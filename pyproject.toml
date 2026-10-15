@@ -30,7 +30,7 @@ version = { attr = "scrinium.__version__" }
 where = ["src"]
 
 [tool.setuptools.package-data]
-scrinium = ["icons/*.svg"]
+scrinium = ["icons/*.svg", "icons/NOTICE"]
 
 [tool.pytest.ini_options]
 pythonpath = ["src"]
