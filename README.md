@@ -34,7 +34,7 @@ Au premier lancement, Scrinium crée un thème **Bienvenue** (5 fiches qui expli
 - Enregistrement **automatique** (Ctrl+S pour forcer). Recherche : Ctrl+F, dans tous les thèmes.
 - **Supprimer = corbeille** (`corbeille/` à côté des fiches) : rien n'est effacé.
 - **Zone de notification** : fermer ou réduire la fenêtre la range dans la zone de notification (clic sur l'icône = afficher/cacher, clic droit = menu). Option *Fichier → Réduire dans la zone de notification* pour désactiver ; sans zone de notification sur le bureau (GNOME sans extension AppIndicator), la fenêtre se comporte normalement. En se cachant, Scrinium **referme les fiches verrouillées** : le mot de passe est redemandé.
-- **Instance unique** : relancer `scrinium` réveille la fenêtre déjà ouverte. `scrinium --minimise` démarre caché dans la zone de notification (pratique en lancement automatique à l'ouverture de session).
+- **Instance unique** : relancer `scrinium` réveille la fenêtre déjà ouverte. `scrinium --minimise` démarre caché dans la zone de notification. La case *Fichier → Lancer au démarrage de la session* l'active pour vous (fichier XDG autostart sous Linux, clé Run sous Windows, LaunchAgent sous macOS).
 - Options : `--theme NOM` (ouvre sur ce thème), `--nouvelle` (ouvre avec une fiche vide prête à saisir).
 
 ## Données
