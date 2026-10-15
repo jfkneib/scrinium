@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Copyright (C) 2026 Jean-François Kneib
 """Clé de secours : paire RSA propre à chaque utilisateur, créée à la demande (jamais par l'installation)."""
 import os
 from pathlib import Path

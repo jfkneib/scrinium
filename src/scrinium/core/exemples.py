@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Copyright (C) 2026 Jean-François Kneib
 """Thèmes et fiches proposés au premier lancement : de quoi comprendre l'outil en l'utilisant."""
 from ..i18n import _
 

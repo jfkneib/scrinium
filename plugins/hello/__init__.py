@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Copyright (C) 2026 Jean-François Kneib
 """Example Scrinium extension. Copy this folder to <data folder>/plugins/ and enable it in Extensions > Manage extensions."""
 from scrinium.core.plugins import Plugin
 

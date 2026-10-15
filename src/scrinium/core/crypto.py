@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Copyright (C) 2026 Jean-François Kneib
 """Chiffrement des fiches : AES-256-GCM, clé dérivée du mot de passe par scrypt.
 
 Format `.lock` (inchangé depuis les premières versions, donc compatible) :

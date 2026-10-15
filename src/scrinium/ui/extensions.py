@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Copyright (C) 2026 Jean-François Kneib
 """Interface des extensions : ce qu'une extension peut ajouter à la fenêtre, et la boîte de gestion."""
 from PyQt6.QtCore import QTimer, QUrl, Qt
 from PyQt6.QtGui import QAction, QDesktopServices

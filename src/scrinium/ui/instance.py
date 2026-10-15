@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Copyright (C) 2026 Jean-François Kneib
 """Instance unique : un second lancement réveille la fenêtre déjà ouverte (souvent cachée dans la zone de notification)."""
 import getpass
 

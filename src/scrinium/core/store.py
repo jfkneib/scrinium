@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Copyright (C) 2026 Jean-François Kneib
 """Stockage des fiches : un dossier par thème, un fichier par fiche.
 
   <base>/fiches/<Thème>/<titre>.md    ligne `# titre`, puis le texte

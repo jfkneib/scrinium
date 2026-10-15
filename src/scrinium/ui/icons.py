@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Copyright (C) 2026 Jean-François Kneib
 """Icônes : thème du système d'abord (KDE/GNOME), sinon jeu embarqué (Breeze, LGPL) recoloré selon le thème clair/sombre."""
 from pathlib import Path
 
