@@ -5,7 +5,7 @@ Légende : ☐ à faire · ◐ en cours · ✔ fait. Ordre = priorité proposée
 ## 0. Avant de publier
 - ☐ Créer le dépôt `jfkneib/scrinium` sur GitHub (vide), pousser (`git remote add origin git@github.com:jfkneib/scrinium.git`)
 - ☐ Release `v0.1.0` avec le `.deb` en pièce jointe (GitHub Actions : build du `.deb` à chaque tag)
-- ☐ Tester `install.sh` sur `debian13-test` (revenir au snapshot `propre` avant) et sur Ubuntu 24.04/26.04
+- ☐ Tester `install.sh` sur une VM Debian/Ubuntu propre (snapshot avant chaque test) et sur Ubuntu 24.04/26.04
 - ☐ Capture d'écran dans le README
 - ☐ Page `man scrinium`
 
@@ -53,7 +53,7 @@ Extraire le texte d'une image de fiche pour pouvoir la chercher/copier. Moteurs 
   - réglages : activer, adresse, nom du modèle ; test de connexion
   - **local uniquement** par défaut : refuser une adresse distante sans avertissement explicite (les images peuvent être privées)
   - ne jamais envoyer le contenu d'une fiche verrouillée sans demande explicite de l'utilisateur
-  - penser au partage de la VRAM (8 Go) avec ComfyUI/autres modèles (`OLLAMA_KEEP_ALIVE`, un seul modèle chargé)
+  - penser au partage de la mémoire graphique avec d'autres modèles (`OLLAMA_KEEP_ALIVE`, un seul modèle chargé à la fois)
 - ☐ Texte extrait stocké avec la fiche (et **chiffré** si la fiche est verrouillée), indexé par la recherche (sauf fiches verrouillées fermées)
 - ☐ Bouton « Extraire le texte » sur une image, résultat modifiable avant enregistrement
 
@@ -68,7 +68,7 @@ Dicter une note au micro, le texte s'insère à la position du curseur (`ctx.ui.
 
 ## 3 ter. Plugin `scrinium-capture` : résultat d'une commande dans une fiche
 Envoyer la sortie d'une commande shell dans une fiche (notes d'administration : `df -h`, config réseau, etc.).
-- ☐ En ligne de commande, par un tube : `ip a | scrinium ajouter --theme Informatique --fiche "Réseau XPS"` (Scrinium ne lance rien : il reçoit le texte sur l'entrée standard)
+- ☐ En ligne de commande, par un tube : `ip a | scrinium ajouter --theme Informatique --fiche "Réseau"` (Scrinium ne lance rien : il reçoit le texte sur l'entrée standard)
 - ☐ L'instance déjà ouverte reçoit le texte par le canal d'instance unique (sinon écriture directe dans les fichiers) ; fiche créée si elle n'existe pas, sinon ajout à la fin (option `--remplacer`)
 - ☐ Bloc encadré avec la date et la commande (` ```bash ` ... ` ``` `), pour garder le contexte ; option `--brut`
 - ☐ Dans la fenêtre : bouton « Exécuter une commande… » → affiche la sortie, puis l'insère à la position du curseur (`ctx.ui.inserer_texte`) ; **la commande est lancée uniquement sur demande explicite de l'utilisateur**, avec délai maximum et taille de sortie limitée
@@ -88,7 +88,6 @@ Envoyer la sortie d'une commande shell dans une fiche (notes d'administration : 
 - ☐ Synchronisation entre machines (dossier partagé : verrous de fichiers, conflits)
 - ☐ Export/import (zip, Markdown)
 - ☐ Thèmes : couleur par thème, tri personnalisé
-- ☐ Migration de l'outil perso `~/scripts/aide-memoire/` vers Scrinium (clé root commune → `recovery.pub`, tuiles dashboard via le hook `themes-changed`)
 - ☐ Verrouillage automatique après X minutes d'inactivité
 
 ## Fait
