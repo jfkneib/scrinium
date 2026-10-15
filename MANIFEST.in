@@ -1,4 +1,4 @@
-include LICENSE README.md README.fr.md
+include LICENSE README.md README.fr.md TODO.md
 recursive-include po *.po *.pot
 recursive-include packaging *
 recursive-include src/scrinium/icons *.svg
