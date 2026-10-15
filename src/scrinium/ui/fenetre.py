@@ -45,8 +45,6 @@ class Fenetre(QMainWindow):
         self.maj_fiches()
         if nouvelle:
             self.nouvelle_fiche()
-        if not store.a_cle_de_secours and not store.reglages().get("recovery_asked"):
-            QTimer.singleShot(0, lambda: AssistantCle(store, self).exec())
 
     # ---------- construction ----------
     def _action(self, texte, ic, slot, raccourci=None):
@@ -91,8 +89,8 @@ class Fenetre(QMainWindow):
         mf.addSeparator()
         mf.addAction(self._action(_("Quitter"), "application-exit", self.quitter, "Ctrl+Q"))
         ms = m.addMenu(_("&Sécurité"))
-        ms.addAction(self._action(_("Clé de secours…"), "object-locked", self.assistant_cle))
-        ms.addAction(self._action(_("Rouvrir une fiche avec la clé de secours…"), "object-unlocked", self.secours))
+        ms.addAction(self._action(_("Fichier de secours…"), "object-locked", self.assistant_cle))
+        ms.addAction(self._action(_("Rouvrir une fiche avec le fichier de secours…"), "object-unlocked", self.secours))
         mh = m.addMenu(_("&Aide"))
         mh.addAction(self._action(_("À propos"), "help-about", self.a_propos))
 
@@ -533,9 +531,14 @@ class Fenetre(QMainWindow):
     def verrouiller(self):
         self.sauver()
         f, t = self.fiche, self.fiche_theme
-        avertissement = (_("Mot de passe oublié : la clé de secours permettra de rouvrir la fiche.")
-                         if self.store.a_cle_de_secours else
-                         _("ATTENTION : pas de clé de secours (menu Sécurité). Mot de passe oublié = fiche irrécupérable."))
+        if not self.store.a_cle_de_secours:
+            if not self._proposer_secours():
+                return
+            avertissement = (_("Mot de passe oublié : le fichier de secours permettra de rouvrir la fiche.")
+                             if self.store.a_cle_de_secours else
+                             _("Pas de fichier de secours : mot de passe oublié = fiche perdue."))
+        else:
+            avertissement = _("Mot de passe oublié : le fichier de secours permettra de rouvrir la fiche.")
         if QMessageBox.question(self, _("Verrouiller la fiche"),
                                 _("Le texte de la fiche sera chiffré avec un mot de passe (le titre reste visible).\n\n")
                                 + avertissement) != QMessageBox.StandardButton.Yes:
@@ -568,34 +571,57 @@ class Fenetre(QMainWindow):
         self.maj_fiches()
 
     # ---------- sécurité ----------
+    def _proposer_secours(self) -> bool:
+        """Premier verrouillage sans fichier de secours : on explique et on propose. False = annuler le verrouillage."""
+        m = QMessageBox(self)
+        m.setIcon(QMessageBox.Icon.Question)
+        m.setWindowTitle(_("Fichier de secours"))
+        m.setText(_("Avant de verrouiller : voulez-vous créer un fichier de secours ?"))
+        m.setInformativeText(_("Si vous oubliez le mot de passe d'une fiche, le fichier de secours permet de la "
+                               "rouvrir. Sans lui, une fiche dont le mot de passe est oublié est perdue pour toujours."))
+        creer = m.addButton(_("Créer le fichier de secours"), QMessageBox.ButtonRole.AcceptRole)
+        sans = m.addButton(_("Verrouiller sans fichier de secours"), QMessageBox.ButtonRole.DestructiveRole)
+        m.addButton(_("Annuler"), QMessageBox.ButtonRole.RejectRole)
+        m.setDefaultButton(creer)
+        m.exec()
+        c = m.clickedButton()
+        if c is creer:
+            AssistantCle(self.store, self).exec()
+            return True   # même si « Plus tard » : l'utilisateur a vu l'avertissement, on continue
+        return c is sans
+
     def assistant_cle(self):
         if self.store.a_cle_de_secours:
-            QMessageBox.information(self, _("Clé de secours"),
-                                    _("Une clé de secours est déjà active (%s). Les nouvelles fiches verrouillées l'utilisent.")
-                                    % self.store.paths.recovery_pub)
-            return
-        AssistantCle(self.store, self, premiere_fois=False).exec()
+            if QMessageBox.question(
+                    self, _("Fichier de secours"),
+                    _("Un fichier de secours est déjà actif.\n\nEn créer un nouveau ? Il servira pour les fiches "
+                      "verrouillées à partir de maintenant ; les fiches déjà verrouillées ne s'ouvriront qu'avec l'ancien.")
+            ) != QMessageBox.StandardButton.Yes:
+                return
+            AssistantCle(self.store, self, remplacer=True).exec()
+        else:
+            AssistantCle(self.store, self).exec()
 
     def secours(self):
         f, t = self.fiche, self.fiche_theme
         if not f or not f.fermee:
-            QMessageBox.information(self, _("Clé de secours"), _("Sélectionnez d'abord une fiche verrouillée."))
+            QMessageBox.information(self, _("Fichier de secours"), _("Sélectionnez d'abord une fiche verrouillée."))
             return
-        chemin, _ok = QFileDialog.getOpenFileName(self, _("Clé privée de secours"), str(self.store.paths.base), "PEM (*.pem);;*")
+        chemin, _ok = QFileDialog.getOpenFileName(self, _("Fichier de secours"), str(self.store.paths.base), "PEM (*.pem);;*")
         if not chemin:
             return
         pem = open(chemin, "rb").read()
         phrase = None
         if b"ENCRYPTED" in pem:
-            phrase = self._mdp(_("Clé de secours"), _("Phrase secrète de la clé :"))
+            phrase = self._mdp(_("Fichier de secours"), _("Mot de passe du fichier de secours :"))
             if not phrase:
                 return
         try:
             f.texte = self.store.ouvrir_avec_cle_privee(f, pem, phrase)
         except Exception as ex:
-            QMessageBox.critical(self, _("Clé de secours"), _("Impossible de rouvrir la fiche : %s") % ex)
+            QMessageBox.critical(self, _("Fichier de secours"), _("Impossible de rouvrir la fiche : %s") % ex)
             return
-        if QMessageBox.question(self, _("Clé de secours"),
+        if QMessageBox.question(self, _("Fichier de secours"),
                                 _("Fiche rouverte. La remettre en clair (retirer le mot de passe) ?")
                                 ) == QMessageBox.StandardButton.Yes:
             self.store.retirer_verrou(t, f)

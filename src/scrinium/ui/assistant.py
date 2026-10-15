@@ -1,8 +1,12 @@
-"""Assistant de première utilisation : clé de secours facultative, propre à l'utilisateur."""
+"""Création du fichier de secours : en mots simples, avec un nom que l'utilisateur reconnaît."""
+import getpass
+import time
 from pathlib import Path
 
+from PyQt6.QtCore import QUrl
+from PyQt6.QtGui import QDesktopServices
 from PyQt6.QtWidgets import (QDialog, QDialogButtonBox, QFileDialog, QFormLayout, QHBoxLayout, QLabel, QLineEdit,
-                             QMessageBox, QPushButton, QRadioButton, QVBoxLayout)
+                             QMessageBox, QPushButton, QVBoxLayout)
 
 from ..core import recovery
 from ..core.store import Store
@@ -10,88 +14,109 @@ from ..i18n import _
 from .icons import icone
 
 
+def dossier_par_defaut() -> Path:
+    d = Path.home() / "Documents"
+    return d if d.is_dir() else Path.home()
+
+
+def nom_par_defaut() -> str:
+    return f"Scrinium-secours-{getpass.getuser()}-{time.strftime('%Y-%m-%d')}"
+
+
 class AssistantCle(QDialog):
-    def __init__(self, store: Store, parent=None, premiere_fois: bool = True):
+    """Crée le fichier de secours. `remplacer` : il en existe déjà un, le nouveau le remplace pour les futures fiches."""
+
+    def __init__(self, store: Store, parent=None, remplacer: bool = False):
         super().__init__(parent)
-        self.store = store
-        self.setWindowTitle(_("Clé de secours"))
-        self.setMinimumWidth(520)
+        self.store, self.remplacer = store, remplacer
+        self.setWindowTitle(_("Fichier de secours"))
+        self.setMinimumWidth(540)
         lay = QVBoxLayout(self)
-        intro = _("Chaque fiche peut être verrouillée par un mot de passe.\n\n"
-                  "Si vous l'oubliez, la fiche est perdue, sauf si vous créez une clé de secours : "
-                  "une clé personnelle, générée ici, qui permet de rouvrir vos fiches verrouillées. "
-                  "Gardez-la hors de cet ordinateur (clé USB, gestionnaire de mots de passe).")
-        if premiere_fois:
-            intro = _("Bienvenue dans Scrinium.\n\n") + intro
-        lab = QLabel(intro)
+        texte = _(
+            "Si vous oubliez le mot de passe d'une fiche verrouillée, la fiche est perdue.\n\n"
+            "Le fichier de secours est un filet de sécurité : il permet de rouvrir vos fiches verrouillées sans leur "
+            "mot de passe. Il est créé une seule fois, maintenant.\n\n"
+            "Gardez-le AILLEURS que sur cet ordinateur (clé USB, courriel à vous-même, gestionnaire de mots de passe). "
+            "Scrinium n'en garde pas de copie : si vous le perdez, il ne pourra pas être refait pour les fiches déjà "
+            "verrouillées.")
+        if remplacer:
+            texte += _("\n\nUn fichier de secours existe déjà. Le nouveau servira pour les fiches verrouillées À PARTIR "
+                       "DE MAINTENANT ; les fiches déjà verrouillées ne s'ouvrent qu'avec l'ancien fichier.")
+        lab = QLabel(texte)
         lab.setWordWrap(True)
         lay.addWidget(lab)
-        self.r_oui = QRadioButton(_("Créer une clé de secours (recommandé)"))
-        self.r_non = QRadioButton(_("Pas de clé de secours : mot de passe oublié = fiche irrécupérable"))
-        self.r_oui.setChecked(True)
-        lay.addWidget(self.r_oui)
-        lay.addWidget(self.r_non)
 
         form = QFormLayout()
-        self.e_chemin = QLineEdit(str(store.paths.base / "cle-de-secours.pem"))
+        self.e_nom = QLineEdit(nom_par_defaut())
+        self.e_nom.setToolTip(_("Choisissez un nom que vous reconnaîtrez plus tard (le suffixe .pem est ajouté)."))
+        form.addRow(_("Nom du fichier :"), self.e_nom)
+        self.e_dossier = QLineEdit(str(dossier_par_defaut()))
         b = QPushButton(icone("document-save"), _("Choisir…"))
         b.clicked.connect(self._choisir)
         ligne = QHBoxLayout()
-        ligne.addWidget(self.e_chemin)
+        ligne.addWidget(self.e_dossier)
         ligne.addWidget(b)
-        form.addRow(_("Enregistrer la clé privée dans :"), ligne)
+        form.addRow(_("Enregistrer dans le dossier :"), ligne)
         self.e_p1 = QLineEdit()
         self.e_p1.setEchoMode(QLineEdit.EchoMode.Password)
         self.e_p2 = QLineEdit()
         self.e_p2.setEchoMode(QLineEdit.EchoMode.Password)
-        form.addRow(_("Phrase secrète (facultative, conseillée) :"), self.e_p1)
-        form.addRow(_("Confirmer la phrase secrète :"), self.e_p2)
-        self.zone = form
+        form.addRow(_("Mot de passe du fichier (facultatif) :"), self.e_p1)
+        form.addRow(_("Confirmer le mot de passe :"), self.e_p2)
         lay.addLayout(form)
-        self.r_non.toggled.connect(self._etat)
+        astuce = QLabel(_("Un mot de passe sur le fichier ajoute une protection si on vous le vole : il faudra alors "
+                          "ce mot de passe pour s'en servir. Notez-le : lui non plus ne se retrouve pas."))
+        astuce.setWordWrap(True)
+        lay.addWidget(astuce)
 
         bb = QDialogButtonBox(QDialogButtonBox.StandardButton.Ok | QDialogButtonBox.StandardButton.Cancel)
+        bb.button(QDialogButtonBox.StandardButton.Ok).setText(_("Créer le fichier de secours"))
+        bb.button(QDialogButtonBox.StandardButton.Cancel).setText(_("Plus tard"))
         bb.accepted.connect(self._valider)
         bb.rejected.connect(self.reject)
         lay.addWidget(bb)
 
-    def _etat(self):
-        for i in range(self.zone.rowCount()):
-            for role in (QFormLayout.ItemRole.LabelRole, QFormLayout.ItemRole.FieldRole):
-                it = self.zone.itemAt(i, role)
-                if it is None:
-                    continue
-                if it.widget():
-                    it.widget().setEnabled(not self.r_non.isChecked())
-                elif it.layout():
-                    for k in range(it.layout().count()):
-                        it.layout().itemAt(k).widget().setEnabled(not self.r_non.isChecked())
-
     def _choisir(self):
-        f, _ok = QFileDialog.getSaveFileName(self, _("Clé privée de secours"), self.e_chemin.text(), "PEM (*.pem)")
-        if f:
-            self.e_chemin.setText(f)
+        d = QFileDialog.getExistingDirectory(self, _("Dossier du fichier de secours"), self.e_dossier.text())
+        if d:
+            self.e_dossier.setText(d)
 
     def _valider(self):
-        if self.r_non.isChecked():
-            self.store.sauver_reglages(recovery_asked=True)
-            self.accept()
-            return
         if self.e_p1.text() != self.e_p2.text():
-            QMessageBox.warning(self, _("Phrase secrète"), _("Les deux saisies sont différentes."))
+            QMessageBox.warning(self, _("Mot de passe"), _("Les deux saisies sont différentes."))
             return
-        chemin = Path(self.e_chemin.text()).expanduser()
+        nom = self.e_nom.text().strip().replace("/", "-").replace("\\", "-") or nom_par_defaut()
+        if not nom.lower().endswith(".pem"):
+            nom += ".pem"
+        dossier = Path(self.e_dossier.text()).expanduser()
+        chemin = dossier / nom
+        pub = self.store.paths.recovery_pub
+        ancienne = None
         try:
-            recovery.generer_paire(chemin, self.store.paths.recovery_pub, self.e_p1.text() or None)
+            if self.remplacer and pub.exists():   # on garde l'ancienne clé publique à côté, au cas où
+                ancienne = pub.with_name(f"recovery-{time.strftime('%Y%m%d-%H%M%S')}.pub.ancienne")
+                pub.rename(ancienne)
+            recovery.generer_paire(chemin, pub, self.e_p1.text() or None)
         except FileExistsError:
-            QMessageBox.warning(self, _("Clé de secours"), _("Ce fichier existe déjà : choisissez un autre nom."))
+            if ancienne:
+                ancienne.rename(pub)
+            QMessageBox.warning(self, _("Fichier de secours"),
+                                _("Un fichier porte déjà ce nom dans ce dossier : choisissez un autre nom."))
             return
         except OSError as ex:
-            QMessageBox.critical(self, _("Clé de secours"), str(ex))
+            if ancienne and not pub.exists():
+                ancienne.rename(pub)
+            QMessageBox.critical(self, _("Fichier de secours"), str(ex))
             return
         self.store.sauver_reglages(recovery_asked=True)
-        QMessageBox.information(
-            self, _("Clé de secours créée"),
-            _("Clé privée : %s\n\nCopiez-la maintenant hors de cet ordinateur. "
-              "Sans elle, un mot de passe oublié rend la fiche irrécupérable.") % chemin)
+        m = QMessageBox(self)
+        m.setIcon(QMessageBox.Icon.Information)
+        m.setWindowTitle(_("Fichier de secours créé"))
+        m.setText(_("Votre fichier de secours est prêt :\n\n%s\n\nCopiez-le MAINTENANT hors de cet ordinateur "
+                    "(clé USB, courriel, gestionnaire de mots de passe).") % chemin)
+        ouvrir = m.addButton(_("Ouvrir le dossier"), QMessageBox.ButtonRole.ActionRole)
+        m.addButton(QMessageBox.StandardButton.Ok)
+        m.exec()
+        if m.clickedButton() is ouvrir:
+            QDesktopServices.openUrl(QUrl.fromLocalFile(str(dossier)))
         self.accept()
