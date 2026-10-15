@@ -76,6 +76,18 @@ Envoyer la sortie d'une commande shell dans une fiche (notes d'administration : 
 - ☐ Option : lancer la commande sur une machine distante (`ssh machine commande`), en réutilisant la config SSH de l'utilisateur (à étudier : prudence)
 - ☐ Nécessite dans l'API : `ctx.ajouter_commande_cli(nom, fn)` (sous-commandes ajoutées par les plugins) et réception de texte par l'instance unique
 
+## 3 quater. Partage de fiches et synchronisation (à prévoir tôt : touche au cœur)
+Partager des fiches entre machines et/ou personnes : dépôt sur le réseau local (SMB/NFS/dossier partagé), cloud (Nextcloud/WebDAV, Syncthing, Dropbox…) ou dépôt git.
+- ☐ **Plusieurs dépôts de fiches** : aujourd'hui `Store` a un seul dossier racine. Prévoir une liste de « dépôts » (personnel + partagés), chacun avec son dossier, ses thèmes, son éventuel fichier de secours (`recovery.pub` par dépôt, pas global). À concevoir AVANT la v0.2 pour ne pas casser le format.
+- ☐ Un thème (ou un dépôt) peut être **partagé** : indicateur dans la liste, réglage « dossier partagé » (chemin local d'un montage réseau, ou dossier synchronisé)
+- ☐ Les fiches verrouillées (`.lock`) se synchronisent sans risque (chiffrées) ; les fiches en clair le sont **en clair** → avertissement clair à l'activation du partage, et proposition de verrouiller
+- ☐ Sûreté des écritures partagées : écriture atomique (déjà en place), détection de modification externe (mtime/taille, surveillance de dossier), **conflits** : ne jamais écraser en silence (copie « fiche (conflit <machine>) », comparaison simple)
+- ☐ Rechargement automatique quand un fichier change sur le disque (outil de synchro externe ou autre machine)
+- ☐ Plusieurs utilisateurs sur un dépôt LAN : qui a modifié quoi (métadonnée `modifie_par`), droits laissés au système de fichiers ; clé de secours par utilisateur : une fiche verrouillée par A n'est pas rouvrable par B
+- ☐ Plugins de transport (API) : `scrinium-sync-webdav` (Nextcloud), `scrinium-sync-git`, `scrinium-sync-lan` ; le cœur ne connaît que des dossiers
+- ☐ Option d'inclure/exclure par thème, et état de synchro visible (en cours, à jour, conflit)
+- ☐ Tests : deux instances sur le même dossier, modification simultanée, coupure réseau pendant l'écriture
+
 ## 4. Multi-plateforme
 - ☐ Builds Windows (PyInstaller + Inno Setup) et macOS (`.dmg`) par GitHub Actions
 - ☐ Vérifier sous Windows et macOS : lancement automatique, zone de notification, droits des fichiers (chmod sans effet sous Windows)
@@ -85,7 +97,6 @@ Envoyer la sortie d'une commande shell dans une fiche (notes d'administration : 
 ## 5. Améliorations diverses
 - ☐ Sources du code en anglais (aujourd'hui en français, `po/en.po` traduit du français)
 - ☐ Autres langues (de, es, it…)
-- ☐ Synchronisation entre machines (dossier partagé : verrous de fichiers, conflits)
 - ☐ Export/import (zip, Markdown)
 - ☐ Thèmes : couleur par thème, tri personnalisé
 - ☐ Verrouillage automatique après X minutes d'inactivité
