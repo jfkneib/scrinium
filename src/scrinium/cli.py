@@ -49,15 +49,15 @@ def main(argv=None) -> int:
     langue = i18n.init(Store(Paths()).reglages().get("langue", "auto"))
     p = argparse.ArgumentParser(prog="scrinium", description=_("Scrinium : fiches rangées par thème."))
     p.add_argument("--version", action="version", version=f"scrinium {__version__}")
-    p.add_argument("--theme", metavar="NOM", help=_("ouvre directement sur ce thème"))
-    p.add_argument("--nouvelle", "--new", dest="nouvelle", action="store_true", help=_("ouvre avec une nouvelle fiche"))
+    p.add_argument("--theme", metavar="NAME", help=_("ouvre directement sur ce thème"))
+    p.add_argument("--new", "--nouvelle", dest="nouvelle", action="store_true", help=_("ouvre avec une nouvelle fiche"))
     p.add_argument("--minimise", action="store_true",
                    help=_("démarre caché dans la zone de notification (ex. lancement à l'ouverture de session)"))
     sub = p.add_subparsers(dest="cmd")
-    r = sub.add_parser("secours", aliases=["rescue"], help=_("rouvrir une fiche verrouillée avec le fichier de secours (sans interface)"))
-    r.add_argument("action", choices=["lister", "ouvrir", "deverrouiller", "list", "open", "unlock"])
-    r.add_argument("fiche", nargs="?")
-    r.add_argument("--cle", "--key", dest="cle", required=False, default="~/.config/scrinium/cle-de-secours.pem",
+    r = sub.add_parser("rescue", aliases=["secours"], help=_("rouvrir une fiche verrouillée avec le fichier de secours (sans interface)"))
+    r.add_argument("action", choices=["list", "open", "unlock", "lister", "ouvrir", "deverrouiller"])
+    r.add_argument("fiche", metavar="TITLE", nargs="?")
+    r.add_argument("--key", "--cle", dest="cle", metavar="FILE", required=False, default="~/.config/scrinium/cle-de-secours.pem",
                    help=_("fichier de secours (PEM)"))
     a = p.parse_args(argv)
     if a.cmd in ("secours", "rescue"):
