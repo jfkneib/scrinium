@@ -1,0 +1,60 @@
+.TH SCRINIUM 1 "October 2026" "scrinium 0.1.0" "User Commands"
+.SH NAME
+scrinium \- notes organised by topic, lockable with a password
+.SH SYNOPSIS
+.B scrinium
+[\fB\-\-theme\fR \fINAME\fR] [\fB\-\-new\fR] [\fB\-\-minimise\fR]
+.br
+.B scrinium rescue
+{\fBlist\fR|\fBopen\fR|\fBunlock\fR} [\fITITLE\fR] [\fB\-\-key\fR \fIFILE\fR]
+.SH DESCRIPTION
+.B Scrinium
+keeps short notes (numbers, procedures, codes) as cards grouped by topic, automatically saved as plain text files.
+Each note can be locked with a password (AES\-256\-GCM, key derived with scrypt). An optional rescue file, created by
+the user, can reopen a note whose password was forgotten.
+.PP
+Without arguments, the main window opens. If Scrinium is already running (possibly hidden in the notification area),
+that window is shown instead of starting a second instance.
+.SH OPTIONS
+.TP
+.BI \-\-theme " NAME"
+Open directly on this topic.
+.TP
+.BR \-\-new ", " \-\-nouvelle
+Open with an empty note ready to type.
+.TP
+.B \-\-minimise
+Start hidden in the notification area (useful when started at login).
+.TP
+.B \-\-version
+Print the version and exit.
+.SH RESCUE COMMAND
+.TP
+.B scrinium rescue list
+List locked notes and tell whether they can be reopened with a rescue file.
+.TP
+.BI "scrinium rescue open " TITLE " \-\-key " FILE
+Print the text of a locked note using the rescue file (PEM private key).
+.TP
+.BI "scrinium rescue unlock " TITLE " \-\-key " FILE
+Put a locked note back in plain text.
+.PP
+The French spellings \fBsecours lister|ouvrir|deverrouiller\fR and \fB\-\-cle\fR are also accepted.
+.SH FILES
+.TP
+.I ~/.config/scrinium/
+Data folder on Linux (\fIfiches/\fR: notes, \fIcorbeille/\fR: trash, \fIsettings.json\fR, \fIplugins/\fR: extensions).
+.TP
+.I ~/.config/scrinium/recovery.pub
+Public part of the rescue key. The rescue file itself (private key) is never kept by Scrinium.
+.SH ENVIRONMENT
+.TP
+.B SCRINIUM_HOME
+Use another data folder.
+.TP
+.B SCRINIUM_LANG
+Force the interface language (\fBen\fR, \fBfr\fR). By default the system language is used.
+.SH SEE ALSO
+Full documentation: /usr/share/doc/scrinium/ and https://github.com/jfkneib/scrinium
+.SH AUTHOR
+Jean\-Fran\(,cois Kneib. Licensed under the GNU GPL, version 3 or later.
