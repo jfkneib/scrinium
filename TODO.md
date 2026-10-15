@@ -9,7 +9,24 @@ Légende : ☐ à faire · ◐ en cours · ✔ fait. Ordre = priorité proposée
 - ☐ Capture d'écran dans le README
 - ☐ Page `man scrinium`
 
-## 1. Images dans les fiches (v0.2)
+## 0 bis. Système de plugins (avant les images, v0.2)
+Le cœur reste petit ; calendrier/alarmes et OCR sont des plugins. Les **pièces jointes** (images) restent dans le cœur :
+leur stockage et leur chiffrement avec la fiche font partie du format de fichier, un plugin ne doit pas pouvoir l'affaiblir.
+- ☐ API v1 versionnée (`API_VERSION`) : un plugin déclare la version qu'il vise, refus propre si incompatible
+- ☐ Découverte : *entry points* Python (`scrinium.plugins`, pour les paquets pip/deb comme `scrinium-ocr`) + dossier utilisateur `~/.config/scrinium/plugins/`
+- ☐ Cycle de vie : `activer(ctx)` / `desactiver()` ; un plugin est **désactivé par défaut** tant que l'utilisateur ne l'a pas activé (menu *Fichier → Extensions…* : liste, version, auteur, activer/désactiver)
+- ☐ Contexte donné au plugin (`ctx`) :
+  - lecture/écriture des fiches **ouvertes** (jamais la clé de chiffrement, jamais une fiche verrouillée fermée)
+  - signaux : fiche ouverte/enregistrée/fermée, thème modifié, fenêtre cachée, démarrage/arrêt
+  - UI : ajouter une action de menu, un bouton de barre d'outils, un panneau latéral, une page de réglages, une notification de la zone de notification
+  - planificateur (minuteries) et stockage de réglages par plugin (`settings.json`, clé au nom du plugin)
+  - **métadonnées de fiche** (clé/valeur, ex. `rappel`) stockées en tête du `.md` ; fiche verrouillée : métadonnées non sensibles en clair, le reste chiffré (à décider : une date de rappel en clair est-elle acceptable ?)
+- ☐ Isolation des pannes : toute exception d'un plugin est interceptée et journalisée ; après N erreurs le plugin est désactivé, l'application continue
+- ☐ Sécurité : un plugin est du code arbitraire avec accès aux fiches ouvertes → avertissement clair à l'activation, plugins tiers jamais chargés sans accord, permissions déclarées affichées
+- ☐ Documentation `docs/plugins.md` + plugin d'exemple (`hello`) + tests (chargement, version incompatible, plugin qui plante)
+- ☐ Les plugins officiels vivent dans `plugins/` du dépôt et sont publiés en paquets séparés (`scrinium-rappels`, `scrinium-ocr`)
+
+## 1. Images dans les fiches (v0.2, dans le cœur)
 Une fiche peut contenir une ou plusieurs images, en plus du texte ou à sa place.
 - ☐ Format : une fiche = `titre.md` + dossier `titre.pj/` (pièces jointes) ; le `.md` référence les images (`![](titre.pj/1.png)`)
 - ☐ **Fiches verrouillées** : les images doivent être chiffrées aussi (même clé, AES-GCM). Nouveau format `.lock` v3 (conteneur : texte + pièces jointes), l'ancien format reste lisible. À spécifier AVANT de coder (tests de compatibilité).
@@ -18,8 +35,8 @@ Une fiche peut contenir une ou plusieurs images, en plus du texte ou à sa place
 - ☐ Redimensionnement/compression à l'import (limiter le poids du dossier de données)
 - ☐ Corbeille : les pièces jointes suivent la fiche
 
-## 2. Rappels et petit calendrier (v0.3)
-Ne pas faire un agenda complet : des **fiches avec une date**.
+## 2. Plugin `scrinium-rappels` : rappels et petit calendrier (v0.3)
+Ne pas faire un agenda complet : des **fiches avec une date**. Repose sur l'API plugins (métadonnées, planificateur, notifications).
 - ☐ Date/heure facultative sur une fiche (ligne en tête du `.md`, ex. `@rappel: 2026-11-03 09:00`)
 - ☐ Alarme simple : notification du bureau à l'heure (zone de notification déjà là, lancement automatique déjà là) ; répétition simple (quotidien, hebdo, mensuel, annuel pour les anniversaires)
 - ☐ Fiche verrouillée avec rappel : seul le **titre** (déjà visible) est affiché dans la notification, jamais le contenu
@@ -28,8 +45,8 @@ Ne pas faire un agenda complet : des **fiches avec une date**.
 - ☐ Rappels manqués (PC éteint) : les afficher au démarrage
 - ☐ Import des anniversaires du thème « Anniversaires » (idée)
 
-## 3. OCR optionnel (v0.4)
-Extraire le texte d'une image de fiche pour pouvoir la chercher/copier.
+## 3. Plugin `scrinium-ocr` : OCR optionnel (v0.4)
+Extraire le texte d'une image de fiche pour pouvoir la chercher/copier. Moteurs eux-mêmes enfichables (Tesseract, Ollama).
 - ☐ Moteur 1 (par défaut, léger) : **Tesseract** (`apt install tesseract-ocr tesseract-ocr-fra`), rien à télécharger de plus
 - ☐ Moteur 2 (facultatif, « OCR intelligent ») : modèle vision local via **Ollama** (ex. `qwen2.5vl:3b`, 3,2 Go) par l'API `http://127.0.0.1:11434`
   - réglages : activer, adresse, nom du modèle ; test de connexion
@@ -61,3 +78,4 @@ Extraire le texte d'une image de fiche pour pouvoir la chercher/copier.
 - ✔ Zone de notification, instance unique, lancement au démarrage, reverrouillage en se cachant
 - ✔ Français / anglais (gettext)
 - ✔ `install.sh`, paquet `.deb`, README FR/EN
+- ✔ `TODO.md` (ce fichier)
