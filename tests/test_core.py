@@ -5,6 +5,10 @@ from scrinium.core.paths import Paths
 from scrinium.core.store import Store, propre
 
 
+def _perso(themes):
+    return next(t for t in themes if t.nom == "Perso")
+
+
 @pytest.fixture
 def store(tmp_path):
     s = Store(Paths(tmp_path / "am"))
@@ -12,9 +16,30 @@ def store(tmp_path):
     return s
 
 
-def test_premier_lancement_cree_exemple(store):
-    assert [t.nom for t in store.themes] == ["Perso"]
-    assert store.themes[0].fiches[0].titre == "Exemple"
+def test_premier_lancement_cree_exemples(store):
+    noms = [t.nom for t in store.themes]
+    assert noms == sorted(noms, key=str.lower) and "Bienvenue" in noms and len(noms) >= 4
+    assert all(t.fiches for t in store.themes)
+    assert (store.paths.fiches / "Bienvenue" / ".icone").read_text().strip() == "help-about"
+
+
+def test_fiche_verrouillee_de_demo(store):
+    demo = next(t for t in store.themes if t.nom == "Bienvenue")
+    verrouillee = [f for f in demo.fiches if f.verrou]
+    assert len(verrouillee) == 1 and verrouillee[0].fermee
+    with pytest.raises(crypto.InvalidTag):
+        store.deverrouiller(verrouillee[0], "faux")
+    store.deverrouiller(verrouillee[0], "scrinium")
+    assert "Bravo" in verrouillee[0].texte
+    # le mot de passe annoncé dans la fiche d'aide est bien celui de la démo
+    aide = next(f for f in demo.fiches if f.titre.startswith("4"))
+    assert "scrinium" in aide.texte
+
+
+def test_exemples_pas_recrees(store):
+    th = store.theme("Perso")
+    store.supprimer_fiche(th, th.fiches[0])
+    assert len(_perso(Store(store.paths).charger()).fiches) == len(th.fiches)
 
 
 def test_propre():
@@ -23,16 +48,16 @@ def test_propre():
 
 
 def test_enregistrer_renomme_et_relit(store):
-    th = store.themes[0]
+    th = store.theme("Perso")
     f = store.nouvelle_fiche(th)
     assert store.enregistrer(th, f, "Wifi", "mdp123")
     assert f.path.name == "Wifi.md"
     assert not store.enregistrer(th, f, "Wifi", "mdp123")
-    assert store.charger()[0].fiches[-1].texte == "mdp123"
+    assert _perso(store.charger()).fiches[-1].texte == "mdp123"
 
 
 def test_titre_en_double(store):
-    th = store.themes[0]
+    th = store.theme("Perso")
     a, b = store.nouvelle_fiche(th), store.nouvelle_fiche(th)
     store.enregistrer(th, a, "X", "1")
     store.enregistrer(th, b, "X", "2")
@@ -40,19 +65,19 @@ def test_titre_en_double(store):
 
 
 def test_fiche_vide_jetee(store):
-    th = store.themes[0]
+    th = store.theme("Perso")
     f = store.nouvelle_fiche(th)
     assert store.jeter_si_vide(th, f) and not f.path.exists()
 
 
 def test_verrou_aller_retour_sans_clair_sur_disque(store):
-    th = store.themes[0]
+    th = store.theme("Perso")
     f = store.nouvelle_fiche(th)
     store.enregistrer(th, f, "Secret", "très secret")
     store.verrouiller(th, f, "motdepasse")
     assert f.path.suffix == ".lock"
     assert b"tres secret" not in f.path.read_bytes() and "très secret".encode() not in f.path.read_bytes()
-    g = store.charger()[0].fiches[-1]
+    g = _perso(store.charger()).fiches[-1]
     assert g.fermee
     with pytest.raises(crypto.InvalidTag):
         store.deverrouiller(g, "faux")
@@ -67,7 +92,7 @@ def test_verrou_aller_retour_sans_clair_sur_disque(store):
 def test_cle_de_secours(store):
     p = store.paths
     recovery.generer_paire(p.base / "cle.pem", p.recovery_pub, phrase="phrase")
-    th = store.themes[0]
+    th = store.theme("Perso")
     f = store.nouvelle_fiche(th)
     store.enregistrer(th, f, "S", "contenu")
     store.verrouiller(th, f, "oublie")

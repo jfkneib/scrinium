@@ -27,6 +27,8 @@ Prérequis de `install.sh` : Python ≥ 3.10 avec `venv`. PyQt6 et cryptography 
 
 ## Utilisation
 
+Au premier lancement, Scrinium crée un thème **Bienvenue** (5 fiches qui expliquent l'outil, dont une fiche verrouillée à essayer) et quelques thèmes modèles à compléter (Perso, Maison, Informatique, Voyages). Supprimez-les quand vous voulez.
+
 - `scrinium` ouvre la fenêtre : thèmes à gauche, fiches au milieu, éditeur à droite.
 - **Fiche** (Ctrl+N) / **Thème** : création. Clic droit ou boutons sous la liste pour renommer, changer l'icône, supprimer un thème.
 - Enregistrement **automatique** (Ctrl+S pour forcer). Recherche : Ctrl+F, dans tous les thèmes.
