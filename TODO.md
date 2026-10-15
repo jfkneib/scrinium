@@ -3,11 +3,13 @@
 Légende : ☐ à faire · ◐ en cours · ✔ fait. Ordre = priorité proposée.
 
 ## 0. Avant de publier
-- ☐ Créer le dépôt `jfkneib/scrinium` sur GitHub (vide), pousser (`git remote add origin git@github.com:jfkneib/scrinium.git`)
-- ☐ Release `v0.1.0` avec le `.deb` en pièce jointe (GitHub Actions : build du `.deb` à chaque tag)
-- ☐ Tester `install.sh` sur une VM Debian/Ubuntu propre (snapshot avant chaque test) et sur Ubuntu 24.04/26.04
+- ✔ Dépôt `jfkneib/scrinium` créé et poussé
+- ✔ Release `v0.1.0` publiée avec le `.deb` et `SHA256SUMS`
+- ☐ GitHub Actions : construire le `.deb` et publier la release automatiquement à chaque tag
+- ✔ `.deb` et `install.sh` testés sur Debian 13 (VM neuve) ; `.deb` installé sur Ubuntu 26.04 (2 machines)
+- ☐ Tester sur Ubuntu 24.04 LTS et Debian 12
 - ☐ Capture d'écran dans le README
-- ☐ Page `man scrinium`
+- ✔ Page `man scrinium`
 
 ## 0 bis. Système de plugins (avant les images, v0.2)
 Le cœur reste petit ; calendrier/alarmes et OCR sont des plugins. Les **pièces jointes** (images) restent dans le cœur :
