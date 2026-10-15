@@ -66,6 +66,16 @@ Dicter une note au micro, le texte s'insère à la position du curseur (`ctx.ui.
 - ☐ Dépendances Python propres au plugin (`pip` dans le venv de `install.sh`) : à documenter, pas de paquet Debian officiel pour faster-whisper
 - ☐ Option gratuite en attendant : la dictée du système (KDE/GNOME, Windows `Win+H`, macOS)
 
+## 3 ter. Plugin `scrinium-capture` : résultat d'une commande dans une fiche
+Envoyer la sortie d'une commande shell dans une fiche (notes d'administration : `df -h`, config réseau, etc.).
+- ☐ En ligne de commande, par un tube : `ip a | scrinium ajouter --theme Informatique --fiche "Réseau XPS"` (Scrinium ne lance rien : il reçoit le texte sur l'entrée standard)
+- ☐ L'instance déjà ouverte reçoit le texte par le canal d'instance unique (sinon écriture directe dans les fichiers) ; fiche créée si elle n'existe pas, sinon ajout à la fin (option `--remplacer`)
+- ☐ Bloc encadré avec la date et la commande (` ```bash ` ... ` ``` `), pour garder le contexte ; option `--brut`
+- ☐ Dans la fenêtre : bouton « Exécuter une commande… » → affiche la sortie, puis l'insère à la position du curseur (`ctx.ui.inserer_texte`) ; **la commande est lancée uniquement sur demande explicite de l'utilisateur**, avec délai maximum et taille de sortie limitée
+- ☐ Fiche **verrouillée** : refuser l'ajout sans déverrouillage (jamais d'écriture en clair), ou demander le mot de passe ; ne jamais passer un mot de passe en argument
+- ☐ Option : lancer la commande sur une machine distante (`ssh machine commande`), en réutilisant la config SSH de l'utilisateur (à étudier : prudence)
+- ☐ Nécessite dans l'API : `ctx.ajouter_commande_cli(nom, fn)` (sous-commandes ajoutées par les plugins) et réception de texte par l'instance unique
+
 ## 4. Multi-plateforme
 - ☐ Builds Windows (PyInstaller + Inno Setup) et macOS (`.dmg`) par GitHub Actions
 - ☐ Vérifier sous Windows et macOS : lancement automatique, zone de notification, droits des fichiers (chmod sans effet sous Windows)
