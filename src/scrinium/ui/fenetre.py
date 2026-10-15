@@ -1,11 +1,11 @@
 """Fenêtre principale (PyQt6)."""
 import time
 
-from PyQt6.QtCore import QSize, Qt, QTimer
+from PyQt6.QtCore import QEvent, QSize, Qt, QTimer
 from PyQt6.QtGui import QAction, QKeySequence
 from PyQt6.QtWidgets import (QApplication, QFileDialog, QHBoxLayout, QInputDialog, QLabel, QLineEdit, QListWidget,
                              QListWidgetItem, QMainWindow, QMenu, QMessageBox, QPlainTextEdit, QPushButton, QSplitter,
-                             QToolBar, QVBoxLayout, QWidget)
+                             QSystemTrayIcon, QToolBar, QVBoxLayout, QWidget)
 
 from .. import __version__
 from ..core import crypto
@@ -27,6 +27,8 @@ class Fenetre(QMainWindow):
         self.fiche_theme = None    # son thème
         self.chargement = False
         self.rows: list = []       # ligne de la liste des fiches -> (thème, fiche)
+        self.quitter_vraiment = False
+        self.tray = None
         self.timer = QTimer(self, singleShot=True, interval=700)
         self.timer.timeout.connect(self.sauver)
         self.setWindowTitle(_("Scrinium"))
@@ -34,6 +36,7 @@ class Fenetre(QMainWindow):
         self.resize(900, 540)
         store.charger()
         self._ui()
+        self._zone_notification()
         if not theme and store.premier_lancement:
             theme = _("Bienvenue")   # première ouverture : on commence par les fiches d'aide
         if theme:
@@ -77,7 +80,12 @@ class Fenetre(QMainWindow):
         mf.addAction(self.a_fiche)
         mf.addAction(self.a_theme)
         mf.addSeparator()
-        mf.addAction(self._action(_("Quitter"), "application-exit", self.close, "Ctrl+Q"))
+        self.a_tray = QAction(_("Réduire dans la zone de notification"), self, checkable=True)
+        self.a_tray.setChecked(bool(self.store.reglages().get("tray", True)))
+        self.a_tray.toggled.connect(lambda on: self.store.sauver_reglages(tray=bool(on)))
+        mf.addAction(self.a_tray)
+        mf.addSeparator()
+        mf.addAction(self._action(_("Quitter"), "application-exit", self.quitter, "Ctrl+Q"))
         ms = m.addMenu(_("&Sécurité"))
         ms.addAction(self._action(_("Clé de secours…"), "object-locked", self.assistant_cle))
         ms.addAction(self._action(_("Rouvrir une fiche avec la clé de secours…"), "object-unlocked", self.secours))
@@ -383,7 +391,72 @@ class Fenetre(QMainWindow):
             self.fiche = None
             self.maj_themes()
 
+    # ---------- zone de notification ----------
+    def _zone_notification(self):
+        """Icône dans la zone de notification, si le bureau en a une (sinon : fenêtre ordinaire)."""
+        if not QSystemTrayIcon.isSystemTrayAvailable():
+            self.a_tray.setEnabled(False)
+            self.a_tray.setToolTip(_("Pas de zone de notification sur ce bureau."))
+            return
+        self.tray = QSystemTrayIcon(icone_appli(), self)
+        self.tray.setToolTip(_("Scrinium"))
+        m = QMenu(self)
+        m.addAction(icone("view-pim-notes"), _("Ouvrir Scrinium"), self.montrer)
+        m.addAction(icone("document-new"), _("Nouvelle fiche"), lambda: self.montrer(nouvelle=True))
+        m.addSeparator()
+        m.addAction(icone("application-exit"), _("Quitter"), self.quitter)
+        self.tray.setContextMenu(m)
+        self.tray.activated.connect(self._clic_tray)
+        self.tray.show()
+        QApplication.instance().setQuitOnLastWindowClosed(False)
+
+    @property
+    def tray_actif(self) -> bool:
+        return self.tray is not None and self.a_tray.isChecked()
+
+    def _clic_tray(self, raison):
+        if raison == QSystemTrayIcon.ActivationReason.Trigger:
+            self.cacher() if self.isVisible() and not self.isMinimized() else self.montrer()
+
+    def montrer(self, theme: str | None = None, nouvelle: bool = False):
+        if theme and theme in self._noms():
+            self.quitter_fiche()
+            self.theme = theme
+            self.maj_themes()
+            self.maj_fiches()
+        self.showNormal()
+        self.raise_()
+        self.activateWindow()
+        if nouvelle:
+            self.nouvelle_fiche()
+
+    def cacher(self):
+        """Dans la zone de notification : enregistre, et referme les fiches verrouillées (mot de passe redemandé)."""
+        self.quitter_fiche()
+        for t in self.store.themes:
+            for f in t.fiches:
+                if f.verrou and not f.fermee:
+                    f.texte = f.cle = f.salt = None
+                    f.wrap = b""
+        if self.fiche is not None and self.fiche.fermee:
+            self._afficher(self.fiche_theme, self.fiche)
+        self.hide()
+
+    def quitter(self):
+        self.quitter_vraiment = True
+        self.close()
+        QApplication.instance().quit()
+
+    def changeEvent(self, ev):
+        if ev.type() == QEvent.Type.WindowStateChange and self.isMinimized() and self.tray_actif:
+            QTimer.singleShot(0, self.cacher)   # réduire = aller dans la zone de notification
+        super().changeEvent(ev)
+
     def closeEvent(self, ev):
+        if self.tray_actif and not self.quitter_vraiment:
+            ev.ignore()
+            self.cacher()
+            return
         self.quitter_fiche()
         super().closeEvent(ev)
 

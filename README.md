@@ -33,6 +33,8 @@ Au premier lancement, Scrinium crée un thème **Bienvenue** (5 fiches qui expli
 - **Fiche** (Ctrl+N) / **Thème** : création. Clic droit ou boutons sous la liste pour renommer, changer l'icône, supprimer un thème.
 - Enregistrement **automatique** (Ctrl+S pour forcer). Recherche : Ctrl+F, dans tous les thèmes.
 - **Supprimer = corbeille** (`corbeille/` à côté des fiches) : rien n'est effacé.
+- **Zone de notification** : fermer ou réduire la fenêtre la range dans la zone de notification (clic sur l'icône = afficher/cacher, clic droit = menu). Option *Fichier → Réduire dans la zone de notification* pour désactiver ; sans zone de notification sur le bureau (GNOME sans extension AppIndicator), la fenêtre se comporte normalement. En se cachant, Scrinium **referme les fiches verrouillées** : le mot de passe est redemandé.
+- **Instance unique** : relancer `scrinium` réveille la fenêtre déjà ouverte. `scrinium --minimise` démarre caché dans la zone de notification (pratique en lancement automatique à l'ouverture de session).
 - Options : `--theme NOM` (ouvre sur ce thème), `--nouvelle` (ouvre avec une fiche vide prête à saisir).
 
 ## Données
