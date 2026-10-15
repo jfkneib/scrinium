@@ -49,6 +49,8 @@ def main(argv=None) -> int:
     p.add_argument("--version", action="version", version=f"scrinium {__version__}")
     p.add_argument("--theme", metavar="NOM", help=_("ouvre directement sur ce thème"))
     p.add_argument("--nouvelle", "--new", dest="nouvelle", action="store_true", help=_("ouvre avec une nouvelle fiche"))
+    p.add_argument("--minimise", action="store_true",
+                   help=_("démarre caché dans la zone de notification (ex. lancement à l'ouverture de session)"))
     sub = p.add_subparsers(dest="cmd")
     r = sub.add_parser("secours", help=_("rouvrir une fiche verrouillée avec la clé de secours (sans interface)"))
     r.add_argument("action", choices=["lister", "ouvrir", "deverrouiller"])
@@ -59,12 +61,18 @@ def main(argv=None) -> int:
     if a.cmd == "secours":
         return _recuperer(a)
     from PyQt6.QtWidgets import QApplication
+    from .ui import instance
     from .ui.fenetre import Fenetre
     app = QApplication(sys.argv[:1])
     app.setApplicationName("scrinium")
     app.setDesktopFileName("scrinium")
+    if instance.reveiller_existante(a.theme, a.nouvelle):   # déjà lancé (peut-être dans la zone de notification)
+        return 0
     w = Fenetre(Store(Paths()), theme=a.theme, nouvelle=a.nouvelle)
-    w.show()
+    serveur = instance.Serveur(w)
+    serveur.reveil.connect(lambda th, nv: w.montrer(th or None, nv))
+    if not (a.minimise and w.tray_actif):
+        w.show()
     return app.exec()
 
 
