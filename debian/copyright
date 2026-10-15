@@ -1,0 +1,16 @@
+Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
+Upstream-Name: scrinium
+
+Files: *
+Copyright: 2026 Jean-François Kneib
+License: GPL-3+
+
+Files: src/scrinium/icons/*
+Copyright: KDE Breeze icon theme authors
+License: LGPL-3+
+
+License: GPL-3+
+ On Debian systems, the full text is in /usr/share/common-licenses/GPL-3.
+
+License: LGPL-3+
+ On Debian systems, the full text is in /usr/share/common-licenses/LGPL-3.
