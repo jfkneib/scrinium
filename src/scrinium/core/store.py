@@ -174,7 +174,6 @@ class Store:
     def a_la_corbeille(self, p: Path) -> None:
         mkdir_prive(self.paths.corbeille)
         shutil.move(str(p), str(self.paths.corbeille / f'{time.strftime("%Y%m%d-%H%M%S")}-{p.name}'))
-        self._hook()
 
     # ---------- thèmes ----------
     def nouveau_theme(self, nom: str) -> Theme:
@@ -203,6 +202,7 @@ class Store:
     def supprimer_theme(self, th: Theme) -> None:
         self.a_la_corbeille(th.path)
         self.themes.remove(th)
+        self._hook()   # après le retrait : le hook doit voir la liste à jour
 
     # ---------- fiches ----------
     def nouvelle_fiche(self, th: Theme) -> Fiche:
