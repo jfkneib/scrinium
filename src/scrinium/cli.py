@@ -54,13 +54,14 @@ def main(argv=None) -> int:
     p.add_argument("--minimise", action="store_true",
                    help=_("démarre caché dans la zone de notification (ex. lancement à l'ouverture de session)"))
     sub = p.add_subparsers(dest="cmd")
-    r = sub.add_parser("secours", help=_("rouvrir une fiche verrouillée avec le fichier de secours (sans interface)"))
-    r.add_argument("action", choices=["lister", "ouvrir", "deverrouiller"])
+    r = sub.add_parser("secours", aliases=["rescue"], help=_("rouvrir une fiche verrouillée avec le fichier de secours (sans interface)"))
+    r.add_argument("action", choices=["lister", "ouvrir", "deverrouiller", "list", "open", "unlock"])
     r.add_argument("fiche", nargs="?")
-    r.add_argument("--cle", required=False, default="~/.config/scrinium/cle-de-secours.pem",
+    r.add_argument("--cle", "--key", dest="cle", required=False, default="~/.config/scrinium/cle-de-secours.pem",
                    help=_("fichier de secours (PEM)"))
     a = p.parse_args(argv)
-    if a.cmd == "secours":
+    if a.cmd in ("secours", "rescue"):
+        a.action = {"list": "lister", "open": "ouvrir", "unlock": "deverrouiller"}.get(a.action, a.action)
         return _recuperer(a)
     from PyQt6.QtWidgets import QApplication
     from .ui import instance

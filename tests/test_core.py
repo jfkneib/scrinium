@@ -155,3 +155,20 @@ def test_mo_compatible_avec_gettext_standard(tmp_path):
     mo.write_bytes(i18n_po.ecrire_mo(cat))
     t = gettext.GNUTranslations(open(mo, "rb"))
     assert t.gettext("Quitter") == "Quit" and t.gettext("inconnu") == "inconnu"
+
+
+def test_cli_secours_alias_anglais(tmp_path, monkeypatch, capsys):
+    from scrinium import cli
+    monkeypatch.setenv("SCRINIUM_HOME", str(tmp_path / "h"))
+    monkeypatch.setenv("SCRINIUM_LANG", "fr")
+    s = Store(Paths())
+    s.charger()
+    th = s.theme("Perso")
+    f = s.nouvelle_fiche(th)
+    s.enregistrer(th, f, "Code", "1234")
+    recovery.generer_paire(tmp_path / "k.pem", s.paths.recovery_pub)
+    s.verrouiller(th, f, "abcd")
+    assert cli.main(["rescue", "list"]) == 0
+    assert "Perso/Code.lock" in capsys.readouterr().out
+    assert cli.main(["rescue", "open", "Code", "--cle", str(tmp_path / "k.pem")]) == 0
+    assert capsys.readouterr().out.strip() == "1234"
