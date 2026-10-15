@@ -35,9 +35,10 @@ def themes(dossier_fiches) -> list:
                 "le texte est chiffré (AES-256) avec un mot de passe que vous choisissez. Le titre reste visible, "
                 "le contenu non.\n\n"
                 "Essayez : la fiche « Exemple verrouillé » de ce thème a pour mot de passe : %s\n\n"
-                "ATTENTION : si vous oubliez le mot de passe d'une fiche, elle est perdue, sauf si vous avez créé une "
-                "clé de secours (menu Sécurité > Clé de secours…). Faites-le dès maintenant et gardez le fichier de clé "
-                "hors de cet ordinateur (clé USB, gestionnaire de mots de passe).") % MOT_DE_PASSE_DEMO),
+                "Filet de sécurité : si vous oubliez le mot de passe d'une fiche, elle est perdue, sauf si vous avez un "
+                "FICHIER DE SECOURS. Scrinium vous le propose au premier verrouillage (ou plus tard : menu Sécurité > "
+                "Fichier de secours…). Donnez-lui un nom que vous reconnaîtrez et gardez-le hors de cet ordinateur "
+                "(clé USB, gestionnaire de mots de passe).") % MOT_DE_PASSE_DEMO),
             (_("5 · Où sont mes fiches ?"), _(
                 "Chaque fiche est un simple fichier texte (.md) et chaque thème un dossier :\n\n    %s\n\n"
                 "Vous pouvez les lire avec n'importe quel éditeur de texte. Pour les sauvegarder, copiez ce dossier. "

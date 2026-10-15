@@ -83,3 +83,43 @@ def test_lancement_automatique(fen, tmp_path, monkeypatch):
     assert "--minimise" in contenu and "Exec=" in contenu
     fen.a_demarrage.setChecked(False)
     assert not f.exists()
+
+
+def test_pas_de_popup_au_demarrage_et_fichier_de_secours_au_premier_verrou(fen, tmp_path, monkeypatch):
+    from PyQt6.QtWidgets import QMessageBox
+    from scrinium.ui import assistant
+    assert not fen.store.a_cle_de_secours          # rien n'a été imposé à l'ouverture
+    monkeypatch.setattr(QMessageBox, "exec", lambda self: 0)
+    monkeypatch.setattr(QMessageBox, "clickedButton", lambda self: self.buttons()[0])
+    dlg = assistant.AssistantCle(fen.store, fen)
+    dlg.e_nom.setText("Mon secours perso")
+    dlg.e_dossier.setText(str(tmp_path / "docs"))
+    dlg.e_p1.setText("abc"); dlg.e_p2.setText("abc")
+    dlg._valider()
+    assert (tmp_path / "docs" / "Mon secours perso.pem").exists()
+    assert fen.store.a_cle_de_secours
+
+
+def test_nouveau_fichier_de_secours_garde_l_ancienne_cle_publique(fen, tmp_path, monkeypatch):
+    from PyQt6.QtWidgets import QMessageBox
+    from scrinium.ui import assistant
+    monkeypatch.setattr(QMessageBox, "exec", lambda self: 0)
+    monkeypatch.setattr(QMessageBox, "clickedButton", lambda self: self.buttons()[0])
+    for nom, rempl in (("un", False), ("deux", True)):
+        d = assistant.AssistantCle(fen.store, fen, remplacer=rempl)
+        d.e_nom.setText(nom); d.e_dossier.setText(str(tmp_path / "k"))
+        d._valider()
+    assert (tmp_path / "k" / "un.pem").exists() and (tmp_path / "k" / "deux.pem").exists()
+    assert len(list(fen.store.paths.base.glob("recovery-*.pub.ancienne"))) == 1
+
+
+def test_nom_deja_pris_refuse(fen, tmp_path, monkeypatch):
+    from PyQt6.QtWidgets import QMessageBox
+    from scrinium.ui import assistant
+    vu = []
+    monkeypatch.setattr(QMessageBox, "warning", staticmethod(lambda *a: vu.append(a[2])))
+    d = assistant.AssistantCle(fen.store, fen)
+    d.e_nom.setText("x"); d.e_dossier.setText(str(tmp_path))
+    (tmp_path / "x.pem").write_text("déjà là")
+    d._valider()
+    assert vu and (tmp_path / "x.pem").read_text() == "déjà là" and not fen.store.a_cle_de_secours
