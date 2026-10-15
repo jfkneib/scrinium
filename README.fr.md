@@ -10,13 +10,23 @@ facultative, créée par vous au premier lancement, permet de rouvrir une fiche 
 
 Interface Qt (PyQt6) : Linux, Windows, macOS (paquets Windows/macOS : à venir).
 
+**[⬇ Télécharger la dernière version (paquet .deb)](https://github.com/jfkneib/scrinium/releases/latest)** · [Installation](#installation)
+
 ## Installation
 
-**Debian / Ubuntu** (paquet `.deb` de la page *Releases*) :
+**Debian / Ubuntu** : téléchargez `scrinium_0.1.0_all.deb` sur la [**page des versions (Releases)**](https://github.com/jfkneib/scrinium/releases/latest) (section *Assets*, tout en bas), ou directement :
+
+```bash
+wget https://github.com/jfkneib/scrinium/releases/download/v0.1.0/scrinium_0.1.0_all.deb
+```
+
+puis installez-le :
 
 ```bash
 sudo apt install ./scrinium_0.1.0_all.deb
 ```
+
+Pour vérifier le téléchargement, récupérez aussi `SHA256SUMS` sur la même page et lancez `sha256sum -c SHA256SUMS`.
 
 **Autres distributions** (sans root, depuis ce dépôt) :
 
