@@ -1,0 +1,6 @@
+scrinium (0.1.0) unstable; urgency=medium
+
+  * Première version publique : interface Qt, cœur indépendant de l'interface,
+    clé de secours propre à chaque utilisateur (assistant au premier lancement).
+
+ -- Jean-François Kneib <kneib.jean-francois@cegetel.net>  Thu, 15 Oct 2026 14:12:05 +0200

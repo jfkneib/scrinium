@@ -1,0 +1,2 @@
+packaging/scrinium.desktop usr/share/applications
+src/scrinium/icons/scrinium.svg usr/share/icons/hicolor/scalable/apps
