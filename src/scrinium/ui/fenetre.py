@@ -8,7 +8,7 @@ from PyQt6.QtWidgets import (QApplication, QFileDialog, QHBoxLayout, QInputDialo
                              QSystemTrayIcon, QToolBar, QVBoxLayout, QWidget)
 
 from .. import __version__
-from ..core import crypto
+from ..core import autostart, crypto
 from ..core.store import ICONE_DEFAUT, Store, propre
 from ..i18n import _
 from .assistant import AssistantCle
@@ -84,6 +84,10 @@ class Fenetre(QMainWindow):
         self.a_tray.setChecked(bool(self.store.reglages().get("tray", True)))
         self.a_tray.toggled.connect(lambda on: self.store.sauver_reglages(tray=bool(on)))
         mf.addAction(self.a_tray)
+        self.a_demarrage = QAction(_("Lancer au démarrage de la session"), self, checkable=True)
+        self.a_demarrage.setChecked(autostart.actif())
+        self.a_demarrage.toggled.connect(self._demarrage)
+        mf.addAction(self.a_demarrage)
         mf.addSeparator()
         mf.addAction(self._action(_("Quitter"), "application-exit", self.quitter, "Ctrl+Q"))
         ms = m.addMenu(_("&Sécurité"))
@@ -390,6 +394,15 @@ class Fenetre(QMainWindow):
         if self.fiche and self.store.jeter_si_vide(self.fiche_theme, self.fiche):
             self.fiche = None
             self.maj_themes()
+
+    def _demarrage(self, on: bool):
+        try:
+            autostart.activer(on)
+        except OSError as ex:
+            QMessageBox.warning(self, _("Démarrage de la session"), _("Impossible de modifier le lancement automatique : %s") % ex)
+            self.a_demarrage.blockSignals(True)
+            self.a_demarrage.setChecked(autostart.actif())
+            self.a_demarrage.blockSignals(False)
 
     # ---------- zone de notification ----------
     def _zone_notification(self):

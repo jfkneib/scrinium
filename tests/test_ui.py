@@ -67,3 +67,19 @@ def test_instance_unique(app):
         if recus:
             break
     assert recus == [("Perso", True)]
+
+
+def test_lancement_automatique(fen, tmp_path, monkeypatch):
+    import sys
+    if sys.platform in ("win32", "darwin"):
+        pytest.skip("test limité à Linux (XDG autostart)")
+    from scrinium.core import autostart
+    monkeypatch.setenv("XDG_CONFIG_HOME", str(tmp_path / "xdg"))
+    assert not autostart.actif()
+    fen.a_demarrage.setChecked(True)
+    f = tmp_path / "xdg" / "autostart" / "scrinium.desktop"
+    assert f.exists() and autostart.actif()
+    contenu = f.read_text(encoding="utf-8")
+    assert "--minimise" in contenu and "Exec=" in contenu
+    fen.a_demarrage.setChecked(False)
+    assert not f.exists()
