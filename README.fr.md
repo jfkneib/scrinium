@@ -71,6 +71,16 @@ scrinium secours deverrouiller "titre" --cle ~/cle-de-secours.pem
 # alias anglais : scrinium rescue list|open|unlock
 ```
 
+## Extensions
+
+Scrinium peut être étendu par des plugins (rappels, OCR, dictée… sont prévus sous forme de plugins). Ils sont
+**désactivés par défaut** : *Extensions → Gérer les extensions…* les liste et les active un par un, après un
+avertissement (une extension est du code Python qui s'exécute avec les mêmes droits que Scrinium : n'activez que celles
+que vous connaissez). Déposez le dossier d'une extension dans `<dossier de données>/plugins/`, ou installez un paquet qui
+en fournit une. Un exemple fonctionnel est dans [`plugins/hello`](plugins/hello) ; l'API est décrite dans
+[`docs/plugins.md`](docs/plugins.md) (en anglais). Une extension défaillante n'empêche jamais Scrinium de démarrer et
+est désactivée automatiquement après des erreurs répétées.
+
 ## Intégration (facultatif)
 
 Si un exécutable `~/.config/scrinium/hooks/themes-changed` existe, il est appelé à chaque création, renommage,

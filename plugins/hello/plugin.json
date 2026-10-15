@@ -1,0 +1,8 @@
+{
+  "titre": "Hello (example)",
+  "version": "1.0",
+  "auteur": "Scrinium",
+  "description": "Example extension: a menu entry and a toolbar button that report how many notes you have, and a log of opened notes.",
+  "classe": "HelloPlugin",
+  "api": 1
+}

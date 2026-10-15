@@ -74,6 +74,15 @@ scrinium rescue unlock "title" --key ~/rescue-file.pem    # puts the note back i
 
 (The French spelling `scrinium secours lister|ouvrir|deverrouiller` also works.)
 
+## Extensions
+
+Scrinium can be extended with plugins (reminders, OCR, dictation… are planned as plugins). They are **disabled by default**:
+*Extensions → Manage extensions…* lists them and enables them one by one, after a warning (an extension is Python code
+running with the same rights as Scrinium: only enable ones you trust). Drop an extension folder into
+`<data folder>/plugins/`, or install a package that provides one. A working example is in [`plugins/hello`](plugins/hello);
+the API is documented in [`docs/plugins.md`](docs/plugins.md). A faulty extension never prevents Scrinium from starting
+and is disabled automatically after repeated errors.
+
 ## Integration (optional)
 
 If an executable `~/.config/scrinium/hooks/themes-changed` exists, it is called each time a topic is created, renamed,

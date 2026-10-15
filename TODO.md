@@ -12,6 +12,7 @@ Légende : ☐ à faire · ◐ en cours · ✔ fait. Ordre = priorité proposée
 ## 0 bis. Système de plugins (avant les images, v0.2)
 Le cœur reste petit ; calendrier/alarmes et OCR sont des plugins. Les **pièces jointes** (images) restent dans le cœur :
 leur stockage et leur chiffrement avec la fiche font partie du format de fichier, un plugin ne doit pas pouvoir l'affaiblir.
+- ✔ Implémenté : API v1, découverte sans exécution de code, activation explicite, événements, isolation des pannes, menu *Extensions*, `docs/plugins.md`, plugin `hello`
 - ☐ API v1 versionnée (`API_VERSION`) : un plugin déclare la version qu'il vise, refus propre si incompatible
 - ☐ Découverte : *entry points* Python (`scrinium.plugins`, pour les paquets pip/deb comme `scrinium-ocr`) + dossier utilisateur `~/.config/scrinium/plugins/`
 - ☐ Cycle de vie : `activer(ctx)` / `desactiver()` ; un plugin est **désactivé par défaut** tant que l'utilisateur ne l'a pas activé (menu *Fichier → Extensions…* : liste, version, auteur, activer/désactiver)
@@ -55,6 +56,15 @@ Extraire le texte d'une image de fiche pour pouvoir la chercher/copier. Moteurs 
   - penser au partage de la VRAM (8 Go) avec ComfyUI/autres modèles (`OLLAMA_KEEP_ALIVE`, un seul modèle chargé)
 - ☐ Texte extrait stocké avec la fiche (et **chiffré** si la fiche est verrouillée), indexé par la recherche (sauf fiches verrouillées fermées)
 - ☐ Bouton « Extraire le texte » sur une image, résultat modifiable avant enregistrement
+
+## 3 bis. Plugin `scrinium-dictee` : dictée vocale (v0.5)
+Dicter une note au micro, le texte s'insère à la position du curseur (`ctx.ui.inserer_texte`, déjà dans l'API).
+- ☐ Reconnaissance **locale** (aucun envoi sur Internet) : `faster-whisper` (modèles `base`/`small`, bon en français, CPU suffisant, GPU facultatif) ; alternative légère : Vosk. Ollama n'est pas l'outil pour la parole.
+- ☐ Enregistrement micro (QtMultimedia ou `sounddevice`), bouton « Dicter » + raccourci appui-pour-parler, indicateur d'écoute
+- ☐ Téléchargement du modèle **à la demande** (taille affichée, accord de l'utilisateur), stocké dans les données du plugin
+- ☐ Choix de la langue (auto / fr / en), ponctuation, mode « ajouter » / « remplacer la sélection »
+- ☐ Dépendances Python propres au plugin (`pip` dans le venv de `install.sh`) : à documenter, pas de paquet Debian officiel pour faster-whisper
+- ☐ Option gratuite en attendant : la dictée du système (KDE/GNOME, Windows `Win+H`, macOS)
 
 ## 4. Multi-plateforme
 - ☐ Builds Windows (PyInstaller + Inno Setup) et macOS (`.dmg`) par GitHub Actions
