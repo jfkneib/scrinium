@@ -13,7 +13,8 @@ import sys
 import time
 from pathlib import Path
 
-from . import crypto
+from . import crypto, exemples
+from ..i18n import _
 from .paths import Paths
 
 ICONE_DEFAUT = "view-pim-notes"
@@ -71,6 +72,7 @@ class Store:
     def __init__(self, paths: Paths | None = None):
         self.paths = paths or Paths()
         self.themes: list[Theme] = []
+        self.premier_lancement = False
 
     # ---------- lecture ----------
     def charger(self) -> list[Theme]:
@@ -78,9 +80,8 @@ class Store:
         premier = not fiches.exists()
         mkdir_prive(fiches)
         if premier:
-            t = fiches / "Perso"
-            mkdir_prive(t)
-            self._ecrire_md(t / "Exemple.md", "Exemple", "Une fiche : un titre et une note.\n")
+            self.premier_lancement = True
+            self._exemples()
         self.themes = []
         for d in sorted((d for d in fiches.iterdir() if d.is_dir() and not d.name.startswith(".")),
                         key=lambda d: d.name.lower()):
@@ -92,6 +93,22 @@ class Store:
                 th.fiches.append(self._lire(p))
             self.themes.append(th)
         return self.themes
+
+    def _exemples(self) -> None:
+        """Premier lancement : thèmes et fiches modèles, dont une fiche verrouillée de démonstration."""
+        for nom, icone, fiches in exemples.themes(self.paths.fiches):
+            d = self.paths.fiches / propre(nom, "thème")
+            mkdir_prive(d)
+            _ecrire(d / ".icone", (icone + "\n").encode("utf-8"))
+            for titre, texte in fiches:
+                self._ecrire_md(self.libre(d, titre), titre, texte)
+        demo = self.paths.fiches / propre(_("Bienvenue"), "thème")
+        titre = _("Exemple verrouillé")
+        f = Fiche(self.libre(demo, titre), titre, _(
+            "Bravo, vous avez déverrouillé la fiche !\n\nCe texte n'existe en clair nulle part sur le disque. "
+            "« Retirer le mot de passe » la remettrait en clair."))
+        th = Theme(demo)
+        self.verrouiller(th, f, exemples.MOT_DE_PASSE_DEMO, sans_secours=True)
 
     @staticmethod
     def _lire(p: Path) -> Fiche:
@@ -204,10 +221,10 @@ class Store:
     def a_cle_de_secours(self) -> bool:
         return self.paths.recovery_pub.exists()
 
-    def verrouiller(self, th: Theme, f: Fiche, mdp: str) -> None:
+    def verrouiller(self, th: Theme, f: Fiche, mdp: str, sans_secours: bool = False) -> None:
         salt = os.urandom(16)
         cle = crypto.deriver(mdp, salt)
-        wrap = crypto.envelopper(cle, self.paths.recovery_pub)
+        wrap = b"" if sans_secours else crypto.envelopper(cle, self.paths.recovery_pub)
         ancien = f.path
         nouveau = self.libre(th.path, f.titre, ancien, ".lock")
         _ecrire(nouveau, crypto.chiffrer(f.texte, cle, salt, wrap))

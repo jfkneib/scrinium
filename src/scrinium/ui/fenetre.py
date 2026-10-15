@@ -34,6 +34,8 @@ class Fenetre(QMainWindow):
         self.resize(900, 540)
         store.charger()
         self._ui()
+        if not theme and store.premier_lancement:
+            theme = _("Bienvenue")   # première ouverture : on commence par les fiches d'aide
         if theme:
             self.theme = next((t.nom for t in store.themes if t.nom.lower() == theme.lower()), self.TOUS)
         self.maj_themes()
@@ -168,7 +170,7 @@ class Fenetre(QMainWindow):
         it = QListWidgetItem(icone(ICONE_DEFAUT), self.TOUS)
         self.liste_themes.addItem(it)
         for t in self.store.themes:
-            self.liste_themes.addItem(QListWidgetItem(icone(t.icone), f"{t.nom}  ({len(t.fiches)})"))
+            self.liste_themes.addItem(QListWidgetItem(icone(t.icone) if not icone(t.icone).isNull() else icone(ICONE_DEFAUT), f"{t.nom}  ({len(t.fiches)})"))
         if self.theme not in self._noms():
             self.theme = self.TOUS
         self.liste_themes.setCurrentRow(self._noms().index(self.theme))
