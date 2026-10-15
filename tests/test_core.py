@@ -172,3 +172,42 @@ def test_cli_secours_alias_anglais(tmp_path, monkeypatch, capsys):
     assert "Perso/Code.lock" in capsys.readouterr().out
     assert cli.main(["rescue", "open", "Code", "--cle", str(tmp_path / "k.pem")]) == 0
     assert capsys.readouterr().out.strip() == "1234"
+
+
+# ---------- métadonnées de fiche ----------
+def test_meta_dans_md_invisible_et_conservee(store):
+    th = store.theme("Perso")
+    f = store.nouvelle_fiche(th)
+    store.enregistrer(th, f, "Rdv", "dentiste")
+    store.maj_meta(th, f, rappel="2026-11-03 09:00", note="a --> b")
+    brut = f.path.read_text(encoding="utf-8")
+    assert brut.startswith("# Rdv\n\n<!-- scrinium:") and brut.count("-->") == 1   # le « --> » de la valeur est échappé
+    g = next(x for x in _perso(Store(store.paths).charger()).fiches if x.titre == "Rdv")
+    assert g.texte == "dentiste" and g.meta == {"rappel": "2026-11-03 09:00", "note": "a --> b"}
+    store.maj_meta(th, f, rappel=None)
+    assert "rappel" not in f.meta and "rappel" not in f.path.read_text(encoding="utf-8")
+
+
+def test_meta_chiffree_avec_une_fiche_verrouillee(store):
+    th = store.theme("Perso")
+    f = store.nouvelle_fiche(th)
+    store.enregistrer(th, f, "Banque", "code 1234")
+    store.maj_meta(th, f, rappel="2026-12-01")
+    store.verrouiller(th, f, "motdepasse")
+    brut = f.path.read_bytes()
+    assert b"rappel" not in brut and b"2026-12-01" not in brut
+    g = next(x for x in _perso(store.charger()).fiches if x.titre == "Banque")
+    assert g.meta == {} and g.fermee
+    with pytest.raises(ValueError):
+        store.maj_meta(th, g, rappel="x")
+    store.deverrouiller(g, "motdepasse")
+    assert g.texte == "code 1234" and g.meta == {"rappel": "2026-12-01"}
+    store.retirer_verrou(th, g)
+    assert "2026-12-01" in g.path.read_text(encoding="utf-8")
+
+
+def test_fiche_sans_meta_inchangee(store):
+    th = store.theme("Perso")
+    f = store.nouvelle_fiche(th)
+    store.enregistrer(th, f, "X", "texte")
+    assert f.path.read_text(encoding="utf-8") == "# X\n\ntexte"

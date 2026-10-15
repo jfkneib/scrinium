@@ -9,9 +9,11 @@ from PyQt6.QtWidgets import (QApplication, QFileDialog, QHBoxLayout, QInputDialo
 
 from .. import __version__
 from ..core import autostart, crypto
+from ..core.plugins import FicheVue, Gestionnaire
 from ..core.store import ICONE_DEFAUT, Store, propre
 from ..i18n import _
 from .assistant import AssistantCle
+from .extensions import DialogueExtensions, UiPlugin
 from .icons import icone, icone_appli
 
 ORANGE, VERT, GRIS = "#c77700", "#2e8b3a", "gray"
@@ -37,6 +39,9 @@ class Fenetre(QMainWindow):
         store.charger()
         self._ui()
         self._zone_notification()
+        self.plugins = Gestionnaire(store, ui_factory=lambda info: UiPlugin(self, info.nom),
+                                    fiche_courante=lambda: self._vue(self.fiche_theme, self.fiche),
+                                    sur_desactivation_auto=self._plugin_coupe)
         if not theme and store.premier_lancement:
             theme = _("Bienvenue")   # première ouverture : on commence par les fiches d'aide
         if theme:
@@ -45,6 +50,7 @@ class Fenetre(QMainWindow):
         self.maj_fiches()
         if nouvelle:
             self.nouvelle_fiche()
+        QTimer.singleShot(0, self.plugins.demarrer)
 
     # ---------- construction ----------
     def _action(self, texte, ic, slot, raccourci=None):
@@ -55,7 +61,7 @@ class Fenetre(QMainWindow):
         return a
 
     def _ui(self):
-        tb = QToolBar(_("Actions"))
+        tb = self.barre = QToolBar(_("Actions"))
         tb.setMovable(False)
         tb.setIconSize(QSize(22, 22))
         tb.setToolButtonStyle(Qt.ToolButtonStyle.ToolButtonTextBesideIcon)
@@ -91,6 +97,9 @@ class Fenetre(QMainWindow):
         ms = m.addMenu(_("&Sécurité"))
         ms.addAction(self._action(_("Fichier de secours…"), "object-locked", self.assistant_cle))
         ms.addAction(self._action(_("Rouvrir une fiche avec le fichier de secours…"), "object-unlocked", self.secours))
+        self.menu_ext = m.addMenu(_("E&xtensions"))
+        self.menu_ext.addAction(self._action(_("Gérer les extensions…"), "preferences-plugin", self.gerer_extensions))
+        self.menu_ext.addSeparator()
         mh = m.addMenu(_("&Aide"))
         ml = mh.addMenu(_("&Langue"))
         groupe = QActionGroup(self)
@@ -224,6 +233,7 @@ class Fenetre(QMainWindow):
             return
         self.quitter_fiche()
         self.store.nouveau_theme(nom)
+        self.plugins.emettre("themes_modifies")
         self.theme = nom
         self.maj_themes()
         self.maj_fiches()
@@ -238,6 +248,7 @@ class Fenetre(QMainWindow):
             return
         self.quitter_fiche()
         self.store.renommer_theme(t, nom)
+        self.plugins.emettre("themes_modifies")
         self.theme = t.nom
         self.maj_themes()
         self.maj_fiches()
@@ -252,6 +263,7 @@ class Fenetre(QMainWindow):
               "applications-development, view-pim-notes :"), text=t.icone)
         if ok and n.strip():
             self.store.icone_theme(t, n)
+            self.plugins.emettre("themes_modifies")
             self.maj_themes()
 
     def supprimer_theme(self):
@@ -265,6 +277,7 @@ class Fenetre(QMainWindow):
         ) == QMessageBox.StandardButton.Yes:
             self.fiche = None
             self.store.supprimer_theme(t)
+            self.plugins.emettre("themes_modifies")
             self.theme = self.TOUS
             self.maj_themes()
             self.maj_fiches()
@@ -338,6 +351,8 @@ class Fenetre(QMainWindow):
         self.texte.document().clearUndoRedoStacks()
         self.chargement = False
         self._maj_boutons()
+        if f is not None:
+            self.plugins.emettre("fiche_ouverte", fiche=FicheVue(t, f))
 
     def nouvelle_fiche(self):
         self.quitter_fiche()
@@ -391,6 +406,7 @@ class Fenetre(QMainWindow):
         titre, texte = self.titre.text().strip(), self.texte.toPlainText()
         if self.store.enregistrer(t, f, titre, texte):
             self._statut(f"{_('✔ Enregistré à')} {time.strftime('%H:%M:%S')}  ·  {t.nom}/{f.path.name}", VERT)
+            self.plugins.emettre("fiche_enregistree", fiche=FicheVue(t, f), origine=None)
             row = self.liste.currentRow()
             if 0 <= row < len(self.rows):   # libellé à jour sans perdre la sélection
                 self.liste.item(row).setText(self._libelle(t, f, self.theme == self.TOUS or self.recherche.text().strip()))
@@ -399,9 +415,30 @@ class Fenetre(QMainWindow):
 
     def quitter_fiche(self):
         self.sauver()
+        if self.fiche is not None:
+            self.plugins.emettre("fiche_fermee", fiche=FicheVue(self.fiche_theme, self.fiche))
         if self.fiche and self.store.jeter_si_vide(self.fiche_theme, self.fiche):
             self.fiche = None
             self.maj_themes()
+
+    # ---------- extensions ----------
+    def _vue(self, theme, fiche):
+        return FicheVue(theme, fiche) if fiche is not None and theme is not None else None
+
+    def gerer_extensions(self):
+        DialogueExtensions(self).exec()
+
+    def _plugin_coupe(self, nom: str, erreur: str):
+        QMessageBox.warning(self, _("Extension désactivée"),
+                            _("L'extension « %(nom)s » a été désactivée après des erreurs répétées :\n%(erreur)s")
+                            % {"nom": nom, "erreur": erreur})
+
+    def selectionner_fiche(self, vue):
+        """Sélectionne dans la liste la fiche décrite par `vue` (utilisé par les extensions)."""
+        for i, (t, f) in enumerate(self.rows):
+            if FicheVue(t, f).id == vue.id:
+                self.liste.setCurrentRow(i)
+                return
 
     def _langue(self, code: str):
         self.store.sauver_reglages(langue=code)
@@ -452,6 +489,7 @@ class Fenetre(QMainWindow):
         self.showNormal()
         self.raise_()
         self.activateWindow()
+        self.plugins.emettre("fenetre_montree")
         if nouvelle:
             self.nouvelle_fiche()
 
@@ -466,6 +504,7 @@ class Fenetre(QMainWindow):
         if self.fiche is not None and self.fiche.fermee:
             self._afficher(self.fiche_theme, self.fiche)
         self.hide()
+        self.plugins.emettre("fenetre_cachee")
 
     def quitter(self):
         self.quitter_vraiment = True
@@ -483,6 +522,7 @@ class Fenetre(QMainWindow):
             self.cacher()
             return
         self.quitter_fiche()
+        self.plugins.arreter()
         super().closeEvent(ev)
 
     # ---------- copier / verrou ----------

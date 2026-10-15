@@ -21,6 +21,31 @@ ICONE_DEFAUT = "view-pim-notes"
 POSIX = os.name == "posix"
 
 
+_META = re.compile(r"\A<!-- scrinium: (\{.*?\}) -->\n?", re.S)
+
+
+def separer_meta(brut: str):
+    """(texte, meta) : une ligne `<!-- scrinium: {...} -->` en tête du texte porte les métadonnées de la fiche
+    (invisibles dans un rendu Markdown, chiffrées avec le texte d'une fiche verrouillée)."""
+    m = _META.match(brut)
+    if not m:
+        return brut, {}
+    try:
+        meta = json.loads(m.group(1))
+        if isinstance(meta, dict):
+            return brut[m.end():], {str(k): str(v) for k, v in meta.items()}
+    except ValueError:
+        pass
+    return brut, {}
+
+
+def joindre_meta(meta: dict, texte: str) -> str:
+    if not meta:
+        return texte
+    corps = json.dumps(meta, ensure_ascii=False, sort_keys=True).replace("-->", "--\\u003e")
+    return f"<!-- scrinium: {corps} -->\n{texte}"
+
+
 def propre(nom: str, defaut: str = "sans titre") -> str:
     """Nom utilisable comme fichier ou dossier."""
     n = re.sub(r'[/\\:*?"<>|\x00-\x1f]', "-", nom).strip().lstrip(".").strip()
@@ -49,6 +74,7 @@ class Fiche:
         self.path, self.titre, self.texte, self.verrou = path, titre, texte, verrou
         self.cle = self.salt = None
         self.wrap = b""
+        self.meta: dict = {}
         self.maj = time.strftime("%Y-%m-%d %H:%M", time.localtime(path.stat().st_mtime)) if path.exists() \
             else time.strftime("%Y-%m-%d %H:%M")
 
@@ -120,7 +146,10 @@ class Store:
             premiere, _, reste = brut.partition("\n")
             titre = premiere[2:].strip()
             texte = reste[1:] if reste.startswith("\n") else reste
-        return Fiche(p, titre, texte)
+        texte, meta = separer_meta(texte)
+        f = Fiche(p, titre, texte)
+        f.meta = meta
+        return f
 
     def theme(self, nom: str) -> Theme | None:
         return next((t for t in self.themes if t.nom == nom), None)
@@ -196,9 +225,9 @@ class Store:
             return True
         return False
 
-    def enregistrer(self, th: Theme, f: Fiche, titre: str, texte: str) -> bool:
+    def enregistrer(self, th: Theme, f: Fiche, titre: str, texte: str, force: bool = False) -> bool:
         """Écrit la fiche si elle a changé. Une fiche verrouillée n'est jamais écrite en clair."""
-        if f.fermee or (titre == f.titre and texte == f.texte):
+        if f.fermee or (not force and titre == f.titre and texte == f.texte):
             return False
         ancien = f.path
         ext = ".lock" if f.verrou else ".md"
@@ -207,14 +236,25 @@ class Store:
         if f.verrou:
             if not f.wrap:   # verrouillée avant la clé de secours : on l'ajoute à l'enregistrement
                 f.wrap = crypto.envelopper(f.cle, self.paths.recovery_pub)
-            _ecrire(nouveau, crypto.chiffrer(texte, f.cle, f.salt, f.wrap))
+            _ecrire(nouveau, crypto.chiffrer(joindre_meta(f.meta, texte), f.cle, f.salt, f.wrap))
         else:
-            self._ecrire_md(nouveau, titre, texte)
+            self._ecrire_md(nouveau, titre, joindre_meta(f.meta, texte))
         if nouveau != ancien and ancien.exists():
             ancien.unlink()
         f.titre, f.texte, f.path = titre, texte, nouveau
         f.maj = time.strftime("%Y-%m-%d %H:%M")
         return True
+
+    def maj_meta(self, th: Theme, f: Fiche, **valeurs) -> None:
+        """Ajoute/modifie des métadonnées (valeur None ou "" = suppression) et enregistre. Fiche verrouillée fermée : refusé."""
+        if f.fermee:
+            raise ValueError("fiche verrouillée : déverrouillez-la d'abord")
+        for k, v in valeurs.items():
+            if v is None or v == "":
+                f.meta.pop(k, None)
+            else:
+                f.meta[k] = str(v)
+        self.enregistrer(th, f, f.titre, f.texte, force=True)
 
     # ---------- verrou ----------
     @property
@@ -227,28 +267,30 @@ class Store:
         wrap = b"" if sans_secours else crypto.envelopper(cle, self.paths.recovery_pub)
         ancien = f.path
         nouveau = self.libre(th.path, f.titre, ancien, ".lock")
-        _ecrire(nouveau, crypto.chiffrer(f.texte, cle, salt, wrap))
+        _ecrire(nouveau, crypto.chiffrer(joindre_meta(f.meta, f.texte), cle, salt, wrap))
         if ancien.exists():
             ancien.unlink()
         f.path, f.verrou, f.cle, f.salt, f.wrap = nouveau, True, cle, salt, wrap
 
     def deverrouiller(self, f: Fiche, mdp: str) -> None:
         """Lève crypto.InvalidTag (mauvais mot de passe) ou ValueError/OSError."""
-        texte, cle, salt, wrap = crypto.dechiffrer(f.path.read_bytes(), mdp)
+        brut, cle, salt, wrap = crypto.dechiffrer(f.path.read_bytes(), mdp)
         if not wrap and self.a_cle_de_secours:   # ancienne fiche : on lui ajoute la clé de secours
             wrap = crypto.envelopper(cle, self.paths.recovery_pub)
-            _ecrire(f.path, crypto.chiffrer(texte, cle, salt, wrap))
-        f.texte, f.cle, f.salt, f.wrap = texte, cle, salt, wrap
+            _ecrire(f.path, crypto.chiffrer(brut, cle, salt, wrap))
+        f.texte, f.meta = separer_meta(brut)
+        f.cle, f.salt, f.wrap = cle, salt, wrap
 
     def retirer_verrou(self, th: Theme, f: Fiche) -> None:
         ancien = f.path
         nouveau = self.libre(th.path, f.titre, ancien, ".md")
-        self._ecrire_md(nouveau, f.titre, f.texte)
+        self._ecrire_md(nouveau, f.titre, joindre_meta(f.meta, f.texte))
         ancien.unlink()
         f.path, f.verrou, f.cle, f.salt, f.wrap = nouveau, False, None, None, b""
 
     def ouvrir_avec_cle_privee(self, f: Fiche, pem: bytes, phrase: str | None) -> str:
-        return crypto.ouvrir_avec_cle_privee(f.path.read_bytes(), pem, phrase)
+        texte, f.meta = separer_meta(crypto.ouvrir_avec_cle_privee(f.path.read_bytes(), pem, phrase))
+        return texte
 
     # ---------- réglages et hook ----------
     def reglages(self) -> dict:

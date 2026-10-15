@@ -123,3 +123,79 @@ def test_nom_deja_pris_refuse(fen, tmp_path, monkeypatch):
     (tmp_path / "x.pem").write_text("déjà là")
     d._valider()
     assert vu and (tmp_path / "x.pem").read_text() == "déjà là" and not fen.store.a_cle_de_secours
+
+
+# ---------- extensions ----------
+def _plugin_ui(fen):
+    d = fen.store.paths.base / "plugins" / "demo"
+    d.mkdir(parents=True)
+    (d / "plugin.json").write_text('{"titre": "Demo", "classe": "P", "api": 1}')
+    (d / "__init__.py").write_text('''
+from PyQt6.QtWidgets import QLabel
+from scrinium.core.plugins import Plugin
+class P(Plugin):
+    def activer(self, ctx):
+        self.vus = []
+        ctx.ui.ajouter_action("Faire un truc", lambda: self.vus.append("action"))
+        ctx.ui.ajouter_bouton("Bouton", lambda: None)
+        ctx.ui.ajouter_panneau("Mon panneau", QLabel("salut"))
+        ctx.on("fiche_ouverte", lambda fiche: self.vus.append(fiche.titre))
+''')
+    return d
+
+
+def test_extension_ajoute_puis_retire_menu_bouton_panneau(fen):
+    _plugin_ui(fen)
+    g = fen.plugins
+    g.decouvrir()
+    textes = lambda m: [a.text() for a in m.actions()]
+    avant_menu, avant_barre = len(fen.menu_ext.actions()), len(fen.barre.actions())
+    assert g.activer("demo")
+    assert "Faire un truc" in textes(fen.menu_ext) and "Bouton" in textes(fen.barre)
+    from PyQt6.QtWidgets import QDockWidget
+    assert [d.windowTitle() for d in fen.findChildren(QDockWidget)] == ["Mon panneau"]
+    fen.menu_ext.actions()[-1].trigger()
+    assert g.actifs["demo"][0].vus[-1] == "action"
+    fen._sel_fiche(1)    # ouvre une autre fiche : l'événement arrive à l'extension
+    assert g.actifs["demo"][0].vus[-1] != "action"
+    g.desactiver("demo")
+    assert len(fen.menu_ext.actions()) == avant_menu and len(fen.barre.actions()) == avant_barre
+    assert not [d for d in fen.dockWidgetArea.__self__.findChildren(QDockWidget) if d.isVisibleTo(fen)]
+
+
+def test_dialogue_extensions_liste_et_active(fen, monkeypatch):
+    from PyQt6.QtCore import Qt
+    from PyQt6.QtWidgets import QMessageBox
+    from scrinium.ui.extensions import DialogueExtensions
+    _plugin_ui(fen)
+    monkeypatch.setattr(QMessageBox, "question", staticmethod(lambda *a, **k: QMessageBox.StandardButton.Yes))
+    d = DialogueExtensions(fen)
+    assert d.liste.count() == 1 and "Demo" in d.liste.item(0).text()
+    d.liste.item(0).setCheckState(Qt.CheckState.Checked)
+    assert "demo" in fen.plugins.actifs and fen.plugins.actifs_reglage() == ["demo"]
+    d.liste.item(0).setCheckState(Qt.CheckState.Unchecked)
+    assert "demo" not in fen.plugins.actifs
+
+
+def test_extension_exemple_du_depot(fen):
+    from pathlib import Path
+    import shutil
+    src = Path(__file__).resolve().parent.parent / "plugins" / "hello"
+    shutil.copytree(src, fen.store.paths.base / "plugins" / "hello")
+    fen.plugins.decouvrir()
+    assert fen.plugins.activer("hello")
+    fen.plugins.actifs["hello"][1].ui.notifier = lambda t, m: None   # pas de notification réelle en test
+    fen.plugins.actifs["hello"][0].compter()
+
+
+def test_inserer_texte_dans_la_note(fen):
+    from scrinium.ui.extensions import UiPlugin
+    ui = UiPlugin(fen, "x")
+    fen.texte.setPlainText("début fin")
+    c = fen.texte.textCursor(); c.setPosition(6); fen.texte.setTextCursor(c)
+    assert ui.inserer_texte("[dicté] ") and fen.texte.toPlainText() == "début [dicté] fin"
+    fen.texte.selectAll()
+    assert ui.texte_selectionne() == "début [dicté] fin"
+    # fiche verrouillée fermée : refusé
+    fen.texte.setEnabled(False)
+    assert not ui.inserer_texte("non") and ui.texte_selectionne() == ""
