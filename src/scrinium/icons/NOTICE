@@ -1,7 +1,27 @@
-The SVG icons in this folder come from the Breeze icon theme (KDE) and are licensed under the
+Icons in this folder
+====================
+
+scrinium.svg  -  the Scrinium application icon. Original work drawn for this project from basic
+                 shapes (not derived from any other artwork). Copyright (C) 2026 Jean-François Kneib,
+                 licensed under the GNU General Public License, version 3 or later (GPL-3.0-or-later).
+
+All other *.svg files come from the Breeze icon theme (KDE) and are licensed under the
 GNU Lesser General Public License, version 3 or later (LGPL-3.0-or-later):
 https://invent.kde.org/frameworks/breeze-icons
 Copyright (C) KDE Breeze icon theme authors.
 
-Les icônes SVG de ce dossier proviennent du thème d'icônes Breeze (KDE), sous licence
-LGPL-3.0-or-later (voir le lien ci-dessus).
+Name and icon: if you believe that the name "Scrinium" or this icon infringes a right or may be
+confused with something else, please tell the author (see README); they will be changed in good faith.
+
+---
+
+Icônes de ce dossier
+====================
+
+scrinium.svg  -  icône de l'application : œuvre originale dessinée pour ce projet à partir de formes
+                 simples (non dérivée d'une autre œuvre), sous licence GPL-3.0-or-later.
+
+Les autres fichiers *.svg viennent du thème d'icônes Breeze (KDE), sous licence LGPL-3.0-or-later.
+
+Nom et icône : si vous pensez que le nom « Scrinium » ou cette icône porte atteinte à un droit ou peut
+être confondu avec autre chose, dites-le à l'auteur (voir le README) : ils seront changés de bonne foi.

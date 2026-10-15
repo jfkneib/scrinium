@@ -111,6 +111,16 @@ xgettext --language=Python --keyword=_ --from-code=UTF-8 --sort-by-file -o po/sc
 msgmerge -U po/en.po po/scrinium.pot
 ```
 
+## Name and icon
+
+*Scrinium* is a Latin word (a casket for books and papers). Several unrelated projects use the same name (for example
+a research infrastructure for AI agents on PyPI, and an object-document mapper); none is related to this one. The icon
+was drawn from scratch for this project from basic shapes.
+
+I am not aware of any conflict, but **if you believe the name or the icon infringes a right or causes confusion, please
+[open an issue](https://github.com/jfkneib/scrinium/issues) or write to me: I will change it in good faith.**
+If you distribute a modified version, please make it clear that it is not the original (for example by renaming it).
+
 ## License
 
 GPL-3.0-or-later (see [`LICENSE`](LICENSE)). Icons: Breeze theme (KDE), LGPL-3.0-or-later (see `src/scrinium/icons/NOTICE`).

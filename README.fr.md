@@ -96,6 +96,16 @@ dpkg-buildpackage -us -uc -b    # construit le .deb (dans le dossier parent)
 
 Le code est séparé : `core/` (stockage, chiffrement, clé de secours, sans aucune dépendance graphique) et `ui/` (PyQt6).
 
+## Nom et icône
+
+*Scrinium* est un mot latin (le coffret où l'on rangeait livres et papiers). Plusieurs projets sans rapport portent le
+même nom (par exemple une infrastructure de recherche pour agents IA sur PyPI, et un mapper objet-document) ; aucun n'est
+lié à celui-ci. L'icône a été dessinée pour ce projet à partir de formes simples.
+
+Je n'ai connaissance d'aucun conflit, mais **si vous pensez que le nom ou l'icône porte atteinte à un droit ou prête à
+confusion, [ouvrez un ticket](https://github.com/jfkneib/scrinium/issues) ou écrivez-moi : je les changerai de bonne foi.**
+Si vous distribuez une version modifiée, merci d'indiquer clairement qu'il ne s'agit pas de l'original (par exemple en la renommant).
+
 ## Licence
 
 GPL-3.0-or-later (voir [`LICENSE`](LICENSE)). Icônes : thème Breeze (KDE), LGPL-3.0-or-later (voir `src/scrinium/icons/NOTICE`).
