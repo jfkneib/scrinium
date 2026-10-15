@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Copyright (C) 2026 Jean-François Kneib
 """Lecture des fichiers .po et écriture des .mo, sans dépendance (Python n'embarque pas msgfmt)."""
 import ast
 import struct

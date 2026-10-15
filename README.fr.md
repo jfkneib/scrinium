@@ -98,6 +98,8 @@ Le code est séparé : `core/` (stockage, chiffrement, clé de secours, sans auc
 
 ## Licence
 
-GPL-3.0-or-later. Icônes : thème Breeze (KDE), LGPL-3.0-or-later.
+GPL-3.0-or-later (voir [`LICENSE`](LICENSE)). Icônes : thème Breeze (KDE), LGPL-3.0-or-later (voir `src/scrinium/icons/NOTICE`).
+
+Les extensions s'exécutent dans le processus de Scrinium : celles distribuées avec lui devraient avoir une licence compatible GPL.
 
 L'interface existe en français et en anglais (gettext, `po/`) : langue automatique, ou menu *Aide → Langue*. Pour ajouter une langue, copier `po/scrinium.pot` en `po/<code>.po` et traduire (les textes sources sont en français).

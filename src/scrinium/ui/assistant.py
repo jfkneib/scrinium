@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Copyright (C) 2026 Jean-François Kneib
 """Création du fichier de secours : en mots simples, avec un nom que l'utilisateur reconnaît."""
 import getpass
 import time

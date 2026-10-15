@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Copyright (C) 2026 Jean-François Kneib
 """Lancement automatique à l'ouverture de session (Linux : XDG autostart ; Windows : clé Run ; macOS : LaunchAgent)."""
 import os
 import shutil

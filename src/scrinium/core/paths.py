@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Copyright (C) 2026 Jean-François Kneib
 """Emplacements des données selon le système (aucune dépendance externe)."""
 import os
 import sys

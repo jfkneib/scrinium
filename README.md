@@ -113,4 +113,6 @@ msgmerge -U po/en.po po/scrinium.pot
 
 ## License
 
-GPL-3.0-or-later. Icons: Breeze theme (KDE), LGPL-3.0-or-later.
+GPL-3.0-or-later (see [`LICENSE`](LICENSE)). Icons: Breeze theme (KDE), LGPL-3.0-or-later (see `src/scrinium/icons/NOTICE`).
+
+Extensions are loaded into Scrinium's process: extensions distributed together with Scrinium should use a GPL-compatible license.

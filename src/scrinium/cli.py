@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Copyright (C) 2026 Jean-François Kneib
 """Ligne de commande : fenêtre, ou récupération de fiches en ligne de commande avec la clé de secours."""
 import argparse
 import getpass

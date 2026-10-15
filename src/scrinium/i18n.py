@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Copyright (C) 2026 Jean-François Kneib
 """Traduction (gettext). Les textes sources sont en français ; po/<langue>.po fournit les autres langues.
 
 Langue : réglage « langue » (settings.json : fr, en ou auto), sinon variable SCRINIUM_LANG, sinon langue du système.

@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Copyright (C) 2026 Jean-François Kneib
 """Compile les traductions (po/*.po -> scrinium/locale/<langue>/LC_MESSAGES/scrinium.mo) pendant le build."""
 import importlib.util
 from pathlib import Path

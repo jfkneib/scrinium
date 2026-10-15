@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Copyright (C) 2026 Jean-François Kneib
 """Extensions (plugins), API v1. Aucune dépendance graphique : l'interface fournit `ui_factory`.
 
 Découverte SANS exécuter de code :
