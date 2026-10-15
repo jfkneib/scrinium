@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "scrinium"
 dynamic = ["version"]
-description = "Fiches rangées par thème, verrouillables par mot de passe (AES-256), avec clé de secours facultative"
+description = "Notes organised by topic, lockable with a password (AES-256), avec clé de secours facultative"
 readme = "README.md"
 license = { text = "GPL-3.0-or-later" }
 requires-python = ">=3.10"

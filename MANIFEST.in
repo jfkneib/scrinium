@@ -1,0 +1,4 @@
+include LICENSE README.md
+recursive-include po *.po *.pot
+recursive-include packaging *
+recursive-include src/scrinium/icons *.svg

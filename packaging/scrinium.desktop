@@ -1,12 +1,14 @@
 [Desktop Entry]
 Type=Application
 Name=Scrinium
-Name[en]=Scrinium
-Comment=Fiches rangées par thème, verrouillables par mot de passe
-Comment[en]=Notes grouped by topic, lockable with a password
+GenericName=Notes
+GenericName[fr]=Fiches
+Comment=Notes organised by topic, lockable with a password
+Comment[fr]=Fiches rangées par thème, verrouillables par mot de passe
 Exec=scrinium
 Icon=scrinium
 Terminal=false
 Categories=Utility;
-Keywords=notes;fiches;memo;mot de passe;
+Keywords=notes;memo;password;lock;vault;
+Keywords[fr]=fiches;mémo;mot de passe;verrou;coffre;
 StartupWMClass=scrinium

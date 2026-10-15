@@ -1,0 +1,770 @@
+# Scrinium : modèle de traduction (textes sources en français).
+# Copyright (C) 2026 Jean-François Kneib
+# Même licence que le programme (GPL-3.0-or-later).
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: scrinium 0.1.0\n"
+"Report-Msgid-Bugs-To: \n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: src/scrinium/cli.py:28
+msgid "Fiche introuvable."
+msgstr ""
+
+#: src/scrinium/cli.py:28
+msgid ""
+"Plusieurs fiches :\n"
+"  "
+msgstr ""
+
+#: src/scrinium/cli.py:33
+msgid "Mot de passe du fichier de secours (vide si aucun) : "
+msgstr ""
+
+#: src/scrinium/cli.py:37
+#, python-format
+msgid "Impossible : %s"
+msgstr ""
+
+#: src/scrinium/cli.py:44
+#, python-format
+msgid "Remise en clair : %s"
+msgstr ""
+
+#: src/scrinium/cli.py:50
+msgid "Scrinium : fiches rangées par thème."
+msgstr ""
+
+#: src/scrinium/cli.py:52
+msgid "ouvre directement sur ce thème"
+msgstr ""
+
+#: src/scrinium/cli.py:53
+msgid "ouvre avec une nouvelle fiche"
+msgstr ""
+
+#: src/scrinium/cli.py:55
+msgid ""
+"démarre caché dans la zone de notification (ex. lancement à l'ouverture de "
+"session)"
+msgstr ""
+
+#: src/scrinium/cli.py:57
+msgid ""
+"rouvrir une fiche verrouillée avec le fichier de secours (sans interface)"
+msgstr ""
+
+#: src/scrinium/cli.py:61
+msgid "fichier de secours (PEM)"
+msgstr ""
+
+#: src/scrinium/core/exemples.py:9 src/scrinium/core/store.py:105
+#: src/scrinium/ui/fenetre.py:42
+msgid "Bienvenue"
+msgstr ""
+
+#: src/scrinium/core/exemples.py:10
+msgid "1 · Bienvenue dans Scrinium"
+msgstr ""
+
+#: src/scrinium/core/exemples.py:11
+msgid ""
+"Scrinium range vos petites notes : numéros, codes, procédures, listes…\n"
+"\n"
+"Trois colonnes :\n"
+"  • à gauche, les THÈMES (les tiroirs) ;\n"
+"  • au milieu, les FICHES du thème choisi ;\n"
+"  • à droite, le contenu de la fiche : un titre et une note.\n"
+"\n"
+"Tout s'enregistre tout seul pendant que vous écrivez : il n'y a pas de "
+"bouton « Enregistrer ».\n"
+"\n"
+"Ces fiches de bienvenue sont là pour apprendre. Lisez-les dans l'ordre, puis "
+"supprimez le thème « Bienvenue » quand vous n'en avez plus besoin (clic "
+"droit sur le thème, « Supprimer » : il va à la corbeille, rien n'est perdu)."
+msgstr ""
+
+#: src/scrinium/core/exemples.py:20
+msgid "2 · Créer, modifier, ranger"
+msgstr ""
+
+#: src/scrinium/core/exemples.py:21
+msgid ""
+"  • Nouvelle fiche : bouton « Fiche » en haut, ou Ctrl+N. Tapez le titre, "
+"puis la note.\n"
+"  • Nouveau thème : bouton « Thème ».\n"
+"  • Renommer un thème, changer son icône, le supprimer : clic droit sur le "
+"thème, ou les trois petits boutons sous la liste des thèmes.\n"
+"  • Supprimer une fiche : bouton « Supprimer la fiche ». Elle va à la "
+"corbeille, elle n'est pas détruite.\n"
+"  • Une fiche laissée entièrement vide disparaît d'elle-même.\n"
+"\n"
+"Essayez : cliquez sur « Fiche », donnez-lui un titre, écrivez quelques mots."
+msgstr ""
+
+#: src/scrinium/core/exemples.py:28
+msgid "3 · Chercher et copier"
+msgstr ""
+
+#: src/scrinium/core/exemples.py:29
+msgid ""
+"  • Ctrl+F : la recherche regarde dans les titres, les notes et les noms de "
+"thèmes, tous thèmes confondus.\n"
+"  • « Copier la note » met tout le texte dans le presse-papiers, prêt à "
+"coller ailleurs (un numéro, une adresse…).\n"
+"  • Le thème « ★ Toutes les fiches » montre tout d'un coup."
+msgstr ""
+
+#: src/scrinium/core/exemples.py:33
+msgid "4 · Verrouiller une fiche"
+msgstr ""
+
+#: src/scrinium/core/exemples.py:34
+#, python-format
+msgid ""
+"Pour une information sensible (code, mot de passe, numéro de carte…), "
+"cliquez sur « Verrouiller… » : le texte est chiffré (AES-256) avec un mot de "
+"passe que vous choisissez. Le titre reste visible, le contenu non.\n"
+"\n"
+"Essayez : la fiche « Exemple verrouillé » de ce thème a pour mot de passe : "
+"%s\n"
+"\n"
+"Filet de sécurité : si vous oubliez le mot de passe d'une fiche, elle est "
+"perdue, sauf si vous avez un FICHIER DE SECOURS. Scrinium vous le propose au "
+"premier verrouillage (ou plus tard : menu Sécurité > Fichier de secours…). "
+"Donnez-lui un nom que vous reconnaîtrez et gardez-le hors de cet ordinateur "
+"(clé USB, gestionnaire de mots de passe)."
+msgstr ""
+
+#: src/scrinium/core/exemples.py:42
+msgid "5 · Où sont mes fiches ?"
+msgstr ""
+
+#: src/scrinium/core/exemples.py:43
+#, python-format
+msgid ""
+"Chaque fiche est un simple fichier texte (.md) et chaque thème un dossier :\n"
+"\n"
+"    %s\n"
+"\n"
+"Vous pouvez les lire avec n'importe quel éditeur de texte. Pour les "
+"sauvegarder, copiez ce dossier. Les fiches verrouillées sont des "
+"fichiers .lock, illisibles sans leur mot de passe."
+msgstr ""
+
+#: src/scrinium/core/exemples.py:47
+msgid "Perso"
+msgstr ""
+
+#: src/scrinium/core/exemples.py:48
+msgid "Numéros d'urgence"
+msgstr ""
+
+#: src/scrinium/core/exemples.py:49
+msgid ""
+"Europe : 112 (urgences)\n"
+"France : 15 SAMU · 17 police · 18 pompiers · 114 urgences par SMS (sourds et "
+"malentendants) · 3114 prévention du suicide\n"
+"\n"
+"À compléter : médecin traitant, pharmacie de garde, personne à prévenir…"
+msgstr ""
+
+#: src/scrinium/core/exemples.py:53
+msgid "Anniversaires"
+msgstr ""
+
+#: src/scrinium/core/exemples.py:53
+msgid ""
+"Prénom — date — idée de cadeau\n"
+"\n"
+msgstr ""
+
+#: src/scrinium/core/exemples.py:54
+msgid "Cartes, mutuelle, assurances"
+msgstr ""
+
+#: src/scrinium/core/exemples.py:55
+msgid ""
+"Mutuelle : n° d'adhérent …\n"
+"Assurance habitation : contrat n° … / téléphone sinistres …\n"
+"Carte vitale : …\n"
+"\n"
+"Astuce : pour des numéros sensibles, cliquez sur « Verrouiller… »."
+msgstr ""
+
+#: src/scrinium/core/exemples.py:58
+msgid "Maison"
+msgstr ""
+
+#: src/scrinium/core/exemples.py:59
+msgid "Wifi de la maison"
+msgstr ""
+
+#: src/scrinium/core/exemples.py:60
+msgid ""
+"Nom du réseau (SSID) : \n"
+"Mot de passe : \n"
+"\n"
+"Astuce : cette fiche est une bonne candidate au verrouillage."
+msgstr ""
+
+#: src/scrinium/core/exemples.py:62
+msgid "Artisans et dépannage"
+msgstr ""
+
+#: src/scrinium/core/exemples.py:63
+msgid ""
+"Plombier : nom — téléphone\n"
+"Électricien : …\n"
+"Chauffagiste : …\n"
+"Maintenance chaudière : …"
+msgstr ""
+
+#: src/scrinium/core/exemples.py:64
+msgid "Entretien de la maison"
+msgstr ""
+
+#: src/scrinium/core/exemples.py:65
+msgid ""
+"Chaudière : dernier entretien le …\n"
+"Ramonage : …\n"
+"Piles des détecteurs de fumée : …"
+msgstr ""
+
+#: src/scrinium/core/exemples.py:67
+msgid "Informatique"
+msgstr ""
+
+#: src/scrinium/core/exemples.py:68
+msgid "Mon réseau"
+msgstr ""
+
+#: src/scrinium/core/exemples.py:69
+msgid ""
+"Box / routeur : adresse …\n"
+"Adresse de l'imprimante : …\n"
+"Nom des ordinateurs : …"
+msgstr ""
+
+#: src/scrinium/core/exemples.py:70
+msgid "Mes comptes : où j'ai quoi"
+msgstr ""
+
+#: src/scrinium/core/exemples.py:71
+msgid ""
+"Messagerie : …\n"
+"Banque en ligne : …\n"
+"Cloud : …\n"
+"\n"
+"Notez ici OÙ se trouvent vos comptes, pas leurs mots de passe en clair. Pour "
+"un mot de passe, verrouillez la fiche."
+msgstr ""
+
+#: src/scrinium/core/exemples.py:75
+msgid "Voyages"
+msgstr ""
+
+#: src/scrinium/core/exemples.py:76
+msgid "Check-list valise"
+msgstr ""
+
+#: src/scrinium/core/exemples.py:77
+msgid ""
+"☐ Papiers d'identité / passeport\n"
+"☐ Billets, réservations\n"
+"☐ Carte bancaire, un peu d'espèces\n"
+"☐ Médicaments, ordonnance\n"
+"☐ Chargeurs, adaptateur de prise\n"
+"☐ Vêtements, trousse de toilette"
+msgstr ""
+
+#: src/scrinium/core/exemples.py:79
+msgid "Documents à emporter"
+msgstr ""
+
+#: src/scrinium/core/exemples.py:80
+msgid ""
+"Assurance voyage : n° de contrat …\n"
+"Assistance (numéro à appeler) : …\n"
+"Adresse de l'hébergement : …"
+msgstr ""
+
+#: src/scrinium/core/store.py:106
+msgid "Exemple verrouillé"
+msgstr ""
+
+#: src/scrinium/core/store.py:108
+msgid ""
+"Bravo, vous avez déverrouillé la fiche !\n"
+"\n"
+"Ce texte n'existe en clair nulle part sur le disque. « Retirer le mot de "
+"passe » la remettrait en clair."
+msgstr ""
+
+#: src/scrinium/ui/assistant.py:32 src/scrinium/ui/assistant.py:103
+#: src/scrinium/ui/assistant.py:109 src/scrinium/ui/fenetre.py:593
+#: src/scrinium/ui/fenetre.py:611 src/scrinium/ui/fenetre.py:623
+#: src/scrinium/ui/fenetre.py:625 src/scrinium/ui/fenetre.py:631
+#: src/scrinium/ui/fenetre.py:637 src/scrinium/ui/fenetre.py:639
+msgid "Fichier de secours"
+msgstr ""
+
+#: src/scrinium/ui/assistant.py:36
+msgid ""
+"Si vous oubliez le mot de passe d'une fiche verrouillée, la fiche est "
+"perdue.\n"
+"\n"
+"Le fichier de secours est un filet de sécurité : il permet de rouvrir vos "
+"fiches verrouillées sans leur mot de passe. Il est créé une seule fois, "
+"maintenant.\n"
+"\n"
+"Gardez-le AILLEURS que sur cet ordinateur (clé USB, courriel à vous-même, "
+"gestionnaire de mots de passe). Scrinium n'en garde pas de copie : si vous "
+"le perdez, il ne pourra pas être refait pour les fiches déjà verrouillées."
+msgstr ""
+
+#: src/scrinium/ui/assistant.py:43
+msgid ""
+"\n"
+"\n"
+"Un fichier de secours existe déjà. Le nouveau servira pour les fiches "
+"verrouillées À PARTIR DE MAINTENANT ; les fiches déjà verrouillées ne "
+"s'ouvrent qu'avec l'ancien fichier."
+msgstr ""
+
+#: src/scrinium/ui/assistant.py:51
+msgid ""
+"Choisissez un nom que vous reconnaîtrez plus tard (le suffixe .pem est "
+"ajouté)."
+msgstr ""
+
+#: src/scrinium/ui/assistant.py:52
+msgid "Nom du fichier :"
+msgstr ""
+
+#: src/scrinium/ui/assistant.py:54
+msgid "Choisir…"
+msgstr ""
+
+#: src/scrinium/ui/assistant.py:59
+msgid "Enregistrer dans le dossier :"
+msgstr ""
+
+#: src/scrinium/ui/assistant.py:64
+msgid "Mot de passe du fichier (facultatif) :"
+msgstr ""
+
+#: src/scrinium/ui/assistant.py:65 src/scrinium/ui/fenetre.py:567
+msgid "Confirmer le mot de passe :"
+msgstr ""
+
+#: src/scrinium/ui/assistant.py:67
+msgid ""
+"Un mot de passe sur le fichier ajoute une protection si on vous le vole : il "
+"faudra alors ce mot de passe pour s'en servir. Notez-le : lui non plus ne se "
+"retrouve pas."
+msgstr ""
+
+#: src/scrinium/ui/assistant.py:73 src/scrinium/ui/fenetre.py:597
+msgid "Créer le fichier de secours"
+msgstr ""
+
+#: src/scrinium/ui/assistant.py:74
+msgid "Plus tard"
+msgstr ""
+
+#: src/scrinium/ui/assistant.py:80
+msgid "Dossier du fichier de secours"
+msgstr ""
+
+#: src/scrinium/ui/assistant.py:86
+msgid "Les deux saisies sont différentes."
+msgstr ""
+
+#: src/scrinium/ui/assistant.py:86 src/scrinium/ui/fenetre.py:539
+#: src/scrinium/ui/fenetre.py:565 src/scrinium/ui/fenetre.py:569
+msgid "Mot de passe"
+msgstr ""
+
+#: src/scrinium/ui/assistant.py:104
+msgid "Un fichier porte déjà ce nom dans ce dossier : choisissez un autre nom."
+msgstr ""
+
+#: src/scrinium/ui/assistant.py:114
+msgid "Fichier de secours créé"
+msgstr ""
+
+#: src/scrinium/ui/assistant.py:115
+#, python-format
+msgid ""
+"Votre fichier de secours est prêt :\n"
+"\n"
+"%s\n"
+"\n"
+"Copiez-le MAINTENANT hors de cet ordinateur (clé USB, courriel, gestionnaire "
+"de mots de passe)."
+msgstr ""
+
+#: src/scrinium/ui/assistant.py:117
+msgid "Ouvrir le dossier"
+msgstr ""
+
+#: src/scrinium/ui/fenetre.py:25
+msgid "★ Toutes les fiches"
+msgstr ""
+
+#: src/scrinium/ui/fenetre.py:35 src/scrinium/ui/fenetre.py:380
+#: src/scrinium/ui/fenetre.py:391 src/scrinium/ui/fenetre.py:428
+msgid "Scrinium"
+msgstr ""
+
+#: src/scrinium/ui/fenetre.py:59
+msgid "Actions"
+msgstr ""
+
+#: src/scrinium/ui/fenetre.py:64
+msgid "Fiche"
+msgstr ""
+
+#: src/scrinium/ui/fenetre.py:65
+msgid "Nouvelle fiche (Ctrl+N)"
+msgstr ""
+
+#: src/scrinium/ui/fenetre.py:66 src/scrinium/ui/fenetre.py:224
+msgid "Thème"
+msgstr ""
+
+#: src/scrinium/ui/fenetre.py:67 src/scrinium/ui/fenetre.py:219
+msgid "Nouveau thème"
+msgstr ""
+
+#: src/scrinium/ui/fenetre.py:71
+msgid "Chercher (Ctrl+F)…"
+msgstr ""
+
+#: src/scrinium/ui/fenetre.py:78
+msgid "&Fichier"
+msgstr ""
+
+#: src/scrinium/ui/fenetre.py:82
+msgid "Réduire dans la zone de notification"
+msgstr ""
+
+#: src/scrinium/ui/fenetre.py:86
+msgid "Lancer au démarrage de la session"
+msgstr ""
+
+#: src/scrinium/ui/fenetre.py:91 src/scrinium/ui/fenetre.py:433
+msgid "Quitter"
+msgstr ""
+
+#: src/scrinium/ui/fenetre.py:92
+msgid "&Sécurité"
+msgstr ""
+
+#: src/scrinium/ui/fenetre.py:93
+msgid "Fichier de secours…"
+msgstr ""
+
+#: src/scrinium/ui/fenetre.py:94
+msgid "Rouvrir une fiche avec le fichier de secours…"
+msgstr ""
+
+#: src/scrinium/ui/fenetre.py:95
+msgid "&Aide"
+msgstr ""
+
+#: src/scrinium/ui/fenetre.py:96
+msgid "&Langue"
+msgstr ""
+
+#: src/scrinium/ui/fenetre.py:99
+msgid "Automatique"
+msgstr ""
+
+#: src/scrinium/ui/fenetre.py:105 src/scrinium/ui/fenetre.py:652
+msgid "À propos"
+msgstr ""
+
+#: src/scrinium/ui/fenetre.py:114
+msgid "Renommer le thème"
+msgstr ""
+
+#: src/scrinium/ui/fenetre.py:115 src/scrinium/ui/fenetre.py:251
+msgid "Icône du thème"
+msgstr ""
+
+#: src/scrinium/ui/fenetre.py:116 src/scrinium/ui/fenetre.py:263
+msgid "Supprimer le thème"
+msgstr ""
+
+#: src/scrinium/ui/fenetre.py:131
+msgid "Supprimer la fiche"
+msgstr ""
+
+#: src/scrinium/ui/fenetre.py:140
+msgid "Titre"
+msgstr ""
+
+#: src/scrinium/ui/fenetre.py:145
+msgid "Copier la note"
+msgstr ""
+
+#: src/scrinium/ui/fenetre.py:147 src/scrinium/ui/fenetre.py:494
+#: src/scrinium/ui/fenetre.py:500
+msgid "Verrouiller…"
+msgstr ""
+
+#: src/scrinium/ui/fenetre.py:154
+msgid "Note"
+msgstr ""
+
+#: src/scrinium/ui/fenetre.py:213
+msgid "Renommer…"
+msgstr ""
+
+#: src/scrinium/ui/fenetre.py:214
+msgid "Icône…"
+msgstr ""
+
+#: src/scrinium/ui/fenetre.py:215
+msgid "Supprimer…"
+msgstr ""
+
+#: src/scrinium/ui/fenetre.py:219
+msgid "Nom du thème :"
+msgstr ""
+
+#: src/scrinium/ui/fenetre.py:224
+msgid "Ce thème existe déjà."
+msgstr ""
+
+#: src/scrinium/ui/fenetre.py:236
+msgid "Nouveau nom :"
+msgstr ""
+
+#: src/scrinium/ui/fenetre.py:236
+msgid "Renommer"
+msgstr ""
+
+#: src/scrinium/ui/fenetre.py:252
+msgid ""
+"Nom d'icône du thème d'icônes du système, ex : folder-documents, phone, "
+"network-wired, applications-development, view-pim-notes :"
+msgstr ""
+
+#: src/scrinium/ui/fenetre.py:264
+#, python-format
+msgid ""
+"Mettre « %(nom)s » et ses %(n)d fiche(s) à la corbeille ?\n"
+"(%(dossier)s)"
+msgstr ""
+
+#: src/scrinium/ui/fenetre.py:275 src/scrinium/ui/fenetre.py:368
+msgid "(sans titre)"
+msgstr ""
+
+#: src/scrinium/ui/fenetre.py:277
+msgid "(verrouillée)"
+msgstr ""
+
+#: src/scrinium/ui/fenetre.py:328
+msgid ""
+"Fiche verrouillée.\n"
+"\n"
+"Cliquer sur « Déverrouiller… » (ou double-clic sur la fiche) et saisir le "
+"mot de passe."
+msgstr ""
+
+#: src/scrinium/ui/fenetre.py:330
+msgid "Verrouillée"
+msgstr ""
+
+#: src/scrinium/ui/fenetre.py:333
+msgid "Verrouillée (ouverte)"
+msgstr ""
+
+#: src/scrinium/ui/fenetre.py:333 src/scrinium/ui/fenetre.py:399
+msgid "✔ Enregistré"
+msgstr ""
+
+#: src/scrinium/ui/fenetre.py:334
+msgid "modifié le"
+msgstr ""
+
+#: src/scrinium/ui/fenetre.py:337
+msgid "Aucune fiche : « Fiche » (Ctrl+N)"
+msgstr ""
+
+#: src/scrinium/ui/fenetre.py:367
+msgid "Supprimer"
+msgstr ""
+
+#: src/scrinium/ui/fenetre.py:368
+#, python-format
+msgid "Mettre la fiche « %s » à la corbeille ?"
+msgstr ""
+
+#: src/scrinium/ui/fenetre.py:379
+msgid "● modification en cours…"
+msgstr ""
+
+#: src/scrinium/ui/fenetre.py:394
+msgid "✔ Enregistré à"
+msgstr ""
+
+#: src/scrinium/ui/fenetre.py:409
+msgid "Langue"
+msgstr ""
+
+#: src/scrinium/ui/fenetre.py:409
+msgid "Langue modifiée : redémarrez Scrinium pour l'appliquer."
+msgstr ""
+
+#: src/scrinium/ui/fenetre.py:415
+msgid "Démarrage de la session"
+msgstr ""
+
+#: src/scrinium/ui/fenetre.py:415
+#, python-format
+msgid "Impossible de modifier le lancement automatique : %s"
+msgstr ""
+
+#: src/scrinium/ui/fenetre.py:425
+msgid "Pas de zone de notification sur ce bureau."
+msgstr ""
+
+#: src/scrinium/ui/fenetre.py:430
+msgid "Ouvrir Scrinium"
+msgstr ""
+
+#: src/scrinium/ui/fenetre.py:431
+msgid "Nouvelle fiche"
+msgstr ""
+
+#: src/scrinium/ui/fenetre.py:496
+msgid "Déverrouiller…"
+msgstr ""
+
+#: src/scrinium/ui/fenetre.py:498 src/scrinium/ui/fenetre.py:578
+msgid "Retirer le mot de passe"
+msgstr ""
+
+#: src/scrinium/ui/fenetre.py:510
+msgid "✔ Note copiée dans le presse-papiers"
+msgstr ""
+
+#: src/scrinium/ui/fenetre.py:533 src/scrinium/ui/fenetre.py:542
+msgid "Fiche verrouillée"
+msgstr ""
+
+#: src/scrinium/ui/fenetre.py:533
+#, python-format
+msgid "Mot de passe de « %s » :"
+msgstr ""
+
+#: src/scrinium/ui/fenetre.py:539
+msgid "Mot de passe incorrect."
+msgstr ""
+
+#: src/scrinium/ui/fenetre.py:542
+#, python-format
+msgid "Lecture impossible : %s"
+msgstr ""
+
+#: src/scrinium/ui/fenetre.py:552 src/scrinium/ui/fenetre.py:556
+msgid ""
+"Mot de passe oublié : le fichier de secours permettra de rouvrir la fiche."
+msgstr ""
+
+#: src/scrinium/ui/fenetre.py:554
+msgid "Pas de fichier de secours : mot de passe oublié = fiche perdue."
+msgstr ""
+
+#: src/scrinium/ui/fenetre.py:557
+msgid "Verrouiller la fiche"
+msgstr ""
+
+#: src/scrinium/ui/fenetre.py:558
+msgid ""
+"Le texte de la fiche sera chiffré avec un mot de passe (le titre reste "
+"visible).\n"
+"\n"
+msgstr ""
+
+#: src/scrinium/ui/fenetre.py:561
+msgid "Mot de passe (4 caractères minimum) :"
+msgstr ""
+
+#: src/scrinium/ui/fenetre.py:561 src/scrinium/ui/fenetre.py:567
+msgid "Verrouiller"
+msgstr ""
+
+#: src/scrinium/ui/fenetre.py:565
+msgid "Trop court (4 caractères minimum)."
+msgstr ""
+
+#: src/scrinium/ui/fenetre.py:569
+msgid "Les deux saisies sont différentes, fiche non verrouillée."
+msgstr ""
+
+#: src/scrinium/ui/fenetre.py:579
+msgid "Le texte de la fiche sera de nouveau stocké en clair. Continuer ?"
+msgstr ""
+
+#: src/scrinium/ui/fenetre.py:594
+msgid "Avant de verrouiller : voulez-vous créer un fichier de secours ?"
+msgstr ""
+
+#: src/scrinium/ui/fenetre.py:595
+msgid ""
+"Si vous oubliez le mot de passe d'une fiche, le fichier de secours permet de "
+"la rouvrir. Sans lui, une fiche dont le mot de passe est oublié est perdue "
+"pour toujours."
+msgstr ""
+
+#: src/scrinium/ui/fenetre.py:598
+msgid "Verrouiller sans fichier de secours"
+msgstr ""
+
+#: src/scrinium/ui/fenetre.py:599
+msgid "Annuler"
+msgstr ""
+
+#: src/scrinium/ui/fenetre.py:612
+msgid ""
+"Un fichier de secours est déjà actif.\n"
+"\n"
+"En créer un nouveau ? Il servira pour les fiches verrouillées à partir de "
+"maintenant ; les fiches déjà verrouillées ne s'ouvriront qu'avec l'ancien."
+msgstr ""
+
+#: src/scrinium/ui/fenetre.py:623
+msgid "Sélectionnez d'abord une fiche verrouillée."
+msgstr ""
+
+#: src/scrinium/ui/fenetre.py:631
+msgid "Mot de passe du fichier de secours :"
+msgstr ""
+
+#: src/scrinium/ui/fenetre.py:637
+#, python-format
+msgid "Impossible de rouvrir la fiche : %s"
+msgstr ""
+
+#: src/scrinium/ui/fenetre.py:640
+msgid "Fiche rouverte. La remettre en clair (retirer le mot de passe) ?"
+msgstr ""
+
+#. reste fermée ; rien n'a été écrit
+#: src/scrinium/ui/fenetre.py:645
+msgid "Fiche toujours verrouillée."
+msgstr ""
+
+#: src/scrinium/ui/fenetre.py:654
+msgid "Fiches rangées par thème, verrouillables (AES-256-GCM)."
+msgstr ""
