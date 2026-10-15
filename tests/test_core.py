@@ -213,3 +213,41 @@ def test_fiche_sans_meta_inchangee(store):
     f = store.nouvelle_fiche(th)
     store.enregistrer(th, f, "X", "texte")
     assert f.path.read_text(encoding="utf-8") == "# X\n\ntexte"
+
+
+# ---------- hook « themes-changed » ----------
+def _installer_hook(store):
+    h = store.paths.hooks
+    h.mkdir(parents=True, exist_ok=True)
+    journal = store.paths.base / "hook.log"
+    script = h / "themes-changed"
+    script.write_text(f'#!/bin/sh\ncat >> "{journal}"\necho >> "{journal}"\n')
+    script.chmod(0o755)
+    return journal
+
+
+def _derniere_liste(journal):
+    import json
+    return [t["nom"] for t in json.loads(journal.read_text(encoding="utf-8").strip().splitlines()[-1])]
+
+
+def test_hook_themes_changed_creation_renommage_icone_suppression(store):
+    journal = _installer_hook(store)
+    th = store.nouveau_theme("Alpha")
+    assert "Alpha" in _derniere_liste(journal)
+    store.renommer_theme(th, "Beta")
+    assert "Beta" in _derniere_liste(journal) and "Alpha" not in _derniere_liste(journal)
+    store.icone_theme(th, "folder-documents")
+    import json
+    derniere = json.loads(journal.read_text(encoding="utf-8").strip().splitlines()[-1])
+    assert next(t for t in derniere if t["nom"] == "Beta")["icone"] == "folder-documents"
+    store.supprimer_theme(th)
+    assert "Beta" not in _derniere_liste(journal)       # le thème supprimé n'est plus dans la liste donnée au hook
+
+
+def test_hook_absent_ou_non_executable_est_ignore(store):
+    store.nouveau_theme("Sans hook")                      # pas de hook : rien ne plante
+    h = store.paths.hooks
+    h.mkdir(parents=True, exist_ok=True)
+    (h / "themes-changed").write_text("#!/bin/sh\nexit 1\n")   # non exécutable
+    store.nouveau_theme("Hook non exécutable")

@@ -19,7 +19,8 @@ def app():
 
 
 @pytest.fixture
-def fen(app, tmp_path):
+def fen(app, tmp_path, monkeypatch):
+    monkeypatch.setenv("XDG_CONFIG_HOME", str(tmp_path / "xdg"))   # jamais de lecture/écriture dans le vrai ~/.config
     s = Store(Paths(tmp_path / "am"))
     s.sauver_reglages(recovery_asked=True)
     w = Fenetre(s)
