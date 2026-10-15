@@ -1,88 +1,107 @@
 # Scrinium
 
-*Scrinium* : en latin, le coffret où l'on rangeait livres et papiers précieux.
+**English** · [Français](README.fr.md)
 
-Des **fiches** (titre + note) rangées par **thème**, enregistrées automatiquement dans de simples fichiers texte.
-Chaque fiche peut être **verrouillée par un mot de passe** (AES-256-GCM, clé dérivée par scrypt). Une **clé de secours**
-facultative, créée par vous au premier lancement, permet de rouvrir une fiche dont le mot de passe est oublié.
+*Scrinium*: in Latin, the casket where books and precious papers were kept.
 
-Interface Qt (PyQt6) : Linux, Windows, macOS (paquets Windows/macOS : à venir).
+Short **notes** (a title and some text) organised by **topic**, saved automatically as plain text files.
+Each note can be **locked with a password** (AES-256-GCM, key derived with scrypt). An optional **rescue file**,
+created by you, can reopen a note whose password was forgotten.
+
+Qt interface (PyQt6): Linux, Windows, macOS (Windows and macOS packages: coming). Available in English and French.
 
 ## Installation
 
-**Debian / Ubuntu** (paquet `.deb` de la page *Releases*) :
+**Debian / Ubuntu** (`.deb` package from the *Releases* page):
 
 ```bash
 sudo apt install ./scrinium_0.1.0_all.deb
 ```
 
-**Autres distributions** (sans root, depuis ce dépôt) :
+**Other distributions** (no root needed, from this repository):
 
 ```bash
-./install.sh              # installe dans ~/.local (environnement Python isolé + lanceur + icône)
-./install.sh --uninstall  # désinstalle (vos fiches sont conservées)
+./install.sh              # installs into ~/.local (isolated Python environment + launcher + icon)
+./install.sh --uninstall  # removes it (your notes are kept)
 ```
 
-Prérequis de `install.sh` : Python ≥ 3.10 avec `venv`. PyQt6 et cryptography sont installés par pip.
+`install.sh` needs Python ≥ 3.10 with `venv`. PyQt6 and cryptography are installed by pip.
 
-## Utilisation
+## Usage
 
-Au premier lancement, Scrinium crée un thème **Bienvenue** (5 fiches qui expliquent l'outil, dont une fiche verrouillée à essayer) et quelques thèmes modèles à compléter (Perso, Maison, Informatique, Voyages). Supprimez-les quand vous voulez.
+On first launch Scrinium creates a **Welcome** topic (5 notes that explain the tool, including a locked note to try)
+and a few template topics to fill in (Personal, Home, Computers, Travel). Delete them whenever you like.
 
-- `scrinium` ouvre la fenêtre : thèmes à gauche, fiches au milieu, éditeur à droite.
-- **Fiche** (Ctrl+N) / **Thème** : création. Clic droit ou boutons sous la liste pour renommer, changer l'icône, supprimer un thème.
-- Enregistrement **automatique** (Ctrl+S pour forcer). Recherche : Ctrl+F, dans tous les thèmes.
-- **Supprimer = corbeille** (`corbeille/` à côté des fiches) : rien n'est effacé.
-- **Zone de notification** : fermer ou réduire la fenêtre la range dans la zone de notification (clic sur l'icône = afficher/cacher, clic droit = menu). Option *Fichier → Réduire dans la zone de notification* pour désactiver ; sans zone de notification sur le bureau (GNOME sans extension AppIndicator), la fenêtre se comporte normalement. En se cachant, Scrinium **referme les fiches verrouillées** : le mot de passe est redemandé.
-- **Instance unique** : relancer `scrinium` réveille la fenêtre déjà ouverte. `scrinium --minimise` démarre caché dans la zone de notification. La case *Fichier → Lancer au démarrage de la session* l'active pour vous (fichier XDG autostart sous Linux, clé Run sous Windows, LaunchAgent sous macOS).
-- Options : `--theme NOM` (ouvre sur ce thème), `--nouvelle` (ouvre avec une fiche vide prête à saisir).
+- `scrinium` opens the window: topics on the left, notes in the middle, editor on the right.
+- **Note** (Ctrl+N) / **Topic**: create. Right-click a topic, or use the buttons under the list, to rename it, change its icon or delete it.
+- **Automatic** saving (Ctrl+S to force). Search: Ctrl+F, across all topics.
+- **Delete = trash** (`corbeille/` next to the notes): nothing is ever erased.
+- **Notification area**: closing or minimising the window sends it to the notification area (click the icon to show/hide, right-click for the menu). Turn it off with *File → Minimise to the notification area*. On a desktop without a notification area (GNOME without the AppIndicator extension) the window behaves normally. When it hides, Scrinium **closes open locked notes**: the password is asked again.
+- **Single instance**: launching `scrinium` again wakes up the window that is already open. `scrinium --minimise` starts hidden in the notification area. The *File → Start at login* checkbox sets this up for you (XDG autostart file on Linux, Run key on Windows, LaunchAgent on macOS).
+- Options: `--theme NAME` (open on that topic), `--nouvelle` / `--new` (open with an empty note ready to type).
+- **Language**: automatic (system language), or *Help → Language*, or the `SCRINIUM_LANG` environment variable (`en`, `fr`).
 
-## Données
+## Data
 
-| Système | Dossier |
+| System | Folder |
 |---|---|
 | Linux | `~/.config/scrinium/` |
 | Windows | `%APPDATA%\scrinium\` |
 | macOS | `~/Library/Application Support/scrinium/` |
 
-`SCRINIUM_HOME` force un autre dossier. Dedans : `fiches/<Thème>/<titre>.md` (ou `.lock`), `corbeille/`, `settings.json`.
-Les `.md` se lisent et se modifient avec n'importe quel éditeur ; sauvegardez simplement ce dossier.
+`SCRINIUM_HOME` forces another folder. Inside: `fiches/<Topic>/<title>.md` (or `.lock`), `corbeille/` (the trash), `settings.json`.
+The `.md` files can be read and edited with any text editor; to back up, just copy this folder.
 
-## Verrouillage et clé de secours
+## Locking and the rescue file
 
-- **Verrouiller…** chiffre le texte de la fiche ; le titre reste visible, la recherche ne lit pas le contenu d'une fiche verrouillée.
-  Aucun texte en clair n'est écrit sur disque, même pendant l'édition. Le mot de passe n'est jamais stocké.
-- **Fichier de secours** : si vous oubliez le mot de passe d'une fiche, il permet de la rouvrir. Scrinium le propose au
-  **premier verrouillage** (ou plus tard : menu *Sécurité → Fichier de secours…*). Vous choisissez son nom (par défaut
-  *Scrinium-secours-<utilisateur>-<date>*) et son dossier (par défaut *Documents*), avec un mot de passe de protection
-  facultatif. Techniquement : une paire RSA générée **chez vous** ; la clé publique (`recovery.pub`) enveloppe la clé de
-  chaque fiche verrouillée ensuite, le fichier de secours est la clé privée (PEM). **Gardez-le hors de l'ordinateur** :
-  Scrinium n'en garde aucune copie. Un nouveau fichier peut être créé à tout moment ; il ne vaut que pour les fiches
-  verrouillées après sa création (les autres ne s'ouvrent qu'avec l'ancien). Les fiches verrouillées *avant* la création
-  du tout premier fichier le reçoivent au prochain déverrouillage.
-- Récupération : menu *Sécurité → Rouvrir une fiche avec le fichier de secours…*, ou en ligne de commande :
+- **Lock…** encrypts the text of the note; the title stays visible, and search does not read the content of a locked note.
+  No plain text is ever written to disk, even while editing. The password is never stored.
+- **Rescue file**: if you forget the password of a note, it lets you reopen it. Scrinium offers to create it the
+  **first time you lock a note** (or later: *Security → Rescue file…*). You choose its name (default
+  *Scrinium-secours-<user>-<date>*) and its folder (default *Documents*), with an optional password protecting the file.
+  Technically: an RSA key pair generated **on your machine**; the public key (`recovery.pub`) wraps the key of every note
+  locked afterwards, and the rescue file is the private key (PEM). **Keep it away from the computer**: Scrinium keeps no
+  copy. A new rescue file can be created at any time; it only covers notes locked after its creation (the others can
+  only be opened with the old one). Notes locked *before* the very first rescue file was created receive it the next
+  time they are unlocked.
+- Recovery: menu *Security → Reopen a note with the rescue file…*, or from the command line:
 
 ```bash
-scrinium secours lister
-scrinium secours ouvrir "titre" --cle ~/cle-de-secours.pem
-scrinium secours deverrouiller "titre" --cle ~/cle-de-secours.pem
+scrinium rescue list
+scrinium rescue open "title" --key ~/rescue-file.pem
+scrinium rescue unlock "title" --key ~/rescue-file.pem    # puts the note back in plain text
 ```
 
-## Intégration (facultatif)
+(The French spelling `scrinium secours lister|ouvrir|deverrouiller` also works.)
 
-Si un exécutable `~/.config/scrinium/hooks/themes-changed` existe, il est appelé à chaque création, renommage,
-suppression ou changement d'icône de thème, avec sur l'entrée standard la liste JSON `[{"nom","icone","fiches"}]`.
-Utile pour générer des lanceurs, un tableau de bord, etc.
+## Integration (optional)
 
-## Développement
+If an executable `~/.config/scrinium/hooks/themes-changed` exists, it is called each time a topic is created, renamed,
+deleted or gets a new icon, with the JSON list `[{"nom","icone","fiches"}]` on its standard input.
+Handy to generate launchers, a dashboard, etc.
+
+## Development
 
 ```bash
 python3 -m venv .venv && .venv/bin/pip install -e '.[test]' && .venv/bin/pytest
-dpkg-buildpackage -us -uc -b    # construit le .deb (dans le dossier parent)
+dpkg-buildpackage -us -uc -b    # builds the .deb (in the parent folder)
 ```
 
-Le code est séparé : `core/` (stockage, chiffrement, clé de secours, sans aucune dépendance graphique) et `ui/` (PyQt6).
+The code is split into `core/` (storage, encryption, rescue file, no GUI dependency at all) and `ui/` (PyQt6).
 
-## Licence
+### Translations
 
-GPL-3.0-or-later. Icônes : thème Breeze (KDE), LGPL-3.0-or-later.
+Texts use gettext. Source strings are in **French** (`_("…")` in the code); `po/scrinium.pot` is the template and
+`po/en.po` the English translation. The `.po` files are compiled to `.mo` at build time (no extra tool needed).
+To add a language, copy `po/scrinium.pot` to `po/<code>.po`, fill in the `msgstr` entries and run the tests (they
+check that every string is translated and that placeholders such as `%s` match). To refresh the template after
+changing the code:
+
+```bash
+xgettext --language=Python --keyword=_ --from-code=UTF-8 --sort-by-file -o po/scrinium.pot $(git ls-files 'src/*.py')
+msgmerge -U po/en.po po/scrinium.pot
+```
+
+## License
+
+GPL-3.0-or-later. Icons: Breeze theme (KDE), LGPL-3.0-or-later.
