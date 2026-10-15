@@ -10,10 +10,10 @@ Homepage: https://github.com/jfkneib/scrinium
 Package: scrinium
 Architecture: all
 Depends: ${python3:Depends}, ${misc:Depends}, python3-pyqt6, python3-pyqt6.qtsvg, python3-cryptography
-Description: fiches rangées par thème, verrouillables par mot de passe
- Scrinium range des notes courtes (numéros, procédures, codes) en fiches
- classées par thème, enregistrées automatiquement dans des fichiers texte.
+Description: notes organised by topic, lockable with a password
+ Scrinium keeps short notes (numbers, procedures, codes) as cards grouped by
+ topic, automatically saved as plain text files.
  .
- Chaque fiche peut être verrouillée par un mot de passe (AES-256-GCM, clé
- dérivée par scrypt). Une clé de secours facultative, créée par l'utilisateur,
- permet de rouvrir une fiche dont le mot de passe est oublié.
+ Each note can be locked with a password (AES-256-GCM, scrypt-derived key). An
+ optional rescue file, created by the user, can reopen a note whose password
+ was forgotten. The interface is available in French and English.

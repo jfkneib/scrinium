@@ -2,7 +2,7 @@
 import time
 
 from PyQt6.QtCore import QEvent, QSize, Qt, QTimer
-from PyQt6.QtGui import QAction, QKeySequence
+from PyQt6.QtGui import QAction, QActionGroup, QKeySequence
 from PyQt6.QtWidgets import (QApplication, QFileDialog, QHBoxLayout, QInputDialog, QLabel, QLineEdit, QListWidget,
                              QListWidgetItem, QMainWindow, QMenu, QMessageBox, QPlainTextEdit, QPushButton, QSplitter,
                              QSystemTrayIcon, QToolBar, QVBoxLayout, QWidget)
@@ -92,6 +92,15 @@ class Fenetre(QMainWindow):
         ms.addAction(self._action(_("Fichier de secours…"), "object-locked", self.assistant_cle))
         ms.addAction(self._action(_("Rouvrir une fiche avec le fichier de secours…"), "object-unlocked", self.secours))
         mh = m.addMenu(_("&Aide"))
+        ml = mh.addMenu(_("&Langue"))
+        groupe = QActionGroup(self)
+        actuelle = self.store.reglages().get("langue", "auto")
+        for code, nom in (("auto", _("Automatique")), ("fr", "Français"), ("en", "English")):
+            a = QAction(nom, self, checkable=True)
+            a.setChecked(code == actuelle)
+            a.triggered.connect(lambda _checked, c=code: self._langue(c))
+            groupe.addAction(a)
+            ml.addAction(a)
         mh.addAction(self._action(_("À propos"), "help-about", self.a_propos))
 
         self.liste_themes = QListWidget()
@@ -251,7 +260,8 @@ class Fenetre(QMainWindow):
             return
         if QMessageBox.question(
                 self, _("Supprimer le thème"),
-                _("Mettre « %s » et ses %d fiche(s) à la corbeille ?\n(%s)") % (t.nom, len(t.fiches), self.store.paths.corbeille)
+                _("Mettre « %(nom)s » et ses %(n)d fiche(s) à la corbeille ?\n(%(dossier)s)")
+                % {"nom": t.nom, "n": len(t.fiches), "dossier": self.store.paths.corbeille}
         ) == QMessageBox.StandardButton.Yes:
             self.fiche = None
             self.store.supprimer_theme(t)
@@ -392,6 +402,10 @@ class Fenetre(QMainWindow):
         if self.fiche and self.store.jeter_si_vide(self.fiche_theme, self.fiche):
             self.fiche = None
             self.maj_themes()
+
+    def _langue(self, code: str):
+        self.store.sauver_reglages(langue=code)
+        QMessageBox.information(self, _("Langue"), _("Langue modifiée : redémarrez Scrinium pour l'appliquer."))
 
     def _demarrage(self, on: bool):
         try:

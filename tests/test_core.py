@@ -115,3 +115,43 @@ def test_ancien_format_lisible():
     cle = crypto.deriver("pw", salt)
     data = crypto.chiffrer("ancien", cle, salt, b"")
     assert crypto.dechiffrer(data, "pw")[0] == "ancien"
+
+
+# ---------- traductions ----------
+def _racine():
+    from pathlib import Path
+    return Path(__file__).resolve().parent.parent
+
+
+def test_traduction_anglaise_complete_et_coherente():
+    import re
+    from scrinium import i18n_po
+    pot = i18n_po.lire_po((_racine() / "po" / "scrinium.pot").read_text(encoding="utf-8").replace('msgstr ""', 'msgstr "x"'))
+    en = i18n_po.lire_po((_racine() / "po" / "en.po").read_text(encoding="utf-8"))
+    assert set(pot) == set(en), (set(pot) ^ set(en))
+    motif = r"%\(\w+\)\w|%[sd]"
+    for fr, ang in en.items():
+        if fr:
+            assert sorted(re.findall(motif, fr)) == sorted(re.findall(motif, ang)), fr[:50]
+
+
+def test_langue_anglaise_et_repli(monkeypatch):
+    from scrinium import i18n
+    try:
+        assert i18n.init("en") == "en" and i18n._("Annuler") == "Cancel"
+        assert i18n.init("de") == "en"            # langue sans traduction : anglais
+        assert i18n.init("fr") == "fr" and i18n._("Annuler") == "Annuler"
+        monkeypatch.setenv("SCRINIUM_LANG", "en_GB.UTF-8")
+        assert i18n.init("auto") == "en"
+    finally:
+        i18n.init("fr")
+
+
+def test_mo_compatible_avec_gettext_standard(tmp_path):
+    import gettext
+    from scrinium import i18n_po
+    cat = i18n_po.lire_po((_racine() / "po" / "en.po").read_text(encoding="utf-8"))
+    mo = tmp_path / "x.mo"
+    mo.write_bytes(i18n_po.ecrire_mo(cat))
+    t = gettext.GNUTranslations(open(mo, "rb"))
+    assert t.gettext("Quitter") == "Quit" and t.gettext("inconnu") == "inconnu"

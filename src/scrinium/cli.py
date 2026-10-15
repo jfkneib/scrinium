@@ -7,6 +7,7 @@ from pathlib import Path
 from . import __version__
 from .core.paths import Paths
 from .core.store import Store
+from . import i18n
 from .i18n import _
 
 
@@ -29,7 +30,7 @@ def _recuperer(args) -> int:
         return 1
     t, f = res[0]
     pem = Path(args.cle).expanduser().read_bytes()
-    phrase = getpass.getpass(_("Phrase secrète de la clé (vide si aucune) : ")) or None if b"ENCRYPTED" in pem else None
+    phrase = getpass.getpass(_("Mot de passe du fichier de secours (vide si aucun) : ")) or None if b"ENCRYPTED" in pem else None
     try:
         texte = store.ouvrir_avec_cle_privee(f, pem, phrase)
     except Exception as ex:
@@ -45,6 +46,7 @@ def _recuperer(args) -> int:
 
 
 def main(argv=None) -> int:
+    langue = i18n.init(Store(Paths()).reglages().get("langue", "auto"))
     p = argparse.ArgumentParser(prog="scrinium", description=_("Scrinium : fiches rangées par thème."))
     p.add_argument("--version", action="version", version=f"scrinium {__version__}")
     p.add_argument("--theme", metavar="NOM", help=_("ouvre directement sur ce thème"))
@@ -52,11 +54,11 @@ def main(argv=None) -> int:
     p.add_argument("--minimise", action="store_true",
                    help=_("démarre caché dans la zone de notification (ex. lancement à l'ouverture de session)"))
     sub = p.add_subparsers(dest="cmd")
-    r = sub.add_parser("secours", help=_("rouvrir une fiche verrouillée avec la clé de secours (sans interface)"))
+    r = sub.add_parser("secours", help=_("rouvrir une fiche verrouillée avec le fichier de secours (sans interface)"))
     r.add_argument("action", choices=["lister", "ouvrir", "deverrouiller"])
     r.add_argument("fiche", nargs="?")
     r.add_argument("--cle", required=False, default="~/.config/scrinium/cle-de-secours.pem",
-                   help=_("clé privée de secours (PEM)"))
+                   help=_("fichier de secours (PEM)"))
     a = p.parse_args(argv)
     if a.cmd == "secours":
         return _recuperer(a)
@@ -65,6 +67,10 @@ def main(argv=None) -> int:
     from .ui.fenetre import Fenetre
     app = QApplication(sys.argv[:1])
     app.setApplicationName("scrinium")
+    from PyQt6.QtCore import QLibraryInfo, QTranslator
+    qt_tr = QTranslator(app)   # boutons standard de Qt (OK, Annuler, Copier, Coller…)
+    if qt_tr.load(f"qtbase_{langue}", QLibraryInfo.path(QLibraryInfo.LibraryPath.TranslationsPath)):
+        app.installTranslator(qt_tr)
     app.setDesktopFileName("scrinium")
     if instance.reveiller_existante(a.theme, a.nouvelle):   # déjà lancé (peut-être dans la zone de notification)
         return 0
