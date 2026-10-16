@@ -44,6 +44,7 @@ class MyPlugin(Plugin):
 | `ctx.modifier(vue, titre=None, texte=None)` | change a note |
 | `ctx.reglages` | per-extension settings: `.get(key, default)`, `.set(key, value)`, `.tous()` |
 | `ctx.ui` | window helpers (below); `None` without a window |
+| `ctx.dossier_donnees` | `Path` of a folder reserved for the extension (models, downloaded dependencies); not created until you do |
 | `ctx.api` | API version provided |
 
 `FicheVue` (read-only): `id`, `titre`, `theme`, `verrou` (is locked), `fermee` (locked and not opened yet), `texte`, `meta`.

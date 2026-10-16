@@ -60,6 +60,7 @@ Extraire le texte d'une image de fiche pour pouvoir la chercher/copier. Moteurs 
 - ☐ Bouton « Extraire le texte » sur une image, résultat modifiable avant enregistrement
 
 ## 3 bis. Plugin `scrinium-dictee` : dictée vocale (v0.5)
+✔ Première version écrite dans `plugins/dictee/` (non testée de bout en bout : installation et modèle à valider) : demande d'accord à l'activation pour installer `faster-whisper` (pip --target dans `ctx.dossier_donnees`), modèle téléchargé à la 1re dictée après accord, micro via parecord/pw-record/arecord, Ctrl+Alt+D, réglages modèle/langue. Reste : appui-pour-parler, ponctuation, mode « remplacer la sélection », paquet séparé.
 Dicter une note au micro, le texte s'insère à la position du curseur (`ctx.ui.inserer_texte`, déjà dans l'API).
 - ☐ Reconnaissance **locale** (aucun envoi sur Internet) : `faster-whisper` (modèles `base`/`small`, bon en français, CPU suffisant, GPU facultatif) ; alternative légère : Vosk. Ollama n'est pas l'outil pour la parole.
 - ☐ Enregistrement micro (QtMultimedia ou `sounddevice`), bouton « Dicter » + raccourci appui-pour-parler, indicateur d'écoute

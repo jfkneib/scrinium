@@ -1,0 +1,8 @@
+{
+  "titre": "Dictée vocale",
+  "version": "0.1",
+  "auteur": "Scrinium",
+  "description": "Dictez une note au micro : reconnaissance 100 % locale (faster-whisper), texte inséré au curseur. Demande votre accord avant d'installer faster-whisper et de télécharger un modèle.",
+  "classe": "DicteePlugin",
+  "api": 1
+}

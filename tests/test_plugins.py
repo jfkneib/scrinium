@@ -152,3 +152,12 @@ def test_nom_de_dossier_invalide_ignore(store):
     faire_plugin(store, "bon", "from scrinium.core.plugins import Plugin\nclass P(Plugin): pass")
     g = Gestionnaire(store)
     assert list(g.decouvrir()) == ["bon"]
+
+
+def test_dossier_donnees_propre_a_l_extension(store):
+    faire_plugin(store, "ok", CODE_OK)
+    g = Gestionnaire(store)
+    g.demarrer()
+    g.activer("ok")
+    d = g.actifs["ok"][1].dossier_donnees
+    assert d == store.paths.base / "plugins-donnees" / "ok" and not d.exists()   # créé seulement à la demande
