@@ -111,7 +111,10 @@ class DicteePlugin(Plugin):
         self.pont.erreur.connect(self._erreur)
         self.action = ctx.ui.ajouter_action(_("Dicter"), self.basculer, "audio-input-microphone")
         self.action.setShortcut("Ctrl+Alt+D")
-        ctx.ui.ajouter_bouton(_("Dicter"), self.basculer, "audio-input-microphone")
+        self.bouton = ctx.ui.ajouter_bouton(_("Dicter"), self.basculer, "audio-input-microphone")
+        self.actions = (self.action, self.bouton)
+        for a in self.actions:      # bouton enfoncé = micro ouvert
+            a.setCheckable(True)
         ctx.ui.ajouter_action(_("Réglages de la dictée…"), self.reglages, "configure")
 
     def desactiver(self):
@@ -167,6 +170,14 @@ class DicteePlugin(Plugin):
             self._arreter_et_transcrire()
         elif not self.occupe:
             self._demarrer_micro()
+        self._etat()
+
+    def _etat(self):
+        """Aligne boutons et menu sur l'état réel : enfoncé et « ● » tant que le micro enregistre."""
+        on = self.rec is not None
+        for a in self.actions:
+            a.setChecked(on)
+            a.setText(_("● Enregistrement… (cliquer pour arrêter)") if on else _("Dicter"))
 
     def _demarrer_micro(self):
         if not self.ctx.ui.inserer_texte(""):
@@ -178,8 +189,7 @@ class DicteePlugin(Plugin):
         self.audio = bytearray()
         self.lecteur = threading.Thread(target=self._lire, args=(self.rec,), daemon=True)
         self.lecteur.start()
-        self.action.setText(_("● Arrêter la dictée"))
-        self.ctx.ui.notifier(_("Dictée"), _("Je vous écoute… (Ctrl+Alt+D pour arrêter)"))
+        self.ctx.ui.notifier(_("Dictée"), _("Je vous écoute… (cliquer à nouveau ou Ctrl+Alt+D pour arrêter)"))
 
     def _lire(self, proc):
         while chunk := proc.stdout.read(4096):
@@ -193,8 +203,8 @@ class DicteePlugin(Plugin):
                 p.wait(2)
             except subprocess.TimeoutExpired:
                 p.kill()
-        if getattr(self, "action", None) is not None:
-            self.action.setText(_("Dicter"))
+        if getattr(self, "actions", None):
+            self._etat()
 
     def _arreter_et_transcrire(self):
         self._arreter_micro()
