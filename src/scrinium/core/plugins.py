@@ -100,6 +100,7 @@ class Contexte:
         self._g, self.info = gestionnaire, info
         self.reglages = ReglagesPlugin(gestionnaire.store, info.nom)
         self.ui = None   # fourni par l'interface (None sans fenêtre)
+        self.dossier_donnees = gestionnaire.store.paths.base / "plugins-donnees" / info.nom   # propre à l'extension, créé à la demande
 
     def on(self, evenement: str, fn: Callable) -> None:
         """S'abonne à un événement (voir EVENEMENTS). `fn(**arguments)` ; les exceptions sont interceptées."""
