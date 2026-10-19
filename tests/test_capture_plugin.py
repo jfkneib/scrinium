@@ -382,3 +382,166 @@ def test_premier_plan_desactivable_et_absent_si_refus(fen, faux, monkeypatch):
     monkeypatch.setattr(mod().QMessageBox, "information", lambda *a, **k: None)
     plugin(fen).vers_console()                                                              # refus : rien à mettre devant
     assert not (faux / "focus-script").exists()
+
+
+# ---------- actions préparées : logique ----------
+def test_variables_protegees_pour_le_shell():
+    assert lg.etendre("grep -rn {selection} .", "foo bar", "T", "taper") == "grep -rn foo bar ."          # relu avant validation
+    assert lg.etendre("grep -rn {selection} .", "foo bar", "T", "copier") == "grep -rn foo bar ."
+    pire = lg.etendre("grep {selection} f", "x; rm -rf ~ && echo $(id)", "T", "executer")
+    assert pire == "grep 'x; rm -rf ~ && echo $(id)' f"                                                    # une seule « chaîne » pour le shell
+    assert lg.etendre("echo {selection}", "it's", "T", "executer") == "echo 'it'\"'\"'s'"
+    assert lg.etendre("echo {fiche}", "s", "Ma fiche; ls", "executer") == "echo 'Ma fiche; ls'"
+    assert lg.etendre("echo {selection} {fiche}", "{fiche}", "T", "taper") == "echo {fiche} T"             # pas de double remplacement
+    assert lg.utilise_selection("a {selection}") and not lg.utilise_selection("a {fiche}")
+
+
+def test_executer_avec_selection_dangereuse_ne_lance_rien_de_plus(tmp_path):
+    cible = tmp_path / "ne-doit-pas-exister"
+    cmd = lg.etendre("echo {selection}", f"x; touch {cible}", "T", "executer")
+    code, sortie, *_ = lg.executer(cmd)
+    assert code == 0 and not cible.exists() and "touch" in sortie                                        # affiché, jamais exécuté
+
+
+def test_normaliser_actions():
+    a = lg.normaliser_action({"nom": "  Ping ", "commande": "ping -c1 x\n", "mode": "inconnu", "icone": "", "description": None})
+    assert (a["nom"], a["mode"], a["icone"], a["commande"]) == ("Ping", "taper", "system-run", "ping -c1 x")
+    assert lg.normaliser_action({"nom": "", "commande": "x"}) is None and lg.normaliser_action({"nom": "x", "commande": " \n"}) is None
+    assert lg.normaliser_action("pas un dict") is None and lg.normaliser_liste("pas une liste") == []
+    assert len(lg.normaliser_liste([{"nom": str(i), "commande": "x"} for i in range(500)])) == lg.MAX_ACTIONS
+    assert len(lg.normaliser_action({"nom": "n" * 200, "commande": "c" * 9000})["commande"]) == 4000
+
+
+def test_exemples_valides_et_prudents():
+    assert lg.normaliser_liste(list(lg.EXEMPLES)) == list(lg.EXEMPLES)
+    assert len({a["nom"] for a in lg.EXEMPLES}) == len(lg.EXEMPLES)
+    assert all(a["mode"] in lg.MODES for a in lg.EXEMPLES)
+    assert not any(m in a["commande"] for a in lg.EXEMPLES for m in ("rm ", "sudo", "dd ", "mkfs", ">"))   # rien de destructif
+
+
+def test_export_import_aller_retour_et_refus():
+    actions = [{"nom": "A", "icone": "x", "mode": "copier", "commande": "ls\npwd", "description": "d"}]
+    assert lg.importer_actions(lg.exporter_actions(actions)) == actions
+    for mauvais in ("pas du json", '{"autre": 1}', '[1, 2]', '{"scrinium_actions": 1, "actions": [{"nom": ""}]}'):
+        with pytest.raises(ValueError):
+            lg.importer_actions(mauvais)
+
+
+# ---------- actions préparées : panneau et clics ----------
+def test_panneau_liste_les_exemples_avec_infobulles(fen):
+    p = plugin(fen)
+    assert p.panneau.liste.count() == len(lg.EXEMPLES) and p.actions() == list(lg.EXEMPLES)
+    it = next(p.panneau.liste.item(i) for i in range(p.panneau.liste.count()) if p.panneau.liste.item(i).text() == "Disques")
+    tip = it.toolTip()
+    assert "df -h" in tip and "Espace disque" in tip and "confirmation" in tip                          # commande, description, mode
+    assert p.dock.windowTitle() == "Actions"
+
+
+def test_infobulle_echappe_le_html():
+    tip = mod().info_action({"nom": "<b>x</b>", "description": "<i>", "commande": "echo '<script>'\n" * 9, "mode": "taper"})
+    assert "<script>" not in tip and "&lt;script&gt;" in tip and "…" in tip                              # échappé, tronqué à 6 lignes
+
+
+def test_clic_taper_envoie_sans_valider(fen, faux):
+    selectionner(fen, "foo bar")
+    plugin(fen).lancer_action({"nom": "g", "icone": "x", "mode": "taper", "commande": "grep -rn {selection} .", "description": ""})
+    assert envois(faux)[-1][2] == "grep -rn foo bar ."                                                   # aucune Entrée
+
+
+def test_clic_sans_selection_alors_que_l_action_en_a_besoin(fen, faux):
+    fen.texte.moveCursor(fen.texte.textCursor().MoveOperation.Start)
+    plugin(fen).lancer_action({"nom": "g", "icone": "x", "mode": "taper", "commande": "grep {selection} .", "description": ""})
+    assert envois(faux) == [] and lancements(faux) == []
+
+
+def test_clic_executer_prepare_la_commande_sans_la_lancer(fen, monkeypatch, tmp_path):
+    vus = []
+    monkeypatch.setattr(mod().DialogueCommande, "exec", lambda self: vus.append(self) or 0)
+    cible = tmp_path / "piege"
+    selectionner(fen, f"x; touch {cible}")
+    plugin(fen).lancer_action({"nom": "e", "icone": "x", "mode": "executer", "commande": "echo {selection}", "description": ""})
+    (d,) = vus
+    assert d.commande.text().startswith("echo 'x; touch ") and d.resultat is None and not cible.exists()  # affichée, pas lancée
+
+
+def test_clic_copier(fen):
+    selectionner(fen, "abc")
+    plugin(fen).lancer_action({"nom": "c", "icone": "x", "mode": "copier", "commande": "echo {selection} {fiche}", "description": ""})
+    assert QApplication.clipboard().text() == "echo abc Notes"
+
+
+def test_enregistrer_les_actions_remplace_les_exemples(fen):
+    p = plugin(fen)
+    p.sauver_actions([{"nom": "Seule", "commande": "ls", "mode": "taper"}, {"nom": "", "commande": "x"}])
+    assert [a["nom"] for a in p.actions()] == ["Seule"] and p.panneau.liste.count() == 1
+    p.sauver_actions([])
+    assert p.actions() == [] and p.panneau.liste.count() == 0                                           # une liste vide reste vide
+
+
+def test_dialogue_actions_ajouter_modifier_deplacer_supprimer(fen, monkeypatch):
+    p = plugin(fen)
+    p.sauver_actions([{"nom": "A", "commande": "a"}, {"nom": "B", "commande": "b"}])
+    d = mod().DialogueActions(p)
+
+    class Faux:
+        def __init__(self, action=None, parent=None):
+            self.action = action
+
+        def exec(self):
+            return 1
+
+        def resultat(self):
+            return {"nom": "Nouveau" if self.action is None else "A2", "icone": "x", "mode": "copier", "commande": "n", "description": ""}
+    monkeypatch.setattr(mod(), "DialogueAction", Faux)
+    d._ajouter()
+    assert [a["nom"] for a in p.actions()] == ["A", "B", "Nouveau"]
+    d.liste.setCurrentRow(0)
+    d._modifier()
+    assert [a["nom"] for a in p.actions()] == ["A2", "B", "Nouveau"]
+    d.liste.setCurrentRow(0)
+    d._deplacer(1)
+    assert [a["nom"] for a in p.actions()] == ["B", "A2", "Nouveau"] and d.liste.currentRow() == 1
+    d.liste.setCurrentRow(2)
+    d._deplacer(1)                                                                                       # au bout : rien ne bouge
+    assert [a["nom"] for a in p.actions()] == ["B", "A2", "Nouveau"]
+    d.liste.setCurrentRow(0)
+    d._supprimer()
+    assert len(p.actions()) == 2 and p.panneau.liste.count() == 2                                       # le panneau suit
+
+
+def test_dialogue_actions_exemples_export_import(fen, monkeypatch, tmp_path):
+    p = plugin(fen)
+    p.sauver_actions([{"nom": "Perso", "commande": "uptime"}])
+    d = mod().DialogueActions(p)
+    monkeypatch.setattr(mod().QMessageBox, "question", lambda *a, **k: mod().QMessageBox.StandardButton.Yes)
+    d._exemples()
+    assert [a["nom"] for a in p.actions()][0] == "Perso" and len(p.actions()) == 1 + len(lg.EXEMPLES)
+    fichier = tmp_path / "x.json"
+    monkeypatch.setattr(mod().QFileDialog, "getSaveFileName", staticmethod(lambda *a, **k: (str(fichier), "")))
+    d._exporter()
+    p.sauver_actions([])
+    d = mod().DialogueActions(p)
+    monkeypatch.setattr(mod().QFileDialog, "getOpenFileName", staticmethod(lambda *a, **k: (str(fichier), "")))
+    d._importer()
+    assert len(p.actions()) == 1 + len(lg.EXEMPLES)
+    fichier.write_text("pas du json")
+    avertis = []
+    monkeypatch.setattr(mod().QMessageBox, "warning", lambda *a, **k: avertis.append(a[2]))
+    d._importer()
+    assert avertis and len(p.actions()) == 1 + len(lg.EXEMPLES)                                          # import refusé, liste intacte
+
+
+def test_dialogue_action_validation(app, monkeypatch):
+    avertis = []
+    monkeypatch.setattr(mod().QMessageBox, "warning", lambda *a, **k: avertis.append(a[2]))
+    d = mod().DialogueAction()
+    d._valider()
+    assert avertis and d.result() != 1                                                                   # nom et commande obligatoires
+    d.nom.setText("  Mon action ")
+    d.commande.setPlainText("ls -la\ndf -h")
+    d.mode.setCurrentIndex(d.mode.findData("copier"))
+    d.icone.setText("icone-qui-n-existe-pas")
+    d._valider()
+    r = d.resultat()
+    assert r["nom"] == "Mon action" and r["mode"] == "copier" and r["commande"] == "ls -la\ndf -h"
+    assert mod().icone_action("icone-qui-n-existe-pas") is not None                                      # repli sur une icône par défaut

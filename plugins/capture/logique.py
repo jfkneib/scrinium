@@ -1,8 +1,10 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 # Copyright (C) 2026 Jean-François Kneib
 """Partie sans interface de l'extension « Capture et console » : exécuter une commande, parler à Konsole par D-Bus."""
+import json
 import os
 import re
+import shlex
 import shutil
 import subprocess
 import tempfile
@@ -145,3 +147,81 @@ def envoyer(qdbus: str, service: str, session: int, texte: str) -> None:
         raise AccesRefuse(message)
     if r.returncode != 0:
         raise RuntimeError(message or f"qdbus a échoué (code {r.returncode})")
+
+
+# ---------- actions préparées (panneau d'icônes) ----------
+MODES = {
+    "taper": "Taper dans la console, sans valider",
+    "executer": "Exécuter (après confirmation) et insérer la sortie dans la fiche",
+    "copier": "Copier dans le presse-papiers",
+}
+MAX_ACTIONS = 200
+EXEMPLES = (
+    {"nom": "Réseau", "icone": "network-wired", "mode": "executer", "commande": "ip -br a",
+     "description": "Adresses des interfaces réseau."},
+    {"nom": "Disques", "icone": "drive-harddisk", "mode": "executer", "commande": "df -h",
+     "description": "Espace disque par système de fichiers."},
+    {"nom": "Services en échec", "icone": "dialog-warning", "mode": "executer", "commande": "systemctl --failed --no-pager",
+     "description": "Unités systemd en erreur."},
+    {"nom": "Erreurs du boot", "icone": "dialog-error", "mode": "executer",
+     "commande": "journalctl -p err -b --no-pager | tail -n 50", "description": "50 dernières erreurs depuis le démarrage."},
+    {"nom": "Git status", "icone": "vcs-normal", "mode": "taper", "commande": "git status",
+     "description": "État du dépôt de la console (tapé, à valider vous-même)."},
+    {"nom": "Chercher la sélection", "icone": "edit-find", "mode": "taper", "commande": "grep -rn {selection} .",
+     "description": "Tape un grep du texte sélectionné dans la fiche (guillemets à ajouter si besoin)."},
+)
+
+
+def normaliser_action(a) -> dict | None:
+    """Action valide (champs nettoyés, mode connu) ou None si elle n'a ni nom ni commande."""
+    if not isinstance(a, dict):
+        return None
+    nom, commande = str(a.get("nom", "")).strip()[:60], str(a.get("commande", "")).strip("\n")[:4000]
+    if not nom or not commande.strip():
+        return None
+    mode = a.get("mode") if a.get("mode") in MODES else "taper"
+    return {"nom": nom, "icone": str(a.get("icone", "")).strip()[:80] or "system-run", "mode": mode,
+            "commande": commande, "description": str(a.get("description", "")).strip()[:300]}
+
+
+def normaliser_liste(liste) -> list:
+    if not isinstance(liste, list):
+        return []
+    return [a for a in (normaliser_action(x) for x in liste) if a][:MAX_ACTIONS]
+
+
+def exporter_actions(actions: list) -> str:
+    return json.dumps({"scrinium_actions": 1, "actions": normaliser_liste(actions)}, ensure_ascii=False, indent=2)
+
+
+def importer_actions(texte: str) -> list:
+    """Actions lues dans un fichier d'export. ValueError si ce n'en est pas un."""
+    try:
+        d = json.loads(texte)
+    except ValueError as ex:
+        raise ValueError("fichier JSON invalide") from ex
+    if not isinstance(d, dict) or d.get("scrinium_actions") != 1:
+        raise ValueError("ce n'est pas un export d'actions de Scrinium")
+    actions = normaliser_liste(d.get("actions"))
+    if not actions:
+        raise ValueError("aucune action valide dans ce fichier")
+    return actions
+
+
+def citer(texte: str) -> str:
+    """Texte rendu inoffensif pour le shell (une sélection ne doit jamais pouvoir ajouter de commande)."""
+    return shlex.quote(texte) if os.name == "posix" else subprocess.list2cmdline([texte])
+
+
+_VARIABLE = re.compile(r"\{(selection|fiche)\}")
+
+
+def utilise_selection(commande: str) -> bool:
+    return "{selection}" in commande
+
+
+def etendre(commande: str, selection: str, titre: str, mode: str) -> str:
+    """Remplace {selection} et {fiche}. Mode « executer » (shell) : valeurs entre guillemets du shell ; sinon telles quelles
+    (« taper » : relues par l'utilisateur avant validation ; « copier » : jamais exécutées)."""
+    valeurs = {"selection": selection, "fiche": titre}
+    return _VARIABLE.sub(lambda m: citer(valeurs[m[1]]) if mode == "executer" else valeurs[m[1]], commande)
