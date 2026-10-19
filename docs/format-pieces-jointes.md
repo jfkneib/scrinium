@@ -1,6 +1,6 @@
 # Spécification : pièces jointes (images) dans les fiches
 
-Statut : **projet à valider** (aucun code écrit). Cible : Scrinium 0.2. Choix d'interface retenu : **option B** (le texte
+Statut : **validé le 2026-10-20** ; couche « cœur » implémentée (`core/crypto.py`, `core/store.py`, `tests/test_pieces.py`) ; interface, import d'image, `rescue` et API des extensions restent à faire. Cible : Scrinium 0.2. Choix d'interface retenu : **option B** (le texte
 reste un texte simple ; les images sont listées sous la fiche en vignettes, pas au milieu du texte).
 
 ## 1. Principes
@@ -29,8 +29,8 @@ reste un texte simple ; les images sont listées sous la fiche en vignettes, pas
 
 - Dossier `.pj` : mêmes droits que les fiches (`0700`, fichiers `0600` sous POSIX). Nom = celui du fichier de la fiche
   sans l'extension, plus `.pj`. Il n'existe que si la fiche a au moins une pièce jointe (supprimé quand la dernière part).
-- **Numéro** `n` : entier ≥ 1, croissant, **jamais réutilisé** dans une fiche (max existant + 1). L'ordre d'affichage est
-  l'ordre des numéros.
+- **Numéro** `n` : entier ≥ 1, égal au plus grand numéro présent + 1 (un numéro supprimé est à la corbeille, qui garde le nom
+  d'origine : pas de collision). L'ordre d'affichage est l'ordre des numéros.
 - Fiche en clair : `n.<ext>` avec `ext` ∈ `png`, `jpg`, `webp`. Le fichier est une image ordinaire, ouvrable par n'importe
   quel logiciel. Fichier descriptif facultatif `n.json` :
   `{"nom": "capture.png", "ajoute": "2026-10-20 14:03", "ocr": "texte extrait", "ocr_moteur": "tesseract"}`.
@@ -80,7 +80,7 @@ approximative**. Ni le contenu, ni le nom, ni le type, ni le texte OCR. (Un remp
 | **Verrouiller** | 1) construire `Ma fiche.pj.new/` avec toutes les pièces chiffrées (`n.lock`) ; 2) écrire `Ma fiche.lock` ; 3) échange de dossiers : `.pj` → `.pj.old`, `.pj.new` → `.pj` ; 4) supprimer `.old` puis l'ancien `.md` |
 | **Retirer le verrou** | l'inverse : déchiffrer vers `.pj.new` (`n.<ext>` + `n.json`), écrire `.md`, échange, suppression |
 | Changer de mot de passe (si ajouté) | même procédure que « verrouiller » : tout est rechiffré |
-| Chargement | `.pj.old` sans `.pj` → restaurer ; `.pj.old` avec `.pj` → supprimer `.old` ; `.pj.new` → supprimer (jamais valide) |
+| Chargement (`_reparer_pj`) | `.pj.new` contenant le marqueur `.pret` **et** dont la fiche (`.lock` si ce sont des `n.lock`, sinon `.md`) existe → promu (l'échange est terminé) ; sinon supprimé (jamais valide). Puis `.pj.old` sans `.pj` → restauré ; `.pj.old` avec `.pj` → supprimé. Le marqueur `.pret` est retiré une fois l'échange fini |
 | Dossier `.pj` sans fiche | **orphelin** : signalé dans le journal, jamais supprimé ni affiché comme fiche |
 
 Une version de Scrinium **< 0.2** ignore les `.pj` : renommer, verrouiller ou supprimer une fiche avec pièces jointes
