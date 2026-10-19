@@ -9,38 +9,34 @@ Légende : ☐ à faire · ◐ en cours · ✔ fait. Ordre = priorité proposée
 - ✔ `.deb` et `install.sh` testés sur Debian 13 (VM neuve) ; `.deb` installé sur Ubuntu 26.04 (2 machines)
 - ☐ Tester sur Ubuntu 24.04 LTS et Debian 12
 - ☐ Capture d'écran dans le README
-- ✔ Page `man scrinium`
+- ✔ Page `man scrinium` · ☐ à compléter : sous-commande `ajouter`, option `rescue open --images`
+- ☐ README (FR/EN) : la section « Extensions » dit encore que rappels/OCR/dictée sont « prévus » ; documenter images, OCR, dictée, courriel, capture, `scrinium ajouter`, workflow `dev` → `main`
+- ☐ Livrer les 4 plugins (`dictee`, `courriel`, `ocr`, `capture`) dans le `.deb` (dossier d'exemples) : aujourd'hui `plugins/` n'est qu'une copie à faire à la main
+- ☐ Traductions anglaises (`po/en.po`) des textes ajoutés : images, OCR, dictée, courriel, capture (les plugins affichent le français si la traduction manque)
 
 ## 0 bis. Système de plugins (avant les images, v0.2)
 Le cœur reste petit ; calendrier/alarmes et OCR sont des plugins. Les **pièces jointes** (images) restent dans le cœur :
 leur stockage et leur chiffrement avec la fiche font partie du format de fichier, un plugin ne doit pas pouvoir l'affaiblir.
-- ✔ Implémenté : API v1, découverte sans exécution de code, activation explicite, événements, isolation des pannes, menu *Extensions*, `docs/plugins.md`, plugin `hello`
-- ☐ API v1 versionnée (`API_VERSION`) : un plugin déclare la version qu'il vise, refus propre si incompatible
-- ☐ Découverte : *entry points* Python (`scrinium.plugins`, pour les paquets pip/deb comme `scrinium-ocr`) + dossier utilisateur `~/.config/scrinium/plugins/`
-- ☐ Cycle de vie : `activer(ctx)` / `desactiver()` ; un plugin est **désactivé par défaut** tant que l'utilisateur ne l'a pas activé (menu *Fichier → Extensions…* : liste, version, auteur, activer/désactiver)
-- ☐ Contexte donné au plugin (`ctx`) :
-  - lecture/écriture des fiches **ouvertes** (jamais la clé de chiffrement, jamais une fiche verrouillée fermée)
-  - signaux : fiche ouverte/enregistrée/fermée, thème modifié, fenêtre cachée, démarrage/arrêt
-  - UI : ajouter une action de menu, un bouton de barre d'outils, un panneau latéral, une page de réglages, une notification de la zone de notification
-  - planificateur (minuteries) et stockage de réglages par plugin (`settings.json`, clé au nom du plugin)
-  - **métadonnées de fiche** (clé/valeur, ex. `rappel`) stockées en tête du `.md` ; fiche verrouillée : métadonnées non sensibles en clair, le reste chiffré (à décider : une date de rappel en clair est-elle acceptable ?)
-- ☐ Isolation des pannes : toute exception d'un plugin est interceptée et journalisée ; après N erreurs le plugin est désactivé, l'application continue
-- ☐ Sécurité : un plugin est du code arbitraire avec accès aux fiches ouvertes → avertissement clair à l'activation, plugins tiers jamais chargés sans accord, permissions déclarées affichées
-- ☐ Documentation `docs/plugins.md` + plugin d'exemple (`hello`) + tests (chargement, version incompatible, plugin qui plante)
-- ☐ Les plugins officiels vivent dans `plugins/` du dépôt et sont publiés en paquets séparés (`scrinium-rappels`, `scrinium-ocr`)
+- ✔ **Fait et testé** (`core/plugins.py`, `tests/test_plugins.py`, `docs/plugins.md`, exemple `plugins/hello`) : API versionnée (`API_VERSION`, refus propre d'une extension d'une autre version), découverte sans exécuter de code (dossier utilisateur + *entry points* `scrinium.plugins`), désactivées par défaut avec avertissement à l'activation, cycle de vie `activer(ctx)` / `desactiver()`, isolation des pannes (désactivation après 5 erreurs), réglages par extension, métadonnées de fiche, minuteries, UI (action de menu, bouton de barre, panneau, notification), événements (dont `piece_jointe_*`), `ctx.dossier_donnees`, `ctx.pieces/lire_piece/maj_piece`
+- ☐ **Permissions déclarées et affichées** à l'activation (aujourd'hui : seulement l'avertissement général « code arbitraire »)
+- ☐ **Métadonnées d'une fiche verrouillée** : décision prise = tout est chiffré avec le texte (rien en clair) ; à revoir pour les rappels (une fiche verrouillée fermée n'a pas de date lisible)
+- ☐ Page de réglages commune aux extensions (chacune ouvre aujourd'hui ses propres fenêtres)
+- ☐ Point d'accroche pour le menu clic droit des vignettes (OCR « Extraire le texte »)
+- ☐ Publier les plugins en paquets séparés (`scrinium-rappels`, `scrinium-ocr`…) : décision à prendre, ou les embarquer tous dans le `.deb`
+- ➜ Abandonné : `ctx.ajouter_commande_cli` (sous-commandes ajoutées par les plugins) : `scrinium ajouter` vit dans le cœur
 
 ## 1. Images dans les fiches (v0.2, dans le cœur)
 Une fiche peut contenir une ou plusieurs images, en plus du texte ou à sa place.
-- ◐ **Spécification validée : `docs/format-pieces-jointes.md`** ; ✔ cœur fait (AMLOCK3, `Store.ajouter_piece`/`lister_pieces`/`lire_piece`/`maj_piece`/`supprimer_piece`, verrouillage et reprise après interruption, 19 tests) ; ✔ import d'image (`ui/images.py` : réencodage, métadonnées supprimées, 2560 px, 8 Mo) et interface (bande de vignettes, Ctrl+V, glisser-déposer, bouton, visionneuse, enregistrer sous, copier, supprimer) ; ✔ `scrinium rescue list/open --images/unlock` pour les pièces, recherche dans le texte OCR (fiches en clair ou ouvertes), API des extensions (`ctx.pieces/lire_piece/maj_piece`, 3 événements) ; ☐ traductions anglaises des nouveaux textes pour les pièces, recherche, API des extensions. Option B retenue (vignettes sous la fiche, texte simple). La fiche `.md`/`.lock` ne change pas ; pièces dans `titre.pj/`, verrouillées en `AMLOCK3` (affine la ligne « `.lock` v3 » ci-dessous)
-- ☐ Format : une fiche = `titre.md` + dossier `titre.pj/` (pièces jointes) ; (le `.md` ne référence plus les images : option B)
-- ☐ **Fiches verrouillées** : les images doivent être chiffrées aussi (même clé, AES-GCM). Nouveau format `.lock` v3 (conteneur : texte + pièces jointes), l'ancien format reste lisible. À spécifier AVANT de coder (tests de compatibilité).
-- ☐ Coller une image depuis le presse-papiers (Ctrl+V), glisser-déposer, bouton « Ajouter une image »
-- ☐ Affichage dans l'éditeur (vignette cliquable, plein écran), suppression, export
-- ✔ Recadrage dans la visionneuse (rectangle à la souris ; « nouvelle image » ou « remplacer l'originale », l'ancienne version va à la corbeille, texte OCR effacé) · ☐ rotation, annotation
-- ☐ Redimensionnement/compression à l'import (limiter le poids du dossier de données)
-- ☐ Corbeille : les pièces jointes suivent la fiche
+- ✔ **Fait et testé** (spécification : `docs/format-pieces-jointes.md`, option B : vignettes sous la fiche, texte simple) :
+  - cœur : `titre.md`/`titre.lock` inchangés, pièces dans `titre.pj/`, `AMLOCK3` pour les fiches verrouillées (même clé, clé de secours incluse), reprise après interruption, `Store.ajouter/lister/lire/maj/remplacer/supprimer_piece` (`tests/test_pieces.py`)
+  - import : réencodage PNG/JPEG, métadonnées supprimées (EXIF, commentaires PNG), 2560 px, 8 Mo, 50 pièces / 100 Mo par fiche
+  - interface : Ctrl+V, glisser-déposer, bouton « Ajouter une image », bande de vignettes, visionneuse, enregistrer sous, copier, supprimer (corbeille), **recadrage** (nouvelle image ou remplacement, ancienne version à la corbeille)
+  - fiche verrouillée : images chiffrées, bande cachée tant qu'elle est fermée ; renommer / supprimer la fiche : les `.pj` suivent (corbeille avec même horodatage)
+  - `scrinium rescue list/open --images/unlock` pour les pièces ; recherche dans le texte OCR (fiches en clair ou ouvertes)
+- ☐ Traductions anglaises (voir section 0) · ☐ rotation, annotation de l'image · ☐ option de réglage des limites (2560 px, 8 Mo…) dans `settings.json` (clé `pieces_jointes`, prévue dans la spécification)
+- ☐ Essai réel avec une vraie photo JPEG avec EXIF (test automatique limité aux commentaires PNG) · ☐ tests sous Windows/macOS (noms de fichiers, titres ne différant que par la casse)
 
-## 2. Plugin `scrinium-rappels` : rappels et petit calendrier (v0.3)
+## 2. Plugin `rappels` : rappels et petit calendrier (pas commencé)
 Ne pas faire un agenda complet : des **fiches avec une date**. Repose sur l'API plugins (métadonnées, planificateur, notifications).
 - ☐ Date/heure facultative sur une fiche (ligne en tête du `.md`, ex. `@rappel: 2026-11-03 09:00`)
 - ☐ Alarme simple : notification du bureau à l'heure (zone de notification déjà là, lancement automatique déjà là) ; répétition simple (quotidien, hebdo, mensuel, annuel pour les anniversaires)
@@ -50,43 +46,36 @@ Ne pas faire un agenda complet : des **fiches avec une date**. Repose sur l'API 
 - ☐ Rappels manqués (PC éteint) : les afficher au démarrage
 - ☐ Import des anniversaires du thème « Anniversaires » (idée)
 
-## 3. Plugin `scrinium-ocr` : OCR optionnel (v0.4)
-✔ Première version dans `plugins/ocr/` (Tesseract seul, testée de bout en bout, 10 tests) : menu *Extensions* (extraire le texte des images de la fiche, voir/corriger le texte, réglages : chemin, langue `fra`, automatique à l'ajout). Image donnée à Tesseract sur son entrée standard (jamais de fichier temporaire, même pour une fiche verrouillée ouverte). Reste : clic droit sur une vignette (point d'accroche à ajouter à l'API), moteur Ollama facultatif, essai réel sur photos et captures floues, macOS/Windows.
-Extraire le texte d'une image de fiche pour pouvoir la chercher/copier. Moteurs eux-mêmes enfichables (Tesseract, Ollama).
-- ☐ Moteur 1 (par défaut, léger) : **Tesseract** (`apt install tesseract-ocr tesseract-ocr-fra`), rien à télécharger de plus
-- ☐ Moteur 2 (facultatif, « OCR intelligent ») : modèle vision local via **Ollama** (ex. `qwen2.5vl:3b`, 3,2 Go) par l'API `http://127.0.0.1:11434`
+## 3. Plugin `ocr` : texte des images (fait ; reste : Ollama, clic droit)
+✔ **Fait et testé** (`plugins/ocr/`, `tests/test_ocr.py`, essai réel avec Tesseract 5.5 et `fra`) : menu *Extensions* (extraire le texte des images de la fiche, voir/corriger le texte, réglages : chemin, langue, automatique à l'ajout). Image donnée à Tesseract sur son entrée standard (aucun fichier temporaire, même pour une fiche verrouillée ouverte) ; texte enregistré avec l'image (chiffré si la fiche est verrouillée) et cherché par la recherche.
+- ☐ Clic droit « Extraire le texte » sur une vignette (point d'accroche à ajouter à l'API)
+- ☐ Moteur 2 facultatif (« OCR intelligent ») : modèle vision local via **Ollama** (ex. `qwen2.5vl:3b`, 3,2 Go) par `http://127.0.0.1:11434`
   - réglages : activer, adresse, nom du modèle ; test de connexion
   - **local uniquement** par défaut : refuser une adresse distante sans avertissement explicite (les images peuvent être privées)
   - ne jamais envoyer le contenu d'une fiche verrouillée sans demande explicite de l'utilisateur
   - penser au partage de la mémoire graphique avec d'autres modèles (`OLLAMA_KEEP_ALIVE`, un seul modèle chargé à la fois)
-- ☐ Texte extrait stocké avec la fiche (et **chiffré** si la fiche est verrouillée), indexé par la recherche (sauf fiches verrouillées fermées)
-- ☐ Bouton « Extraire le texte » sur une image, résultat modifiable avant enregistrement
+- ☐ Essai sur photos et captures floues ; plusieurs langues par image ; macOS/Windows (chemins usuels de `tesseract` prévus, non testés)
 
-## 3 bis. Plugin `scrinium-dictee` : dictée vocale (v0.5)
-✔ Première version dans `plugins/dictee/`, testée de bout en bout sur l'Inspiron (installation, modèle `small`, micro, insertion) : demande d'accord à l'activation pour installer `faster-whisper` (pip --target dans `ctx.dossier_donnees`), modèle téléchargé à la 1re dictée après accord, micro via parecord/pw-record/arecord, Ctrl+Alt+D, réglages modèle/langue. Reste : appui-pour-parler, ponctuation, mode « remplacer la sélection », paquet séparé.
-Dicter une note au micro, le texte s'insère à la position du curseur (`ctx.ui.inserer_texte`, déjà dans l'API).
-- ☐ Reconnaissance **locale** (aucun envoi sur Internet) : `faster-whisper` (modèles `base`/`small`, bon en français, CPU suffisant, GPU facultatif) ; alternative légère : Vosk. Ollama n'est pas l'outil pour la parole.
-- ☐ Enregistrement micro (QtMultimedia ou `sounddevice`), bouton « Dicter » + raccourci appui-pour-parler, indicateur d'écoute
-- ☐ Téléchargement du modèle **à la demande** (taille affichée, accord de l'utilisateur), stocké dans les données du plugin
-- ☐ Choix de la langue (auto / fr / en), ponctuation, mode « ajouter » / « remplacer la sélection »
-- ☐ Dépendances Python propres au plugin (`pip` dans le venv de `install.sh`) : à documenter, pas de paquet Debian officiel pour faster-whisper
-- ☐ Option gratuite en attendant : la dictée du système (KDE/GNOME, Windows `Win+H`, macOS)
+## 3 bis. Plugin `dictee` : dictée vocale (fait ; reste : appui-pour-parler…)
+✔ **Fait et testé de bout en bout sur l'Inspiron** (`plugins/dictee/`) : reconnaissance locale `faster-whisper` (modèles `base`/`small`/`medium`, repli CPU si CUDA échoue), accord demandé avant d'installer le paquet (`pip --target` dans `ctx.dossier_donnees`) puis avant de télécharger le modèle (taille affichée), micro par `parecord`/`pw-record`/`arecord` (aucune bibliothèque audio), bouton enfoncé pendant l'enregistrement, Ctrl+Alt+D, langue auto/fr/en.
+- ☐ Appui-pour-parler (aujourd'hui : un clic démarre, un clic arrête) · ☐ ponctuation · ☐ choix « ajouter » / « remplacer la sélection » (aujourd'hui le texte remplace la sélection)
+- ☐ Documenter les dépendances Python propres au plugin (pas de paquet Debian officiel pour `faster-whisper`) et l'option du système en attendant (KDE/GNOME, Windows `Win+H`, macOS) · ☐ alternative légère Vosk · ☐ tests sous Windows/macOS (enregistreur audio à adapter)
 
 ## 3 bis-b. Plugin `courriel` : envoi d'une fiche par courriel
 ✔ Première version dans `plugins/courriel/` (testée en vrai avec un compte Free ; Gmail exige un mot de passe d'application) : bouton + menu *Envoyer par courriel*, carnet d'adresses, choix multiple des destinataires + adresses libres, formulaire serveur SMTP (STARTTLS/SSL, test de connexion), récapitulatif avant envoi. Fiche verrouillée fermée : jamais envoyée ; ouverte : avertissement (part en clair). Mot de passe : trousseau (`keyring`) si présent, sinon session, ou fichier 0600 sur demande.
-- ☐ Pièces jointes (fichier `.md`, images quand elles existeront) · ☐ plusieurs comptes d'envoi · ☐ groupes de contacts · ☐ import du carnet (vCard/CSV) · ☐ envoi chiffré de bout en bout (PGP) pour les fiches verrouillées
+- ☐ Joindre les images de la fiche (elles existent maintenant ; fiche en clair ou ouverte) · ☐ pièce jointe `.md` · ☐ plusieurs comptes d'envoi · ☐ groupes de contacts · ☐ import du carnet (vCard/CSV) · ☐ envoi chiffré de bout en bout (PGP) pour les fiches verrouillées
 
-## 3 ter. Plugin `scrinium-capture` : résultat d'une commande dans une fiche
-✔ **Partie tube faite dans le cœur** (`core/capture.py`, `scrinium ajouter/add`, 11 tests) : `ip a | scrinium ajouter -t Thème -f Fiche [-c commande] [--remplacer] [--brut]` ; l'instance ouverte écrit elle-même (éditeur cohérent) via le canal d'instance (protocole `add`, réponse ok/err, socket réservée à l'utilisateur) ; sinon écriture directe ; fiche verrouillée fermée refusée ; entrée vide refusée ; texte tronqué à 256 Ko. Chaque `SCRINIUM_HOME` a son propre canal. ✔ **Plugin GUI `plugins/capture/`** (13 tests) : « Exécuter une commande et insérer la sortie… » (délai 30 s, sortie limitée, bloc daté inséré au curseur) ; bouton « Console » : le texte sélectionné est tapé SANS validation dans une session Konsole (D-Bus ; caractères de contrôle retirés, collage « bracketed » si plusieurs lignes), **l'extension ouvre sa propre Konsole (« Scrinium »), la réutilise toujours, la rouvre si on la ferme** (PID mémorisé, retrouvée après redémarrage) ; « Choisir la console cible… » pour utiliser une console existante (reconnue par titre + dossier + programme), « Revenir à la console de l'extension » ; **la console passe au premier plan après l'envoi** (script KWin chargé par D-Bus, retrouvée par son PID ; vérifié sur X11 avec KWin 6.6 ; réglable) ; sinon copie dans le presse-papiers. ⚠ Konsole désactive par défaut cette API (option « Enable the security sensitive parts of the DBus API ») : non testé contre un vrai Konsole avec l'option activée. ✔ **Panneau d'actions préparées** (boutons-icônes, infobulle = nom/description/commande/mode ; 3 modes au clic : taper sans valider, exécuter après confirmation et insérer la sortie, copier ; variables `{selection}` `{fiche}` protégées pour le shell en mode exécuter ; éditeur, réordonnancement, exemples, export/import JSON ; 24 tests). ☐ groupes (onglets), action « valider (Entrée) » explicite par action.
-- ☐ **Portabilité** : l'envoi direct est Konsole/D-Bus (Linux/KDE) ; Windows et macOS = presse-papiers seulement pour l'instant ; adaptateurs à écrire (tmux `send-keys`, kitty `@ send-text`, WezTerm, iTerm2 AppleScript, Windows Terminal : aucune API connue) · ☐ autres terminaux (gnome-terminal…), bouton de la barre de la fenêtre ouverte au clic droit.
-Envoyer la sortie d'une commande shell dans une fiche (notes d'administration : `df -h`, config réseau, etc.).
-- ☐ En ligne de commande, par un tube : `ip a | scrinium ajouter --theme Informatique --fiche "Réseau"` (Scrinium ne lance rien : il reçoit le texte sur l'entrée standard)
-- ☐ L'instance déjà ouverte reçoit le texte par le canal d'instance unique (sinon écriture directe dans les fichiers) ; fiche créée si elle n'existe pas, sinon ajout à la fin (option `--remplacer`)
-- ☐ Bloc encadré avec la date et la commande (` ```bash ` ... ` ``` `), pour garder le contexte ; option `--brut`
-- ☐ Dans la fenêtre : bouton « Exécuter une commande… » → affiche la sortie, puis l'insère à la position du curseur (`ctx.ui.inserer_texte`) ; **la commande est lancée uniquement sur demande explicite de l'utilisateur**, avec délai maximum et taille de sortie limitée
-- ☐ Fiche **verrouillée** : refuser l'ajout sans déverrouillage (jamais d'écriture en clair), ou demander le mot de passe ; ne jamais passer un mot de passe en argument
-- ☐ Option : lancer la commande sur une machine distante (`ssh machine commande`), en réutilisant la config SSH de l'utilisateur (à étudier : prudence)
-- ☐ Nécessite dans l'API : `ctx.ajouter_commande_cli(nom, fn)` (sous-commandes ajoutées par les plugins) et réception de texte par l'instance unique
+## 3 ter. Plugin `capture` et `scrinium ajouter` : commande ↔ fiche (fait ; reste : groupes, tmux…)
+✔ **Fait et testé** :
+- **Tube vers fiche, dans le cœur** (`core/capture.py`, `scrinium ajouter/add`, `tests/test_capture.py`) : `ip a | scrinium ajouter -t Thème -f Fiche [-c commande] [--remplacer] [--brut]` ; l'instance ouverte écrit elle-même (l'éditeur reste cohérent) par le canal d'instance (protocole `add`, réponse ok/err, socket réservée à l'utilisateur), sinon écriture directe ; fiche créée si absente ; bloc daté avec la commande entre barrières ; fiche verrouillée fermée refusée ; entrée vide refusée ; texte tronqué à 256 Ko. Chaque `SCRINIUM_HOME` a son propre canal d'instance (la version de test cohabite avec l'habituelle).
+- **Plugin `plugins/capture/`** (`tests/test_capture_plugin.py`) :
+  - « Exécuter une commande et insérer la sortie… » : jamais sans clic, délai 30 s, sortie limitée, bloc daté inséré au curseur
+  - bouton « Console » : texte sélectionné tapé **sans valider** dans une Konsole (D-Bus ; caractères de contrôle retirés, collage « bracketed » si plusieurs lignes) ; l'extension ouvre **sa propre Konsole**, la réutilise, la rouvre si on la ferme ; « Choisir la console cible… » ; console mise **au premier plan** (script KWin, vérifié sur X11/KWin 6.6) ; repli presse-papiers
+  - **panneau d'actions préparées** : boutons-icônes avec infobulle, 3 modes au clic (taper / exécuter après confirmation / copier), `{selection}` et `{fiche}` protégés pour le shell, éditeur, réordonnancement, exemples, export/import JSON ; interrupteur « Actions » dans la barre d'outils et le menu
+- ⚠ Konsole désactive par défaut l'envoi de texte par D-Bus (option « Enable the security sensitive parts of the DBus API ») : le refus est reconnu et expliqué ; **l'envoi direct avec l'option activée n'a pas été testé** contre un vrai Konsole
+- ☐ Groupes d'actions (onglets) · ☐ action « valider (Entrée) » explicite, action par action · ☐ clic droit sur une action
+- ☐ **Portabilité** : l'envoi direct est Konsole/D-Bus (Linux/KDE) ; Windows et macOS = presse-papiers seulement ; adaptateurs possibles : tmux `send-keys` (le plus rentable : Linux, macOS, WSL), kitty `@ send-text`, WezTerm, iTerm2 (AppleScript) ; Windows Terminal : aucune API connue · ☐ autres terminaux Linux (gnome-terminal…) · ☐ le tube `scrinium ajouter` n'a été testé que sous Linux
+- ☐ Option : lancer la commande sur une machine distante (`ssh machine commande`), en réutilisant la config SSH (à étudier : prudence)
 
 ## 3 quater. Partage de fiches et synchronisation (à prévoir tôt : touche au cœur)
 Partager des fiches entre machines et/ou personnes : dépôt sur le réseau local (SMB/NFS/dossier partagé), cloud (Nextcloud/WebDAV, Syncthing, Dropbox…) ou dépôt git.
@@ -120,4 +109,6 @@ Partager des fiches entre machines et/ou personnes : dépôt sur le réseau loca
 - ✔ Zone de notification, instance unique, lancement au démarrage, reverrouillage en se cachant
 - ✔ Français / anglais (gettext)
 - ✔ `install.sh`, paquet `.deb`, README FR/EN
-- ✔ `TODO.md` (ce fichier)
+- ✔ `TODO.md` (ce fichier, remis à jour le 2026-10-20)
+- ✔ Workflow git : branche `dev` puis `main`, sans pull request (dépôt perso) ; tests : `python3 -m pytest` (154)
+- ✔ `~/scripts/scrinium/dev.sh` (XPS + Inspiron) : lance les sources avec des données de test séparées
