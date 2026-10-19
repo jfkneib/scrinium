@@ -50,6 +50,7 @@ Ne pas faire un agenda complet : des **fiches avec une date**. Repose sur l'API 
 - ☐ Import des anniversaires du thème « Anniversaires » (idée)
 
 ## 3. Plugin `scrinium-ocr` : OCR optionnel (v0.4)
+✔ Première version dans `plugins/ocr/` (Tesseract seul, testée de bout en bout, 10 tests) : menu *Extensions* (extraire le texte des images de la fiche, voir/corriger le texte, réglages : chemin, langue `fra`, automatique à l'ajout). Image donnée à Tesseract sur son entrée standard (jamais de fichier temporaire, même pour une fiche verrouillée ouverte). Reste : clic droit sur une vignette (point d'accroche à ajouter à l'API), moteur Ollama facultatif, essai réel sur photos et captures floues, macOS/Windows.
 Extraire le texte d'une image de fiche pour pouvoir la chercher/copier. Moteurs eux-mêmes enfichables (Tesseract, Ollama).
 - ☐ Moteur 1 (par défaut, léger) : **Tesseract** (`apt install tesseract-ocr tesseract-ocr-fra`), rien à télécharger de plus
 - ☐ Moteur 2 (facultatif, « OCR intelligent ») : modèle vision local via **Ollama** (ex. `qwen2.5vl:3b`, 3,2 Go) par l'API `http://127.0.0.1:11434`
