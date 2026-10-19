@@ -79,6 +79,44 @@ def _extraire_images(pieces, pem, phrase, dossier: Path) -> int:
     return code
 
 
+def _ajouter(args) -> int:
+    """`scrinium ajouter` : le texte reçu sur l'entrée standard est ajouté à une fiche (créée au besoin)."""
+    from .core import capture
+    if sys.stdin.isatty():
+        print(_("Aucun texte reçu : utilisez un tube, par exemple :  ip a | scrinium ajouter -t Informatique -f Réseau"),
+              file=sys.stderr)
+        return 2
+    texte = capture.tronquer(sys.stdin.buffer.read(capture.TAILLE_MAX + 1).decode("utf-8", "replace"))
+    if not texte.strip():
+        print(_("Aucun texte reçu (entrée vide) : rien n'a été ajouté."), file=sys.stderr)
+        return 2
+    payload = {"theme": args.theme_cible, "fiche": args.fiche_cible, "texte": texte, "commande": args.commande or "",
+               "remplacer": args.remplacer, "brut": args.brut}
+    rep = None
+    try:   # une fenêtre déjà ouverte écrit elle-même (son éditeur reste cohérent) ; Qt absent = écriture directe
+        from PyQt6.QtCore import QCoreApplication
+        from .ui import instance
+        _app = QCoreApplication.instance() or QCoreApplication(sys.argv[:1])   # (à garder vivante pendant l'échange)
+        assert _app is not None
+        rep = instance.envoyer_ajout(payload)
+    except ImportError:
+        pass
+    if rep is not None:
+        ok, msg = rep
+        print(_("Ajouté à « %(theme)s / %(fiche)s ».") % {"theme": args.theme_cible, "fiche": args.fiche_cible} if ok
+              else _("Impossible : %s") % msg, file=sys.stderr)
+        return 0 if ok else 1
+    store = Store(Paths())
+    store.charger()
+    try:
+        th, f = capture.ajouter(store, args.theme_cible, args.fiche_cible, texte, args.commande or "", args.remplacer, args.brut)
+    except (ValueError, OSError) as ex:
+        print(_("Impossible : %s") % ex, file=sys.stderr)
+        return 1
+    print(_("Ajouté à « %(theme)s / %(fiche)s ».") % {"theme": th.nom, "fiche": f.titre}, file=sys.stderr)
+    return 0
+
+
 def main(argv=None) -> int:
     langue = i18n.init(Store(Paths()).reglages().get("langue", "auto"))
     p = argparse.ArgumentParser(prog="scrinium", description=_("Scrinium : fiches rangées par thème."))
@@ -94,7 +132,17 @@ def main(argv=None) -> int:
     r.add_argument("--images", metavar="DIR", help=_("avec « open » : extrait les images jointes (EN CLAIR) dans ce dossier"))
     r.add_argument("--key", "--cle", dest="cle", metavar="FILE", required=False, default="~/.config/scrinium/cle-de-secours.pem",
                    help=_("fichier de secours (PEM)"))
+    c = sub.add_parser("add", aliases=["ajouter"], help=_("ajoute à une fiche le texte reçu sur l'entrée standard (tube)"))
+    c.add_argument("-t", "--theme", "--topic", dest="theme_cible", metavar="NAME", required=True, help=_("thème de la fiche"))
+    c.add_argument("-f", "--fiche", "--note", dest="fiche_cible", metavar="TITLE", required=True,
+                   help=_("titre de la fiche (créée si elle n'existe pas)"))
+    c.add_argument("-c", "--commande", "--command", dest="commande", metavar="TEXT",
+                   help=_("commande à rappeler dans l'en-tête du bloc ajouté"))
+    c.add_argument("--remplacer", "--replace", action="store_true", help=_("remplace le texte de la fiche au lieu d'ajouter à la fin"))
+    c.add_argument("--brut", "--raw", action="store_true", help=_("ajoute le texte tel quel, sans en-tête daté ni barrières"))
     a = p.parse_args(argv)
+    if a.cmd in ("add", "ajouter"):
+        return _ajouter(a)
     if a.cmd in ("secours", "rescue"):
         a.action = {"list": "lister", "open": "ouvrir", "unlock": "deverrouiller"}.get(a.action, a.action)
         return _recuperer(a)
@@ -112,6 +160,7 @@ def main(argv=None) -> int:
         return 0
     w = Fenetre(Store(Paths()), theme=a.theme, nouvelle=a.nouvelle)
     serveur = instance.Serveur(w)
+    serveur.ajout = w.ajouter_depuis_cli
     serveur.reveil.connect(lambda th, nv: w.montrer(th or None, nv))
     if not (a.minimise and w.tray_actif):
         w.show()

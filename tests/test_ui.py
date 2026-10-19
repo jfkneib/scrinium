@@ -60,7 +60,8 @@ def test_fermer_avec_option_cache_dans_la_zone_de_notification(fen):
     assert fen.isVisible()
 
 
-def test_instance_unique(app):
+def test_instance_unique(app, monkeypatch):
+    monkeypatch.setenv("SCRINIUM_INSTANCE", f"scrinium-test-{os.getpid()}")   # jamais le canal d'une vraie instance
     srv = instance.Serveur()
     recus = []
     srv.reveil.connect(lambda th, nv: recus.append((th, nv)))

@@ -77,6 +77,7 @@ Dicter une note au micro, le texte s'insère à la position du curseur (`ctx.ui.
 - ☐ Pièces jointes (fichier `.md`, images quand elles existeront) · ☐ plusieurs comptes d'envoi · ☐ groupes de contacts · ☐ import du carnet (vCard/CSV) · ☐ envoi chiffré de bout en bout (PGP) pour les fiches verrouillées
 
 ## 3 ter. Plugin `scrinium-capture` : résultat d'une commande dans une fiche
+✔ **Partie tube faite dans le cœur** (`core/capture.py`, `scrinium ajouter/add`, 11 tests) : `ip a | scrinium ajouter -t Thème -f Fiche [-c commande] [--remplacer] [--brut]` ; l'instance ouverte écrit elle-même (éditeur cohérent) via le canal d'instance (protocole `add`, réponse ok/err, socket réservée à l'utilisateur) ; sinon écriture directe ; fiche verrouillée fermée refusée ; entrée vide refusée ; texte tronqué à 256 Ko. Chaque `SCRINIUM_HOME` a son propre canal. ☐ Reste (plugin GUI) : « Exécuter une commande… » (sortie insérée au curseur) et envoi de la sélection vers un prompt de console (Konsole : à confirmer).
 Envoyer la sortie d'une commande shell dans une fiche (notes d'administration : `df -h`, config réseau, etc.).
 - ☐ En ligne de commande, par un tube : `ip a | scrinium ajouter --theme Informatique --fiche "Réseau"` (Scrinium ne lance rien : il reçoit le texte sur l'entrée standard)
 - ☐ L'instance déjà ouverte reçoit le texte par le canal d'instance unique (sinon écriture directe dans les fichiers) ; fiche créée si elle n'existe pas, sinon ajout à la fin (option `--remplacer`)
