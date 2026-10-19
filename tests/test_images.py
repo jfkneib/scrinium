@@ -168,3 +168,78 @@ def test_recherche_trouve_le_texte_des_images(fen):
     assert any(f is fen.fiche for _t, f in fen.rows)
     fen.recherche.setText("introuvable-xyz")
     assert fen.rows == []
+
+
+# ---------- recadrage ----------
+from PyQt6.QtCore import QRect, QSize  # noqa: E402
+
+
+def test_conversion_de_la_selection():
+    # étiquette 800x600, image affichée 400x200 centrée (marges 200 et 200), image d'origine 1600x800 (x4)
+    lab, aff, orig = QSize(800, 600), QSize(400, 200), QSize(1600, 800)
+    assert images.convertir_selection(QRect(200, 200, 200, 200), lab, aff, orig) == QRect(0, 0, 800, 800)
+    assert images.convertir_selection(QRect(300, 250, 100, 100), lab, aff, orig) == QRect(400, 200, 400, 400)
+    assert images.convertir_selection(QRect(0, 0, 150, 150), lab, aff, orig) is None           # hors de l'image
+    assert images.convertir_selection(QRect(250, 250, 4, 4), lab, aff, orig) is None           # trop petite
+    r = images.convertir_selection(QRect(100, 100, 900, 900), lab, aff, orig)                  # déborde : rognée à l'image
+    assert r == QRect(0, 0, 1600, 800)
+
+
+def _visionneuse(fen, app):
+    img = QImage(400, 200, QImage.Format.Format_RGB32)
+    img.fill(QColor("blue"))
+    for x in range(200):
+        for y in range(200):
+            img.setPixelColor(x, y, QColor("red"))                  # moitié gauche rouge, moitié droite bleue
+    fen.bande.ajouter([img])
+    v = images.Visionneuse(fen, fen.fiche, fen.store.lister_pieces(fen.fiche), 0, fen)
+    v.resize(800, 600)
+    v.show()
+    app.processEvents()
+    return v
+
+
+def _tracer(v, fx0, fy0, fx1, fy1):
+    """Trace un rectangle exprimé en fractions de l'image affichée (après redimensionnement de la zone)."""
+    v._mode_recadrage(True)
+    QApplication.processEvents()                                    # la barre apparaît : l'image se redimensionne
+    pm = v.image.pixmap()
+    assert pm.height() <= v.image.height() and pm.width() <= v.image.width()   # jamais rognée par sa zone
+    decx, decy = (v.image.width() - pm.width()) // 2, (v.image.height() - pm.height()) // 2
+    x0, y0, x1, y1 = (round(fx0 * pm.width()), round(fy0 * pm.height()), round(fx1 * pm.width()), round(fy1 * pm.height()))
+    v._selection(QRect(decx + x0, decy + y0, x1 - x0, y1 - y0))
+
+
+def test_recadrer_en_nouvelle_image(fen, app):
+    v = _visionneuse(fen, app)
+    _tracer(v, 0, 0, 0.49, 1)                # moitié gauche (rouge)
+    assert v.zone is not None and v.b_nouvelle.isEnabled()
+    v._appliquer(False)
+    pieces = fen.store.lister_pieces(fen.fiche)
+    assert len(pieces) == 2 and "recadrée" in pieces[1].nom
+    rognee = QImage.fromData(fen.store.lire_piece(fen.fiche, pieces[1]))
+    assert 190 <= rognee.width() <= 200 and rognee.height() == 200
+    assert rognee.pixelColor(rognee.width() // 2, 100).red() > 200 and rognee.pixelColor(rognee.width() // 2, 100).blue() < 50
+    assert fen.store.lire_piece(fen.fiche, pieces[0]) is not None and fen.bande.liste.count() == 2
+    assert v.i == 1                                                   # la visionneuse montre la nouvelle image
+
+
+def test_recadrer_en_remplacant(fen, app, monkeypatch):
+    v = _visionneuse(fen, app)
+    _tracer(v, 0.51, 0, 1, 1)      # moitié droite (bleue)
+    monkeypatch.setattr(images.QMessageBox, "question", lambda *a, **k: images.QMessageBox.StandardButton.Yes)
+    v._appliquer(True)
+    pieces = fen.store.lister_pieces(fen.fiche)
+    assert len(pieces) == 1
+    img = QImage.fromData(fen.store.lire_piece(fen.fiche, pieces[0]))
+    assert img.width() < 210 and img.pixelColor(img.width() // 2, 100).blue() > 200
+    assert os.listdir(fen.store.paths.corbeille)                      # l'originale est dans la corbeille
+
+
+def test_recadrage_refuse_remplacement_sans_confirmation(fen, app, monkeypatch):
+    v = _visionneuse(fen, app)
+    _tracer(v, 0, 0, 0.5, 1)
+    monkeypatch.setattr(images.QMessageBox, "question", lambda *a, **k: images.QMessageBox.StandardButton.No)
+    v._appliquer(True)
+    (p,) = fen.store.lister_pieces(fen.fiche)
+    assert QImage.fromData(fen.store.lire_piece(fen.fiche, p)).width() == 400

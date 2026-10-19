@@ -417,6 +417,35 @@ class Store:
             _ecrire(d / f"{n}.json", json.dumps(self._entete(piece), ensure_ascii=False).encode("utf-8"))
         return piece
 
+    def remplacer_piece(self, f: Fiche, piece: Piece, type_: str, donnees: bytes) -> Piece:
+        """Remplace le contenu d'une pièce (recadrage…) en gardant son numéro et son nom. L'ancienne version est COPIÉE à la
+        corbeille ; le texte OCR est effacé (il ne correspond plus à l'image). ValueError si fiche fermée ou limites dépassées."""
+        if f.fermee or (f.verrou and f.cle is None):
+            raise ValueError("fiche verrouillée : déverrouillez-la d'abord")
+        if type_ not in EXT_PIECE:
+            raise ValueError(f"type de pièce jointe non pris en charge : {type_}")
+        if len(donnees) > LIMITES_PIECES["octets_piece"]:
+            raise ValueError("image trop lourde")
+        d = piece.chemin.parent
+        autres = sum(p.stat().st_size for n, p in self._numeros(d) if n != piece.id)
+        if autres + len(donnees) > LIMITES_PIECES["octets_total"]:
+            raise ValueError("pièces jointes trop volumineuses pour cette fiche")
+        mkdir_prive(self.paths.corbeille)
+        stamp = time.strftime("%Y%m%d-%H%M%S")
+        for ancien in (piece.chemin, piece.chemin.with_suffix(".json")):
+            if ancien.exists():
+                shutil.copy2(ancien, self.paths.corbeille / f"{stamp}-{d.name}-{ancien.name}")
+        neuve = Piece(piece.id, piece.nom, type_, len(donnees), piece.chemin, piece.ajoute)
+        if f.verrou:
+            _ecrire(piece.chemin, crypto.chiffrer_piece(self._entete(neuve), donnees, f.cle, f.salt, f.wrap))
+        else:
+            neuve.chemin = d / f"{piece.id}{EXT_PIECE[type_]}"
+            _ecrire(neuve.chemin, donnees)
+            _ecrire(d / f"{piece.id}.json", json.dumps(self._entete(neuve), ensure_ascii=False).encode("utf-8"))
+            if piece.chemin != neuve.chemin:       # PNG <-> JPEG : l'ancien fichier est remplacé
+                piece.chemin.unlink(missing_ok=True)
+        return neuve
+
     def lire_piece(self, f: Fiche, piece: Piece) -> bytes:
         if f.verrou:
             return crypto.dechiffrer_piece(piece.chemin.read_bytes(), f.cle)[1]
