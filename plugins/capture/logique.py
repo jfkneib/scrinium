@@ -5,6 +5,8 @@ import os
 import re
 import shutil
 import subprocess
+import tempfile
+import time
 
 DELAI_COMMANDE = 30          # secondes
 SORTIE_MAX = 200 * 1024      # octets conservés
@@ -60,6 +62,49 @@ def lancer_konsole() -> int | None:
                          stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
                          start_new_session=True)
     return p.pid
+
+
+SCRIPT_PREMIER_PLAN = """(function () {
+    var pid = %d;
+    var liste = workspace.windowList ? workspace.windowList() : workspace.clientList();
+    for (var i = 0; i < liste.length; i++) {
+        if (liste[i].pid === pid) {
+            var w = liste[i];
+            if (w.minimized) { w.minimized = false; }
+            if ("activeWindow" in workspace) { workspace.activeWindow = w; } else { workspace.activeClient = w; }
+            break;
+        }
+    }
+})();
+"""
+
+
+def mettre_au_premier_plan(qdbus: str, service: str) -> bool:
+    """Ramène devant la fenêtre de la Konsole `service` (org.kde.konsole-<pid>) grâce à un petit script KWin (KDE, X11 ou
+    Wayland), retrouvée par son numéro de processus. False, sans erreur, si ce n'est pas possible (autre bureau)."""
+    m = re.search(r"-(\d+)$", service)
+    if not m:
+        return False
+    fd, chemin = tempfile.mkstemp(suffix=".js", prefix="scrinium-focus-")
+    nom = f"scrinium-focus-{os.getpid()}-{time.time_ns()}"
+    try:
+        with os.fdopen(fd, "w", encoding="utf-8") as f:
+            f.write(SCRIPT_PREMIER_PLAN % int(m[1]))
+        r = _qdbus(qdbus, "org.kde.KWin", "/Scripting", "org.kde.kwin.Scripting.loadScript", chemin, nom)
+        ident = r.stdout.decode().strip()
+        if r.returncode != 0 or not ident.lstrip("-").isdigit() or int(ident) < 0:
+            return False
+        _qdbus(qdbus, "org.kde.KWin", f"/Scripting/Script{ident}", "org.kde.kwin.Script.run")
+        time.sleep(0.3)                                       # laisse le script s'exécuter avant de le décharger
+        _qdbus(qdbus, "org.kde.KWin", "/Scripting", "org.kde.kwin.Scripting.unloadScript", nom)
+        return True
+    except (OSError, subprocess.SubprocessError):
+        return False
+    finally:
+        try:
+            os.unlink(chemin)
+        except OSError:
+            pass
 
 
 def _qdbus(qdbus: str, *args: str) -> subprocess.CompletedProcess:

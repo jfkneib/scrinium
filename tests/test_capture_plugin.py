@@ -33,6 +33,17 @@ if not a:
     print("\\n".join(" " + s for s in sorted({x[0] for x in sessions})))
 elif len(a) == 1:
     print("/\\n/Sessions\\n" + "\\n".join("/Sessions/%s" % x[1] for x in sessions if x[0] == a[0]) + "\\n/Windows")
+elif a[0] == "org.kde.KWin":                      # gestionnaire de fenêtres : scripts de mise au premier plan
+    if os.path.exists(d + "/sans_kwin"):
+        print("Error: org.freedesktop.DBus.Error.ServiceUnknown")
+        sys.exit(2)
+    if a[2].endswith(".loadScript"):
+        open(d + "/focus-script", "w").write(open(a[3]).read())
+        print(7)
+    elif a[2].endswith(".Script.run"):
+        open(d + "/focus-lance", "a").write("1\\n")
+    elif a[2].endswith(".unloadScript"):
+        print("true")
 else:
     svc, obj, meth = a[0], a[1], a[2]
     n = obj.rsplit("/", 1)[1]
@@ -339,3 +350,35 @@ def test_dialogue_commande_insere_la_sortie(fen, app):
     d._inserer()
     assert "### " in fen.texte.toPlainText() and "— echo bonjour-capture" in fen.texte.toPlainText()
     assert "bonjour-capture\n```" in fen.texte.toPlainText()
+
+
+# ---------- mise au premier plan ----------
+def test_script_premier_plan_cible_le_bon_processus(faux):
+    q = lg.trouver_qdbus()
+    assert lg.mettre_au_premier_plan(q, "org.kde.konsole-4242") is True
+    js = (faux / "focus-script").read_text()
+    assert "var pid = 4242;" in js and "workspace.activeWindow = w" in js and (faux / "focus-lance").exists()
+
+
+def test_premier_plan_sans_kwin_ne_plante_pas(faux):
+    (faux / "sans_kwin").write_text("")
+    assert lg.mettre_au_premier_plan(lg.trouver_qdbus(), "org.kde.konsole-4242") is False
+    assert lg.mettre_au_premier_plan(lg.trouver_qdbus(), "pas-un-service") is False
+
+
+def test_console_au_premier_plan_apres_l_envoi(fen, faux):
+    selectionner(fen, "ls")
+    plugin(fen).vers_console()
+    assert f"var pid = {pid_dedie(faux)};" in (faux / "focus-script").read_text()          # la console de l'extension est mise devant
+
+
+def test_premier_plan_desactivable_et_absent_si_refus(fen, faux, monkeypatch):
+    fen.plugins.actifs["capture"][1].reglages.set("premier_plan", False)
+    selectionner(fen, "ls")
+    plugin(fen).vers_console()
+    assert envois(faux) and not (faux / "focus-script").exists()
+    fen.plugins.actifs["capture"][1].reglages.set("premier_plan", True)
+    (faux / "refus").write_text("")
+    monkeypatch.setattr(mod().QMessageBox, "information", lambda *a, **k: None)
+    plugin(fen).vers_console()                                                              # refus : rien à mettre devant
+    assert not (faux / "focus-script").exists()

@@ -8,7 +8,7 @@
   « Scrinium »), la réutilise toujours, et la rouvre si vous l'avez fermée. Le texte y est tapé SANS être validé (vous
   relisez, puis Entrée) ; il faut pour cela activer dans Konsole « Enable the security sensitive parts of the DBus API ».
   Sinon, ou ailleurs que sous Konsole : le texte est copié dans le presse-papiers. « Choisir la console cible… » permet
-  d'utiliser à la place une de vos consoles existantes.
+  d'utiliser à la place une de vos consoles existantes. Sous KDE, la console passe au premier plan après l'envoi.
 Le pendant « fiche -> commande » (`ip a | scrinium ajouter …`) est dans le cœur : `scrinium ajouter`.
 """
 import threading
@@ -116,6 +116,9 @@ class DialogueReglages(QDialog):
         self.direct = QCheckBox(_("Essayer d'abord de taper directement dans Konsole (sans valider)"))
         self.direct.setChecked(bool(plugin.ctx.reglages.get("direct", True)))
         f.addRow(self.direct)
+        self.devant = QCheckBox(_("Mettre la console au premier plan après l'envoi (KDE)"))
+        self.devant.setChecked(bool(plugin.ctx.reglages.get("premier_plan", True)))
+        f.addRow(self.devant)
         aide = QLabel(AIDE_KONSOLE)
         aide.setWordWrap(True)
         f.addRow(aide)
@@ -126,6 +129,7 @@ class DialogueReglages(QDialog):
 
     def _valider(self):
         self.p.ctx.reglages.set("direct", self.direct.isChecked())
+        self.p.ctx.reglages.set("premier_plan", self.devant.isChecked())
         self.p.refus_vu = False          # l'utilisateur a peut-être activé l'option de Konsole : on réessaie
         self.accept()
 
@@ -242,6 +246,8 @@ class CapturePlugin(Plugin):
         except Exception as ex:
             self.ctx.ui.notifier(_("Console"), _("Konsole : %s") % ex)
             return False
+        if self.ctx.reglages.get("premier_plan", True):
+            logique.mettre_au_premier_plan(qdbus, choix[0])
         self.ctx.ui.notifier(_("Console"), (_("Console ouverte : ") if neuve else "")
                              + _("texte tapé dans « %s » (non validé : relisez, puis Entrée).") % choix[2])
         return True
