@@ -50,6 +50,18 @@ def trouver_qdbus() -> str | None:
     return next((p for n in ("qdbus6", "qdbus-qt6", "qdbus") if (p := shutil.which(n))), None)
 
 
+def lancer_konsole() -> int | None:
+    """Ouvre une Konsole à part (processus à elle) titrée « Scrinium » ; retourne son PID, qui est aussi celui de son service
+    D-Bus (org.kde.konsole-<pid>). None si Konsole n'est pas installé."""
+    exe = shutil.which("konsole")
+    if not exe:
+        return None
+    p = subprocess.Popen([exe, "--separate", "--nofork", "-p", "tabtitle=Scrinium"], cwd=os.path.expanduser("~"),
+                         stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+                         start_new_session=True)
+    return p.pid
+
+
 def _qdbus(qdbus: str, *args: str) -> subprocess.CompletedProcess:
     return subprocess.run([qdbus, *args], capture_output=True, timeout=10)
 

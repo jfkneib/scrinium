@@ -48,6 +48,21 @@ else:
 '''
 
 
+FAUX_KONSOLE = '''#!/usr/bin/env python3
+import os, signal, sys, time
+d = os.environ["FAUX_DIR"]
+open(d + "/lancements", "a").write(" ".join(sys.argv[1:]) + "\\n")
+ligne = "org.kde.konsole-%d 1 Scrinium\\n" % os.getpid()
+open(d + "/sessions", "a").write(ligne)
+def fin(*a):
+    open(d + "/sessions", "w").write(open(d + "/sessions").read().replace(ligne, ""))
+    sys.exit(0)
+signal.signal(signal.SIGTERM, fin)
+while True:
+    time.sleep(0.1)
+'''
+
+
 @pytest.fixture(scope="module")
 def app():
     return QApplication.instance() or QApplication([])
@@ -85,13 +100,23 @@ def faux(tmp_path, monkeypatch):
     q = bin_ / "qdbus6"
     q.write_text(FAUX_QDBUS)
     q.chmod(q.stat().st_mode | stat.S_IEXEC)
+    k = bin_ / "konsole"
+    k.write_text(FAUX_KONSOLE)
+    k.chmod(k.stat().st_mode | stat.S_IEXEC)
     d = tmp_path / "faux"
     d.mkdir()
-    (d / "sessions").write_text("org.kde.konsole-111 1 claude : bash\n")
+    (d / "sessions").write_text("org.kde.konsole-111 1 claude : bash\n")        # une console de l'utilisateur, déjà ouverte
     monkeypatch.setenv("FAUX_DIR", str(d))
     monkeypatch.setenv("FAUX_PID", str(os.getpid()))
     monkeypatch.setenv("PATH", f"{bin_}{os.pathsep}{os.environ['PATH']}")
-    return d
+    yield d
+    for ligne in (d / "sessions").read_text().splitlines():                       # ne laisse aucun faux Konsole derrière soi
+        service = ligne.split()[0]
+        if service != "org.kde.konsole-111" and service.rsplit("-", 1)[-1].isdigit():
+            try:
+                os.kill(int(service.rsplit("-", 1)[-1]), 15)
+            except OSError:
+                pass
 
 
 def envois(d):
@@ -153,13 +178,69 @@ def test_sans_selection_rien_ne_part(fen, faux):
     assert envois(faux) == []
 
 
-def test_une_seule_console_envoi_direct_sans_valider(fen, faux):
+def lancements(d):
+    f = d / "lancements"
+    return f.read_text().splitlines() if f.exists() else []
+
+
+def pid_dedie(d):
+    return next(int(x.split()[0].rsplit("-", 1)[-1]) for x in (d / "sessions").read_text().splitlines() if x.endswith("Scrinium"))
+
+
+def test_ouvre_sa_propre_console_puis_la_reutilise(fen, faux):
     selectionner(fen)
     plugin(fen).vers_console()
-    assert envois(faux) == [("org.kde.konsole-111", "1", "\x1b[200~ls -la\nps aux\x1b[201~")]    # multi-ligne : collage, pas d'exécution
+    assert len(lancements(faux)) == 1 and "--separate" in lancements(faux)[0] and "tabtitle=Scrinium" in lancements(faux)[0]
+    dedie = f"org.kde.konsole-{pid_dedie(faux)}"
+    assert envois(faux) == [(dedie, "1", "\x1b[200~ls -la\nps aux\x1b[201~")]      # multi-ligne : collage, pas d'exécution
+    assert all(e[0] != "org.kde.konsole-111" for e in envois(faux))                   # la console de l'utilisateur n'est pas touchée
     selectionner(fen, "ip a")
     plugin(fen).vers_console()
-    assert envois(faux)[-1][2] == "ip a"                                                          # jamais de retour à la ligne final
+    assert len(lancements(faux)) == 1 and envois(faux)[-1] == (dedie, "1", "ip a")    # même console, pas de retour à la ligne final
+
+
+def test_console_fermee_est_rouverte(fen, faux):
+    selectionner(fen, "un")
+    plugin(fen).vers_console()
+    premier = pid_dedie(faux)
+    os.kill(premier, 15)                                                               # l'utilisateur ferme la console
+    fin = time.time() + 5
+    while f"konsole-{premier}" in (faux / "sessions").read_text() and time.time() < fin:
+        time.sleep(0.05)
+    selectionner(fen, "deux")
+    plugin(fen).vers_console()
+    assert len(lancements(faux)) == 2 and pid_dedie(faux) != premier
+    assert envois(faux)[-1] == (f"org.kde.konsole-{pid_dedie(faux)}", "1", "deux")
+
+
+def test_console_retrouvee_apres_redemarrage_de_scrinium(fen, faux):
+    selectionner(fen, "un")
+    plugin(fen).vers_console()
+    plugin(fen).pid_dedie = None                                                       # nouveau démarrage : seule la mémoire disque reste
+    selectionner(fen, "deux")
+    plugin(fen).vers_console()
+    assert len(lancements(faux)) == 1 and envois(faux)[-1][2] == "deux"
+
+
+def test_console_choisie_a_la_main_prioritaire_puis_retour_a_celle_de_l_extension(fen, faux, monkeypatch):
+    monkeypatch.setattr(mod().QInputDialog, "getItem", staticmethod(lambda p, t, m, libelles, d, e: (libelles[0], True)))
+    plugin(fen).choisir_cible()                                                        # « claude : bash » (n° 111)
+    assert plugin(fen).cible == ("org.kde.konsole-111", 1)
+    selectionner(fen, "echo ok")
+    plugin(fen).vers_console()
+    assert envois(faux)[-1][:2] == ("org.kde.konsole-111", "1") and lancements(faux) == []
+    plugin(fen).oublier_cible()
+    plugin(fen).vers_console()
+    assert len(lancements(faux)) == 1 and envois(faux)[-1][0] != "org.kde.konsole-111"
+
+
+def test_cible_disparue_retombe_sur_la_console_de_l_extension(fen, faux, monkeypatch):
+    monkeypatch.setattr(mod().QInputDialog, "getItem", staticmethod(lambda p, t, m, libelles, d, e: (libelles[0], True)))
+    plugin(fen).choisir_cible()
+    (faux / "sessions").write_text("")                                                 # la console choisie est fermée
+    selectionner(fen, "make")
+    plugin(fen).vers_console()
+    assert len(lancements(faux)) == 1 and envois(faux)[-1][0] != "org.kde.konsole-111"
 
 
 def test_acces_refuse_copie_dans_le_presse_papiers_et_explique_une_fois(fen, faux, monkeypatch):
@@ -173,13 +254,12 @@ def test_acces_refuse_copie_dans_le_presse_papiers_et_explique_une_fois(fen, fau
     assert len(infos) == 1                                              # l'explication n'est donnée qu'une fois
 
 
-def test_sans_qdbus_ou_sans_console_presse_papiers(fen, faux, monkeypatch):
+def test_sans_konsole_ou_sans_qdbus_presse_papiers(fen, faux, monkeypatch):
     selectionner(fen, "date")
-    (faux / "sessions").write_text("")
+    monkeypatch.setattr(mod().logique, "lancer_konsole", lambda: None)                 # Konsole non installé
     plugin(fen).vers_console()
-    assert QApplication.clipboard().text() == "date"
+    assert QApplication.clipboard().text() == "date" and envois(faux) == []
     QApplication.clipboard().setText("")
-    (faux / "sessions").write_text("org.kde.konsole-111 1 x\n")
     monkeypatch.setattr(mod().logique, "trouver_qdbus", lambda: None)
     plugin(fen).vers_console()
     assert QApplication.clipboard().text() == "date" and envois(faux) == []
@@ -190,43 +270,6 @@ def test_option_directe_desactivee(fen, faux):
     selectionner(fen, "df -h")
     plugin(fen).vers_console()
     assert envois(faux) == [] and QApplication.clipboard().text() == "df -h"
-
-
-def test_plusieurs_consoles_choix_memorise_puis_oublie_si_disparue(fen, faux, monkeypatch):
-    (faux / "sessions").write_text("org.kde.konsole-111 1 admin\norg.kde.konsole-222 1 build\n")
-    questions = []
-
-    def choisir(parent, titre, texte, libelles, defaut, editable):
-        questions.append(libelles)
-        return libelles[1], True
-    monkeypatch.setattr(mod().QInputDialog, "getItem", staticmethod(choisir))
-    selectionner(fen, "make")
-    plugin(fen).vers_console()
-    assert len(questions) == 1 and "build" in questions[0][1] and envois(faux)[-1][:2] == ("org.kde.konsole-222", "1")
-    plugin(fen).vers_console()
-    assert len(questions) == 1 and len(envois(faux)) == 2                                   # même console : on ne redemande pas
-    (faux / "sessions").write_text("org.kde.konsole-111 1 admin\norg.kde.konsole-333 1 autre\n")   # la cible a disparu
-    plugin(fen).vers_console()
-    assert len(questions) == 2
-
-
-def test_annuler_le_choix_n_envoie_ni_ne_copie_rien(fen, faux, monkeypatch):
-    (faux / "sessions").write_text("org.kde.konsole-111 1 a\norg.kde.konsole-222 1 b\n")
-    monkeypatch.setattr(mod().QInputDialog, "getItem", staticmethod(lambda *a, **k: ("", False)))
-    QApplication.clipboard().setText("avant")
-    selectionner(fen, "rm x")
-    plugin(fen).vers_console()
-    assert envois(faux) == [] and QApplication.clipboard().text() == "avant"
-
-
-def test_choisir_la_console_cible(fen, faux, monkeypatch):
-    (faux / "sessions").write_text("org.kde.konsole-111 1 a\norg.kde.konsole-222 1 b\n")
-    monkeypatch.setattr(mod().QInputDialog, "getItem", staticmethod(lambda p, t, m, libelles, d, e: (libelles[1], True)))
-    plugin(fen).choisir_cible()
-    assert plugin(fen).cible == ("org.kde.konsole-222", 1)
-    selectionner(fen, "echo ok")
-    plugin(fen).vers_console()
-    assert envois(faux)[-1][:2] == ("org.kde.konsole-222", "1")
 
 
 def test_dialogue_commande_insere_la_sortie(fen, app):
