@@ -545,3 +545,38 @@ def test_dialogue_action_validation(app, monkeypatch):
     r = d.resultat()
     assert r["nom"] == "Mon action" and r["mode"] == "copier" and r["commande"] == "ls -la\ndf -h"
     assert mod().icone_action("icone-qui-n-existe-pas") is not None                                      # repli sur une icône par défaut
+
+
+# ---------- rouvrir le panneau fermé ----------
+def test_panneau_ferme_se_rouvre_par_la_barre_et_le_menu(fen, app):
+    p = plugin(fen)
+    fen.show()
+    app.processEvents()
+    barre = next(a for a in fen.barre.actions() if a.text() == "Actions")                              # bouton visible dans la barre
+    menu = next(a for a in fen.menu_ext.actions() if a.text() == "Panneau des actions")
+    assert barre.isCheckable() and barre.isChecked() and menu.isChecked() and not p.dock.isHidden()
+    assert fen.menu_ext.actions()[2].text() == "Panneau des actions"                                   # en tête du menu (après « Gérer… » et le séparateur)
+    p.dock.close()                                                                                      # l'utilisateur ferme le panneau (croix)
+    app.processEvents()
+    assert p.dock.isHidden() and not barre.isChecked() and not menu.isChecked()                        # les deux interrupteurs le montrent
+    barre.trigger()
+    app.processEvents()
+    assert p.dock.isVisible() and barre.isChecked() and menu.isChecked()
+    menu.trigger()                                                                                      # et le menu le referme
+    app.processEvents()
+    assert p.dock.isHidden() and not barre.isChecked()
+    menu.trigger()
+    assert p.dock.isVisible()
+
+
+def test_fenetre_reduite_ne_decoche_pas_le_bouton(fen, app):
+    p = plugin(fen)
+    fen.show()
+    app.processEvents()
+    barre = next(a for a in fen.barre.actions() if a.text() == "Actions")
+    fen.hide()
+    app.processEvents()
+    assert barre.isChecked() and not p.dock.isHidden()                                                  # fenêtre cachée ≠ panneau fermé
+    fen.show()
+    app.processEvents()
+    assert barre.isChecked() and p.dock.isVisible()
