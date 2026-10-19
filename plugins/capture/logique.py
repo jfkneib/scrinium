@@ -94,8 +94,9 @@ def sessions_konsole(qdbus: str) -> list:
 def envoyer(qdbus: str, service: str, session: int, texte: str) -> None:
     """Tape `texte` dans la session Konsole, SANS le valider. AccesRefuse si l'API est désactivée dans Konsole."""
     r = _qdbus(qdbus, service, f"/Sessions/{session}", "org.kde.konsole.Session.sendText", charge_utile(texte))
-    erreur = r.stderr.decode("utf-8", "replace")
-    if "AccessDenied" in erreur:
-        raise AccesRefuse(erreur.strip())
+    # qdbus écrit ses erreurs sur la sortie standard (constaté avec qdbus6) : on regarde les deux flux
+    message = (r.stdout + b"\n" + r.stderr).decode("utf-8", "replace").strip()
+    if "AccessDenied" in message:
+        raise AccesRefuse(message)
     if r.returncode != 0:
-        raise RuntimeError(erreur.strip() or f"qdbus a échoué (code {r.returncode})")
+        raise RuntimeError(message or f"qdbus a échoué (code {r.returncode})")

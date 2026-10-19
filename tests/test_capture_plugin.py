@@ -42,7 +42,8 @@ else:
         print(os.environ["FAUX_PID"])
     elif meth.endswith(".sendText"):
         if os.path.exists(d + "/refus"):
-            sys.stderr.write("Error: org.freedesktop.DBus.Error.AccessDenied\\n")
+            print("Error: org.freedesktop.DBus.Error.AccessDenied")      # comme le vrai qdbus6 : sur la sortie standard
+            print("L'API « D-Bus » de confidentialité pour la sécurité est désactivée dans la configuration.")
             sys.exit(2)
         open(d + "/envois", "a").write(repr((svc, n, a[3])) + "\\n")
 '''
@@ -121,7 +122,8 @@ def faux(tmp_path, monkeypatch):
 
 def envois(d):
     f = d / "envois"
-    return [eval(x) for x in f.read_text().splitlines()] if f.exists() else []
+    tous = [eval(x) for x in f.read_text().splitlines()] if f.exists() else []
+    return [e for e in tous if e[2] != ""]                      # un envoi de texte vide est une sonde, pas un envoi
 
 
 def test_sessions_et_envoi(faux):
@@ -243,15 +245,66 @@ def test_cible_disparue_retombe_sur_la_console_de_l_extension(fen, faux, monkeyp
     assert len(lancements(faux)) == 1 and envois(faux)[-1][0] != "org.kde.konsole-111"
 
 
-def test_acces_refuse_copie_dans_le_presse_papiers_et_explique_une_fois(fen, faux, monkeypatch):
+def test_acces_refuse_copie_explique_une_fois_et_n_ouvre_pas_de_console_inutile(fen, faux, monkeypatch):
     (faux / "refus").write_text("")
     infos = []
     monkeypatch.setattr(mod().QMessageBox, "information", lambda *a, **k: infos.append(a[2]))
     selectionner(fen, "uname -a")
     plugin(fen).vers_console()
     assert QApplication.clipboard().text() == "uname -a" and len(infos) == 1 and "DBus" in infos[0]
+    assert lancements(faux) == [] and envois(faux) == []                  # la sonde a suffi : aucune console ouverte pour rien
+    selectionner(fen, "date")
     plugin(fen).vers_console()
-    assert len(infos) == 1                                              # l'explication n'est donnée qu'une fois
+    assert QApplication.clipboard().text() == "date" and len(infos) == 1 and lancements(faux) == []   # explication donnée une fois
+
+
+def test_refus_avec_la_console_de_l_extension_deja_ouverte(fen, faux, monkeypatch):
+    selectionner(fen, "un")
+    plugin(fen).vers_console()                                            # autorisé : la console de l'extension s'ouvre
+    assert len(lancements(faux)) == 1
+    (faux / "refus").write_text("")                                       # l'option est ensuite désactivée dans Konsole
+    monkeypatch.setattr(mod().QMessageBox, "information", lambda *a, **k: None)
+    selectionner(fen, "deux")
+    plugin(fen).vers_console()
+    assert QApplication.clipboard().text() == "deux" and len(lancements(faux)) == 1
+
+
+def test_refus_aucune_console_ouverte_ouvre_celle_de_l_extension_puis_n_insiste_pas(fen, faux, monkeypatch):
+    (faux / "sessions").write_text("")                                    # aucune console ouverte : pas de sonde possible
+    (faux / "refus").write_text("")
+    monkeypatch.setattr(mod().QMessageBox, "information", lambda *a, **k: None)
+    selectionner(fen, "un")
+    plugin(fen).vers_console()
+    assert len(lancements(faux)) == 1 and QApplication.clipboard().text() == "un"      # la console ouverte sert de sonde
+    (faux / "sessions").write_text("")
+    selectionner(fen, "deux")
+    plugin(fen).vers_console()
+    assert len(lancements(faux)) == 1 and QApplication.clipboard().text() == "deux"    # pas de seconde console pour rien
+
+
+def test_reessayer_apres_les_reglages(fen, faux, monkeypatch):
+    (faux / "refus").write_text("")
+    monkeypatch.setattr(mod().QMessageBox, "information", lambda *a, **k: None)
+    selectionner(fen, "un")
+    plugin(fen).vers_console()
+    assert plugin(fen).refus_vu and lancements(faux) == []
+    (faux / "refus").unlink()                                             # l'utilisateur active l'option dans Konsole
+    d = mod().DialogueReglages(plugin(fen))
+    d._valider()                                                          # enregistrer les réglages remet le compteur à zéro
+    selectionner(fen, "deux")
+    plugin(fen).vers_console()
+    assert len(lancements(faux)) == 1 and envois(faux)[-1][2] == "deux"
+
+
+def test_logique_reconnait_le_refus_sur_stdout_comme_sur_stderr(faux, monkeypatch):
+    q = lg.trouver_qdbus()
+    (faux / "refus").write_text("")
+    with pytest.raises(lg.AccesRefuse):
+        lg.envoyer(q, "org.kde.konsole-111", 1, "x")                      # le faux qdbus écrit sur stdout, comme le vrai
+    import subprocess as sp
+    monkeypatch.setattr(lg, "_qdbus", lambda *a: sp.CompletedProcess(a, 2, b"", b"Error: org.freedesktop.DBus.Error.AccessDenied"))
+    with pytest.raises(lg.AccesRefuse):
+        lg.envoyer(q, "org.kde.konsole-111", 1, "x")                      # et sur stderr si une autre version le fait
 
 
 def test_sans_konsole_ou_sans_qdbus_presse_papiers(fen, faux, monkeypatch):
