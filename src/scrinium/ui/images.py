@@ -13,6 +13,7 @@ from PyQt6.QtWidgets import (QApplication, QDialog, QFileDialog, QHBoxLayout, QL
                              QListWidgetItem, QMenu, QMessageBox, QPlainTextEdit, QPushButton, QSizePolicy, QVBoxLayout,
                              QWidget)
 
+from ..core.plugins import FicheVue, PieceVue
 from ..core.store import LIMITES_PIECES
 from ..i18n import _
 from .icons import icone
@@ -263,8 +264,9 @@ class BandePieces(QWidget):
             nom = s.name if isinstance(s, Path) else _("Image collée") + time.strftime(" %Y-%m-%d %H:%M:%S")
             try:
                 type_, donnees = preparer(s)
-                self.fen.store.ajouter_piece(f, nom, type_, donnees)
+                piece = self.fen.store.ajouter_piece(f, nom, type_, donnees)
                 ajoutees += 1
+                self.fen.plugins.emettre("piece_jointe_ajoutee", fiche=FicheVue(t, f), piece=PieceVue(piece))
             except (ImageInvalide, ValueError, OSError) as ex:
                 QMessageBox.warning(self.fen, _("Image"), f"{nom} : {ex}")
         if ajoutees:
@@ -320,6 +322,8 @@ class BandePieces(QWidget):
 
     def supprimer(self, i):
         f, t = self.fen.fiche, self.fen.fiche_theme
-        self.fen.store.supprimer_piece(f, self.pieces[i])
+        piece = self.pieces[i]
+        self.fen.store.supprimer_piece(f, piece)
+        self.fen.plugins.emettre("piece_jointe_supprimee", fiche=FicheVue(t, f), piece=PieceVue(piece))
         self.charger(t, f)
         self.fen.pieces_modifiees()

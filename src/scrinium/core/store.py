@@ -96,6 +96,7 @@ class Fiche:
         self.cle = self.salt = None
         self.wrap = b""
         self.meta: dict = {}
+        self.ocr_cache = None    # (signature des fichiers, texte OCR) : voir Store.texte_ocr
         self.maj = time.strftime("%Y-%m-%d %H:%M", time.localtime(path.stat().st_mtime)) if path.exists() \
             else time.strftime("%Y-%m-%d %H:%M")
 
@@ -321,7 +322,31 @@ class Store:
         f.path, f.verrou, f.cle, f.salt, f.wrap = nouveau, False, None, None, b""
 
     def ouvrir_avec_cle_privee(self, f: Fiche, pem: bytes, phrase: str | None) -> str:
-        texte, f.meta = separer_meta(crypto.ouvrir_avec_cle_privee(f.path.read_bytes(), pem, phrase))
+        """Texte de la fiche rouverte avec la clé de secours. La clé de la fiche est gardée en mémoire (pour pouvoir
+        convertir aussi ses pièces jointes si on retire le verrou) : l'appelant la remet à None s'il renonce."""
+        data = f.path.read_bytes()
+        f.cle, f.salt, f.wrap = crypto.cle_depuis_cle_privee(data, pem, phrase)
+        texte, f.meta = separer_meta(crypto.ouvrir_avec_cle_privee(data, pem, phrase))
+        return texte
+
+    def chemins_pieces(self, f: Fiche) -> list:
+        """[(numéro, chemin)] des pièces présentes sur le disque (sans les déchiffrer)."""
+        return self._numeros(self.dossier_pj(f))
+
+    def texte_ocr(self, f: Fiche) -> str:
+        """Texte extrait (OCR) des pièces, pour la recherche. Vide pour une fiche verrouillée fermée. En cache tant que
+        les fichiers ne changent pas ; jamais écrit sur le disque (pour une fiche verrouillée : mémoire seulement)."""
+        if f.fermee or (f.verrou and f.cle is None):
+            f.ocr_cache = None
+            return ""
+        d = self.dossier_pj(f)
+        if not d.is_dir():
+            return ""
+        signature = tuple((p.name, p.stat().st_mtime_ns, p.stat().st_size) for p in sorted(d.iterdir()))
+        if f.ocr_cache and f.ocr_cache[0] == signature:
+            return f.ocr_cache[1]
+        texte = "\n".join(p.ocr for p in self.lister_pieces(f) if p.ocr)
+        f.ocr_cache = (signature, texte)
         return texte
 
     # ---------- pièces jointes ----------

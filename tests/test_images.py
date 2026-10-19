@@ -158,3 +158,13 @@ def test_titre_change_apres_ajout_les_images_suivent(fen):
     fen.titre.setText("Autre titre")
     fen.sauver()
     assert len(fen.store.lister_pieces(fen.fiche)) == 1 and fen.fiche.path.name == "Autre titre.md"
+
+
+def test_recherche_trouve_le_texte_des_images(fen):
+    fen.bande.ajouter([image()])
+    piece = fen.store.lister_pieces(fen.fiche)[0]
+    fen.store.maj_piece(fen.fiche, piece, ocr="facture électricité octobre")
+    fen.recherche.setText("électricité")
+    assert any(f is fen.fiche for _t, f in fen.rows)
+    fen.recherche.setText("introuvable-xyz")
+    assert fen.rows == []

@@ -264,3 +264,78 @@ def test_texte_lisible_sans_connaitre_les_pj(store):
     store.ajouter_piece(f, "a.png", "image/png", PNG)
     ancien = Store._lire(f.path)                   # lecture de la fiche seule, comme le fait 0.1.0
     assert ancien.texte == "texte important" and ancien.titre == "Ma fiche"
+
+
+# ---------- secours : rescue open --images / unlock ----------
+def _fiche_verrouillee_avec_images(tmp_path, monkeypatch):
+    from scrinium import cli
+    monkeypatch.setenv("SCRINIUM_HOME", str(tmp_path / "h"))
+    monkeypatch.setenv("SCRINIUM_LANG", "fr")
+    s = Store(Paths())
+    s.charger()
+    th = s.theme("Perso")
+    f = s.nouvelle_fiche(th)
+    s.enregistrer(th, f, "Wifi", "mot de passe en photo")
+    s.ajouter_piece(f, "box.png", "image/png", PNG)
+    s.ajouter_piece(f, "photo.jpg", "image/jpeg", JPG)
+    recovery.generer_paire(tmp_path / "k.pem", s.paths.recovery_pub)
+    s.verrouiller(th, f, "abcd")
+    return cli, s, th, f
+
+
+def test_rescue_extrait_les_images(tmp_path, monkeypatch, capsys):
+    cli, s, th, f = _fiche_verrouillee_avec_images(tmp_path, monkeypatch)
+    assert cli.main(["rescue", "list"]) == 0
+    assert "(+ 2 image(s))" in capsys.readouterr().out
+    assert cli.main(["rescue", "open", "Wifi", "--cle", str(tmp_path / "k.pem")]) == 0
+    sortie = capsys.readouterr()
+    assert "mot de passe en photo" in sortie.out and "--images" in sortie.err       # signale les images sans les écrire
+    dest = tmp_path / "sortie"
+    assert cli.main(["rescue", "open", "Wifi", "--cle", str(tmp_path / "k.pem"), "--images", str(dest)]) == 0
+    assert sorted(p.name for p in dest.iterdir()) == ["1-box.png", "2-photo.jpg"]
+    assert (dest / "1-box.png").read_bytes() == PNG and (dest / "2-photo.jpg").read_bytes() == JPG
+
+
+def test_rescue_unlock_remet_les_images_en_clair(tmp_path, monkeypatch, capsys):
+    cli, s, th, f = _fiche_verrouillee_avec_images(tmp_path, monkeypatch)
+    assert cli.main(["rescue", "unlock", "Wifi", "--cle", str(tmp_path / "k.pem")]) == 0
+    s2 = Store(Paths())
+    s2.charger()
+    g = next(x for x in s2.theme("Perso").fiches if x.titre == "Wifi")
+    assert not g.verrou and g.texte == "mot de passe en photo"
+    assert [(p.nom, s2.lire_piece(g, p)) for p in s2.lister_pieces(g)] == [("box.png", PNG), ("photo.jpg", JPG)]
+
+
+def test_secours_graphique_garde_la_cle_pour_les_pieces(tmp_path, monkeypatch):
+    """Même chemin que la fenêtre : ouvrir_avec_cle_privee puis retirer_verrou doit convertir aussi les images."""
+    cli, s, th, f = _fiche_verrouillee_avec_images(tmp_path, monkeypatch)
+    s2 = Store(Paths())
+    s2.charger()
+    g = next(x for x in s2.theme("Perso").fiches if x.titre == "Wifi")
+    g.texte = s2.ouvrir_avec_cle_privee(g, (tmp_path / "k.pem").read_bytes(), None)
+    s2.retirer_verrou(s2.theme("Perso"), g)
+    assert [s2.lire_piece(g, p) for p in s2.lister_pieces(g)] == [PNG, JPG]
+
+
+# ---------- recherche dans le texte OCR ----------
+def test_texte_ocr_cache_et_fiche_fermee(store):
+    th, f = nouvelle(store)
+    p = store.ajouter_piece(f, "t.png", "image/png", PNG)
+    assert store.texte_ocr(f) == ""
+    store.maj_piece(f, p, ocr="code de la porte 4821")
+    assert store.texte_ocr(f) == "code de la porte 4821"
+    store.maj_piece(f, p, ocr="autre texte")                 # le cache suit les modifications des fichiers
+    assert store.texte_ocr(f) == "autre texte"
+    store.verrouiller(th, f, "mdp", sans_secours=True)
+    assert store.texte_ocr(f) == "autre texte"                # ouverte : cherchable
+    f.texte = f.cle = f.salt = None
+    assert store.texte_ocr(f) == "" and f.ocr_cache is None   # fermée : rien, et le cache est purgé
+
+
+def test_ocr_d_une_fiche_verrouillee_jamais_en_clair_sur_disque(store):
+    th, f = nouvelle(store)
+    store.verrouiller(th, f, "mdp", sans_secours=True)
+    p = store.ajouter_piece(f, "t.png", "image/png", PNG)
+    store.maj_piece(f, p, ocr="SECRET-OCR-42", ocr_moteur="tesseract")
+    brut = b"".join(x.read_bytes() for x in store.dossier_pj(f).iterdir())
+    assert b"SECRET-OCR-42" not in brut and b"tesseract" not in brut

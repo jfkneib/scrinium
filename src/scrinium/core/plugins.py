@@ -23,7 +23,8 @@ from typing import Callable
 API_VERSION = 1
 MAX_ERREURS = 5     # au-delà, l'extension est désactivée automatiquement
 EVENEMENTS = ("demarrage", "arret", "fiche_ouverte", "fiche_enregistree", "fiche_fermee", "themes_modifies",
-              "fenetre_cachee", "fenetre_montree")
+              "fenetre_cachee", "fenetre_montree", "piece_jointe_ajoutee", "piece_jointe_supprimee",
+              "piece_jointe_modifiee")
 _NOM = re.compile(r"^[a-z0-9][a-z0-9_-]{0,40}$")
 
 
@@ -72,6 +73,25 @@ class FicheVue:
 
     def __repr__(self):
         return f"<FicheVue {self.id}{' (verrouillée)' if self.verrou else ''}>"
+
+
+class PieceVue:
+    """Vue en lecture d'une pièce jointe (image) : métadonnées seulement ; le contenu s'obtient par `ctx.lire_piece`."""
+    __slots__ = ("_p",)
+
+    def __init__(self, piece):
+        self._p = piece
+
+    id = property(lambda s: s._p.id)
+    nom = property(lambda s: s._p.nom)
+    type = property(lambda s: s._p.type)
+    taille = property(lambda s: s._p.taille)
+    ajoute = property(lambda s: s._p.ajoute)
+    ocr = property(lambda s: s._p.ocr)
+    ocr_moteur = property(lambda s: s._p.ocr_moteur)
+
+    def __repr__(self):
+        return f"<PieceVue {self.id} {self.nom} {self.type}>"
 
 
 class ReglagesPlugin:
@@ -123,6 +143,35 @@ class Contexte:
                 if t is vue._th and f is vue._f:
                     return t, f
         raise ValueError("fiche inconnue (supprimée ?)")
+
+    def pieces(self, vue: FicheVue) -> list:
+        """Pièces jointes (`PieceVue`) de la fiche. Vide pour une fiche verrouillée fermée."""
+        _t, f = self._trouver(vue)
+        return [PieceVue(p) for p in self._g.store.lister_pieces(f)]
+
+    def _piece(self, f, piece):
+        pid = piece if isinstance(piece, int) else piece.id
+        for p in self._g.store.lister_pieces(f):
+            if p.id == pid:
+                return p
+        raise ValueError("pièce inconnue (supprimée ?)")
+
+    def lire_piece(self, vue: FicheVue, piece) -> bytes:
+        """Octets de l'image (PNG ou JPEG). ValueError si la fiche est verrouillée fermée ou la pièce inconnue."""
+        _t, f = self._trouver(vue)
+        if f.fermee:
+            raise ValueError("fiche verrouillée : déverrouillez-la d'abord")
+        return self._g.store.lire_piece(f, self._piece(f, piece))
+
+    def maj_piece(self, vue: FicheVue, piece, ocr: str | None = None, ocr_moteur: str | None = None) -> None:
+        """Enregistre le texte extrait d'une image (chiffré avec elle si la fiche est verrouillée)."""
+        t, f = self._trouver(vue)
+        if f.fermee:
+            raise ValueError("fiche verrouillée : déverrouillez-la d'abord")
+        p = self._piece(f, piece)
+        champs = {k: v for k, v in (("ocr", ocr), ("ocr_moteur", ocr_moteur)) if v is not None}
+        self._g.store.maj_piece(f, p, **champs)
+        self._g.emettre("piece_jointe_modifiee", fiche=FicheVue(t, f), piece=PieceVue(p), origine=self.info.nom)
 
     def maj_meta(self, vue: FicheVue, **valeurs) -> None:
         """Ajoute/modifie/supprime (valeur None) des métadonnées. ValueError si la fiche est verrouillée fermée."""

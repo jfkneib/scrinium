@@ -20,7 +20,9 @@ def _recuperer(args) -> int:
     if args.action == "lister":
         for t, f in verrouillees:
             from .core.crypto import a_cle_de_secours
-            print(("secours " if a_cle_de_secours(f.path.read_bytes()) else "SANS    ") + f"{t.nom}/{f.path.name}")
+            n = len(store.chemins_pieces(f))
+            print(("secours " if a_cle_de_secours(f.path.read_bytes()) else "SANS    ") + f"{t.nom}/{f.path.name}"
+                  + (_("  (+ %d image(s))") % n if n else ""))
         return 0
     ref = (args.fiche or "").lower()
     res = [(t, f) for t, f in verrouillees if ref in f.titre.lower() or ref in f"{t.nom}/{f.titre}".lower()]
@@ -38,13 +40,43 @@ def _recuperer(args) -> int:
     except Exception as ex:
         print(_("Impossible : %s") % ex, file=sys.stderr)
         return 1
+    pieces = store.chemins_pieces(f)
     if args.action == "ouvrir":
         sys.stdout.write(texte if texte.endswith("\n") else texte + "\n")
+        if pieces and args.images:
+            return _extraire_images(pieces, pem, phrase, Path(args.images).expanduser())
+        if pieces:
+            print(_("%d image(s) jointe(s) : ajoutez --images DOSSIER pour les extraire (EN CLAIR).") % len(pieces), file=sys.stderr)
     else:
         f.texte = texte
-        store.retirer_verrou(t, f)
+        try:
+            store.retirer_verrou(t, f)
+        except (ValueError, OSError) as ex:
+            print(_("Impossible : %s") % ex, file=sys.stderr)
+            return 1
         print(_("Remise en clair : %s") % f.path)
     return 0
+
+
+def _extraire_images(pieces, pem, phrase, dossier: Path) -> int:
+    """Écrit les images d'une fiche verrouillée, déchiffrées avec la clé de secours, dans `dossier` (droits 700)."""
+    from .core import crypto
+    from .core.store import mkdir_prive, propre
+    mkdir_prive(dossier)
+    code = 0
+    for n, p in pieces:
+        try:
+            ent, donnees = crypto.ouvrir_piece_avec_cle_privee(p.read_bytes(), pem, phrase)
+        except Exception as ex:
+            print(_("Image %(n)s illisible : %(ex)s") % {"n": p.name, "ex": ex}, file=sys.stderr)
+            code = 1
+            continue
+        suffixe = ".jpg" if ent.get("type") == "image/jpeg" else ".png"
+        cible = dossier / f"{n}-{Path(propre(str(ent.get('nom', 'image')))).stem}{suffixe}"
+        cible.write_bytes(donnees)
+        cible.chmod(0o600)
+        print(cible, file=sys.stderr)
+    return code
 
 
 def main(argv=None) -> int:
@@ -59,6 +91,7 @@ def main(argv=None) -> int:
     r = sub.add_parser("rescue", aliases=["secours"], help=_("rouvrir une fiche verrouillée avec le fichier de secours (sans interface)"))
     r.add_argument("action", choices=["list", "open", "unlock", "lister", "ouvrir", "deverrouiller"])
     r.add_argument("fiche", metavar="TITLE", nargs="?")
+    r.add_argument("--images", metavar="DIR", help=_("avec « open » : extrait les images jointes (EN CLAIR) dans ce dossier"))
     r.add_argument("--key", "--cle", dest="cle", metavar="FILE", required=False, default="~/.config/scrinium/cle-de-secours.pem",
                    help=_("fichier de secours (PEM)"))
     a = p.parse_args(argv)

@@ -307,8 +307,9 @@ class Fenetre(QMainWindow):
             if not q and self.theme != self.TOUS and t.nom != self.theme:
                 continue   # une recherche porte sur tous les thèmes
             for f in sorted(t.fiches, key=lambda f: f.titre.lower()):
-                if q and q not in f.titre.lower() and q not in (f.texte or "").lower() and q not in t.nom.lower():
-                    continue   # fiche verrouillée : pas de recherche dans le contenu
+                if q and q not in f.titre.lower() and q not in (f.texte or "").lower() and q not in t.nom.lower() \
+                        and q not in self.store.texte_ocr(f).lower():
+                    continue   # fiche verrouillée fermée : pas de recherche dans le contenu (ni dans ses images)
                 it = QListWidgetItem(icone("object-locked") if f.verrou else QIcon_vide(), self._libelle(t, f, self.theme == self.TOUS or q))
                 self.liste.addItem(it)
                 if f is self.fiche:
@@ -512,7 +513,7 @@ class Fenetre(QMainWindow):
         for t in self.store.themes:
             for f in t.fiches:
                 if f.verrou and not f.fermee:
-                    f.texte = f.cle = f.salt = None
+                    f.texte = f.cle = f.salt = f.ocr_cache = None
                     f.wrap = b""
         if self.fiche is not None and self.fiche.fermee:
             self._afficher(self.fiche_theme, self.fiche)
@@ -701,7 +702,8 @@ class Fenetre(QMainWindow):
                                 ) == QMessageBox.StandardButton.Yes:
             self.store.retirer_verrou(t, f)
         else:
-            f.texte = None   # reste fermée ; rien n'a été écrit
+            f.texte = f.cle = f.salt = None   # reste fermée ; rien n'a été écrit
+            f.wrap = b""
             self.texte.setPlainText(_("Fiche toujours verrouillée."))
             return
         self._afficher(t, f)
