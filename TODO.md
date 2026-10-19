@@ -70,7 +70,7 @@ Dicter une note au micro, le texte s'insère à la position du curseur (`ctx.ui.
 - ☐ Option gratuite en attendant : la dictée du système (KDE/GNOME, Windows `Win+H`, macOS)
 
 ## 3 bis-b. Plugin `courriel` : envoi d'une fiche par courriel
-✔ Première version dans `plugins/courriel/` (testée en vrai avec Gmail : mot de passe d'application, SSL/TLS 465) : bouton + menu *Envoyer par courriel*, carnet d'adresses, choix multiple des destinataires + adresses libres, formulaire serveur SMTP (STARTTLS/SSL, test de connexion), récapitulatif avant envoi. Fiche verrouillée fermée : jamais envoyée ; ouverte : avertissement (part en clair). Mot de passe : trousseau (`keyring`) si présent, sinon session, ou fichier 0600 sur demande.
+✔ Première version dans `plugins/courriel/` (testée en vrai avec un compte Free ; Gmail exige un mot de passe d'application) : bouton + menu *Envoyer par courriel*, carnet d'adresses, choix multiple des destinataires + adresses libres, formulaire serveur SMTP (STARTTLS/SSL, test de connexion), récapitulatif avant envoi. Fiche verrouillée fermée : jamais envoyée ; ouverte : avertissement (part en clair). Mot de passe : trousseau (`keyring`) si présent, sinon session, ou fichier 0600 sur demande.
 - ☐ Pièces jointes (fichier `.md`, images quand elles existeront) · ☐ plusieurs comptes d'envoi · ☐ groupes de contacts · ☐ import du carnet (vCard/CSV) · ☐ envoi chiffré de bout en bout (PGP) pour les fiches verrouillées
 
 ## 3 ter. Plugin `scrinium-capture` : résultat d'une commande dans une fiche
