@@ -5,6 +5,8 @@ scrinium.svg  -  the Scrinium application icon. Original work drawn for this pro
                  shapes (not derived from any other artwork). Copyright (C) 2026 Jean-François Kneib,
                  licensed under the GNU General Public License, version 3 or later (GPL-3.0-or-later).
 
+mail-send.svg, x-office-address-book.svg  -  same: original work of this project, GPL-3.0-or-later.
+
 All other *.svg files come from the Breeze icon theme (KDE) and are licensed under the
 GNU Lesser General Public License, version 3 or later (LGPL-3.0-or-later):
 https://invent.kde.org/frameworks/breeze-icons
