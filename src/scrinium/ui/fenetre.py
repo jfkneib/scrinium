@@ -6,7 +6,7 @@ import time
 from PyQt6.QtCore import QEvent, QSize, Qt, QTimer
 from PyQt6.QtGui import QAction, QActionGroup, QKeySequence
 from PyQt6.QtWidgets import (QApplication, QFileDialog, QHBoxLayout, QInputDialog, QLabel, QLineEdit, QListWidget,
-                             QListWidgetItem, QMainWindow, QMenu, QMessageBox, QPlainTextEdit, QPushButton, QSplitter,
+                             QListWidgetItem, QMainWindow, QMenu, QMessageBox, QPushButton, QSplitter,
                              QSystemTrayIcon, QToolBar, QVBoxLayout, QWidget)
 
 from .. import __version__
@@ -17,6 +17,7 @@ from ..i18n import _
 from .assistant import AssistantCle
 from .extensions import DialogueExtensions, UiPlugin
 from .icons import icone, icone_appli
+from .images import BandePieces, Editeur
 
 ORANGE, VERT, GRIS = "#c77700", "#2e8b3a", "gray"
 
@@ -160,14 +161,17 @@ class Fenetre(QMainWindow):
         ligne.addWidget(self.titre, 1)
         ligne.addWidget(self.b_copier)
         ligne.addWidget(self.b_verrou)
-        self.texte = QPlainTextEdit()
+        self.texte = Editeur()
         self.texte.setPlaceholderText(_("Note"))
+        self.bande = BandePieces(self)
+        self.texte.images_recues.connect(self.bande.ajouter)
         self.statut = QLabel("")
         droite = QWidget()
         ld = QVBoxLayout(droite)
         ld.setContentsMargins(0, 0, 0, 0)
         ld.addLayout(ligne)
         ld.addWidget(self.texte, 1)
+        ld.addWidget(self.bande)
         ld.addWidget(self.statut)
 
         sp = QSplitter()
@@ -350,11 +354,18 @@ class Fenetre(QMainWindow):
             self.texte.clear()
             self._statut(_("Aucune fiche : « Fiche » (Ctrl+N)"))
         self._etat_editeur(f is not None and not ferme)
+        self.bande.charger(t, f)
         self.texte.document().clearUndoRedoStacks()
         self.chargement = False
         self._maj_boutons()
         if f is not None:
             self.plugins.emettre("fiche_ouverte", fiche=FicheVue(t, f))
+
+    def pieces_modifiees(self):
+        """Appelé par la bande après un ajout ou une suppression d'image."""
+        f, t = self.fiche, self.fiche_theme
+        if f is not None:
+            self._statut(f"{_('✔ Images mises à jour')} ({time.strftime('%H:%M:%S')})  ·  {t.nom}/{f.path.name}", VERT)
 
     def nouvelle_fiche(self):
         self.quitter_fiche()
@@ -596,7 +607,7 @@ class Fenetre(QMainWindow):
         else:
             avertissement = _("Mot de passe oublié : le fichier de secours permettra de rouvrir la fiche.")
         if QMessageBox.question(self, _("Verrouiller la fiche"),
-                                _("Le texte de la fiche sera chiffré avec un mot de passe (le titre reste visible).\n\n")
+                                _("Le texte et les images de la fiche seront chiffrés avec un mot de passe (le titre reste visible).\n\n")
                                 + avertissement) != QMessageBox.StandardButton.Yes:
             return
         m1 = self._mdp(_("Verrouiller"), _("Mot de passe (4 caractères minimum) :"))
@@ -609,7 +620,11 @@ class Fenetre(QMainWindow):
         if m1 != m2:
             QMessageBox.critical(self, _("Mot de passe"), _("Les deux saisies sont différentes, fiche non verrouillée."))
             return
-        self.store.verrouiller(t, f, m1)
+        try:
+            self.store.verrouiller(t, f, m1)
+        except (ValueError, OSError) as ex:
+            QMessageBox.critical(self, _("Verrouiller"), _("Fiche non verrouillée : %s") % ex)
+            return
         self._afficher(t, f)
         self.maj_themes()
         self.maj_fiches()
@@ -617,11 +632,15 @@ class Fenetre(QMainWindow):
     def retirer_verrou(self):
         f, t = self.fiche, self.fiche_theme
         if QMessageBox.question(self, _("Retirer le mot de passe"),
-                                _("Le texte de la fiche sera de nouveau stocké en clair. Continuer ?")
+                                _("Le texte et les images de la fiche seront de nouveau stockés en clair. Continuer ?")
                                 ) != QMessageBox.StandardButton.Yes:
             return
         self.sauver()
-        self.store.retirer_verrou(t, f)
+        try:
+            self.store.retirer_verrou(t, f)
+        except (ValueError, OSError) as ex:
+            QMessageBox.critical(self, _("Retirer le mot de passe"), _("Verrou conservé : %s") % ex)
+            return
         self._afficher(t, f)
         self.maj_themes()
         self.maj_fiches()
