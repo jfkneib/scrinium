@@ -31,7 +31,8 @@ leur stockage et leur chiffrement avec la fiche font partie du format de fichier
 
 ## 1. Images dans les fiches (v0.2, dans le cœur)
 Une fiche peut contenir une ou plusieurs images, en plus du texte ou à sa place.
-- ☐ Format : une fiche = `titre.md` + dossier `titre.pj/` (pièces jointes) ; le `.md` référence les images (`![](titre.pj/1.png)`)
+- ◐ **Spécification rédigée : `docs/format-pieces-jointes.md` (à valider avant tout code)**. Option B retenue (vignettes sous la fiche, texte simple). La fiche `.md`/`.lock` ne change pas ; pièces dans `titre.pj/`, verrouillées en `AMLOCK3` (affine la ligne « `.lock` v3 » ci-dessous)
+- ☐ Format : une fiche = `titre.md` + dossier `titre.pj/` (pièces jointes) ; (le `.md` ne référence plus les images : option B)
 - ☐ **Fiches verrouillées** : les images doivent être chiffrées aussi (même clé, AES-GCM). Nouveau format `.lock` v3 (conteneur : texte + pièces jointes), l'ancien format reste lisible. À spécifier AVANT de coder (tests de compatibilité).
 - ☐ Coller une image depuis le presse-papiers (Ctrl+V), glisser-déposer, bouton « Ajouter une image »
 - ☐ Affichage dans l'éditeur (vignette cliquable, plein écran), suppression, export
