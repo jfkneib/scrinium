@@ -4,12 +4,15 @@
 
 - Exécuter une commande… : la sortie s'affiche, puis s'insère au curseur de la fiche (bloc daté, comme `scrinium ajouter`).
   La commande n'est lancée que sur votre demande, avec un délai maximal et une taille de sortie limitée.
-- Console : envoie le texte sélectionné dans la fiche vers une console. Konsole : le texte est tapé SANS être validé (vous
+- Console : envoie le texte sélectionné dans la fiche vers une console. L'extension ouvre sa propre Konsole (titrée
+  « Scrinium »), la réutilise toujours, et la rouvre si vous l'avez fermée. Le texte y est tapé SANS être validé (vous
   relisez, puis Entrée) ; il faut pour cela activer dans Konsole « Enable the security sensitive parts of the DBus API ».
-  Sinon, ou ailleurs que sous Konsole : le texte est copié dans le presse-papiers.
+  Sinon, ou ailleurs que sous Konsole : le texte est copié dans le presse-papiers. « Choisir la console cible… » permet
+  d'utiliser à la place une de vos consoles existantes.
 Le pendant « fiche -> commande » (`ip a | scrinium ajouter …`) est dans le cœur : `scrinium ajouter`.
 """
 import threading
+import time
 
 from PyQt6.QtCore import QObject, pyqtSignal
 from PyQt6.QtWidgets import (QApplication, QCheckBox, QDialog, QDialogButtonBox, QFormLayout, QHBoxLayout, QInputDialog,
@@ -131,12 +134,14 @@ class CapturePlugin(Plugin):
 
     def activer(self, ctx):
         self.ctx = ctx
-        self.cible = None          # console choisie (service, session) : gardée tant qu'elle existe
+        self.cible = None          # console choisie à la main (service, session) : gardée tant qu'elle existe
+        self.pid_dedie = None      # PID de la Konsole ouverte par l'extension
         if ctx.ui is None:
             return
         ctx.ui.ajouter_bouton(_("Console"), self.vers_console, "utilities-terminal")
         ctx.ui.ajouter_action(_("Envoyer la sélection vers une console"), self.vers_console, "utilities-terminal")
         ctx.ui.ajouter_action(_("Choisir la console cible…"), self.choisir_cible, "utilities-terminal")
+        ctx.ui.ajouter_action(_("Revenir à la console de l'extension"), self.oublier_cible, "utilities-terminal")
         ctx.ui.ajouter_action(_("Exécuter une commande et insérer la sortie…"), self.commande, "system-run")
         ctx.ui.ajouter_action(_("Réglages de la capture…"), self.reglages, "configure")
 
@@ -150,12 +155,16 @@ class CapturePlugin(Plugin):
         DialogueReglages(self, _parent()).exec()
 
     # ---------- fiche -> console ----------
+    def oublier_cible(self):
+        self.cible = None
+        self.ctx.ui.notifier(_("Console"), _("Le texte ira dans la console de l'extension (ouverte au besoin)."))
+
     def choisir_cible(self):
         """Choisit (et mémorise) la console qui recevra le texte."""
         qdbus = logique.trouver_qdbus()
         sessions = logique.sessions_konsole(qdbus) if qdbus else []
         if not sessions:
-            self.ctx.ui.notifier(_("Console"), _("Aucune console Konsole ouverte (le texte sera copié dans le presse-papiers)."))
+            self.ctx.ui.notifier(_("Console"), _("Aucune console Konsole ouverte : celle de l'extension s'ouvrira au premier envoi."))
             return
         choix = self._choisir(sessions, forcer=True)
         if choix is not None:
@@ -173,22 +182,49 @@ class CapturePlugin(Plugin):
         QApplication.clipboard().setText(texte)
         self.ctx.ui.notifier(_("Console"), _("Copié : collez dans votre console (Ctrl+Maj+V). Rien n'est validé."))
 
+    def _console_dediee(self, qdbus):
+        """Session de la Konsole ouverte par l'extension, si elle existe encore (sinon None)."""
+        pid = self.pid_dedie or self.ctx.reglages.get("konsole_pid")
+        if not pid:
+            return None
+        return next((x for x in logique.sessions_konsole(qdbus) if x[0] == f"org.kde.konsole-{pid}"), None)
+
+    def _ouvrir_console(self, qdbus):
+        """Ouvre la Konsole de l'extension et attend qu'elle soit prête (quelques secondes au plus)."""
+        pid = logique.lancer_konsole()
+        if pid is None:
+            return None
+        self.pid_dedie = pid
+        self.ctx.reglages.set("konsole_pid", pid)
+        for _i in range(50):
+            QApplication.processEvents()
+            session = self._console_dediee(qdbus)
+            if session:
+                fin = time.time() + 0.5               # laisse au shell le temps de démarrer
+                while time.time() < fin:
+                    QApplication.processEvents()
+                    time.sleep(0.02)
+                return session
+            time.sleep(0.15)
+        return None
+
     def _konsole(self, texte: str) -> bool:
-        """Tape le texte dans une session Konsole ; False si ce n'est pas possible (repli sur le presse-papiers)."""
+        """Tape le texte dans la console cible (ou dans la Konsole de l'extension, ouverte au besoin) ; False si ce n'est
+        pas possible (repli sur le presse-papiers)."""
         qdbus = logique.trouver_qdbus()
         if not qdbus:
             return False
         try:
             sessions = logique.sessions_konsole(qdbus)
-            if not sessions:
-                return False
-            choix = next((x for x in sessions if x[:2] == self.cible), None)      # la console déjà choisie, si elle existe encore
+            choix = next((x for x in sessions if x[:2] == self.cible), None)    # console choisie à la main, si elle existe encore
+            neuve = False
             if choix is None:
-                choix = self._choisir(sessions)
+                choix = self._console_dediee(qdbus)
                 if choix is None:
-                    return True                   # annulé : on n'envoie rien, on ne copie rien
-                if len(sessions) > 1:
-                    self.cible = choix[:2]        # choix explicite entre plusieurs : mémorisé
+                    choix = self._ouvrir_console(qdbus)
+                    neuve = choix is not None
+            if choix is None:
+                return False
             logique.envoyer(qdbus, *choix[:2], texte)
         except logique.AccesRefuse:
             if not self.ctx.reglages.get("aide_vue", False):
@@ -198,7 +234,8 @@ class CapturePlugin(Plugin):
         except Exception as ex:
             self.ctx.ui.notifier(_("Console"), _("Konsole : %s") % ex)
             return False
-        self.ctx.ui.notifier(_("Console"), _("Tapé dans « %s » (non validé : relisez, puis Entrée).") % choix[2])
+        self.ctx.ui.notifier(_("Console"), (_("Console ouverte : ") if neuve else "")
+                             + _("texte tapé dans « %s » (non validé : relisez, puis Entrée).") % choix[2])
         return True
 
     def _choisir(self, sessions, forcer=False):
