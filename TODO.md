@@ -60,7 +60,7 @@ Extraire le texte d'une image de fiche pour pouvoir la chercher/copier. Moteurs 
 - ☐ Bouton « Extraire le texte » sur une image, résultat modifiable avant enregistrement
 
 ## 3 bis. Plugin `scrinium-dictee` : dictée vocale (v0.5)
-✔ Première version écrite dans `plugins/dictee/` (non testée de bout en bout : installation et modèle à valider) : demande d'accord à l'activation pour installer `faster-whisper` (pip --target dans `ctx.dossier_donnees`), modèle téléchargé à la 1re dictée après accord, micro via parecord/pw-record/arecord, Ctrl+Alt+D, réglages modèle/langue. Reste : appui-pour-parler, ponctuation, mode « remplacer la sélection », paquet séparé.
+✔ Première version dans `plugins/dictee/`, testée de bout en bout sur l'Inspiron (installation, modèle `small`, micro, insertion) : demande d'accord à l'activation pour installer `faster-whisper` (pip --target dans `ctx.dossier_donnees`), modèle téléchargé à la 1re dictée après accord, micro via parecord/pw-record/arecord, Ctrl+Alt+D, réglages modèle/langue. Reste : appui-pour-parler, ponctuation, mode « remplacer la sélection », paquet séparé.
 Dicter une note au micro, le texte s'insère à la position du curseur (`ctx.ui.inserer_texte`, déjà dans l'API).
 - ☐ Reconnaissance **locale** (aucun envoi sur Internet) : `faster-whisper` (modèles `base`/`small`, bon en français, CPU suffisant, GPU facultatif) ; alternative légère : Vosk. Ollama n'est pas l'outil pour la parole.
 - ☐ Enregistrement micro (QtMultimedia ou `sounddevice`), bouton « Dicter » + raccourci appui-pour-parler, indicateur d'écoute
@@ -70,7 +70,7 @@ Dicter une note au micro, le texte s'insère à la position du curseur (`ctx.ui.
 - ☐ Option gratuite en attendant : la dictée du système (KDE/GNOME, Windows `Win+H`, macOS)
 
 ## 3 bis-b. Plugin `courriel` : envoi d'une fiche par courriel
-✔ Première version dans `plugins/courriel/` (tests de la logique OK, interface à essayer) : bouton + menu *Envoyer par courriel*, carnet d'adresses, choix multiple des destinataires + adresses libres, formulaire serveur SMTP (STARTTLS/SSL, test de connexion), récapitulatif avant envoi. Fiche verrouillée fermée : jamais envoyée ; ouverte : avertissement (part en clair). Mot de passe : trousseau (`keyring`) si présent, sinon session, ou fichier 0600 sur demande.
+✔ Première version dans `plugins/courriel/` (testée en vrai avec Gmail : mot de passe d'application, SSL/TLS 465) : bouton + menu *Envoyer par courriel*, carnet d'adresses, choix multiple des destinataires + adresses libres, formulaire serveur SMTP (STARTTLS/SSL, test de connexion), récapitulatif avant envoi. Fiche verrouillée fermée : jamais envoyée ; ouverte : avertissement (part en clair). Mot de passe : trousseau (`keyring`) si présent, sinon session, ou fichier 0600 sur demande.
 - ☐ Pièces jointes (fichier `.md`, images quand elles existeront) · ☐ plusieurs comptes d'envoi · ☐ groupes de contacts · ☐ import du carnet (vCard/CSV) · ☐ envoi chiffré de bout en bout (PGP) pour les fiches verrouillées
 
 ## 3 ter. Plugin `scrinium-capture` : résultat d'une commande dans une fiche
