@@ -126,6 +126,7 @@ class DialogueReglages(QDialog):
 
     def _valider(self):
         self.p.ctx.reglages.set("direct", self.direct.isChecked())
+        self.p.refus_vu = False          # l'utilisateur a peut-être activé l'option de Konsole : on réessaie
         self.accept()
 
 
@@ -136,6 +137,7 @@ class CapturePlugin(Plugin):
         self.ctx = ctx
         self.cible = None          # console choisie à la main (service, session) : gardée tant qu'elle existe
         self.pid_dedie = None      # PID de la Konsole ouverte par l'extension
+        self.refus_vu = False      # Konsole a refusé l'envoi : on n'ouvre plus de console pour rien (remis à zéro par les réglages)
         if ctx.ui is None:
             return
         ctx.ui.ajouter_bouton(_("Console"), self.vers_console, "utilities-terminal")
@@ -180,7 +182,7 @@ class CapturePlugin(Plugin):
         if self.ctx.reglages.get("direct", True) and self._konsole(texte):
             return
         QApplication.clipboard().setText(texte)
-        self.ctx.ui.notifier(_("Console"), _("Copié : collez dans votre console (Ctrl+Maj+V). Rien n'est validé."))
+        self.ctx.ui.notifier(_("Console"), _("Copié dans le presse-papiers : collez dans votre console (Ctrl+Maj+V). Rien n'est validé."))
 
     def _console_dediee(self, qdbus):
         """Session de la Konsole ouverte par l'extension, si elle existe encore (sinon None)."""
@@ -221,12 +223,18 @@ class CapturePlugin(Plugin):
             if choix is None:
                 choix = self._console_dediee(qdbus)
                 if choix is None:
+                    if self.refus_vu:
+                        return False                       # déjà refusé : inutile d'ouvrir une console qui resterait vide
+                    if sessions:                           # sonde sur une console existante : Konsole accepte-t-il l'envoi ?
+                        logique.envoyer(qdbus, *sessions[0][:2], "")
                     choix = self._ouvrir_console(qdbus)
                     neuve = choix is not None
             if choix is None:
                 return False
             logique.envoyer(qdbus, *choix[:2], texte)
         except logique.AccesRefuse:
+            self.refus_vu = True
+            self.ctx.ui.notifier(_("Console"), _("Konsole refuse l'envoi direct : texte copié dans le presse-papiers."))
             if not self.ctx.reglages.get("aide_vue", False):
                 self.ctx.reglages.set("aide_vue", True)
                 QMessageBox.information(_parent(), _("Console"), AIDE_KONSOLE)
