@@ -1,0 +1,8 @@
+{
+  "titre": "OCR (texte des images)",
+  "version": "0.1",
+  "auteur": "Scrinium",
+  "description": "Extrait le texte des images jointes à une fiche avec Tesseract (local, rien n'est envoyé sur Internet) ; le texte est cherchable, et chiffré avec l'image si la fiche est verrouillée.",
+  "classe": "OcrPlugin",
+  "api": 1
+}
