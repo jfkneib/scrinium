@@ -96,19 +96,20 @@ depuis une ancienne version laisse un dossier orphelin (rien n'est perdu). À é
 - Fermeture/réduction de la fenêtre : les données déchiffrées sont libérées avec la fiche (comme le texte).
 - Recherche : le texte OCR des fiches en clair est indexé ; celui d'une fiche verrouillée seulement quand elle est ouverte.
 
-## 7. API des extensions (ajouts, `API_VERSION` inchangée)
+## 7. API des extensions (ajouts, `API_VERSION` inchangée) : implémentée
 
-- `FicheVue.pieces` : liste de `PieceVue` (`id`, `nom`, `type`, `taille`, `ocr`) ; vide pour une fiche verrouillée fermée.
-- `ctx.lire_piece(piece) -> bytes` (fiche ouverte seulement), `ctx.maj_piece(piece, ocr=…, ocr_moteur=…)`,
-  `ctx.ajouter_piece(vue, nom, donnees)`.
-- Événements : `piece_jointe_ajoutee(fiche, piece)`, `piece_jointe_supprimee(fiche, piece)`.
+- `ctx.pieces(vue)` → liste de `PieceVue` (`id`, `nom`, `type`, `taille`, `ajoute`, `ocr`, `ocr_moteur`) ; vide pour une fiche verrouillée fermée.
+  (Pas de propriété `FicheVue.pieces` : une `FicheVue` n'a pas accès au magasin.)
+- `ctx.lire_piece(vue, piece) -> bytes` (fiche ouverte seulement), `ctx.maj_piece(vue, piece, ocr=…, ocr_moteur=…)`.
+- Événements : `piece_jointe_ajoutee`, `piece_jointe_supprimee`, `piece_jointe_modifiee` (`fiche`, `piece`, `origine`).
+- **Pas de `ctx.ajouter_piece`** pour l'instant : une extension ne doit pas pouvoir joindre des octets non réencodés (métadonnées).
 - L'extension OCR s'appuie dessus ; l'extension courriel pourra joindre les images (fiches en clair ou ouvertes).
 
 ## 8. Tests de compatibilité à écrire AVANT le code
 
 1. Fiche `.md` et `.lock` (AMLOCK1/2) existantes : lues et réécrites à l'identique, sans créer de `.pj`.
 2. AMLOCK3 : aller-retour ; mauvais mot de passe ; en-tête ou données modifiés → `InvalidTag` ; magic inconnu → erreur claire.
-3. Clé de secours : ouvre une `n.lock` seule (étendre `scrinium rescue open`).
+3. Clé de secours : ouvre une `n.lock` seule ; `scrinium rescue open TITRE --images DOSSIER` les extrait ; `rescue unlock` les remet en clair.
 4. Verrouiller / retirer le verrou avec 3 pièces ; **interruption simulée à chaque étape** (chargement : état cohérent).
 5. Renommer la fiche et le thème, supprimer la fiche : les `.pj` suivent ; paires dans la corbeille.
 6. Import : EXIF supprimé, réduction à 2560 px, poids maximal, refus au-delà des limites.

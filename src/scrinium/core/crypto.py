@@ -22,7 +22,7 @@ MAGIC3 = b"AMLOCK3\n"   # pièce jointe verrouillée (même enveloppe que AMLOCK
 
 __all__ = ["InvalidTag", "MAGIC", "MAGIC1", "MAGIC3", "chiffrer_piece", "dechiffrer_piece", "dechiffrer_piece_mdp",
            "ouvrir_piece_avec_cle_privee", "deriver", "envelopper", "chiffrer", "dechiffrer",
-           "a_cle_de_secours", "ouvrir_avec_cle_privee"]
+           "a_cle_de_secours", "ouvrir_avec_cle_privee", "cle_depuis_cle_privee"]
 
 
 def _oaep():
@@ -67,18 +67,24 @@ def a_cle_de_secours(data: bytes) -> bool:
     return data.startswith(MAGIC) and int.from_bytes(data[36:38], "big") > 0
 
 
-def ouvrir_avec_cle_privee(data: bytes, pem_prive: bytes, phrase: str | None = None) -> str:
-    """Rouvre une fiche sans son mot de passe avec la clé privée de secours."""
+def cle_depuis_cle_privee(data: bytes, pem_prive: bytes, phrase: str | None = None):
+    """(clé AES de la fiche, sel, clé enveloppée) retrouvée avec la clé privée de secours."""
     if not data.startswith(MAGIC):
         raise ValueError("fiche sans clé de secours (ancien format) : seul son mot de passe peut l'ouvrir")
-    salt, nonce = data[8:24], data[24:36]
+    salt = data[8:24]
     n = int.from_bytes(data[36:38], "big")
-    wrap, ct = data[38:38 + n], data[38 + n:]
+    wrap = data[38:38 + n]
     if not wrap:
         raise ValueError("fiche sans clé de secours : seul son mot de passe peut l'ouvrir")
     priv = serialization.load_pem_private_key(pem_prive, password=phrase.encode("utf-8") if phrase else None)
-    cle = priv.decrypt(wrap, _oaep())
-    return AESGCM(cle).decrypt(nonce, ct, MAGIC + salt + data[36:38] + wrap).decode("utf-8")
+    return priv.decrypt(wrap, _oaep()), salt, wrap
+
+
+def ouvrir_avec_cle_privee(data: bytes, pem_prive: bytes, phrase: str | None = None) -> str:
+    """Rouvre une fiche sans son mot de passe avec la clé privée de secours."""
+    cle, salt, wrap = cle_depuis_cle_privee(data, pem_prive, phrase)
+    nonce, wl, ct = data[24:36], data[36:38], data[38 + len(wrap):]
+    return AESGCM(cle).decrypt(nonce, ct, MAGIC + salt + wl + wrap).decode("utf-8")
 
 
 # ---------- pièces jointes verrouillées (AMLOCK3) ----------

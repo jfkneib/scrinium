@@ -161,3 +161,41 @@ def test_dossier_donnees_propre_a_l_extension(store):
     g.activer("ok")
     d = g.actifs["ok"][1].dossier_donnees
     assert d == store.paths.base / "plugins-donnees" / "ok" and not d.exists()   # créé seulement à la demande
+
+
+def test_api_pieces_jointes(store):
+    code = '''
+from scrinium.core.plugins import Plugin
+EVTS = []
+class P(Plugin):
+    def activer(self, ctx):
+        self.ctx = ctx
+        for e in ("piece_jointe_ajoutee", "piece_jointe_supprimee", "piece_jointe_modifiee"):
+            ctx.on(e, lambda e=e, **kw: EVTS.append((e, kw["piece"].id, kw.get("origine"))))
+'''
+    faire_plugin(store, "ocr", code)
+    th = store.nouveau_theme("T")
+    f = store.nouvelle_fiche(th)
+    store.enregistrer(th, f, "Fiche", "x")
+    store.ajouter_piece(f, "a.png", "image/png", b"\x89PNG-xx")
+    g = Gestionnaire(store)
+    g.demarrer()
+    assert g.activer("ocr")
+    ctx = g.actifs["ocr"][1]
+    vue = next(v for v in ctx.fiches() if v.titre == "Fiche")
+    (pv,) = ctx.pieces(vue)
+    assert (pv.id, pv.nom, pv.type, pv.ocr) == (1, "a.png", "image/png", "")
+    assert ctx.lire_piece(vue, pv) == b"\x89PNG-xx" and ctx.lire_piece(vue, 1) == b"\x89PNG-xx"
+    ctx.maj_piece(vue, pv, ocr="texte lu", ocr_moteur="tesseract")
+    assert ctx.pieces(vue)[0].ocr == "texte lu" and ctx.pieces(vue)[0].ocr_moteur == "tesseract"
+    import sys
+    assert ("piece_jointe_modifiee", 1, "ocr") in sys.modules["scrinium_plugin_ocr"].EVTS
+    with pytest.raises(ValueError):
+        ctx.lire_piece(vue, 99)
+    store.verrouiller(th, f, "mdp", sans_secours=True)
+    f.texte = f.cle = f.salt = None                       # fiche verrouillée fermée : rien n'est accessible
+    assert ctx.pieces(vue) == []
+    with pytest.raises(ValueError):
+        ctx.lire_piece(vue, 1)
+    with pytest.raises(ValueError):
+        ctx.maj_piece(vue, 1, ocr="x")

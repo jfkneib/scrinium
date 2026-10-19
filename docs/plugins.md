@@ -40,6 +40,9 @@ class MyPlugin(Plugin):
 | `ctx.themes()` | list of topic names |
 | `ctx.fiches(theme=None)` | list of `FicheVue` |
 | `ctx.fiche_courante()` | the note shown in the window, or `None` |
+| `ctx.pieces(vue)` | attachments (images) of a note: list of `PieceVue` (`id`, `nom`, `type` `image/png` or `image/jpeg`, `taille`, `ajoute`, `ocr`, `ocr_moteur`); empty for a closed locked note |
+| `ctx.lire_piece(vue, piece)` | bytes of an attachment (`piece` = `PieceVue` or its `id`); `ValueError` for a closed locked note |
+| `ctx.maj_piece(vue, piece, ocr=None, ocr_moteur=None)` | store text extracted from an image (encrypted with it if the note is locked; searched by the main window) |
 | `ctx.maj_meta(vue, **values)` | add/change/remove (`None`) metadata of a note, saved with it |
 | `ctx.modifier(vue, titre=None, texte=None)` | change a note |
 | `ctx.reglages` | per-extension settings: `.get(key, default)`, `.set(key, value)`, `.tous()` |
@@ -63,6 +66,8 @@ For a locked note that is still closed, `texte` is `None` and `meta` is `{}`; ch
 | `fiche_fermee` | `fiche` |
 | `themes_modifies` | — |
 | `fenetre_cachee` / `fenetre_montree` | — |
+| `piece_jointe_ajoutee` / `piece_jointe_supprimee` | `fiche`, `piece` (a deleted attachment can no longer be read) |
+| `piece_jointe_modifiee` | `fiche`, `piece`, `origine` (extension name that called `ctx.maj_piece`) |
 
 Handlers receive keyword arguments; accept `**kw` to stay compatible with future additions.
 
