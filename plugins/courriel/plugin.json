@@ -1,0 +1,8 @@
+{
+  "titre": "Envoi par courriel",
+  "version": "0.1",
+  "auteur": "Scrinium",
+  "description": "Envoie la fiche affichée par courriel : carnet d'adresses, choix des destinataires, réglages du serveur d'envoi (SMTP). Une fiche verrouillée fermée n'est jamais envoyée.",
+  "classe": "CourrielPlugin",
+  "api": 1
+}
