@@ -10,7 +10,7 @@ from PyQt6.QtWidgets import (QApplication, QFileDialog, QHBoxLayout, QInputDialo
                              QSystemTrayIcon, QToolBar, QVBoxLayout, QWidget)
 
 from .. import __version__
-from ..core import autostart, crypto
+from ..core import autostart, capture, crypto
 from ..core.plugins import FicheVue, Gestionnaire
 from ..core.store import ICONE_DEFAUT, Store, propre
 from ..i18n import _
@@ -361,6 +361,25 @@ class Fenetre(QMainWindow):
         self._maj_boutons()
         if f is not None:
             self.plugins.emettre("fiche_ouverte", fiche=FicheVue(t, f))
+
+    def ajouter_depuis_cli(self, p: dict) -> str:
+        """Appelé par l'instance unique pour `scrinium ajouter` : écrit ici, pour que l'éditeur reste cohérent.
+        Retourne un message d'erreur, ou \"\" si tout va bien. Une fiche verrouillée fermée est refusée."""
+        try:
+            self.sauver()        # ce qui est en cours de frappe est enregistré avant de toucher à la fiche
+            t, f = capture.ajouter(self.store, p["theme"], p["fiche"], p["texte"], p.get("commande", ""),
+                                   bool(p.get("remplacer")), bool(p.get("brut")))
+        except (ValueError, KeyError, OSError) as ex:
+            return str(ex)
+        if f is self.fiche:
+            self._afficher(t, f)          # le texte ajouté apparaît dans l'éditeur
+        self.maj_themes()
+        self.maj_fiches()
+        self.plugins.emettre("fiche_enregistree", fiche=FicheVue(t, f), origine="capture")
+        if self.tray is not None and not self.isVisible():
+            self.tray.showMessage(_("Scrinium"), _("Ajouté à « %(theme)s / %(fiche)s »") % {"theme": t.nom, "fiche": f.titre},
+                                  QSystemTrayIcon.MessageIcon.Information, 4000)
+        return ""
 
     def pieces_modifiees(self):
         """Appelé par la bande après un ajout ou une suppression d'image."""
