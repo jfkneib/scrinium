@@ -339,3 +339,41 @@ def test_ocr_d_une_fiche_verrouillee_jamais_en_clair_sur_disque(store):
     store.maj_piece(f, p, ocr="SECRET-OCR-42", ocr_moteur="tesseract")
     brut = b"".join(x.read_bytes() for x in store.dossier_pj(f).iterdir())
     assert b"SECRET-OCR-42" not in brut and b"tesseract" not in brut
+
+
+# ---------- remplacer_piece (recadrage) ----------
+def test_remplacer_piece_clair_change_de_type_et_efface_l_ocr(store):
+    th, f = nouvelle(store)
+    p = store.ajouter_piece(f, "a.png", "image/png", PNG)
+    store.maj_piece(f, p, ocr="ancien texte", ocr_moteur="tesseract")
+    n = store.remplacer_piece(f, p, "image/jpeg", JPG)
+    assert n.id == 1 and n.nom == "a.png" and n.chemin.name == "1.jpg" and not (n.chemin.parent / "1.png").exists()
+    (q,) = store.lister_pieces(f)
+    assert (q.type, q.ocr, q.ocr_moteur, q.nom) == ("image/jpeg", "", "", "a.png") and store.lire_piece(f, q) == JPG
+    assert any(x.endswith("Ma fiche.pj-1.png") for x in os.listdir(store.paths.corbeille))     # ancienne version gardée
+    assert store.texte_ocr(f) == ""
+
+
+def test_remplacer_piece_verrouillee(store):
+    th, f = nouvelle(store)
+    store.verrouiller(th, f, "mdp", sans_secours=True)
+    p = store.ajouter_piece(f, "s.png", "image/png", PNG)
+    store.maj_piece(f, p, ocr="secret")
+    n = store.remplacer_piece(f, p, "image/png", PNG + b"x")
+    (q,) = store.lister_pieces(f)
+    assert store.lire_piece(f, q) == PNG + b"x" and q.ocr == "" and q.nom == "s.png"
+    assert b"IMAGE-SECRETE" not in n.chemin.read_bytes()
+    assert any(x.endswith("1.lock") for x in os.listdir(store.paths.corbeille))
+    f.texte = f.cle = f.salt = None
+    with pytest.raises(ValueError):
+        store.remplacer_piece(f, p, "image/png", PNG)
+
+
+def test_remplacer_piece_limites(store):
+    th, f = nouvelle(store)
+    p = store.ajouter_piece(f, "a.png", "image/png", PNG)
+    with pytest.raises(ValueError, match="type"):
+        store.remplacer_piece(f, p, "image/gif", b"GIF89a")
+    with pytest.raises(ValueError, match="lourde"):
+        store.remplacer_piece(f, p, "image/png", b"0" * (LIMITES_PIECES["octets_piece"] + 1))
+    assert store.lire_piece(f, store.lister_pieces(f)[0]) == PNG                      # rien n'a changé

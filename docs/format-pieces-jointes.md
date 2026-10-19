@@ -90,7 +90,7 @@ depuis une ancienne version laisse un dossier orphelin (rien n'est perdu). À é
 
 - Sous l'éditeur : bande de **vignettes** (96 px, générées en mémoire à l'ouverture, **jamais mises en cache sur le disque**).
 - Ctrl+V avec une image dans le presse-papiers → pièce jointe (le texte collé continue d'aller dans l'éditeur).
-- Double-clic : visionneuse (zoom, flèches précédent/suivant). Clic droit : *Enregistrer sous…*, *Copier*, *Supprimer*.
+- Double-clic : visionneuse (flèches précédent/suivant ; **Recadrer** : rectangle à la souris, enregistré comme nouvelle image ou en remplacement — l'ancienne version est copiée à la corbeille et le texte OCR est effacé). Clic droit : *Enregistrer sous…*, *Copier*, *Supprimer*.
 - Fiche verrouillée fermée : aucune vignette, aucun nombre affiché. Ouverte : vignettes déchiffrées en mémoire seulement ;
   « Enregistrer sous… » écrit une copie **en clair** après avertissement.
 - Fermeture/réduction de la fenêtre : les données déchiffrées sont libérées avec la fiche (comme le texte).

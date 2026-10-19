@@ -36,6 +36,7 @@ Une fiche peut contenir une ou plusieurs images, en plus du texte ou à sa place
 - ☐ **Fiches verrouillées** : les images doivent être chiffrées aussi (même clé, AES-GCM). Nouveau format `.lock` v3 (conteneur : texte + pièces jointes), l'ancien format reste lisible. À spécifier AVANT de coder (tests de compatibilité).
 - ☐ Coller une image depuis le presse-papiers (Ctrl+V), glisser-déposer, bouton « Ajouter une image »
 - ☐ Affichage dans l'éditeur (vignette cliquable, plein écran), suppression, export
+- ✔ Recadrage dans la visionneuse (rectangle à la souris ; « nouvelle image » ou « remplacer l'originale », l'ancienne version va à la corbeille, texte OCR effacé) · ☐ rotation, annotation
 - ☐ Redimensionnement/compression à l'import (limiter le poids du dossier de données)
 - ☐ Corbeille : les pièces jointes suivent la fiche
 

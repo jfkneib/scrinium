@@ -7,11 +7,11 @@ Voir docs/format-pieces-jointes.md. Le stockage et le chiffrement sont dans `cor
 import time
 from pathlib import Path
 
-from PyQt6.QtCore import QBuffer, QByteArray, QIODevice, QSize, Qt, pyqtSignal
+from PyQt6.QtCore import QBuffer, QByteArray, QIODevice, QRect, QSize, Qt, pyqtSignal
 from PyQt6.QtGui import QColor, QIcon, QImage, QImageReader, QPainter, QPixmap
 from PyQt6.QtWidgets import (QApplication, QDialog, QFileDialog, QHBoxLayout, QLabel, QListView, QListWidget,
-                             QListWidgetItem, QMenu, QMessageBox, QPlainTextEdit, QPushButton, QSizePolicy, QVBoxLayout,
-                             QWidget)
+                             QListWidgetItem, QMenu, QMessageBox, QPlainTextEdit, QPushButton, QRubberBand, QSizePolicy,
+                             QVBoxLayout, QWidget)
 
 from ..core.plugins import FicheVue, PieceVue
 from ..core.store import LIMITES_PIECES
@@ -83,15 +83,15 @@ def _aplatir(img: QImage) -> QImage:
     return plat
 
 
-def preparer(source) -> tuple[str, bytes]:
+def preparer(source, jpeg: bool = False) -> tuple[str, bytes]:
     """(type MIME, octets) prêts à être joints : réduit à COTE_MAX px, sans métadonnées, ≤ OCTETS_MAX.
-    PNG par défaut (net pour les captures et l'OCR) ; JPEG si l'origine l'était, ou si le PNG est trop lourd.
+    PNG par défaut (net pour les captures et l'OCR) ; JPEG si l'origine l'était (ou si `jpeg`), ou si le PNG est trop lourd.
     Lève ImageInvalide."""
     img, fmt = _lire(source)
     img = _pixels_seuls(img)
     if max(img.width(), img.height()) > COTE_MAX:
         img = img.scaled(COTE_MAX, COTE_MAX, Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation)
-    if not (fmt in ("jpeg", "jpg") and not img.hasAlphaChannel()):
+    if not ((jpeg or fmt in ("jpeg", "jpg")) and not img.hasAlphaChannel()):
         donnees = _encoder(img, "PNG")
         if len(donnees) <= OCTETS_MAX:
             return "image/png", donnees
@@ -138,25 +138,98 @@ class Editeur(QPlainTextEdit):
             super().insertFromMimeData(src)
 
 
-# ---------- visionneuse ----------
+# ---------- visionneuse (avec recadrage) ----------
+def convertir_selection(rect: QRect, etiquette: QSize, affichee: QSize, origine: QSize) -> QRect | None:
+    """Rectangle tracé dans l'étiquette (image centrée, mise à l'échelle) -> rectangle en pixels de l'image d'origine.
+    None si la sélection est (presque) hors de l'image ou trop petite."""
+    decx, decy = (etiquette.width() - affichee.width()) // 2, (etiquette.height() - affichee.height()) // 2
+    r = rect.translated(-decx, -decy).intersected(QRect(0, 0, affichee.width(), affichee.height()))
+    if r.width() < 8 or r.height() < 8 or affichee.width() <= 0 or affichee.height() <= 0:
+        return None
+    kx, ky = origine.width() / affichee.width(), origine.height() / affichee.height()
+    x, y = round(r.x() * kx), round(r.y() * ky)
+    w, h = min(round(r.width() * kx), origine.width() - x), min(round(r.height() * ky), origine.height() - y)
+    return QRect(x, y, w, h) if w >= 2 and h >= 2 else None
+
+
+class _Cadre(QLabel):
+    """Image affichée ; en mode recadrage, un rectangle se trace à la souris."""
+    selection = pyqtSignal(QRect)      # rectangle en coordonnées de l'étiquette
+    redimensionnee = pyqtSignal()
+
+    def __init__(self):
+        super().__init__(alignment=Qt.AlignmentFlag.AlignCenter)
+        self.actif = False
+        self.depart = None
+        self.bande = QRubberBand(QRubberBand.Shape.Rectangle, self)
+
+    def resizeEvent(self, ev):
+        super().resizeEvent(ev)
+        self.redimensionnee.emit()
+
+    def activer(self, on: bool):
+        self.actif = on
+        self.bande.hide()
+        self.setCursor(Qt.CursorShape.CrossCursor if on else Qt.CursorShape.ArrowCursor)
+
+    def mousePressEvent(self, ev):
+        if not self.actif:
+            return super().mousePressEvent(ev)
+        self.depart = ev.position().toPoint()
+        self.bande.setGeometry(QRect(self.depart, QSize()))
+        self.bande.show()
+
+    def mouseMoveEvent(self, ev):
+        if self.actif and self.depart is not None:
+            self.bande.setGeometry(QRect(self.depart, ev.position().toPoint()).normalized())
+
+    def mouseReleaseEvent(self, ev):
+        if self.actif and self.depart is not None:
+            self.depart = None
+            self.selection.emit(self.bande.geometry())
+
+
 class Visionneuse(QDialog):
     def __init__(self, fenetre, fiche, pieces, index, parent=None):
         super().__init__(parent)
         self.fen, self.fiche, self.pieces, self.i = fenetre, fiche, pieces, index
+        self.zone = None
         self.resize(900, 650)
         lay = QVBoxLayout(self)
-        self.image = QLabel(alignment=Qt.AlignmentFlag.AlignCenter)
+        self.image = _Cadre()
         self.image.setMinimumSize(200, 150)
         self.image.setSizePolicy(QSizePolicy.Policy.Ignored, QSizePolicy.Policy.Ignored)
+        self.image.selection.connect(self._selection)
+        self.image.redimensionnee.connect(self._redim)
         lay.addWidget(self.image, 1)
+        # barre du recadrage (cachée tant que le mode n'est pas activé)
+        self.barre = QWidget()
+        rb = QHBoxLayout(self.barre)
+        rb.setContentsMargins(0, 0, 0, 0)
+        self.aide = QLabel(_("Tracez un rectangle sur l'image."))
+        self.b_nouvelle = QPushButton(_("Garder comme nouvelle image"))
+        self.b_remplacer = QPushButton(_("Remplacer l'originale"))
+        self.b_remplacer.setToolTip(_("L'ancienne version est conservée dans la corbeille."))
+        for b in (self.b_nouvelle, self.b_remplacer):
+            b.setEnabled(False)
+        self.b_nouvelle.clicked.connect(lambda: self._appliquer(False))
+        self.b_remplacer.clicked.connect(lambda: self._appliquer(True))
+        rb.addWidget(self.aide, 1)
+        rb.addWidget(self.b_nouvelle)
+        rb.addWidget(self.b_remplacer)
+        self.barre.hide()
+        lay.addWidget(self.barre)
         bas = QHBoxLayout()
         self.prec, self.suiv = QPushButton("◀"), QPushButton("▶")
         self.titre = QLabel(alignment=Qt.AlignmentFlag.AlignCenter)
+        self.b_recadrer = QPushButton(icone("edit-cut"), _("Recadrer"))
+        self.b_recadrer.setCheckable(True)
+        self.b_recadrer.toggled.connect(self._mode_recadrage)
         fermer = QPushButton(_("Fermer"))
         self.prec.clicked.connect(lambda: self._aller(self.i - 1))
         self.suiv.clicked.connect(lambda: self._aller(self.i + 1))
         fermer.clicked.connect(self.accept)
-        for w in (self.prec, self.titre, self.suiv, fermer):
+        for w in (self.prec, self.titre, self.suiv, self.b_recadrer, fermer):
             bas.addWidget(w, 1 if w is self.titre else 0)
         lay.addLayout(bas)
         self._aller(index)
@@ -176,6 +249,7 @@ class Visionneuse(QDialog):
         self.titre.setText(f"{p.nom}   ({i + 1}/{len(self.pieces)})")
         self.prec.setEnabled(i > 0)
         self.suiv.setEnabled(i < len(self.pieces) - 1)
+        self.b_recadrer.setChecked(False)
         self._ajuster()
 
     def _ajuster(self):
@@ -183,9 +257,11 @@ class Visionneuse(QDialog):
             self.image.setPixmap(self.pix.scaled(self.image.size(), Qt.AspectRatioMode.KeepAspectRatio,
                                                  Qt.TransformationMode.SmoothTransformation))
 
-    def resizeEvent(self, ev):
-        super().resizeEvent(ev)
+    def _redim(self):
+        """L'image suit la taille de sa zone (fenêtre redimensionnée, barre de recadrage affichée ou cachée)."""
         self._ajuster()
+        if self.image.actif:
+            self._effacer_selection()
 
     def keyPressEvent(self, ev):
         if ev.key() == Qt.Key.Key_Left:
@@ -194,6 +270,54 @@ class Visionneuse(QDialog):
             self._aller(self.i + 1)
         else:
             super().keyPressEvent(ev)
+
+    # ----- recadrage -----
+    def _mode_recadrage(self, on: bool):
+        self.image.activer(on)
+        self.barre.setVisible(on)
+        self._effacer_selection()
+
+    def _effacer_selection(self):
+        self.zone = None
+        self.image.bande.hide()
+        self.aide.setText(_("Tracez un rectangle sur l'image."))
+        self.b_nouvelle.setEnabled(False)
+        self.b_remplacer.setEnabled(False)
+
+    def _selection(self, rect):
+        pm = self.image.pixmap()
+        self.zone = convertir_selection(rect, self.image.size(), pm.size(), self.pix.size()) if pm else None
+        ok = self.zone is not None
+        self.aide.setText(_("Zone : %(l)d × %(h)d px") % {"l": self.zone.width(), "h": self.zone.height()} if ok
+                          else _("Sélection trop petite ou hors de l'image."))
+        self.b_nouvelle.setEnabled(ok)
+        self.b_remplacer.setEnabled(ok)
+
+    def _appliquer(self, remplacer: bool):
+        if self.zone is None:
+            return
+        f, t, piece = self.fiche, self.fen.fiche_theme, self.pieces[self.i]
+        if remplacer and QMessageBox.question(
+                self, _("Remplacer l'originale"),
+                _("Remplacer l'image par la zone recadrée ? L'ancienne version est conservée dans la corbeille. "
+                  "Le texte extrait (OCR) de cette image sera effacé.")) != QMessageBox.StandardButton.Yes:
+            return
+        try:
+            type_, donnees = preparer(QImage.fromData(self.donnees).copy(self.zone), jpeg=piece.type == "image/jpeg")
+            if remplacer:
+                nouvelle = self.fen.store.remplacer_piece(f, piece, type_, donnees)
+                self.fen.plugins.emettre("piece_jointe_modifiee", fiche=FicheVue(t, f), piece=PieceVue(nouvelle), origine=None)
+            else:
+                p = Path(piece.nom)
+                nouvelle = self.fen.store.ajouter_piece(f, f"{p.stem} ({_('recadrée')}){p.suffix}", type_, donnees)
+                self.fen.plugins.emettre("piece_jointe_ajoutee", fiche=FicheVue(t, f), piece=PieceVue(nouvelle))
+        except (ImageInvalide, ValueError, OSError) as ex:
+            QMessageBox.warning(self, _("Recadrage"), str(ex))
+            return
+        self.pieces = self.fen.store.lister_pieces(f)
+        self.fen.bande.charger(t, f)
+        self.fen.pieces_modifiees()
+        self._aller(next((k for k, q in enumerate(self.pieces) if q.id == nouvelle.id), self.i))
 
 
 # ---------- bande de vignettes sous l'éditeur ----------
