@@ -356,17 +356,30 @@ class CapturePlugin(Plugin):
         self.refus_vu = False      # Konsole a refusé l'envoi : on n'ouvre plus de console pour rien (remis à zéro par les réglages)
         if ctx.ui is None:
             return
+        # le panneau d'abord : son interrupteur (menu et barre d'outils) doit être facile à retrouver s'il est fermé
+        self.panneau = PanneauActions(self)
+        self.dock = ctx.ui.ajouter_panneau(_("Actions"), self.panneau)
+        self.interrupteurs = (ctx.ui.ajouter_action(_("Panneau des actions"), self.basculer_panneau, "view-list-icons"),
+                              ctx.ui.ajouter_bouton(_("Actions"), self.basculer_panneau, "view-list-icons"))
+        for a in self.interrupteurs:
+            a.setCheckable(True)
+            a.setChecked(not self.dock.isHidden())
+            a.setToolTip(_("Afficher ou masquer le panneau des actions préparées"))
+        self.dock.visibilityChanged.connect(self._etat_panneau)
         ctx.ui.ajouter_bouton(_("Console"), self.vers_console, "utilities-terminal")
         ctx.ui.ajouter_action(_("Envoyer la sélection vers une console"), self.vers_console, "utilities-terminal")
         ctx.ui.ajouter_action(_("Choisir la console cible…"), self.choisir_cible, "utilities-terminal")
         ctx.ui.ajouter_action(_("Revenir à la console de l'extension"), self.oublier_cible, "utilities-terminal")
         ctx.ui.ajouter_action(_("Exécuter une commande et insérer la sortie…"), self.commande, "system-run")
-        ctx.ui.ajouter_action(_("Réglages de la capture…"), self.reglages, "configure")
         ctx.ui.ajouter_action(_("Modifier les actions préparées…"), self.modifier_actions, "configure")
-        self.panneau = PanneauActions(self)
-        self.dock = ctx.ui.ajouter_panneau(_("Actions"), self.panneau)
-        ctx.ui.ajouter_action(_("Afficher / masquer le panneau des actions"), lambda: self.dock.setVisible(not self.dock.isVisible()),
-                              "view-list-icons")
+        ctx.ui.ajouter_action(_("Réglages de la capture…"), self.reglages, "configure")
+
+    def basculer_panneau(self):
+        self.dock.setVisible(self.dock.isHidden())      # « masqué » = fermé par l'utilisateur (≠ fenêtre réduite)
+
+    def _etat_panneau(self, _visible: bool = True):
+        for a in self.interrupteurs:                    # état réel : la fenêtre réduite ne décoche pas le bouton
+            a.setChecked(not self.dock.isHidden())
 
     # ---------- actions préparées ----------
     def actions(self) -> list:
