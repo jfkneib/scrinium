@@ -31,7 +31,7 @@ leur stockage et leur chiffrement avec la fiche font partie du format de fichier
 
 ## 1. Images dans les fiches (v0.2, dans le cœur)
 Une fiche peut contenir une ou plusieurs images, en plus du texte ou à sa place.
-- ◐ **Spécification rédigée : `docs/format-pieces-jointes.md` (à valider avant tout code)**. Option B retenue (vignettes sous la fiche, texte simple). La fiche `.md`/`.lock` ne change pas ; pièces dans `titre.pj/`, verrouillées en `AMLOCK3` (affine la ligne « `.lock` v3 » ci-dessous)
+- ◐ **Spécification validée : `docs/format-pieces-jointes.md`** ; ✔ cœur fait (AMLOCK3, `Store.ajouter_piece`/`lister_pieces`/`lire_piece`/`maj_piece`/`supprimer_piece`, verrouillage et reprise après interruption, 19 tests) ; ☐ import d'image (réencodage, EXIF, 2560 px, 8 Mo), interface (vignettes, Ctrl+V, glisser-déposer, visionneuse), `scrinium rescue open` pour les pièces, recherche, API des extensions. Option B retenue (vignettes sous la fiche, texte simple). La fiche `.md`/`.lock` ne change pas ; pièces dans `titre.pj/`, verrouillées en `AMLOCK3` (affine la ligne « `.lock` v3 » ci-dessous)
 - ☐ Format : une fiche = `titre.md` + dossier `titre.pj/` (pièces jointes) ; (le `.md` ne référence plus les images : option B)
 - ☐ **Fiches verrouillées** : les images doivent être chiffrées aussi (même clé, AES-GCM). Nouveau format `.lock` v3 (conteneur : texte + pièces jointes), l'ancien format reste lisible. À spécifier AVANT de coder (tests de compatibilité).
 - ☐ Coller une image depuis le presse-papiers (Ctrl+V), glisser-déposer, bouton « Ajouter une image »

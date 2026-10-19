@@ -13,6 +13,7 @@ import shutil
 import subprocess
 import sys
 import time
+from dataclasses import dataclass
 from pathlib import Path
 
 from . import crypto, exemples
@@ -21,6 +22,12 @@ from .paths import Paths
 
 ICONE_DEFAUT = "view-pim-notes"
 POSIX = os.name == "posix"
+
+# Pièces jointes (docs/format-pieces-jointes.md)
+EXT_PIECE = {"image/png": ".png", "image/jpeg": ".jpg"}
+TYPE_PIECE = {v: k for k, v in EXT_PIECE.items()}
+LIMITES_PIECES = {"nombre": 50, "octets_piece": 8 * 1024 * 1024, "octets_total": 100 * 1024 * 1024}
+_NOM_PIECE = re.compile(r"(\d+)\.(png|jpg|lock)\Z")
 
 
 _META = re.compile(r"\A<!-- scrinium: (\{.*?\}) -->\n?", re.S)
@@ -71,6 +78,18 @@ def _ecrire(p: Path, data: bytes) -> None:
     os.replace(tmp, p)
 
 
+@dataclass
+class Piece:
+    id: int
+    nom: str
+    type: str
+    taille: int
+    chemin: Path
+    ajoute: str = ""
+    ocr: str = ""
+    ocr_moteur: str = ""
+
+
 class Fiche:
     def __init__(self, path: Path, titre: str, texte: str | None, verrou: bool = False):
         self.path, self.titre, self.texte, self.verrou = path, titre, texte, verrou
@@ -113,6 +132,7 @@ class Store:
         self.themes = []
         for d in sorted((d for d in fiches.iterdir() if d.is_dir() and not d.name.startswith(".")),
                         key=lambda d: d.name.lower()):
+            self._reparer_pj(d)
             th = Theme(d)
             fi = d / ".icone"
             if fi.exists():
@@ -166,14 +186,15 @@ class Store:
         """Chemin libre pour ce titre (ajoute « (2) »… si pris par une autre fiche)."""
         base = propre(titre)
         nom, k = base, 2
-        while any((dossier / f"{nom}{e}").exists() and (dossier / f"{nom}{e}") != actuel for e in (".md", ".lock")):
+        while any((dossier / f"{nom}{e}").exists() and (dossier / f"{nom}{e}") != actuel for e in (".md", ".lock")) \
+                or ((dossier / f"{nom}.pj").exists() and (actuel is None or actuel.stem != nom)):
             nom = f"{base} ({k})"
             k += 1
         return dossier / f"{nom}{ext}"
 
-    def a_la_corbeille(self, p: Path) -> None:
+    def a_la_corbeille(self, p: Path, nom: str | None = None, stamp: str | None = None) -> None:
         mkdir_prive(self.paths.corbeille)
-        shutil.move(str(p), str(self.paths.corbeille / f'{time.strftime("%Y%m%d-%H%M%S")}-{p.name}'))
+        shutil.move(str(p), str(self.paths.corbeille / f'{stamp or time.strftime("%Y%m%d-%H%M%S")}-{nom or p.name}'))
 
     # ---------- thèmes ----------
     def nouveau_theme(self, nom: str) -> Theme:
@@ -213,12 +234,16 @@ class Store:
         return f
 
     def supprimer_fiche(self, th: Theme, f: Fiche) -> None:
-        self.a_la_corbeille(f.path)
+        stamp = time.strftime("%Y%m%d-%H%M%S")
+        pj = self.dossier_pj(f)
+        self.a_la_corbeille(f.path, stamp=stamp)
+        if pj.is_dir():
+            self.a_la_corbeille(pj, stamp=stamp)
         th.fiches.remove(f)
 
     def jeter_si_vide(self, th: Theme, f: Fiche) -> bool:
         """Une fiche restée entièrement vide est supprimée sans passer par la corbeille."""
-        if not f.verrou and not f.titre and not (f.texte or "").strip():
+        if not f.verrou and not f.titre and not (f.texte or "").strip() and not self._numeros(self.dossier_pj(f)):
             try:
                 f.path.unlink()
             except OSError:
@@ -242,6 +267,7 @@ class Store:
         else:
             self._ecrire_md(nouveau, titre, joindre_meta(f.meta, texte))
         if nouveau != ancien and ancien.exists():
+            self._deplacer_pj(ancien, nouveau)   # à tout instant, l'un des deux chemins reste valide
             ancien.unlink()
         f.titre, f.texte, f.path = titre, texte, nouveau
         f.maj = time.strftime("%Y-%m-%d %H:%M")
@@ -269,7 +295,9 @@ class Store:
         wrap = b"" if sans_secours else crypto.envelopper(cle, self.paths.recovery_pub)
         ancien = f.path
         nouveau = self.libre(th.path, f.titre, ancien, ".lock")
-        _ecrire(nouveau, crypto.chiffrer(joindre_meta(f.meta, f.texte), cle, salt, wrap))
+        nouveau_pj = self._preparer_pj(f, nouveau, cle, salt, wrap)     # 1) pièces chiffrées dans X.pj.new
+        _ecrire(nouveau, crypto.chiffrer(joindre_meta(f.meta, f.texte), cle, salt, wrap))   # 2) la fiche
+        self._echanger_pj(nouveau_pj, ancien, nouveau)                  # 3) échange des dossiers
         if ancien.exists():
             ancien.unlink()
         f.path, f.verrou, f.cle, f.salt, f.wrap = nouveau, True, cle, salt, wrap
@@ -286,13 +314,188 @@ class Store:
     def retirer_verrou(self, th: Theme, f: Fiche) -> None:
         ancien = f.path
         nouveau = self.libre(th.path, f.titre, ancien, ".md")
+        nouveau_pj = self._preparer_pj(f, nouveau, None, None, b"")
         self._ecrire_md(nouveau, f.titre, joindre_meta(f.meta, f.texte))
+        self._echanger_pj(nouveau_pj, ancien, nouveau)
         ancien.unlink()
         f.path, f.verrou, f.cle, f.salt, f.wrap = nouveau, False, None, None, b""
 
     def ouvrir_avec_cle_privee(self, f: Fiche, pem: bytes, phrase: str | None) -> str:
         texte, f.meta = separer_meta(crypto.ouvrir_avec_cle_privee(f.path.read_bytes(), pem, phrase))
         return texte
+
+    # ---------- pièces jointes ----------
+    @staticmethod
+    def dossier_pj(f: Fiche) -> Path:
+        return f.path.with_name(f.path.stem + ".pj")
+
+    @staticmethod
+    def _numeros(d: Path) -> list:
+        """[(numéro, chemin)] des pièces d'un dossier .pj (sans les fichiers descriptifs .json)."""
+        if not d.is_dir():
+            return []
+        return sorted((int(m[1]), p) for p in d.iterdir() if (m := _NOM_PIECE.match(p.name)))
+
+    def lister_pieces(self, f: Fiche) -> list:
+        """Pièces de la fiche. Fiche verrouillée : seulement si elle est ouverte (clé connue)."""
+        if f.fermee or (f.verrou and f.cle is None):
+            return []
+        res = []
+        for n, p in self._numeros(self.dossier_pj(f)):
+            if p.suffix == ".lock":
+                if not f.verrou:
+                    continue
+                try:
+                    ent, donnees = crypto.dechiffrer_piece(p.read_bytes(), f.cle)
+                except (crypto.InvalidTag, ValueError, OSError):
+                    continue
+                res.append(Piece(n, str(ent.get("nom", p.name)), str(ent.get("type", "image/png")), len(donnees), p,
+                                 str(ent.get("ajoute", "")), str(ent.get("ocr", "")), str(ent.get("ocr_moteur", ""))))
+            elif not f.verrou:
+                try:
+                    d = json.loads(p.with_suffix(".json").read_text(encoding="utf-8"))
+                except (OSError, ValueError):
+                    d = {}
+                d = d if isinstance(d, dict) else {}
+                res.append(Piece(n, str(d.get("nom", p.name)), TYPE_PIECE[p.suffix], p.stat().st_size, p,
+                                 str(d.get("ajoute", "")), str(d.get("ocr", "")), str(d.get("ocr_moteur", ""))))
+        return res
+
+    @staticmethod
+    def _entete(piece: Piece) -> dict:
+        return {k: v for k, v in (("nom", piece.nom), ("type", piece.type), ("ajoute", piece.ajoute), ("ocr", piece.ocr),
+                                  ("ocr_moteur", piece.ocr_moteur)) if v != ""}
+
+    def ajouter_piece(self, f: Fiche, nom: str, type_: str, donnees: bytes) -> Piece:
+        """Ajoute une image déjà réencodée (PNG ou JPEG). ValueError si fiche fermée, type ou limites non respectés."""
+        if f.fermee or (f.verrou and f.cle is None):
+            raise ValueError("fiche verrouillée : déverrouillez-la d'abord")
+        if type_ not in EXT_PIECE:
+            raise ValueError(f"type de pièce jointe non pris en charge : {type_}")
+        if len(donnees) > LIMITES_PIECES["octets_piece"]:
+            raise ValueError("image trop lourde")
+        d = self.dossier_pj(f)
+        existantes = self._numeros(d)
+        if len(existantes) >= LIMITES_PIECES["nombre"]:
+            raise ValueError("trop de pièces jointes pour cette fiche")
+        if sum(p.stat().st_size for _n, p in existantes) + len(donnees) > LIMITES_PIECES["octets_total"]:
+            raise ValueError("pièces jointes trop volumineuses pour cette fiche")
+        n = max((n for n, _p in existantes), default=0) + 1
+        piece = Piece(n, nom or f"image-{n}", type_, len(donnees), d, time.strftime("%Y-%m-%d %H:%M"))
+        mkdir_prive(d)
+        if f.verrou:
+            piece.chemin = d / f"{n}.lock"
+            _ecrire(piece.chemin, crypto.chiffrer_piece(self._entete(piece), donnees, f.cle, f.salt, f.wrap))
+        else:
+            piece.chemin = d / f"{n}{EXT_PIECE[type_]}"
+            _ecrire(piece.chemin, donnees)
+            _ecrire(d / f"{n}.json", json.dumps(self._entete(piece), ensure_ascii=False).encode("utf-8"))
+        return piece
+
+    def lire_piece(self, f: Fiche, piece: Piece) -> bytes:
+        if f.verrou:
+            return crypto.dechiffrer_piece(piece.chemin.read_bytes(), f.cle)[1]
+        return piece.chemin.read_bytes()
+
+    def maj_piece(self, f: Fiche, piece: Piece, **champs) -> None:
+        """Change `ocr` et/ou `ocr_moteur` d'une pièce (texte extrait ; chiffré avec elle si la fiche est verrouillée)."""
+        for k, v in champs.items():
+            if k not in ("ocr", "ocr_moteur"):
+                raise ValueError(f"champ inconnu : {k}")
+            setattr(piece, k, str(v or ""))
+        if f.verrou:
+            donnees = crypto.dechiffrer_piece(piece.chemin.read_bytes(), f.cle)[1]
+            _ecrire(piece.chemin, crypto.chiffrer_piece(self._entete(piece), donnees, f.cle, f.salt, f.wrap))
+        else:
+            sidecar = piece.chemin.with_suffix(".json")
+            try:
+                ancien = json.loads(sidecar.read_text(encoding="utf-8"))
+            except (OSError, ValueError):
+                ancien = {}
+            ancien = ancien if isinstance(ancien, dict) else {}
+            ancien.update(self._entete(piece))
+            for k in ("ocr", "ocr_moteur"):
+                if not getattr(piece, k):
+                    ancien.pop(k, None)
+            _ecrire(sidecar, json.dumps(ancien, ensure_ascii=False).encode("utf-8"))
+
+    def supprimer_piece(self, f: Fiche, piece: Piece) -> None:
+        """À la corbeille (jamais d'effacement direct) ; le dossier .pj disparaît avec sa dernière pièce."""
+        d = piece.chemin.parent
+        stamp = time.strftime("%Y%m%d-%H%M%S")
+        self.a_la_corbeille(piece.chemin, nom=f"{d.name}-{piece.chemin.name}", stamp=stamp)
+        sidecar = piece.chemin.with_suffix(".json")
+        if sidecar.exists():
+            self.a_la_corbeille(sidecar, nom=f"{d.name}-{sidecar.name}", stamp=stamp)
+        if not self._numeros(d):
+            shutil.rmtree(d, ignore_errors=True)
+
+    # échanges de dossiers : X.pj.new (complet, marqué .pret) -> X.pj ; l'ancien passe par X.pj.old
+    def _preparer_pj(self, f: Fiche, nouveau: Path, cle, salt, wrap) -> Path | None:
+        """Construit X.pj.new avec les pièces converties (chiffrées si `cle`, en clair sinon). None s'il n'y a rien."""
+        d = self.dossier_pj(f)
+        presents = self._numeros(d)
+        if not presents:
+            return None
+        pieces = self.lister_pieces(f)
+        if len(pieces) != len(presents):
+            raise ValueError("pièces jointes illisibles : opération annulée (rien n'a été modifié)")
+        dest = nouveau.with_name(nouveau.stem + ".pj.new")
+        shutil.rmtree(dest, ignore_errors=True)
+        mkdir_prive(dest)
+        for p in pieces:
+            donnees = self.lire_piece(f, p)
+            if cle is not None:
+                _ecrire(dest / f"{p.id}.lock", crypto.chiffrer_piece(self._entete(p), donnees, cle, salt, wrap))
+            else:
+                _ecrire(dest / f"{p.id}{EXT_PIECE[p.type]}", donnees)
+                _ecrire(dest / f"{p.id}.json", json.dumps(self._entete(p), ensure_ascii=False).encode("utf-8"))
+        _ecrire(dest / ".pret", b"")
+        return dest
+
+    def _echanger_pj(self, nouveau_pj: Path | None, ancien: Path, nouveau: Path) -> None:
+        da = ancien.with_name(ancien.stem + ".pj")
+        dn = nouveau.with_name(nouveau.stem + ".pj")
+        if nouveau_pj is None:
+            return
+        old = dn.with_name(dn.name + ".old")
+        shutil.rmtree(old, ignore_errors=True)
+        if dn.exists():
+            os.rename(dn, old)
+        os.rename(nouveau_pj, dn)
+        (dn / ".pret").unlink(missing_ok=True)      # le marqueur reste jusqu'au bout : il prouve que .new est complet
+        shutil.rmtree(old, ignore_errors=True)
+        if da != dn:
+            shutil.rmtree(da, ignore_errors=True)
+
+    def _deplacer_pj(self, ancien: Path, nouveau: Path) -> None:
+        da = ancien.with_name(ancien.stem + ".pj")
+        dn = nouveau.with_name(nouveau.stem + ".pj")
+        if da.is_dir() and da != dn:
+            os.rename(da, dn)
+
+    @staticmethod
+    def _reparer_pj(theme: Path) -> None:
+        """Reprise après interruption d'un échange de dossiers .pj (jamais de perte : .old restauré, .new valide promu)."""
+        for new in theme.glob("*.pj.new"):
+            pj = new.with_suffix("")
+            nom = pj.stem
+            genre = ".lock" if any(new.glob("*.lock")) else ".md"
+            if (new / ".pret").exists() and (theme / f"{nom}{genre}").exists():
+                old = pj.with_name(pj.name + ".old")
+                if pj.exists():
+                    shutil.rmtree(old, ignore_errors=True)
+                    os.rename(pj, old)
+                (new / ".pret").unlink(missing_ok=True)
+                os.rename(new, pj)
+            else:
+                shutil.rmtree(new, ignore_errors=True)
+        for old in theme.glob("*.pj.old"):
+            pj = old.with_suffix("")
+            if pj.exists():
+                shutil.rmtree(old, ignore_errors=True)
+            else:
+                os.rename(old, pj)
 
     # ---------- réglages et hook ----------
     def reglages(self) -> dict:
