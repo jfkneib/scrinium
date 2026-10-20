@@ -18,7 +18,7 @@ from .assistant import AssistantCle
 from .extensions import DialogueExtensions, UiPlugin
 from .icons import icone, icone_appli
 from .images import BandePieces, Editeur
-from .markdown import Apercu, BarreFormat, entourer
+from .markdown import Apercu, BarreFormat, entourer, navigateurs_installes
 
 ORANGE, VERT, GRIS = "#c77700", "#2e8b3a", "gray"
 
@@ -96,6 +96,7 @@ class Fenetre(QMainWindow):
         self.a_demarrage.setChecked(autostart.actif())
         self.a_demarrage.toggled.connect(self._demarrage)
         mf.addAction(self.a_demarrage)
+        mf.addAction(self._action(_("Navigateur pour les liens…"), "internet-web-browser", self.choisir_navigateur))
         mf.addSeparator()
         mf.addAction(self._action(_("Quitter"), "application-exit", self.quitter, "Ctrl+Q"))
         ms = m.addMenu(_("&Sécurité"))
@@ -171,6 +172,7 @@ class Fenetre(QMainWindow):
         ld = QVBoxLayout(droite)
         ld.setContentsMargins(0, 0, 0, 0)
         self.apercu = Apercu()
+        self.apercu.navigateur = lambda: str(self.store.reglages().get("navigateur", ""))
         self.format = BarreFormat(self.texte)
         self.format.apercu_demande.connect(self.basculer_apercu)
         self.pile = QStackedWidget()
@@ -353,6 +355,20 @@ class Fenetre(QMainWindow):
         self.format.setEnabled(actif)
         if not actif and self.format.b_apercu.isChecked():
             self.format.b_apercu.setChecked(False)
+
+    def choisir_navigateur(self):
+        """Navigateur utilisé pour les liens de l'aperçu : celui du système, ou une commande (modifiable à la main)."""
+        systeme = _("Navigateur du système (par défaut)")
+        actuel = str(self.store.reglages().get("navigateur", ""))
+        choix = [systeme] + navigateurs_installes()
+        if actuel and actuel not in choix:
+            choix.append(actuel)
+        texte, ok = QInputDialog.getItem(self, _("Navigateur pour les liens"),
+                                         _("Choisissez un navigateur, ou tapez une commande (ex. : firefox) :"),
+                                         choix, choix.index(actuel) if actuel else 0, True)
+        if ok:
+            texte = texte.strip()
+            self.store.sauver_reglages(navigateur="" if texte in ("", systeme) else texte)
 
     def basculer_apercu(self, actif: bool):
         """Aperçu Markdown (lecture seule, rien n'est écrit) ou édition."""

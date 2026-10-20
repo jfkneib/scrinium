@@ -5,6 +5,9 @@
 Le fichier de la fiche reste du texte Markdown ordinaire (lisible partout) : les boutons ne font qu'insérer
 `**gras**`, `# titre`, etc. dans l'éditeur ; l'aperçu n'écrit jamais rien."""
 import re
+import shlex
+import shutil
+import subprocess
 
 from PyQt6.QtCore import QUrl, pyqtSignal
 from PyQt6.QtGui import QDesktopServices, QTextCursor
@@ -13,6 +16,27 @@ from PyQt6.QtWidgets import QHBoxLayout, QPlainTextEdit, QTextBrowser, QToolButt
 from ..i18n import _
 
 LIENS_AUTORISES = ("http", "https", "mailto")
+NAVIGATEURS = ("firefox", "google-chrome", "chromium", "chromium-browser", "brave-browser", "opera", "vivaldi", "microsoft-edge")
+
+
+def navigateurs_installes() -> list:
+    """Commandes de navigateurs courants trouvées dans le PATH."""
+    return [n for n in NAVIGATEURS if shutil.which(n)]
+
+
+def ouvrir_url(url: QUrl, commande: str = "") -> bool:
+    """Ouvre l'adresse avec `commande` (ex. « firefox » ou « brave-browser --incognito »), sinon avec le navigateur du système.
+    Repli sur le système si la commande est introuvable ou échoue."""
+    if commande.strip():
+        try:
+            argv = shlex.split(commande)
+            if argv and shutil.which(argv[0]):
+                subprocess.Popen(argv + [url.toString()], stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL,
+                                 stderr=subprocess.DEVNULL, start_new_session=True)
+                return True
+        except (OSError, ValueError):
+            pass
+    return QDesktopServices.openUrl(url)
 
 
 # ---------- opérations sur l'éditeur (une seule étape d'annulation chacune) ----------
@@ -209,12 +233,14 @@ class Apercu(QTextBrowser):
 
     def __init__(self, parent=None):
         super().__init__(parent)
+        self.navigateur = lambda: ""             # renvoie la commande choisie (réglage « navigateur »), vide = système
         self.setOpenLinks(False)
         self.anchorClicked.connect(self._lien)
 
     def _lien(self, url: QUrl) -> None:
-        if url.scheme().lower() in LIENS_AUTORISES:
-            QDesktopServices.openUrl(url)
+        if url.scheme().lower() not in LIENS_AUTORISES:
+            return
+        ouvrir_url(url, self.navigateur() if url.scheme().lower() != "mailto" else "")
 
     def afficher(self, texte: str) -> None:
         barre = self.verticalScrollBar().value()
