@@ -7,8 +7,10 @@ import ssl
 from email.message import EmailMessage
 from email.utils import formataddr, formatdate, make_msgid
 
+from scrinium.i18n import N_, _
+
 ADRESSE = re.compile(r"^[^@\s,;<>\"']+@[^@\s,;<>\"']+\.[^@\s,;<>\"']+$")
-SECURITES = {"starttls": ("STARTTLS (port 587)", 587), "ssl": ("SSL/TLS (port 465)", 465), "aucune": ("Aucune (port 25)", 25)}
+SECURITES = {"starttls": (N_("STARTTLS (port 587)"), 587), "ssl": (N_("SSL/TLS (port 465)"), 465), "aucune": (N_("Aucune (port 25)"), 25)}
 DELAI = 20     # secondes
 
 
@@ -41,13 +43,13 @@ def fusionner(*listes) -> list:
 
 def construire(smtp: dict, destinataires: list, sujet: str, corps: str) -> EmailMessage:
     if not destinataires:
-        raise ValueError("aucun destinataire")
+        raise ValueError(_("aucun destinataire"))
     exp = smtp.get("expediteur", "").strip()
     if not adresse_valide(exp):
-        raise ValueError("adresse d'expédition absente ou invalide (réglages du serveur)")
+        raise ValueError(_("adresse d'expédition absente ou invalide (réglages du serveur)"))
     for d in destinataires:
         if not adresse_valide(d):
-            raise ValueError(f"adresse invalide : {d}")
+            raise ValueError(_("adresse invalide : %s") % d)
     m = EmailMessage()
     m["From"] = formataddr((smtp.get("nom", "").strip(), exp))
     m["To"] = ", ".join(destinataires)
@@ -63,10 +65,10 @@ def ouvrir(smtp: dict, mot_de_passe: str | None) -> smtplib.SMTP:
     hote, mode = smtp.get("hote", "").strip(), smtp.get("securite", "starttls")
     port = int(smtp.get("port") or SECURITES.get(mode, SECURITES["starttls"])[1])
     if not hote:
-        raise ValueError("serveur d'envoi non renseigné")
+        raise ValueError(_("serveur d'envoi non renseigné"))
     user = smtp.get("utilisateur", "").strip()
     if user and mode == "aucune":
-        raise ValueError("authentification refusée sans chiffrement : choisissez STARTTLS ou SSL/TLS")
+        raise ValueError(_("authentification refusée sans chiffrement : choisissez STARTTLS ou SSL/TLS"))
     ctx = ssl.create_default_context()
     if mode == "ssl":
         s = smtplib.SMTP_SSL(hote, port, timeout=DELAI, context=ctx)

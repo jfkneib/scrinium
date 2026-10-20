@@ -9,6 +9,8 @@ import subprocess
 import sys
 from pathlib import Path
 
+from scrinium.i18n import _
+
 DELAI = 180          # secondes par image
 TEXTE_MAX = 200_000  # caractères conservés par image
 CHEMINS_USUELS = (
@@ -59,15 +61,15 @@ def reconnaitre(exe: str, donnees: bytes, langue: str = "fra") -> str:
     r = subprocess.run([exe, "stdin", "stdout", "-l", langue or "fra"], input=donnees, capture_output=True,
                        timeout=DELAI, **_options())
     if r.returncode != 0:
-        raise RuntimeError(r.stderr.decode("utf-8", "replace").strip()[:400] or f"tesseract a échoué (code {r.returncode})")
+        raise RuntimeError(r.stderr.decode("utf-8", "replace").strip()[:400] or _("tesseract a échoué (code %d)") % r.returncode)
     return nettoyer(r.stdout.decode("utf-8", "replace"))
 
 
 def aide_installation() -> str:
     if sys.platform.startswith("win"):
-        return ("Windows : installez Tesseract (installateur de l'université de Mannheim, lien sur la page "
-                "github.com/tesseract-ocr/tesseract), en cochant la langue « French », puis indiquez le chemin de "
-                "tesseract.exe dans les réglages de l'extension.")
+        return _("Windows : installez Tesseract (installateur de l'université de Mannheim, lien sur la page "
+                 "github.com/tesseract-ocr/tesseract), en cochant la langue « French », puis indiquez le chemin de "
+                 "tesseract.exe dans les réglages de l'extension.")
     if sys.platform == "darwin":
-        return "macOS : brew install tesseract tesseract-lang"
-    return "Linux (Debian/Ubuntu) : sudo apt install tesseract-ocr tesseract-ocr-fra"
+        return _("macOS : brew install tesseract tesseract-lang")
+    return _("Linux (Debian/Ubuntu) : sudo apt install tesseract-ocr tesseract-ocr-fra")

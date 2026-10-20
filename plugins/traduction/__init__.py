@@ -29,14 +29,13 @@ def _parent():
     return QApplication.activeWindow()
 
 
-def _taille(octets: int) -> str:
-    return f"{octets / 1e9:.2f} Go" if octets >= 1e9 else f"{octets / 1e6:.0f} Mo"
+_taille = logique.fmt_taille
 
 
 class _Pont(QObject):
     """Ramène dans le fil de l'interface ce qui se passe dans un fil de travail."""
     progression = pyqtSignal(object, object)       # « object » : un entier Qt de 32 bits déformerait les tailles de plus de 2 Go
-    etat = pyqtSignal(str)
+    etat = pyqtSignal(object)         # str ou logique.Attente
     fini = pyqtSignal(object, str)          # (résultat, erreur) ; erreur "" = réussi
 
 
@@ -50,7 +49,7 @@ def _emettre(signal, *args):
 def en_arriere_plan(titre: str, message: str, fonction, annulable: bool = False, parent=None):
     """Exécute fonction(annuler: threading.Event, progression) dans un fil, avec une fenêtre qui dit où on en est. (résultat, erreur).
     `progression(fait, total)` met à jour la barre (en Mo : la barre de Qt n'accepte que des entiers de 32 bits) avec pourcentage,
-    débit et temps restant ; `progression.etat(texte)` annonce une étape (ex. « Vérification… »)."""
+    débit et temps restant ; `progression.etat(texte)` annonce une étape (ex. « Vérification… », en `logique.Attente` si la durée est inconnue)."""
     dlg = QProgressDialog(message, _("Annuler") if annulable else None, 0, 0, parent or _parent())
     dlg.setWindowTitle(titre)
     dlg.setMinimumDuration(0)
@@ -65,7 +64,7 @@ def en_arriere_plan(titre: str, message: str, fonction, annulable: bool = False,
 
     def progression(fait, total):
         _emettre(pont.progression, int(fait), int(total))
-    progression.etat = lambda texte: _emettre(pont.etat, str(texte))
+    progression.etat = lambda texte: _emettre(pont.etat, texte if isinstance(texte, str) else str(texte))
 
     def travail():
         try:
@@ -91,9 +90,10 @@ def en_arriere_plan(titre: str, message: str, fonction, annulable: bool = False,
 
     def etape(texte):
         try:
-            suivi["etat"] = texte if "Vérification" not in texte else None
-            dlg.setLabelText(texte)
-            if "Vérification" in texte:
+            attente = isinstance(texte, logique.Attente)
+            suivi["etat"] = None if attente else texte
+            dlg.setLabelText(str(texte))
+            if attente:
                 dlg.setMaximum(0)                          # durée inconnue : barre « en attente »
         except Exception:
             pass
@@ -321,8 +321,8 @@ class DialogueTraduction(QDialog):
         self.src.addItem(_("Détection automatique"), "")
         self.dst = QComboBox()
         for code, (_en, fr) in logique.LANGUES.items():
-            self.src.addItem(fr, code)
-            self.dst.addItem(fr, code)
+            self.src.addItem(_(fr), code)
+            self.dst.addItem(_(fr), code)
         self.detectee = logique.detecter(texte)
         self.dst.setCurrentIndex(max(0, self.dst.findData(logique.cible_par_defaut(self.detectee, r.get("cible", "en")))))
         echange = QPushButton("⇄")
@@ -342,7 +342,7 @@ class DialogueTraduction(QDialog):
         qualite.addWidget(self.qualite, 1)
         qualite.addStretch(2)
         lay.addLayout(qualite)
-        self.info = QLabel(_("Langue détectée : %s") % logique.LANGUES[self.detectee][1] if self.detectee
+        self.info = QLabel(_("Langue détectée : %s") % _(logique.LANGUES[self.detectee][1]) if self.detectee
                            else _("Langue source non détectée : choisissez-la."))
         lay.addWidget(self.info)
         self.src.currentIndexChanged.connect(self._src_change)
@@ -595,7 +595,7 @@ class TraductionPlugin(Plugin):
         verdict = logique.diagnostic_memoire(disponible, besoin)
         if verdict == "ok":
             return "ok"
-        go = lambda o: f"{o / 1024 ** 3:.1f}".replace(".", ",") + " Go"
+        go = logique.fmt_go
         valeurs = {"d": go(disponible), "m": _libelle_modele(choix), "a": go(besoin[0]), "r": go(besoin[1])}
         if verdict == "danger":
             suite = (_("Cette machine n'a pas de mémoire d'échange (swap) : le système pourrait fermer d'autres programmes de force.")

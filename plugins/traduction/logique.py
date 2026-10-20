@@ -19,15 +19,17 @@ import urllib.request
 from pathlib import Path
 from urllib.parse import urlparse
 
+from scrinium.i18n import N_, _, langue
+
 # code : (nom anglais pour la consigne du modèle, nom français affiché)
 LANGUES = {
-    "fr": ("French", "français"), "en": ("English", "anglais"), "es": ("Spanish", "espagnol"), "de": ("German", "allemand"),
-    "it": ("Italian", "italien"), "pt": ("Portuguese", "portugais"), "nl": ("Dutch", "néerlandais"), "pl": ("Polish", "polonais"),
-    "ru": ("Russian", "russe"), "uk": ("Ukrainian", "ukrainien"), "tr": ("Turkish", "turc"), "ar": ("Arabic", "arabe"),
-    "zh": ("Chinese", "chinois"), "ja": ("Japanese", "japonais"), "ko": ("Korean", "coréen"), "hi": ("Hindi", "hindi"),
-    "sv": ("Swedish", "suédois"), "da": ("Danish", "danois"), "fi": ("Finnish", "finnois"), "el": ("Greek", "grec"),
-    "cs": ("Czech", "tchèque"), "ro": ("Romanian", "roumain"), "hu": ("Hungarian", "hongrois"),
-    "vi": ("Vietnamese", "vietnamien"), "id": ("Indonesian", "indonésien"),
+    "fr": ("French", N_("français")), "en": ("English", N_("anglais")), "es": ("Spanish", N_("espagnol")), "de": ("German", N_("allemand")),
+    "it": ("Italian", N_("italien")), "pt": ("Portuguese", N_("portugais")), "nl": ("Dutch", N_("néerlandais")), "pl": ("Polish", N_("polonais")),
+    "ru": ("Russian", N_("russe")), "uk": ("Ukrainian", N_("ukrainien")), "tr": ("Turkish", N_("turc")), "ar": ("Arabic", N_("arabe")),
+    "zh": ("Chinese", N_("chinois")), "ja": ("Japanese", N_("japonais")), "ko": ("Korean", N_("coréen")), "hi": ("Hindi", N_("hindi")),
+    "sv": ("Swedish", N_("suédois")), "da": ("Danish", N_("danois")), "fi": ("Finnish", N_("finnois")), "el": ("Greek", N_("grec")),
+    "cs": ("Czech", N_("tchèque")), "ro": ("Romanian", N_("roumain")), "hu": ("Hungarian", N_("hongrois")),
+    "vi": ("Vietnamese", N_("vietnamien")), "id": ("Indonesian", N_("indonésien")),
 }
 MORCEAU_MAX = 1500                 # caractères par requête (contexte du serveur : 4096 jetons)
 CONTEXTE = 4096
@@ -49,6 +51,10 @@ CHOIX_PERSO = "perso"              # fichier .gguf choisi par l'utilisateur
 MODELE_URL, MODELE_NOM = MODELES["4b"]["url"], MODELES["4b"]["nom"]
 MODELE_SHA256, MODELE_TAILLE = MODELES["4b"]["sha256"], MODELES["4b"]["taille"]
 PAGE_VERSIONS = "https://github.com/ggml-org/llama.cpp/releases"
+
+
+class Attente(str):
+    """Texte d'étape dont la durée est inconnue (la fenêtre passe sa barre en « attente »). Reste une chaîne ordinaire pour le reste."""
 
 
 class ErreurMoteur(Exception):
@@ -356,21 +362,21 @@ def avertissement_modele(m: dict, cle: str) -> str:
     residente = besoin_memoire(cle, None, gpus, m.get("avx2"))[1]
     if mem >= residente:
         return ""
-    go, besoin = f"{mem / 1024 ** 3:.0f} Go", f"{residente / 1024 ** 3:.1f}".replace(".", ",") + " Go"
+    valeurs = {"go": fmt_go(mem, 0), "b": fmt_go(residente)}
     if cle == "12b":
-        return f"Cette machine n'a que {go} de mémoire : le modèle « Meilleur (12B) » en demande jusqu'à {besoin} : il risque de la saturer."
-    return f"Cette machine n'a que {go} de mémoire : même le modèle rapide (jusqu'à {besoin}) sera juste."
+        return _("Cette machine n'a que %(go)s de mémoire : le modèle « Meilleur (12B) » en demande jusqu'à %(b)s : il risque de la saturer.") % valeurs
+    return _("Cette machine n'a que %(go)s de mémoire : même le modèle rapide (jusqu'à %(b)s) sera juste.") % valeurs
 
 
 def description_materiel(m: dict) -> str:
-    gb = lambda o: f"{o / 1024 ** 3:.0f} Go"
-    morceaux = [f"mémoire {gb(m['memoire'])}" if m.get("memoire") else "mémoire inconnue", f"{m.get('coeurs') or '?'} cœurs"]
+    gb = lambda o: fmt_go(o, 0)
+    morceaux = [_("mémoire %s") % gb(m["memoire"]) if m.get("memoire") else _("mémoire inconnue"), _("%s cœurs") % (m.get("coeurs") or "?")]
     if m.get("gpus"):
         morceaux.append(" + ".join(f"{g['nom']} ({gb(g['total'])})" for g in m["gpus"]))
     elif m.get("apple"):
-        morceaux.append("Apple Silicon (mémoire partagée)")
+        morceaux.append(_("Apple Silicon (mémoire partagée)"))
     else:
-        morceaux.append("pas de carte NVIDIA détectée")
+        morceaux.append(_("pas de carte NVIDIA détectée"))
     return ", ".join(morceaux)
 
 
@@ -408,12 +414,13 @@ def completer(url: str, cle: str, prompt: str, n_predict: int, delai: float = DE
         code, rep = _requete(url, cle, "/completion", {"prompt": prompt, "n_predict": n_predict, "temperature": 0,
                                                        "stop": ["<end_of_turn>"], "cache_prompt": True}, delai)
     except (OSError, ValueError) as ex:
-        raise ErreurMoteur(f"serveur injoignable : {ex}") from ex
+        raise ErreurMoteur(_("serveur injoignable : %s") % ex) from ex
     if code == 401:
-        raise ErreurMoteur("clé d'accès refusée par le serveur llama.cpp")
+        raise ErreurMoteur(_("clé d'accès refusée par le serveur llama.cpp"))
     if code != 200 or not isinstance(rep, dict) or "content" not in rep:
         detail = (rep or {}).get("error", {}) if isinstance(rep, dict) else {}
-        raise ErreurMoteur(f"réponse inattendue du serveur (HTTP {code}) {detail.get('message', '') if isinstance(detail, dict) else detail}".strip())
+        raise ErreurMoteur((_("réponse inattendue du serveur (HTTP %(code)s) %(detail)s") % {
+            "code": code, "detail": detail.get("message", "") if isinstance(detail, dict) else detail}).strip())
     return str(rep["content"]).strip()
 
 
@@ -451,9 +458,9 @@ class ServeurLlama:
                 return
             self.arreter()
             if not Path(exe).is_file():
-                raise ErreurMoteur(f"llama-server introuvable : {exe}")
+                raise ErreurMoteur(_("llama-server introuvable : %s") % exe)
             if not Path(modele).is_file():
-                raise ErreurMoteur(f"modèle introuvable : {modele}")
+                raise ErreurMoteur(_("modèle introuvable : %s") % modele)
             port, self.cle = _port_libre(), secrets.token_hex(16)
             cmd = [exe, "-m", modele, "--host", "127.0.0.1", "--port", str(port), "--api-key", self.cle, "-c", str(contexte), "--no-webui"]
             if str(gpu).strip():
@@ -469,7 +476,7 @@ class ServeurLlama:
             fin = time.time() + delai
             while True:
                 if self.proc.poll() is not None:
-                    raise ErreurMoteur("llama-server s'est arrêté : " + self._derniere_erreur())
+                    raise ErreurMoteur(_("llama-server s'est arrêté : %s") % self._derniere_erreur())
                 if sante(self.url, 1) == 200:
                     return
                 if annuler is not None and annuler():
@@ -477,16 +484,16 @@ class ServeurLlama:
                     raise Annule()
                 if time.time() > fin:
                     self.arreter()
-                    raise ErreurMoteur("llama-server n'est pas prêt après %d s" % delai)
+                    raise ErreurMoteur(_("llama-server n'est pas prêt après %d s") % delai)
                 time.sleep(0.25)
 
     def _derniere_erreur(self) -> str:
         try:
             lignes = self.journal.read_text(encoding="utf-8", errors="replace").splitlines()
         except OSError:
-            return "(journal illisible)"
+            return _("(journal illisible)")
         erreurs = [x for x in lignes if re.search(r"error|failed|unknown|not found|cannot", x, re.I)]
-        return (erreurs or lignes or ["(aucun message)"])[-1][:300]
+        return (erreurs or lignes or [_("(aucun message)")])[-1][:300]
 
     def arreter(self) -> None:
         with self._verrou:
@@ -512,7 +519,7 @@ class ServeurLlama:
 def traduire_texte(texte: str, src: str, dst: str, fonction, progression=None, annuler=None) -> str:
     """Traduit `texte` morceau par morceau avec `fonction(morceau) -> str`. Progression (fait, total), annulation entre morceaux."""
     if len(texte) > TEXTE_MAX:
-        raise ErreurMoteur("texte trop long : sélectionnez-en une partie")
+        raise ErreurMoteur(_("texte trop long : sélectionnez-en une partie"))
     morceaux = decouper(texte)
     sortie = []
     for i, m in enumerate(morceaux):
@@ -528,15 +535,26 @@ def traduire_texte(texte: str, src: str, dst: str, fonction, progression=None, a
 
 # ---------- téléchargement du modèle ----------
 def _mo(octets: float) -> str:
-    return f"{octets / 1048576:,.0f}".replace(",", " ") + " Mo"
+    return _("%s Mo") % f"{octets / 1048576:,.0f}".replace(",", " ")
+
+
+def fmt_go(octets: float, decimales: int = 1) -> str:
+    """« 13,3 Go » en français, « 13.3 GB » en anglais."""
+    n = f"{octets / 1024 ** 3:.{decimales}f}"
+    return _("%s Go") % (n.replace(".", ",") if langue() == "fr" else n)
+
+
+def fmt_taille(octets: float) -> str:
+    """« 7.30 Go » ou « 650 Mo » (point décimal, comme dans les messages déjà publiés)."""
+    return _("%s Go") % f"{octets / 1e9:.2f}" if octets >= 1e9 else _("%s Mo") % f"{octets / 1e6:.0f}"
 
 
 def _duree(secondes: float) -> str:
     if secondes < 60:
-        return f"{max(1, int(secondes))} s"
+        return _("%d s") % max(1, int(secondes))
     if secondes < 3600:
-        return f"environ {round(secondes / 60)} min"
-    return f"environ {int(secondes // 3600)} h {round(secondes % 3600 / 60):02d} min"
+        return _("environ %d min") % round(secondes / 60)
+    return _("environ %(h)d h %(m)02d min") % {"h": int(secondes // 3600), "m": round(secondes % 3600 / 60)}
 
 
 def progression_texte(fait: int, total: int, ecoule: float = 0.0, base: int = 0) -> str:
@@ -544,11 +562,11 @@ def progression_texte(fait: int, total: int, ecoule: float = 0.0, base: int = 0)
     (une reprise ne doit pas le gonfler) et n'apparaît qu'après quelques secondes."""
     if total <= 0:
         return ""
-    texte = f"{_mo(fait)} / {_mo(total)} ({min(100, int(fait * 100 / total))} %)"
+    texte = _("%(f)s / %(t)s (%(p)d %%)") % {"f": _mo(fait), "t": _mo(total), "p": min(100, int(fait * 100 / total))}
     recu = fait - base
     if ecoule >= 3 and recu > 0:
         debit = recu / ecoule
-        texte += f" — {debit / 1048576:.0f} Mo/s — reste {_duree((total - fait) / debit)}"
+        texte += _(" — %(d)s Mo/s — reste %(r)s") % {"d": f"{debit / 1048576:.0f}", "r": _duree((total - fait) / debit)}
     return texte
 
 
@@ -569,11 +587,11 @@ def telecharger_modele(dossier: Path, url: str = MODELE_URL, nom: str = MODELE_N
     dossier.mkdir(parents=True, exist_ok=True)
     final, partiel = dossier / nom, dossier / (nom + ".part")
     if final.is_file() and final.stat().st_size == taille:
-        etat("Vérification du fichier déjà présent (somme de contrôle)…")
+        etat(_("Vérification du fichier déjà présent (somme de contrôle)…"))
         if sha256_fichier(final) == sha256:
             return final
     deja = partiel.stat().st_size if partiel.exists() else 0
-    etat("Connexion au serveur de téléchargement…" + (" (reprise d'un téléchargement interrompu)" if deja else ""))
+    etat(_("Connexion au serveur de téléchargement…") + (_(" (reprise d'un téléchargement interrompu)") if deja else ""))
     if progression:
         progression(deja, taille)
     en_tetes = {"Range": f"bytes={deja}-"} if deja else {}
@@ -593,24 +611,24 @@ def telecharger_modele(dossier: Path, url: str = MODELE_URL, nom: str = MODELE_N
                     if progression:
                         progression(deja, taille)
     except urllib.error.URLError as ex:
-        raise ErreurMoteur(f"téléchargement impossible : {ex}") from ex
-    etat("Vérification de la somme de contrôle (SHA-256)…")
+        raise ErreurMoteur(_("téléchargement impossible : %s") % ex) from ex
+    etat(Attente(_("Vérification de la somme de contrôle (SHA-256)…")))
     if partiel.stat().st_size != taille or sha256_fichier(partiel) != sha256:
         partiel.unlink(missing_ok=True)
-        raise ErreurMoteur("fichier téléchargé incorrect (taille ou somme de contrôle) : supprimé")
+        raise ErreurMoteur(_("fichier téléchargé incorrect (taille ou somme de contrôle) : supprimé"))
     os.replace(partiel, final)
     return final
 
 
 # ---------- aide à l'installation de llama.cpp ----------
 def aide_installation() -> str:
-    commun = (f"Les programmes officiels sont sur {PAGE_VERSIONS} : prenez une version « bNNNNN » (préversion) ; la page indique la "
-              "somme de contrôle SHA-256 de chaque fichier, à vérifier. Décompressez où vous voulez, puis indiquez le chemin de "
-              "llama-server dans les réglages (ou placez le dossier dans celui de l'extension).")
+    commun = _("Les programmes officiels sont sur %s : prenez une version « bNNNNN » (préversion) ; la page indique la somme de contrôle "
+               "SHA-256 de chaque fichier, à vérifier. Décompressez où vous voulez, puis indiquez le chemin de llama-server dans les "
+               "réglages (ou placez le dossier dans celui de l'extension).") % PAGE_VERSIONS
     if sys.platform.startswith("win"):
-        return ("Windows : fichier « llama-bNNNNN-bin-win-cpu-x64.zip » (sans carte graphique), « …-win-vulkan-x64.zip » (carte "
-                "graphique, tous constructeurs) ou « …-win-cuda-…-x64.zip » (NVIDIA).\n" + commun)
+        return _("Windows : fichier « llama-bNNNNN-bin-win-cpu-x64.zip » (sans carte graphique), « …-win-vulkan-x64.zip » (carte graphique, "
+                 "tous constructeurs) ou « …-win-cuda-…-x64.zip » (NVIDIA).") + "\n" + commun
     if sys.platform == "darwin":
-        return "macOS : fichier « llama-bNNNNN-bin-macos-arm64.tar.gz » (Apple Silicon) ou « …-macos-x64.tar.gz » (Intel).\n" + commun
-    return ("Linux : fichier « llama-bNNNNN-bin-ubuntu-x64.tar.gz » (sans carte graphique), « …-ubuntu-vulkan-x64.tar.gz » (carte "
-            "graphique, tous constructeurs ; testé avec une NVIDIA) ou « …-ubuntu-cuda-…-x64.tar.gz » (NVIDIA, plus gros).\n" + commun)
+        return _("macOS : fichier « llama-bNNNNN-bin-macos-arm64.tar.gz » (Apple Silicon) ou « …-macos-x64.tar.gz » (Intel).") + "\n" + commun
+    return _("Linux : fichier « llama-bNNNNN-bin-ubuntu-x64.tar.gz » (sans carte graphique), « …-ubuntu-vulkan-x64.tar.gz » (carte graphique, "
+             "tous constructeurs ; testé avec une NVIDIA) ou « …-ubuntu-cuda-…-x64.tar.gz » (NVIDIA, plus gros).") + "\n" + commun
