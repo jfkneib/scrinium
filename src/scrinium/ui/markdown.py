@@ -82,9 +82,25 @@ def titre(ed: QPlainTextEdit) -> None:
     k.endEditBlock()
 
 
+ADRESSE = re.compile(r"^(?:https?://|mailto:|www\.)\S+$", re.I)
+
+
 def lien(ed: QPlainTextEdit) -> None:
-    """[texte](https://…) : la sélection devient le texte du lien, l'adresse est prête à être remplacée."""
+    """Sélection = adresse (http, https, mailto, www.) : devient `<adresse>` (retiré si déjà ainsi) ; autre sélection ou rien :
+    `[texte](https://)`, l'adresse est prête à être remplacée."""
     c = ed.textCursor()
+    if c.hasSelection():
+        t = c.selectedText().strip()
+        if ADRESSE.match(t):
+            c.beginEditBlock()
+            c.insertText("<" + ("https://" + t if t.lower().startswith("www.") else t) + ">")
+            c.endEditBlock()
+            ed.setTextCursor(c)
+            return
+        if len(t) > 2 and t[0] == "<" and t[-1] == ">" and ADRESSE.match(t[1:-1]):      # second clic : on retire
+            c.insertText(t[1:-1])
+            ed.setTextCursor(c)
+            return
     texte = c.selectedText() if c.hasSelection() else _("texte")
     c.beginEditBlock()
     c.insertText(f"[{texte}](https://)")
@@ -121,6 +137,7 @@ def sans_format(texte: str) -> str:
     texte = _FENCE.sub("", texte)
     texte = _PREFIXE.sub(r"\1", texte)
     texte = _LIEN.sub(r"\1", texte)
+    texte = re.sub(r"<((?:https?://|mailto:)[^\s<>]+)>", r"\1", texte)
     texte = _GRAS.sub(lambda m: m[1] or m[2], texte)
     texte = _ITALIQUE.sub(lambda m: m[1] or m[2], texte)
     return _CODE.sub(r"\1", texte)
