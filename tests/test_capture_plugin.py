@@ -553,9 +553,9 @@ def test_panneau_ferme_se_rouvre_par_la_barre_et_le_menu(fen, app):
     fen.show()
     app.processEvents()
     barre = next(a for a in fen.barre.actions() if a.text() == "Actions CLI")                              # bouton visible dans la barre
-    menu = next(a for a in fen.menu_ext.actions() if a.text() == "Panneau des actions")
+    menu = next(a for a in fen.menu_ext.actions() if a.text() == "Panneau des actions CLI")
     assert barre.isCheckable() and barre.isChecked() and menu.isChecked() and not p.dock.isHidden()
-    assert fen.menu_ext.actions()[2].text() == "Panneau des actions"                                   # en tête du menu (après « Gérer… » et le séparateur)
+    assert fen.menu_ext.actions()[2].text() == "Panneau des actions CLI"                                   # en tête du menu (après « Gérer… » et le séparateur)
     p.dock.close()                                                                                      # l'utilisateur ferme le panneau (croix)
     app.processEvents()
     assert p.dock.isHidden() and not barre.isChecked() and not menu.isChecked()                        # les deux interrupteurs le montrent
