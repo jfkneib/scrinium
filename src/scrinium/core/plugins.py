@@ -28,6 +28,16 @@ EVENEMENTS = ("demarrage", "arret", "fiche_ouverte", "fiche_enregistree", "fiche
 _NOM = re.compile(r"^[a-z0-9][a-z0-9_-]{0,40}$")
 
 
+EXEMPLES = ("hello",)       # extensions d'exemple : documentées, jamais proposées comme extensions officielles
+
+
+def dossiers_officiels() -> list:
+    """Dossiers des extensions livrées avec Scrinium : `scrinium/plugins_officiels/` (paquet .deb, pip, install.sh : copiées au
+    moment de la construction) ; depuis un dépôt cloné, le dossier `plugins/` à la racine. Seuls les dossiers qui existent."""
+    ici = Path(__file__).resolve().parent.parent
+    return [d for d in (ici / "plugins_officiels", ici.parent.parent / "plugins") if d.is_dir()]
+
+
 class Plugin:
     """Classe de base d'une extension. `api` : version d'API visée (doit égaler API_VERSION)."""
     api = API_VERSION
@@ -189,8 +199,10 @@ class Contexte:
 
 class Gestionnaire:
     def __init__(self, store, ui_factory: Callable | None = None, dossier: Path | None = None,
-                 fiche_courante: Callable | None = None, sur_desactivation_auto: Callable | None = None):
+                 fiche_courante: Callable | None = None, sur_desactivation_auto: Callable | None = None,
+                 officiels: list | None = None):
         self.store = store
+        self.officiels = dossiers_officiels() if officiels is None else list(officiels)
         self.ui_factory = ui_factory
         self.dossier = dossier or store.paths.base / "plugins"
         self.fiche_courante = fiche_courante
@@ -215,20 +227,27 @@ class Gestionnaire:
             self.infos[ep.name] = InfoPlugin(
                 ep.name, ep.name, getattr(dist, "version", "?") if dist else "?", meta.get("Summary", "") if dist else "",
                 meta.get("Author", "") if dist else "", "paquet", ep.load)
-        if self.dossier.is_dir():
-            for sub in sorted(self.dossier.iterdir()):
-                man = sub / "plugin.json"
-                if not (sub.is_dir() and man.is_file() and _NOM.match(sub.name)) or sub.name in self.infos:
-                    continue
-                try:
-                    m = json.loads(man.read_text(encoding="utf-8"))
-                except (OSError, ValueError):
-                    continue
-                self.infos[sub.name] = InfoPlugin(
-                    sub.name, str(m.get("titre", sub.name)), str(m.get("version", "?")), str(m.get("description", "")),
-                    str(m.get("auteur", "")), "dossier", self._chargeur_dossier(sub, str(m.get("classe", "Plugin"))),
-                    api=m.get("api") if isinstance(m.get("api"), int) else None)
+        self._lire_dossier(self.dossier, "dossier")                      # dossier de l'utilisateur : prioritaire
+        for d in self.officiels:                                         # extensions livrées avec Scrinium : en dernier
+            self._lire_dossier(d, "officielle", exclus=EXEMPLES)
         return self.infos
+
+    def _lire_dossier(self, dossier: Path, source: str, exclus: tuple = ()) -> None:
+        """Ajoute à `infos` les extensions d'un dossier (`<nom>/plugin.json`), sans jamais exécuter leur code ni écraser un nom pris."""
+        if not dossier.is_dir():
+            return
+        for sub in sorted(dossier.iterdir()):
+            man = sub / "plugin.json"
+            if not (sub.is_dir() and man.is_file() and _NOM.match(sub.name)) or sub.name in self.infos or sub.name in exclus:
+                continue
+            try:
+                m = json.loads(man.read_text(encoding="utf-8"))
+            except (OSError, ValueError):
+                continue
+            self.infos[sub.name] = InfoPlugin(
+                sub.name, str(m.get("titre", sub.name)), str(m.get("version", "?")), str(m.get("description", "")),
+                str(m.get("auteur", "")), source, self._chargeur_dossier(sub, str(m.get("classe", "Plugin"))),
+                api=m.get("api") if isinstance(m.get("api"), int) else None)
 
     @staticmethod
     def _chargeur_dossier(sub: Path, classe: str) -> Callable:
