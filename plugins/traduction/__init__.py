@@ -4,14 +4,12 @@
 
 - TranslateGemma (4B) par llama.cpp, sans Ollama : l'extension lance `llama-server` à la demande (127.0.0.1, port libre, clé
   d'accès aléatoire), l'arrête après inactivité ou à la fermeture, ou se connecte à un serveur que vous avez déjà lancé.
-- Argos Translate (hors ligne) : installé dans le dossier de l'extension, avec seulement ses dépendances légères.
-- Rien ne quitte la machine (un serveur distant n'est utilisé que si vous l'acceptez explicitement). Aucune installation ni aucun
-  téléchargement sans votre accord, avec taille et provenance affichées.
+- Rien ne quitte la machine (un serveur distant n'est utilisé que si vous l'acceptez explicitement). Aucun
+  téléchargement sans votre accord, avec taille et provenance affichées. (Argos Translate a été retiré : il exige PyTorch.)
 """
-import sys
 import threading
 
-from PyQt6.QtCore import QEventLoop, QObject, QProcess, QUrl, pyqtSignal
+from PyQt6.QtCore import QEventLoop, QObject, QUrl, pyqtSignal
 from PyQt6.QtGui import QDesktopServices
 from PyQt6.QtWidgets import (QApplication, QCheckBox, QComboBox, QDialog, QDialogButtonBox, QFileDialog, QFormLayout, QHBoxLayout,
                              QLabel, QLineEdit, QMessageBox, QPlainTextEdit, QProgressBar, QProgressDialog, QPushButton,
@@ -22,9 +20,7 @@ from scrinium.i18n import _
 
 from . import logique
 
-MOTEURS = {"llama": "TranslateGemma (llama.cpp)", "argos": "Argos Translate"}
-AIDE_ARGOS_LOURD = _("Argos Translate n'a pas pu être utilisé avec ses seules dépendances légères. Son installation complète "
-                     "ajouterait PyTorch (plusieurs Go) : elle n'est pas faite automatiquement.")
+MOTEURS = {"llama": "TranslateGemma (llama.cpp)"}      # un seul moteur pour l'instant ; la liste reste prête pour d'autres
 
 
 def _parent():
@@ -88,56 +84,6 @@ def en_arriere_plan(titre: str, message: str, fonction, annulable: bool = False,
     return sortie.get("res"), sortie.get("err", "")
 
 
-class _Installation(QDialog):
-    """Lance une suite de commandes `pip install --target` et montre leur sortie."""
-
-    def __init__(self, titre, etapes, parent=None):
-        super().__init__(parent)
-        self.setWindowTitle(titre)
-        self.resize(560, 320)
-        lay = QVBoxLayout(self)
-        self.barre = QProgressBar()
-        self.barre.setRange(0, 0)
-        self.log = QPlainTextEdit(readOnly=True)
-        self.boutons = QDialogButtonBox(QDialogButtonBox.StandardButton.Close)
-        self.boutons.rejected.connect(self.reject)
-        self.boutons.setEnabled(False)
-        for w in (self.barre, self.log, self.boutons):
-            lay.addWidget(w)
-        self.ok = False
-        self.etapes = list(etapes)
-        self.p = QProcess(self)
-        self.p.setProcessChannelMode(QProcess.ProcessChannelMode.MergedChannels)
-        self.p.readyRead.connect(lambda: self.log.appendPlainText(bytes(self.p.readAll()).decode(errors="replace").rstrip()))
-        self.p.finished.connect(self._fini)
-        self._suite()
-
-    def _suite(self):
-        if not self.etapes:
-            self.ok = True
-            self.barre.setRange(0, 1)
-            self.barre.setValue(1)
-            self.accept()
-            return
-        args = self.etapes.pop(0)
-        self.log.appendPlainText("$ pip " + " ".join(args[2:]))
-        self.p.start(sys.executable, args)
-
-    def _fini(self, code, _statut):
-        if code == 0:
-            self._suite()
-            return
-        self.barre.setRange(0, 1)
-        self.boutons.setEnabled(True)
-        self.log.appendPlainText(_("Échec (code %s).") % code)
-
-    def reject(self):
-        if self.p.state() != QProcess.ProcessState.NotRunning:
-            self.p.kill()
-            self.p.waitForFinished(2000)
-        super().reject()
-
-
 class DialogueReglages(QDialog):
     def __init__(self, plugin, parent=None):
         super().__init__(parent)
@@ -150,7 +96,8 @@ class DialogueReglages(QDialog):
         for cle, nom in MOTEURS.items():
             self.moteur.addItem(nom, cle)
         self.moteur.setCurrentIndex(max(0, self.moteur.findData(r.get("moteur", "llama"))))
-        f.addRow(_("Moteur par défaut :"), self.moteur)
+        if len(MOTEURS) > 1:
+            f.addRow(_("Moteur par défaut :"), self.moteur)
         # llama.cpp
         f.addRow(QLabel("<b>" + _("TranslateGemma par llama.cpp") + "</b>"))
         self.exe = QLineEdit(r.get("exe", ""))
@@ -184,12 +131,6 @@ class DialogueReglages(QDialog):
             b.clicked.connect(fn)
             ligne.addWidget(b)
         f.addRow(ligne)
-        # Argos
-        f.addRow(QLabel("<b>" + _("Argos Translate") + "</b>"))
-        statut = _("installé") if logique.argos_present() else _("non installé")
-        self.b_argos = QPushButton(_("Installer Argos Translate…"))
-        self.b_argos.clicked.connect(plugin.installer_argos)
-        f.addRow(_("État : %s") % statut, self.b_argos)
         b = QDialogButtonBox(QDialogButtonBox.StandardButton.Save | QDialogButtonBox.StandardButton.Cancel)
         b.accepted.connect(self._valider)
         b.rejected.connect(self.reject)
@@ -261,7 +202,7 @@ class DialogueTraduction(QDialog):
         echange = QPushButton("⇄")
         echange.setToolTip(_("Échanger les langues"))
         echange.clicked.connect(self._echanger)
-        for w in (self.moteur, self.src, echange, self.dst):
+        for w in ((self.moteur,) if len(MOTEURS) > 1 else ()) + (self.src, echange, self.dst):
             ligne.addWidget(w, 0 if w is echange else 1)
         lay.addLayout(ligne)
         self.info = QLabel(_("Langue détectée : %s") % logique.LANGUES[self.detectee][1] if self.detectee
@@ -413,9 +354,6 @@ class TraductionPlugin(Plugin):
         self.ctx = ctx
         self.occupe = 0
         self.serveur = logique.ServeurLlama(ctx.dossier_donnees / "llama-server.log")
-        self.deps = ctx.dossier_donnees / "deps"
-        if self.deps.is_dir() and str(self.deps) not in sys.path:
-            sys.path.insert(0, str(self.deps))
         if ctx.ui is None:
             return
         ctx.ui.ajouter_bouton(_("Traduire"), self.traduire, "preferences-desktop-locale")
@@ -425,8 +363,6 @@ class TraductionPlugin(Plugin):
 
     def desactiver(self):
         self.serveur.arreter()
-        if str(self.deps) in sys.path:
-            sys.path.remove(str(self.deps))
 
     def _surveiller(self):
         """Libère la mémoire (et la carte graphique) quand le serveur lancé par l'extension ne sert plus."""
@@ -460,8 +396,9 @@ class TraductionPlugin(Plugin):
 
     # ---------- préparation d'un moteur ----------
     def preparer(self, moteur, src, dst, vue):
-        """Retourne `fonction(morceau, annule) -> str` prête, ou None après avoir expliqué ce qui manque ou demandé un accord."""
-        return self._preparer_llama(src, dst, vue) if moteur == "llama" else self._preparer_argos(src, dst)
+        """Retourne `fonction(morceau, annule) -> str` prête, ou None après avoir expliqué ce qui manque ou demandé un accord.
+        (Un ancien réglage inconnu, par exemple « argos », retombe sur llama.cpp.)"""
+        return self._preparer_llama(src, dst, vue)
 
     def _preparer_llama(self, src, dst, vue):
         r = self.ctx.reglages
@@ -494,34 +431,7 @@ class TraductionPlugin(Plugin):
             return self.serveur.completer(logique.consigne(morceau, src, dst), logique.n_predict_pour(morceau))
         return fonction
 
-    def _preparer_argos(self, src, dst):
-        dossier = self.ctx.dossier_donnees / "argos"
-        if not logique.argos_present() and not self.installer_argos():
-            return None
-        try:
-            ok = logique.argos_paire_installee(src, dst, dossier)
-        except logique.ErreurMoteur as ex:
-            QMessageBox.warning(_parent(), _("Argos Translate"), f"{ex}\n\n{AIDE_ARGOS_LOURD}")
-            return None
-        if not ok:
-            paquets, err = en_arriere_plan(_("Argos Translate"), _("Recherche du modèle de langue…"),
-                                           lambda a, p: logique.argos_modeles_necessaires(src, dst, dossier))
-            if err:
-                QMessageBox.warning(_parent(), _("Argos Translate"), err)
-                return None
-            noms = ", ".join(f"{x.from_code} → {x.to_code}" for x in paquets)
-            if QMessageBox.question(_parent(), _("Modèle de langue"), _("Argos a besoin du modèle de langue : %s.\n\nIl sera téléchargé depuis "
-                                                                         "l'index public d'Argos Translate et rangé dans :\n%s\n\nTélécharger maintenant ?")
-                                    % (noms, dossier)) != QMessageBox.StandardButton.Yes:
-                return None
-            _res, err = en_arriere_plan(_("Argos Translate"), _("Téléchargement du modèle de langue…"),
-                                        lambda a, p: logique.argos_installer_paquets(paquets, dossier))
-            if err:
-                QMessageBox.warning(_parent(), _("Argos Translate"), err)
-                return None
-        return lambda m, annule: logique.argos_traduire(m, src, dst, dossier)
-
-    # ---------- installations (toujours avec accord) ----------
+    # ---------- téléchargement (toujours avec accord) ----------
     def telecharger_modele(self):
         """Propose de télécharger le modèle recommandé ; retourne son chemin, ou None."""
         dossier = self.ctx.dossier_donnees / "modeles"
@@ -540,35 +450,6 @@ class TraductionPlugin(Plugin):
             return None
         self.ctx.reglages.set("modele", str(chemin))
         return str(chemin)
-
-    def installer_argos(self) -> bool:
-        """Installe Argos Translate dans le dossier de l'extension (sans PyTorch). True si utilisable ensuite."""
-        deps = self.deps
-        if QMessageBox.question(
-                _parent(), _("Argos Translate"),
-                _("Argos Translate sera installé uniquement pour cette extension, dans :\n%s\n\nSeules ses dépendances légères sont installées "
-                  "(CTranslate2, SentencePiece, SacreMoses, MiniSBD) : PyTorch n'est pas ajouté. L'installation télécharge depuis Internet "
-                  "(PyPI). Installer maintenant ?") % deps) != QMessageBox.StandardButton.Yes:
-            return False
-        deps.mkdir(parents=True, exist_ok=True)
-        base = [sys.executable, "-m", "pip", "install", "--disable-pip-version-check", "--target", str(deps)]
-        etapes = [base[1:] + ["ctranslate2>=4.0,<5", "sentencepiece>=0.2.0,<0.3", "sacremoses>=0.0.53,<0.2", "minisbd", "packaging"],
-                  base[1:] + ["--no-deps", "argostranslate"]]
-        dlg = _Installation(_("Installation d'Argos Translate"), etapes, _parent())
-        dlg.exec()
-        if not dlg.ok:
-            QMessageBox.warning(_parent(), _("Argos Translate"), _("L'installation a échoué."))
-            return False
-        if str(deps) not in sys.path:
-            sys.path.insert(0, str(deps))
-        import importlib
-        importlib.invalidate_caches()
-        try:
-            logique.argos_langues_installees(self.ctx.dossier_donnees / "argos")
-        except logique.ErreurMoteur as ex:
-            QMessageBox.warning(_parent(), _("Argos Translate"), f"{ex}\n\n{AIDE_ARGOS_LOURD}")
-            return False
-        return True
 
     def tester_llama(self):
         """Démarre le serveur et traduit « Bonjour » : dit si tout est en place."""

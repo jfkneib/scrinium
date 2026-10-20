@@ -1,10 +1,9 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 # Copyright (C) 2026 Jean-François Kneib
 """Partie sans interface de l'extension « Traduction » : langues, consigne TranslateGemma, découpage, serveur llama.cpp
-lancé à la demande, téléchargement du modèle, Argos Translate. Bibliothèque standard seule (Argos est importé à la demande)."""
+lancé à la demande, téléchargement du modèle. Bibliothèque standard seule."""
 import glob
 import hashlib
-import importlib.util
 import json
 import os
 import re
@@ -369,73 +368,6 @@ def telecharger_modele(dossier: Path, url: str = MODELE_URL, nom: str = MODELE_N
         raise ErreurMoteur("fichier téléchargé incorrect (taille ou somme de contrôle) : supprimé")
     os.replace(partiel, final)
     return final
-
-
-# ---------- Argos Translate ----------
-def argos_present() -> bool:
-    if "argostranslate" in sys.modules:
-        return True
-    try:
-        return importlib.util.find_spec("argostranslate") is not None
-    except (ImportError, ValueError):
-        return False
-
-
-def _argos(dossier: Path | None):
-    """Module argostranslate, avec ses paquets de langue rangés dans le dossier de l'extension. ErreurMoteur s'il manque."""
-    try:
-        from argostranslate import package, settings, translate
-    except Exception as ex:                 # ImportError, ou dépendance (stanza, spacy…) absente
-        raise ErreurMoteur(f"Argos Translate est inutilisable : {type(ex).__name__}: {ex}") from ex
-    if dossier is not None:
-        for attribut, valeur in (("data_dir", dossier), ("package_data_dir", dossier / "packages"),
-                                 ("cache_dir", dossier / "cache"), ("downloads_dir", dossier / "downloads")):
-            if hasattr(settings, attribut):
-                setattr(settings, attribut, valeur)
-                Path(valeur).mkdir(parents=True, exist_ok=True)
-    return package, translate
-
-
-def argos_langues_installees(dossier: Path | None = None) -> set:
-    _package, translate = _argos(dossier)
-    return {l.code for l in translate.get_installed_languages()}
-
-
-def argos_paire_installee(src: str, dst: str, dossier: Path | None = None) -> bool:
-    _package, translate = _argos(dossier)
-    langues = {l.code: l for l in translate.get_installed_languages()}
-    return src in langues and dst in langues and langues[src].get_translation(langues[dst]) is not None
-
-
-def argos_modeles_necessaires(src: str, dst: str, dossier: Path | None = None) -> list:
-    """Paquets de langue à télécharger pour la paire (avec pivot par l'anglais si besoin). Interroge l'index en ligne."""
-    package, _translate = _argos(dossier)
-    package.update_package_index()
-    dispo = package.get_available_packages()
-
-    def cherche(a, b):
-        return next((p for p in dispo if p.from_code == a and p.to_code == b), None)
-    direct = cherche(src, dst)
-    if direct:
-        return [direct]
-    pivot = [cherche(src, "en"), cherche("en", dst)] if "en" not in (src, dst) else []
-    if pivot and all(pivot):
-        return pivot
-    raise ErreurMoteur(f"Argos n'a pas de modèle pour {src} → {dst}")
-
-
-def argos_installer_paquets(paquets: list, dossier: Path | None = None) -> None:
-    package, _translate = _argos(dossier)
-    for p in paquets:
-        package.install_from_path(p.download())
-
-
-def argos_traduire(texte: str, src: str, dst: str, dossier: Path | None = None) -> str:
-    _package, translate = _argos(dossier)
-    langues = {l.code: l for l in translate.get_installed_languages()}
-    if src not in langues or dst not in langues or langues[src].get_translation(langues[dst]) is None:
-        raise ErreurMoteur(f"modèle Argos {src} → {dst} non installé")
-    return langues[src].get_translation(langues[dst]).translate(texte).strip()
 
 
 # ---------- aide à l'installation de llama.cpp ----------
