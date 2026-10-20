@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: scrinium 0.2.0\n"
 "Report-Msgid-Bugs-To: \n"
-"PO-Revision-Date: 2026-10-20 17:24+0200\n"
+"PO-Revision-Date: 2026-10-20 17:34+0200\n"
 "Last-Translator: Jean-François Kneib\n"
 "Language-Team: English\n"
 "Language: en\n"
@@ -459,7 +459,7 @@ msgstr "Show or hide the prepared CLI actions panel"
 
 #: plugins/capture/__init__.py:419
 #: plugins/courriel/__init__.py:345
-#: plugins/ocr/__init__.py:214
+#: plugins/lecture/__init__.py:286
 msgid "Ouvrez d'abord une fiche."
 msgstr "Open a note first."
 
@@ -468,6 +468,7 @@ msgid "Aucune console Konsole ouverte : celle de l'extension s'ouvrira au premie
 msgstr "No Konsole console is open: the extension's one will open on first send."
 
 #: plugins/capture/__init__.py:446
+#: plugins/lecture/__init__.py:299
 msgid "Sélectionnez d'abord du texte dans la fiche."
 msgstr "Select some text in the note first."
 
@@ -844,6 +845,7 @@ msgid "Erreur : %s"
 msgstr "Error: %s"
 
 #: plugins/dictee/__init__.py:75
+#: plugins/lecture/__init__.py:64
 msgid "Échec (code %s). Voyez ci-dessus."
 msgstr "Failed (code %s). See above."
 
@@ -870,6 +872,271 @@ msgstr "The note can no longer be edited: text not inserted."
 #: plugins/dictee/__init__.py:243
 msgid "Modèle indisponible : %s"
 msgstr "Model unavailable: %s"
+
+#: plugins/lecture/__init__.py:29
+#: plugins/traduction/logique.py:538
+#: plugins/traduction/logique.py:549
+msgid "%s Mo"
+msgstr "%s MB"
+
+#: plugins/lecture/__init__.py:37
+msgid "Installation de Piper"
+msgstr "Installing Piper"
+
+#: plugins/lecture/__init__.py:79
+msgid "Téléchargement de la voix"
+msgstr "Downloading the voice"
+
+#: plugins/lecture/__init__.py:84
+#: plugins/traduction/__init__.py:53
+#: plugins/traduction/__init__.py:613
+msgid "Annuler"
+msgstr "Cancel"
+
+#: plugins/lecture/__init__.py:123
+#: plugins/lecture/__init__.py:261
+#: plugins/lecture/__init__.py:272
+msgid "Lecture à voix haute"
+msgstr "Read aloud"
+
+#: plugins/lecture/__init__.py:133
+#: plugins/lecture/__init__.py:377
+#: plugins/lecture/__init__.py:385
+msgid "Pause"
+msgstr "Pause"
+
+#: plugins/lecture/__init__.py:135
+msgid "Fiche suivante"
+msgstr "Next note"
+
+#: plugins/lecture/__init__.py:137
+#: plugins/traduction/__init__.py:353
+msgid "Arrêter"
+msgstr "Stop"
+
+#: plugins/lecture/__init__.py:154
+msgid "Réglages de la lecture"
+msgstr "Reading settings"
+
+#: plugins/lecture/__init__.py:169
+msgid "1,0 = vitesse normale"
+msgstr "1.0 = normal speed"
+
+#: plugins/lecture/__init__.py:170
+msgid "Moteur :"
+msgstr "Engine:"
+
+#: plugins/lecture/__init__.py:171
+msgid "Langue :"
+msgstr "Language:"
+
+#: plugins/lecture/__init__.py:172
+msgid "Vitesse :"
+msgstr "Speed:"
+
+#: plugins/lecture/__init__.py:215
+msgid "Lire la fiche à voix haute"
+msgstr "Read the note aloud"
+
+#: plugins/lecture/__init__.py:217
+msgid "Lire"
+msgstr "Read"
+
+#: plugins/lecture/__init__.py:218
+msgid "Lire la sélection à voix haute"
+msgstr "Read the selection aloud"
+
+#: plugins/lecture/__init__.py:219
+msgid "Lire un thème à voix haute…"
+msgstr "Read a topic aloud…"
+
+#: plugins/lecture/__init__.py:220
+msgid "Arrêter la lecture"
+msgstr "Stop reading"
+
+#: plugins/lecture/__init__.py:221
+msgid "Réglages de la lecture…"
+msgstr "Reading settings…"
+
+#: plugins/lecture/__init__.py:247
+#: plugins/lecture/__init__.py:309
+#: plugins/lecture/__init__.py:286
+msgid "Lecture"
+msgstr "Reading"
+
+#: plugins/lecture/__init__.py:309
+msgid "Lire toutes les fiches de quel thème ?"
+msgstr "Read all the notes of which topic?"
+
+#: plugins/lecture/__init__.py:81
+msgid "Téléchargement de « %(voix)s » (%(taille)s)…"
+msgstr "Downloading \"%(voix)s\" (%(taille)s)…"
+
+#: plugins/lecture/__init__.py:157
+msgid "Automatique (Piper si possible, sinon espeak-ng)"
+msgstr "Automatic (Piper if possible, otherwise espeak-ng)"
+
+#: plugins/lecture/__init__.py:157
+msgid "Piper (voix naturelle)"
+msgstr "Piper (natural voice)"
+
+#: plugins/lecture/__init__.py:158
+msgid "espeak-ng (voix robotique, rien à télécharger)"
+msgstr "espeak-ng (robotic voice, nothing to download)"
+
+#: plugins/lecture/__init__.py:162
+msgid "Automatique (détectée dans le texte)"
+msgstr "Automatic (detected in the text)"
+
+#: plugins/lecture/__init__.py:162
+msgid "Toujours le français"
+msgstr "Always French"
+
+#: plugins/lecture/__init__.py:163
+msgid "Toujours l'anglais"
+msgstr "Always English"
+
+#: plugins/lecture/__init__.py:213
+msgid "lecture à voix haute : pour l'instant Linux seulement"
+msgstr "reading aloud: Linux only for now"
+
+#: plugins/lecture/__init__.py:262
+msgid ""
+"Pour une voix naturelle, Piper a besoin de :\n"
+"\n"
+"%s\n"
+"\n"
+"Rien d'autre n'est touché sur votre système. Installer maintenant ? (Sinon, espeak-ng sera utilisé s'il est présent.)"
+msgstr ""
+"For a natural voice, Piper needs:\n"
+"\n"
+"%s\n"
+"\n"
+"Nothing else on your system is touched. Install now? (Otherwise espeak-ng will be used if present.)"
+
+#: plugins/lecture/__init__.py:295
+#: plugins/lecture/__init__.py:288
+msgid "Une fiche verrouillée n'est jamais lue à voix haute."
+msgstr "A locked note is never read aloud."
+
+#: plugins/lecture/__init__.py:336
+msgid "Rien à lire."
+msgstr "Nothing to read."
+
+#: plugins/lecture/__init__.py:388
+msgid "Reprendre"
+msgstr "Resume"
+
+#: plugins/lecture/__init__.py:96
+msgid "annulé"
+msgstr "cancelled"
+
+#: plugins/lecture/__init__.py:182
+msgid "Voix (%s) :"
+msgstr "Voice (%s):"
+
+#: plugins/lecture/__init__.py:256
+msgid ""
+"• le paquet Python « piper-tts » (≈ 50 Mo avec ses dépendances), installé uniquement pour cette extension dans :\n"
+"  %s (depuis PyPI)"
+msgstr ""
+"• the Python package \"piper-tts\" (≈ 50 MB with its dependencies), installed for this extension only in:\n"
+"  %s (from PyPI)"
+
+#: plugins/lecture/__init__.py:259
+msgid ""
+"• la voix « %(voix)s » (%(taille)s), téléchargée depuis huggingface.co dans :\n"
+"  %(dossier)s (taille et SHA-256 vérifiés)"
+msgstr ""
+"• the voice \"%(voix)s\" (%(taille)s), downloaded from huggingface.co into:\n"
+"  %(dossier)s (size and SHA-256 checked)"
+
+#: plugins/lecture/__init__.py:272
+msgid "L'installation de Piper a échoué."
+msgstr "Piper installation failed."
+
+#: plugins/lecture/__init__.py:301
+msgid "Sélection"
+msgstr "Selection"
+
+#: plugins/lecture/__init__.py:326
+msgid "Aucune fiche à lire dans « %s »."
+msgstr "No note to read in \"%s\"."
+
+#: plugins/lecture/__init__.py:404
+msgid "Le moteur de voix a échoué : %s"
+msgstr "The voice engine failed: %s"
+
+#: plugins/lecture/__init__.py:178
+msgid "installée"
+msgstr "installed"
+
+#: plugins/lecture/__init__.py:278
+msgid "Téléchargement impossible : %s"
+msgstr "Download failed: %s"
+
+#: plugins/lecture/__init__.py:364
+msgid "Impossible de lire : %s"
+msgstr "Cannot read aloud: %s"
+
+#: plugins/lecture/__init__.py:178
+msgid "à télécharger, %s"
+msgstr "to download, %s"
+
+#: plugins/lecture/__init__.py:376
+msgid "%d fiche(s) verrouillée(s) ignorée(s)"
+msgstr "%d locked note(s) skipped"
+
+#: plugins/lecture/__init__.py:374
+msgid "Fiche %(i)d sur %(n)d"
+msgstr "Note %(i)d of %(n)d"
+
+#: plugins/lecture/logique.py:40
+#: plugins/traduction/logique.py:26
+msgid "français"
+msgstr "French"
+
+#: plugins/lecture/logique.py:40
+#: plugins/traduction/logique.py:26
+msgid "anglais"
+msgstr "English"
+
+#: plugins/lecture/logique.py:151
+msgid "Aucun moteur de voix disponible. Installez espeak-ng (Debian/Ubuntu : sudo apt install espeak-ng), ou laissez l'extension installer Piper (voix plus naturelle) quand elle le propose."
+msgstr "No voice engine available. Install espeak-ng (Debian/Ubuntu: sudo apt install espeak-ng), or let the extension install Piper (more natural voice) when it offers to."
+
+#: plugins/lecture/logique.py:26
+msgid "Français — Siwis"
+msgstr "French — Siwis"
+
+#: plugins/lecture/logique.py:29
+msgid "Français — UPMC"
+msgstr "French — UPMC"
+
+#: plugins/lecture/logique.py:32
+msgid "Anglais (États-Unis) — Lessac"
+msgstr "English (US) — Lessac"
+
+#: plugins/lecture/logique.py:35
+msgid "Anglais (Royaume-Uni) — Alba"
+msgstr "English (UK) — Alba"
+
+#: plugins/lecture/logique.py:255
+msgid "aucun lecteur audio trouvé (paplay, pw-play ou aplay)"
+msgstr "no audio player found (paplay, pw-play or aplay)"
+
+#: plugins/lecture/logique.py:277
+msgid "téléchargement refusé : adresse non sécurisée"
+msgstr "download refused: insecure address"
+
+#: plugins/lecture/logique.py:242
+msgid "le moteur de voix s'est arrêté avec une erreur"
+msgstr "the voice engine stopped with an error"
+
+#: plugins/lecture/logique.py:295
+#: plugins/traduction/logique.py:618
+msgid "fichier téléchargé incorrect (taille ou somme de contrôle) : supprimé"
+msgstr "downloaded file is incorrect (size or checksum): deleted"
 
 #: plugins/ocr/__init__.py:40
 msgid "Réglages de l'OCR"
@@ -1010,12 +1277,6 @@ msgstr "tesseract failed (code %d)"
 msgid "Fichier personnel"
 msgstr "Personal file"
 
-#: plugins/traduction/__init__.py:53
-#: plugins/traduction/__init__.py:613
-#: src/scrinium/ui/capture_rapide.py:52
-msgid "Annuler"
-msgstr "Cancel"
-
 #: plugins/traduction/__init__.py:115
 msgid "Léger : 2,49 Go à télécharger, 3 à 5 Go de mémoire (mesuré sur trois machines)."
 msgstr "Light: 2.49 GB to download, 3 to 5 GB of memory (measured on three machines)."
@@ -1150,10 +1411,6 @@ msgstr "Fast: a few seconds. Better: more faithful, several times slower. (The d
 #: plugins/traduction/__init__.py:496
 msgid "Traduire"
 msgstr "Translate"
-
-#: plugins/traduction/__init__.py:353
-msgid "Arrêter"
-msgstr "Stop"
 
 #: plugins/traduction/__init__.py:367
 msgid "La traduction apparaît ici ; vous pouvez la corriger avant de l'utiliser."
@@ -1416,14 +1673,6 @@ msgid "Cette fiche est verrouillée et le serveur %s n'est pas local : envoyer q
 msgstr "This note is locked and the server %s is not local: send its text anyway?"
 
 #: plugins/traduction/logique.py:26
-msgid "français"
-msgstr "French"
-
-#: plugins/traduction/logique.py:26
-msgid "anglais"
-msgstr "English"
-
-#: plugins/traduction/logique.py:26
 msgid "espagnol"
 msgstr "Spanish"
 
@@ -1519,11 +1768,6 @@ msgstr "Indonesian"
 msgid "Cette machine n'a que %(go)s de mémoire : même le modèle rapide (jusqu'à %(b)s) sera juste."
 msgstr "This machine has only %(go)s of memory: even the fast model (up to %(b)s) will be tight."
 
-#: plugins/traduction/logique.py:538
-#: plugins/traduction/logique.py:549
-msgid "%s Mo"
-msgstr "%s MB"
-
 #: plugins/traduction/logique.py:544
 #: plugins/traduction/logique.py:549
 msgid "%s Go"
@@ -1584,10 +1828,6 @@ msgstr "Connecting to the download server…"
 #: plugins/traduction/logique.py:615
 msgid "Vérification de la somme de contrôle (SHA-256)…"
 msgstr "Checking the checksum (SHA-256)…"
-
-#: plugins/traduction/logique.py:618
-msgid "fichier téléchargé incorrect (taille ou somme de contrôle) : supprimé"
-msgstr "downloaded file is incorrect (size or checksum): deleted"
 
 #: plugins/traduction/logique.py:633
 msgid "Linux : fichier « llama-bNNNNN-bin-ubuntu-x64.tar.gz » (sans carte graphique), « …-ubuntu-vulkan-x64.tar.gz » (carte graphique, tous constructeurs ; testé avec une NVIDIA) ou « …-ubuntu-cuda-…-x64.tar.gz » (NVIDIA, plus gros)."

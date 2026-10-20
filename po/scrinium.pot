@@ -459,7 +459,7 @@ msgstr ""
 
 #: plugins/capture/__init__.py:419
 #: plugins/courriel/__init__.py:345
-#: plugins/ocr/__init__.py:214
+#: plugins/lecture/__init__.py:286
 msgid "Ouvrez d'abord une fiche."
 msgstr ""
 
@@ -468,6 +468,7 @@ msgid "Aucune console Konsole ouverte : celle de l'extension s'ouvrira au premie
 msgstr ""
 
 #: plugins/capture/__init__.py:446
+#: plugins/lecture/__init__.py:299
 msgid "Sélectionnez d'abord du texte dans la fiche."
 msgstr ""
 
@@ -827,6 +828,7 @@ msgid "Erreur : %s"
 msgstr ""
 
 #: plugins/dictee/__init__.py:75
+#: plugins/lecture/__init__.py:64
 msgid "Échec (code %s). Voyez ci-dessus."
 msgstr ""
 
@@ -852,6 +854,262 @@ msgstr ""
 
 #: plugins/dictee/__init__.py:243
 msgid "Modèle indisponible : %s"
+msgstr ""
+
+#: plugins/lecture/__init__.py:29
+#: plugins/traduction/logique.py:538
+#: plugins/traduction/logique.py:549
+msgid "%s Mo"
+msgstr ""
+
+#: plugins/lecture/__init__.py:37
+msgid "Installation de Piper"
+msgstr ""
+
+#: plugins/lecture/__init__.py:79
+msgid "Téléchargement de la voix"
+msgstr ""
+
+#: plugins/lecture/__init__.py:84
+#: plugins/traduction/__init__.py:53
+#: plugins/traduction/__init__.py:613
+msgid "Annuler"
+msgstr ""
+
+#: plugins/lecture/__init__.py:123
+#: plugins/lecture/__init__.py:261
+#: plugins/lecture/__init__.py:272
+msgid "Lecture à voix haute"
+msgstr ""
+
+#: plugins/lecture/__init__.py:133
+#: plugins/lecture/__init__.py:377
+#: plugins/lecture/__init__.py:385
+msgid "Pause"
+msgstr ""
+
+#: plugins/lecture/__init__.py:135
+msgid "Fiche suivante"
+msgstr ""
+
+#: plugins/lecture/__init__.py:137
+#: plugins/traduction/__init__.py:353
+msgid "Arrêter"
+msgstr ""
+
+#: plugins/lecture/__init__.py:154
+msgid "Réglages de la lecture"
+msgstr ""
+
+#: plugins/lecture/__init__.py:169
+msgid "1,0 = vitesse normale"
+msgstr ""
+
+#: plugins/lecture/__init__.py:170
+msgid "Moteur :"
+msgstr ""
+
+#: plugins/lecture/__init__.py:171
+msgid "Langue :"
+msgstr ""
+
+#: plugins/lecture/__init__.py:172
+msgid "Vitesse :"
+msgstr ""
+
+#: plugins/lecture/__init__.py:215
+msgid "Lire la fiche à voix haute"
+msgstr ""
+
+#: plugins/lecture/__init__.py:217
+msgid "Lire"
+msgstr ""
+
+#: plugins/lecture/__init__.py:218
+msgid "Lire la sélection à voix haute"
+msgstr ""
+
+#: plugins/lecture/__init__.py:219
+msgid "Lire un thème à voix haute…"
+msgstr ""
+
+#: plugins/lecture/__init__.py:220
+msgid "Arrêter la lecture"
+msgstr ""
+
+#: plugins/lecture/__init__.py:221
+msgid "Réglages de la lecture…"
+msgstr ""
+
+#: plugins/lecture/__init__.py:247
+#: plugins/lecture/__init__.py:309
+#: plugins/lecture/__init__.py:286
+msgid "Lecture"
+msgstr ""
+
+#: plugins/lecture/__init__.py:309
+msgid "Lire toutes les fiches de quel thème ?"
+msgstr ""
+
+#: plugins/lecture/__init__.py:81
+msgid "Téléchargement de « %(voix)s » (%(taille)s)…"
+msgstr ""
+
+#: plugins/lecture/__init__.py:157
+msgid "Automatique (Piper si possible, sinon espeak-ng)"
+msgstr ""
+
+#: plugins/lecture/__init__.py:157
+msgid "Piper (voix naturelle)"
+msgstr ""
+
+#: plugins/lecture/__init__.py:158
+msgid "espeak-ng (voix robotique, rien à télécharger)"
+msgstr ""
+
+#: plugins/lecture/__init__.py:162
+msgid "Automatique (détectée dans le texte)"
+msgstr ""
+
+#: plugins/lecture/__init__.py:162
+msgid "Toujours le français"
+msgstr ""
+
+#: plugins/lecture/__init__.py:163
+msgid "Toujours l'anglais"
+msgstr ""
+
+#: plugins/lecture/__init__.py:213
+msgid "lecture à voix haute : pour l'instant Linux seulement"
+msgstr ""
+
+#: plugins/lecture/__init__.py:262
+msgid ""
+"Pour une voix naturelle, Piper a besoin de :\n"
+"\n"
+"%s\n"
+"\n"
+"Rien d'autre n'est touché sur votre système. Installer maintenant ? (Sinon, espeak-ng sera utilisé s'il est présent.)"
+msgstr ""
+
+#: plugins/lecture/__init__.py:295
+#: plugins/lecture/__init__.py:288
+msgid "Une fiche verrouillée n'est jamais lue à voix haute."
+msgstr ""
+
+#: plugins/lecture/__init__.py:336
+msgid "Rien à lire."
+msgstr ""
+
+#: plugins/lecture/__init__.py:388
+msgid "Reprendre"
+msgstr ""
+
+#: plugins/lecture/__init__.py:96
+msgid "annulé"
+msgstr ""
+
+#: plugins/lecture/__init__.py:182
+msgid "Voix (%s) :"
+msgstr ""
+
+#: plugins/lecture/__init__.py:256
+msgid ""
+"• le paquet Python « piper-tts » (≈ 50 Mo avec ses dépendances), installé uniquement pour cette extension dans :\n"
+"  %s (depuis PyPI)"
+msgstr ""
+
+#: plugins/lecture/__init__.py:259
+msgid ""
+"• la voix « %(voix)s » (%(taille)s), téléchargée depuis huggingface.co dans :\n"
+"  %(dossier)s (taille et SHA-256 vérifiés)"
+msgstr ""
+
+#: plugins/lecture/__init__.py:272
+msgid "L'installation de Piper a échoué."
+msgstr ""
+
+#: plugins/lecture/__init__.py:301
+msgid "Sélection"
+msgstr ""
+
+#: plugins/lecture/__init__.py:326
+msgid "Aucune fiche à lire dans « %s »."
+msgstr ""
+
+#: plugins/lecture/__init__.py:404
+msgid "Le moteur de voix a échoué : %s"
+msgstr ""
+
+#: plugins/lecture/__init__.py:178
+msgid "installée"
+msgstr ""
+
+#: plugins/lecture/__init__.py:278
+msgid "Téléchargement impossible : %s"
+msgstr ""
+
+#: plugins/lecture/__init__.py:364
+msgid "Impossible de lire : %s"
+msgstr ""
+
+#: plugins/lecture/__init__.py:178
+msgid "à télécharger, %s"
+msgstr ""
+
+#: plugins/lecture/__init__.py:376
+msgid "%d fiche(s) verrouillée(s) ignorée(s)"
+msgstr ""
+
+#: plugins/lecture/__init__.py:374
+msgid "Fiche %(i)d sur %(n)d"
+msgstr ""
+
+#: plugins/lecture/logique.py:40
+#: plugins/traduction/logique.py:26
+msgid "français"
+msgstr ""
+
+#: plugins/lecture/logique.py:40
+#: plugins/traduction/logique.py:26
+msgid "anglais"
+msgstr ""
+
+#: plugins/lecture/logique.py:151
+msgid "Aucun moteur de voix disponible. Installez espeak-ng (Debian/Ubuntu : sudo apt install espeak-ng), ou laissez l'extension installer Piper (voix plus naturelle) quand elle le propose."
+msgstr ""
+
+#: plugins/lecture/logique.py:26
+msgid "Français — Siwis"
+msgstr ""
+
+#: plugins/lecture/logique.py:29
+msgid "Français — UPMC"
+msgstr ""
+
+#: plugins/lecture/logique.py:32
+msgid "Anglais (États-Unis) — Lessac"
+msgstr ""
+
+#: plugins/lecture/logique.py:35
+msgid "Anglais (Royaume-Uni) — Alba"
+msgstr ""
+
+#: plugins/lecture/logique.py:255
+msgid "aucun lecteur audio trouvé (paplay, pw-play ou aplay)"
+msgstr ""
+
+#: plugins/lecture/logique.py:277
+msgid "téléchargement refusé : adresse non sécurisée"
+msgstr ""
+
+#: plugins/lecture/logique.py:242
+msgid "le moteur de voix s'est arrêté avec une erreur"
+msgstr ""
+
+#: plugins/lecture/logique.py:295
+#: plugins/traduction/logique.py:618
+msgid "fichier téléchargé incorrect (taille ou somme de contrôle) : supprimé"
 msgstr ""
 
 #: plugins/ocr/__init__.py:40
@@ -993,12 +1251,6 @@ msgstr ""
 msgid "Fichier personnel"
 msgstr ""
 
-#: plugins/traduction/__init__.py:53
-#: plugins/traduction/__init__.py:613
-#: src/scrinium/ui/capture_rapide.py:52
-msgid "Annuler"
-msgstr ""
-
 #: plugins/traduction/__init__.py:115
 msgid "Léger : 2,49 Go à télécharger, 3 à 5 Go de mémoire (mesuré sur trois machines)."
 msgstr ""
@@ -1132,10 +1384,6 @@ msgstr ""
 #: plugins/traduction/__init__.py:350
 #: plugins/traduction/__init__.py:496
 msgid "Traduire"
-msgstr ""
-
-#: plugins/traduction/__init__.py:353
-msgid "Arrêter"
 msgstr ""
 
 #: plugins/traduction/__init__.py:367
@@ -1386,14 +1634,6 @@ msgid "Cette fiche est verrouillée et le serveur %s n'est pas local : envoyer q
 msgstr ""
 
 #: plugins/traduction/logique.py:26
-msgid "français"
-msgstr ""
-
-#: plugins/traduction/logique.py:26
-msgid "anglais"
-msgstr ""
-
-#: plugins/traduction/logique.py:26
 msgid "espagnol"
 msgstr ""
 
@@ -1489,11 +1729,6 @@ msgstr ""
 msgid "Cette machine n'a que %(go)s de mémoire : même le modèle rapide (jusqu'à %(b)s) sera juste."
 msgstr ""
 
-#: plugins/traduction/logique.py:538
-#: plugins/traduction/logique.py:549
-msgid "%s Mo"
-msgstr ""
-
 #: plugins/traduction/logique.py:544
 #: plugins/traduction/logique.py:549
 msgid "%s Go"
@@ -1553,10 +1788,6 @@ msgstr ""
 
 #: plugins/traduction/logique.py:615
 msgid "Vérification de la somme de contrôle (SHA-256)…"
-msgstr ""
-
-#: plugins/traduction/logique.py:618
-msgid "fichier téléchargé incorrect (taille ou somme de contrôle) : supprimé"
 msgstr ""
 
 #: plugins/traduction/logique.py:633
