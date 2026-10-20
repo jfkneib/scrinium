@@ -149,6 +149,7 @@ class DialogueExtensions(QDialog):
         self._remplir()
         self.liste.currentRowChanged.connect(self._detail)
         self.liste.itemChanged.connect(self._coche)
+        self._detail(self.liste.currentRow())        # la première extension est déjà sélectionnée : son détail s'affiche tout de suite
 
     def _remplir(self):
         self.liste.blockSignals(True)
@@ -171,7 +172,8 @@ class DialogueExtensions(QDialog):
         info = self.g.infos[self.liste.item(row).data(Qt.ItemDataRole.UserRole)]
         txt = f"<b>{info.titre}</b> {info.version}" + (f" · {info.auteur}" if info.auteur else "")
         txt += f"<br>{info.description}" if info.description else ""
-        txt += "<br><i>" + (_("Installée comme paquet") if info.source == "paquet" else _("Dossier utilisateur")) + "</i>"
+        source = {"paquet": _("Installée comme paquet"), "officielle": _("Fournie avec Scrinium")}.get(info.source, _("Dossier utilisateur"))
+        txt += "<br><i>" + source + "</i>"
         if info.erreur:
             txt += f"<br><span style='color:#c0392b'>⚠ {info.erreur}</span>"
         self.detail.setText(txt)

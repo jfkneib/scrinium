@@ -43,3 +43,12 @@ def _aucune_boite_modale_inattendue(monkeypatch):
             monkeypatch.setattr(classe, nom, staticmethod(interdit(f"{classe.__name__}.{nom}")))
     for classe in (QDialog, QMessageBox, QMenu):
         monkeypatch.setattr(classe, "exec", interdit(f"{classe.__name__}.exec"))
+
+
+@pytest.fixture(autouse=True)
+def _sans_extensions_officielles(monkeypatch):
+    """Par défaut, aucun test ne voit les extensions du dépôt (isolation) : un test qui en veut passe `officiels=[...]` au Gestionnaire.
+    La vraie fonction reste accessible sous `plugins.dossiers_officiels_reels`."""
+    from scrinium.core import plugins
+    plugins.dossiers_officiels_reels = getattr(plugins, "dossiers_officiels_reels", plugins.dossiers_officiels)
+    monkeypatch.setattr(plugins, "dossiers_officiels", lambda: [])

@@ -199,3 +199,69 @@ class P(Plugin):
         ctx.lire_piece(vue, 1)
     with pytest.raises(ValueError):
         ctx.maj_piece(vue, 1, ocr="x")
+
+
+# ---------- extensions officielles (livrées avec Scrinium) ----------
+def faire_officiel(racine, nom, titre="Officielle", code="from scrinium.core.plugins import Plugin\nclass P(Plugin): api = 1\n"):
+    d = racine / nom
+    d.mkdir(parents=True)
+    (d / "plugin.json").write_text(json.dumps({"titre": titre, "version": "9", "description": "livrée", "auteur": "Scrinium", "classe": "P", "api": 1}))
+    (d / "__init__.py").write_text(code)
+    return d
+
+
+def test_extensions_officielles_decouvertes_mais_desactivees(store, tmp_path):
+    off = tmp_path / "off"
+    faire_officiel(off, "dictee", "Dictée")
+    faire_officiel(off, "hello", "Exemple")                                   # un exemple n'est jamais proposé
+    g = Gestionnaire(store, officiels=[off])
+    g.demarrer()
+    assert list(g.infos) == ["dictee"] and g.infos["dictee"].source == "officielle" and g.infos["dictee"].titre == "Dictée"
+    assert not g.actifs and g.actifs_reglage() == []                           # désactivée tant que l'utilisateur ne l'a pas activée
+    assert g.activer("dictee") and "dictee" in g.actifs
+
+
+def test_decouverte_officielle_n_execute_rien(store, tmp_path):
+    marque = tmp_path / "execute"
+    faire_officiel(tmp_path / "off", "piege", code=f"open({str(marque)!r}, 'w').write('x')\nclass P: api = 1")
+    Gestionnaire(store, officiels=[tmp_path / "off"]).decouvrir()
+    assert not marque.exists()                                                  # lister ≠ importer
+
+
+def test_le_dossier_utilisateur_prime_sur_l_officielle(store, tmp_path):
+    faire_officiel(tmp_path / "off", "ocr", "Version fournie")
+    faire_plugin(store, "ocr", CODE_OK, manifeste={"titre": "Ma copie"})
+    g = Gestionnaire(store, officiels=[tmp_path / "off"])
+    g.decouvrir()
+    assert g.infos["ocr"].source == "dossier" and g.infos["ocr"].titre == "Ma copie"      # la copie de l'utilisateur remplace la version fournie
+
+
+def test_officielles_sans_manifeste_ou_nom_invalide_ignorees(store, tmp_path):
+    off = tmp_path / "off"
+    (off / "sans-manifeste").mkdir(parents=True)
+    faire_officiel(off, "Mauvais Nom")
+    faire_officiel(off, "bon")
+    (off / "casse").mkdir()
+    (off / "casse" / "plugin.json").write_text("{pas du json")
+    g = Gestionnaire(store, officiels=[off])
+    g.decouvrir()
+    assert list(g.infos) == ["bon"]
+    assert Gestionnaire(store, officiels=[tmp_path / "inexistant"]).decouvrir() == {}
+
+
+def test_dossiers_officiels_reels_du_depot():
+    from scrinium.core import plugins
+    dossiers = plugins.dossiers_officiels_reels()
+    noms = {p.name for d in dossiers for p in d.iterdir() if (p / "plugin.json").is_file()}
+    assert {"capture", "courriel", "dictee", "ocr", "traduction"} <= noms
+    assert all((p / "plugin.json").is_file() for d in dossiers for p in d.iterdir() if p.is_dir() and p.name in noms)
+
+
+def test_les_cinq_extensions_du_depot_se_decouvrent_et_se_chargent(store):
+    from scrinium.core import plugins
+    g = Gestionnaire(store, officiels=plugins.dossiers_officiels_reels())
+    g.decouvrir()
+    assert {"capture", "courriel", "dictee", "ocr", "traduction"} <= set(g.infos) and "hello" not in g.infos
+    for nom in ("capture", "courriel", "dictee", "ocr", "traduction"):
+        info = g.infos[nom]
+        assert info.source == "officielle" and info.api == 1 and info.titre and info.description and info.version     # manifestes complets

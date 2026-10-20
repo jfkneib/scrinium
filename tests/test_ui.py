@@ -203,3 +203,24 @@ def test_inserer_texte_dans_la_note(fen):
     # fiche verrouillée fermée : refusé
     fen.texte.setEnabled(False)
     assert not ui.inserer_texte("non") and ui.texte_selectionne() == ""
+
+
+def test_dialogue_extensions_montre_les_extensions_fournies(fen, tmp_path, monkeypatch):
+    import json
+    from PyQt6.QtCore import Qt
+    from PyQt6.QtWidgets import QMessageBox
+    from scrinium.ui.extensions import DialogueExtensions
+    d = tmp_path / "officielles" / "demo"
+    d.mkdir(parents=True)
+    (d / "plugin.json").write_text(json.dumps({"titre": "Démo fournie", "version": "3", "description": "livrée avec Scrinium", "auteur": "Scrinium", "classe": "P", "api": 1}))
+    (d / "__init__.py").write_text("from scrinium.core.plugins import Plugin\nclass P(Plugin): api = 1\n")
+    fen.plugins.officiels = [tmp_path / "officielles"]
+    dlg = DialogueExtensions(fen)
+    assert dlg.liste.count() == 1 and "Démo fournie" in dlg.liste.item(0).text()
+    assert dlg.liste.item(0).checkState() == Qt.CheckState.Unchecked                                  # désactivée par défaut
+    assert "Fournie avec Scrinium" in dlg.detail.text() and "livrée avec Scrinium" in dlg.detail.text()
+    demandes = []
+    monkeypatch.setattr(QMessageBox, "question", lambda *a, **k: demandes.append(a[2]) or QMessageBox.StandardButton.No)
+    dlg.liste.item(0).setCheckState(Qt.CheckState.Checked)                                             # l'activer demande l'accord (avertissement « code arbitraire »)
+    assert demandes and "Démo fournie" in demandes[0] and "demo" not in fen.plugins.actifs
+    assert dlg.liste.item(0).checkState() == Qt.CheckState.Unchecked                                   # refusé : elle reste désactivée
