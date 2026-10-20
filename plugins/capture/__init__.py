@@ -149,7 +149,7 @@ class PanneauActions(QWidget):
         self.liste.setUniformItemSizes(True)
         self.liste.itemClicked.connect(self._clic)
         lay.addWidget(self.liste, 1)
-        b = QPushButton(icone("configure"), _("Modifier les actions…"))
+        b = QPushButton(icone("configure"), _("Modifier les actions CLI…"))
         b.clicked.connect(plugin.modifier_actions)
         lay.addWidget(b)
         self.rafraichir()
@@ -174,7 +174,7 @@ class DialogueAction(QDialog):
     def __init__(self, action=None, parent=None):
         super().__init__(parent)
         a = action or {"nom": "", "icone": "system-run", "mode": "taper", "commande": "", "description": ""}
-        self.setWindowTitle(_("Action"))
+        self.setWindowTitle(_("Action CLI"))
         self.resize(520, 400)
         f = QFormLayout(self)
         self.nom = QLineEdit(a["nom"])
@@ -215,7 +215,7 @@ class DialogueAction(QDialog):
 
     def _valider(self):
         if not self.nom.text().strip() or not self.commande.toPlainText().strip():
-            QMessageBox.warning(self, _("Action"), _("Le nom et la commande sont obligatoires."))
+            QMessageBox.warning(self, _("Action CLI"), _("Le nom et la commande sont obligatoires."))
             return
         self.accept()
 
@@ -230,7 +230,7 @@ class DialogueActions(QDialog):
     def __init__(self, plugin, parent=None):
         super().__init__(parent)
         self.p = plugin
-        self.setWindowTitle(_("Actions préparées"))
+        self.setWindowTitle(_("Actions CLI préparées"))
         self.resize(560, 420)
         lay = QHBoxLayout(self)
         self.liste = QListWidget()
@@ -289,7 +289,7 @@ class DialogueActions(QDialog):
             self._enregistrer(j)
 
     def _exemples(self):
-        rep = QMessageBox.question(self, _("Exemples"), _("Ajouter les actions d'exemple à la fin de la liste ? "
+        rep = QMessageBox.question(self, _("Exemples"), _("Ajouter les actions CLI d'exemple à la fin de la liste ? "
                                                          "(Aucune n'est lancée.)"))
         if rep == QMessageBox.StandardButton.Yes:
             self.actions += [dict(a) for a in logique.EXEMPLES]
@@ -297,23 +297,23 @@ class DialogueActions(QDialog):
             self._enregistrer(len(self.actions) - 1)
 
     def _exporter(self):
-        chemin, _f = QFileDialog.getSaveFileName(self, _("Exporter les actions"), "actions-scrinium.json", "JSON (*.json)")
+        chemin, _f = QFileDialog.getSaveFileName(self, _("Exporter les actions CLI"), "actions-scrinium.json", "JSON (*.json)")
         if chemin:
             try:
                 Path(chemin).write_text(logique.exporter_actions(self.actions), encoding="utf-8")
             except OSError as ex:
-                QMessageBox.warning(self, _("Actions"), str(ex))
+                QMessageBox.warning(self, _("Actions CLI"), str(ex))
 
     def _importer(self):
-        chemin, _f = QFileDialog.getOpenFileName(self, _("Importer des actions"), "", "JSON (*.json)")
+        chemin, _f = QFileDialog.getOpenFileName(self, _("Importer des actions CLI"), "", "JSON (*.json)")
         if not chemin:
             return
         try:
             nouvelles = logique.importer_actions(Path(chemin).read_text(encoding="utf-8"))
         except (OSError, ValueError) as ex:
-            QMessageBox.warning(self, _("Actions"), str(ex))
+            QMessageBox.warning(self, _("Actions CLI"), str(ex))
             return
-        if QMessageBox.question(self, _("Importer"), _("Ajouter %d action(s) à la liste ? Relisez leurs commandes avant de les "
+        if QMessageBox.question(self, _("Importer"), _("Ajouter %d action(s) CLI à la liste ? Relisez leurs commandes avant de les "
                                                       "utiliser.") % len(nouvelles)) == QMessageBox.StandardButton.Yes:
             self.actions = logique.normaliser_liste(self.actions + nouvelles)
             self._enregistrer(len(self.actions) - 1)
@@ -358,20 +358,20 @@ class CapturePlugin(Plugin):
             return
         # le panneau d'abord : son interrupteur (menu et barre d'outils) doit être facile à retrouver s'il est fermé
         self.panneau = PanneauActions(self)
-        self.dock = ctx.ui.ajouter_panneau(_("Actions"), self.panneau)
-        self.interrupteurs = (ctx.ui.ajouter_action(_("Panneau des actions"), self.basculer_panneau, "view-list-icons"),
-                              ctx.ui.ajouter_bouton(_("Actions"), self.basculer_panneau, "view-list-icons"))
+        self.dock = ctx.ui.ajouter_panneau(_("Actions CLI"), self.panneau)
+        self.interrupteurs = (ctx.ui.ajouter_action(_("Panneau des actions CLI"), self.basculer_panneau, "view-list-icons"),
+                              ctx.ui.ajouter_bouton(_("Actions CLI"), self.basculer_panneau, "view-list-icons"))
         for a in self.interrupteurs:
             a.setCheckable(True)
             a.setChecked(not self.dock.isHidden())
-            a.setToolTip(_("Afficher ou masquer le panneau des actions préparées"))
+            a.setToolTip(_("Afficher ou masquer le panneau des actions CLI préparées"))
         self.dock.visibilityChanged.connect(self._etat_panneau)
         ctx.ui.ajouter_bouton(_("Console"), self.vers_console, "utilities-terminal")
         ctx.ui.ajouter_action(_("Envoyer la sélection vers une console"), self.vers_console, "utilities-terminal")
         ctx.ui.ajouter_action(_("Choisir la console cible…"), self.choisir_cible, "utilities-terminal")
         ctx.ui.ajouter_action(_("Revenir à la console de l'extension"), self.oublier_cible, "utilities-terminal")
         ctx.ui.ajouter_action(_("Exécuter une commande et insérer la sortie…"), self.commande, "system-run")
-        ctx.ui.ajouter_action(_("Modifier les actions préparées…"), self.modifier_actions, "configure")
+        ctx.ui.ajouter_action(_("Modifier les actions CLI préparées…"), self.modifier_actions, "configure")
         ctx.ui.ajouter_action(_("Réglages de la capture…"), self.reglages, "configure")
 
     def basculer_panneau(self):
@@ -400,17 +400,17 @@ class CapturePlugin(Plugin):
         selection = self.ctx.ui.texte_selectionne()
         vue = self.ctx.fiche_courante()
         if logique.utilise_selection(a["commande"]) and not selection.strip():
-            self.ctx.ui.notifier(_("Actions"), _("Sélectionnez d'abord du texte dans la fiche : « %s » en a besoin.") % a["nom"])
+            self.ctx.ui.notifier(_("Actions CLI"), _("Sélectionnez d'abord du texte dans la fiche : « %s » en a besoin.") % a["nom"])
             return
         cmd = logique.etendre(a["commande"], selection, vue.titre if vue else "", a["mode"])
         if a["mode"] == "executer":
             if vue is None:
-                self.ctx.ui.notifier(_("Actions"), _("Ouvrez d'abord une fiche : la sortie y sera insérée."))
+                self.ctx.ui.notifier(_("Actions CLI"), _("Ouvrez d'abord une fiche : la sortie y sera insérée."))
                 return
             DialogueCommande(self, _parent(), commande=cmd).exec()      # la commande s'affiche ; rien ne part sans clic
         elif a["mode"] == "copier":
             QApplication.clipboard().setText(cmd)
-            self.ctx.ui.notifier(_("Actions"), _("Copié dans le presse-papiers : « %s ».") % a["nom"])
+            self.ctx.ui.notifier(_("Actions CLI"), _("Copié dans le presse-papiers : « %s ».") % a["nom"])
         else:
             self.envoyer_a_la_console(cmd)
 

@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: scrinium 0.2.0\n"
 "Report-Msgid-Bugs-To: \n"
-"PO-Revision-Date: 2026-10-20 17:07+0200\n"
+"PO-Revision-Date: 2026-10-20 17:15+0200\n"
 "Last-Translator: Jean-François Kneib\n"
 "Language-Team: English\n"
 "Language: en\n"
@@ -161,13 +161,13 @@ msgid "Exécution…"
 msgstr "Running…"
 
 #: plugins/capture/__init__.py:152
-msgid "Modifier les actions…"
-msgstr "Edit actions…"
+msgid "Modifier les actions CLI…"
+msgstr "Edit CLI actions…"
 
 #: plugins/capture/__init__.py:177
 #: plugins/capture/__init__.py:218
-msgid "Action"
-msgstr "Action"
+msgid "Action CLI"
+msgstr "CLI action"
 
 #: plugins/capture/__init__.py:182
 msgid "Nom d'une icône du thème d'icônes du système (ex. network-wired, drive-harddisk, utilities-terminal, system-run, edit-find)."
@@ -199,24 +199,24 @@ msgid "Description :"
 msgstr "Description:"
 
 #: plugins/capture/__init__.py:233
-msgid "Actions préparées"
-msgstr "Prepared actions"
+msgid "Actions CLI préparées"
+msgstr "Prepared CLI actions"
 
 #: plugins/capture/__init__.py:292
 msgid "Exemples"
 msgstr "Examples"
 
 #: plugins/capture/__init__.py:292
-msgid "Ajouter les actions d'exemple à la fin de la liste ? (Aucune n'est lancée.)"
-msgstr "Add the example actions to the end of the list? (None of them is run.)"
+msgid "Ajouter les actions CLI d'exemple à la fin de la liste ? (Aucune n'est lancée.)"
+msgstr "Add the example CLI actions to the end of the list? (None of them is run.)"
 
 #: plugins/capture/__init__.py:300
-msgid "Exporter les actions"
-msgstr "Export the actions"
+msgid "Exporter les actions CLI"
+msgstr "Export the CLI actions"
 
 #: plugins/capture/__init__.py:308
-msgid "Importer des actions"
-msgstr "Import actions"
+msgid "Importer des actions CLI"
+msgstr "Import CLI actions"
 
 #: plugins/capture/__init__.py:326
 msgid "Réglages de la capture"
@@ -233,8 +233,8 @@ msgstr "Bring the console to the front after sending (KDE)"
 #: plugins/capture/__init__.py:361
 #: plugins/capture/__init__.py:363
 #: plugins/capture/__init__.py:403
-msgid "Actions"
-msgstr "Actions"
+msgid "Actions CLI"
+msgstr "CLI actions"
 
 #: plugins/capture/__init__.py:369
 #: plugins/capture/__init__.py:429
@@ -259,8 +259,8 @@ msgid "Exécuter une commande et insérer la sortie…"
 msgstr "Run a command and insert its output…"
 
 #: plugins/capture/__init__.py:374
-msgid "Modifier les actions préparées…"
-msgstr "Edit prepared actions…"
+msgid "Modifier les actions CLI préparées…"
+msgstr "Edit prepared CLI actions…"
 
 #: plugins/capture/__init__.py:375
 msgid "Réglages de la capture…"
@@ -333,12 +333,12 @@ msgid "Importer"
 msgstr "Import"
 
 #: plugins/capture/__init__.py:362
-msgid "Panneau des actions"
-msgstr "Actions panel"
+msgid "Panneau des actions CLI"
+msgstr "CLI actions panel"
 
 #: plugins/capture/__init__.py:367
-msgid "Afficher ou masquer le panneau des actions préparées"
-msgstr "Show or hide the prepared actions panel"
+msgid "Afficher ou masquer le panneau des actions CLI préparées"
+msgstr "Show or hide the prepared CLI actions panel"
 
 #: plugins/capture/__init__.py:419
 #: plugins/courriel/__init__.py:345
@@ -359,8 +359,8 @@ msgid "La commande est lancée par votre shell, uniquement quand vous cliquez su
 msgstr "The command is run by your shell, only when you click “Run” (maximum time: %d s)."
 
 #: plugins/capture/__init__.py:316
-msgid "Ajouter %d action(s) à la liste ? Relisez leurs commandes avant de les utiliser."
-msgstr "Add %d action(s) to the list? Review their commands before using them."
+msgid "Ajouter %d action(s) CLI à la liste ? Relisez leurs commandes avant de les utiliser."
+msgstr "Add %d CLI action(s) to the list? Review their commands before using them."
 
 #: plugins/capture/__init__.py:403
 msgid "Sélectionnez d'abord du texte dans la fiche : « %s » en a besoin."
@@ -2173,6 +2173,10 @@ msgstr "System browser (default)"
 #: src/scrinium/ui/fenetre.py:555
 msgid "Scrinium"
 msgstr "Scrinium"
+
+#: src/scrinium/ui/fenetre.py:69
+msgid "Actions"
+msgstr "Actions"
 
 #: src/scrinium/ui/fenetre.py:75
 msgid "Nouvelle fiche (Ctrl+N)"
