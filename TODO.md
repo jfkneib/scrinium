@@ -126,6 +126,7 @@ Partager des fiches entre machines et/ou personnes : dépôt sur le réseau loca
 - ☐ Android : réécriture à part, lecture du même format ; nécessite la synchronisation (Syncthing/Nextcloud), voir plus bas
 
 ## 5. Améliorations diverses
+- ✔ Plugin `applications` (2026-10-21, `dev`, v0.3) : panneau d'icônes qui lance des applications (choix parmi les .desktop installés ou commande libre), `{selection}`/`{fiche}` facultatifs passés en arguments sans shell, refusés pour une fiche verrouillée ; séparé des Actions CLI. Reste : Windows/macOS (liste des applications installées), icônes depuis un fichier .desktop propre à l'utilisateur
 - ✔ Capture rapide (2026-10-21, `dev`, v0.3) : `scrinium --rapide` / Fichier / zone de notification, fenêtre « note rapide », Ctrl+Entrée = ajout daté à une fiche (retenue), fiches verrouillées refusées ; raccourci global = à lier dans le bureau (KDE : Ajouter une commande). Reste : raccourci enregistré par Scrinium lui-même (KGlobalAccel / portail), pré-remplir depuis la sélection ou le presse-papiers
 - ✔ Mise en forme Markdown (2026-10-21, `dev`, v0.3) : barre de boutons (gras, italique, titre, listes, citation, code, lien ; Ctrl+B / Ctrl+I) qui écrivent la syntaxe, et bouton « Aperçu » (Ctrl+E, lecture seule, liens http/https/mailto seulement). Le fichier reste du Markdown. Reste : coloration en direct dans l'éditeur, export HTML/PDF
 - ☐ Sources du code en anglais (aujourd'hui en français, `po/en.po` traduit du français)
