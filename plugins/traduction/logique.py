@@ -36,11 +36,18 @@ DELAI_REQUETE = 300                # secondes
 DELAI_DEMARRAGE = 180
 HOTES_LOCAUX = ("127.0.0.1", "localhost", "::1", "[::1]")
 
-# modèle recommandé (quantifié depuis les poids officiels de Google ; licence Gemma)
-MODELE_URL = "https://huggingface.co/mradermacher/translategemma-4b-it-GGUF/resolve/main/translategemma-4b-it.Q4_K_M.gguf"
-MODELE_NOM = "translategemma-4b-it.Q4_K_M.gguf"
-MODELE_SHA256 = "81200d03e843d2ec1ece6eeafe7d13cb6e5211e1fcd336ade55790b683a08330"
-MODELE_TAILLE = 2_489_909_760
+# modèles proposés (quantifiés Q4_K_M depuis les poids officiels de Google par mradermacher ; licence Gemma)
+_DEPOT = "https://huggingface.co/mradermacher/translategemma-%s-it-GGUF/resolve/main/translategemma-%s-it.Q4_K_M.gguf"
+MODELES = {
+    "4b": {"libelle": "Rapide (4B)", "nom": "translategemma-4b-it.Q4_K_M.gguf", "url": _DEPOT % ("4b", "4b"),
+           "sha256": "81200d03e843d2ec1ece6eeafe7d13cb6e5211e1fcd336ade55790b683a08330", "taille": 2_489_909_760},
+    "12b": {"libelle": "Meilleur (12B)", "nom": "translategemma-12b-it.Q4_K_M.gguf", "url": _DEPOT % ("12b", "12b"),
+            "sha256": "b7aac4b4be7ab0c49b6556c29c4467e74313df7f1e95d9f9676bb2adf0afa528", "taille": 7_300_794_112},
+}
+CHOIX_PERSO = "perso"              # fichier .gguf choisi par l'utilisateur
+# le 4B reste le modèle « par défaut » pour le code qui n'en précise pas
+MODELE_URL, MODELE_NOM = MODELES["4b"]["url"], MODELES["4b"]["nom"]
+MODELE_SHA256, MODELE_TAILLE = MODELES["4b"]["sha256"], MODELES["4b"]["taille"]
 PAGE_VERSIONS = "https://github.com/ggml-org/llama.cpp/releases"
 
 
@@ -166,14 +173,98 @@ def trouver_llama(chemin: str = "", dossier_donnees: Path | None = None) -> str 
     return None
 
 
-def trouver_modele(chemin: str = "", dossier_donnees: Path | None = None) -> str | None:
-    """Fichier .gguf : chemin des réglages, sinon celui téléchargé dans le dossier de l'extension, sinon ~/.local/opt/llama.cpp/modeles."""
-    if chemin and Path(chemin).is_file():
-        return chemin
-    for d in ([dossier_donnees / "modeles"] if dossier_donnees else []) + [Path(os.path.expanduser("~/.local/opt/llama.cpp/modeles"))]:
-        if (d / MODELE_NOM).is_file():
-            return str(d / MODELE_NOM)
+def dossiers_modeles(dossier_donnees: Path | None = None) -> list:
+    return ([dossier_donnees / "modeles"] if dossier_donnees else []) + [Path(os.path.expanduser("~/.local/opt/llama.cpp/modeles"))]
+
+
+def trouver_modele(chemin: str = "", dossier_donnees: Path | None = None, choix: str = "4b") -> str | None:
+    """Fichier .gguf du modèle. Choix « perso » (ou chemin donné sans choix) : ce chemin. Sinon : le fichier du modèle choisi
+    (« 4b », « 12b ») dans le dossier de l'extension ou dans ~/.local/opt/llama.cpp/modeles."""
+    if choix == CHOIX_PERSO or choix not in MODELES:
+        return chemin if chemin and Path(chemin).is_file() else None
+    for d in dossiers_modeles(dossier_donnees):
+        if (d / MODELES[choix]["nom"]).is_file():
+            return str(d / MODELES[choix]["nom"])
     return None
+
+
+def memoire_totale() -> int | None:
+    """Mémoire vive de la machine en octets (None si on ne sait pas la lire)."""
+    try:
+        return os.sysconf("SC_PAGE_SIZE") * os.sysconf("SC_PHYS_PAGES")
+    except (ValueError, OSError, AttributeError):
+        pass
+    if os.name == "nt":
+        try:
+            import ctypes
+
+            class Etat(ctypes.Structure):
+                _fields_ = [("dwLength", ctypes.c_ulong), ("dwMemoryLoad", ctypes.c_ulong), ("ullTotalPhys", ctypes.c_ulonglong),
+                            ("ullAvailPhys", ctypes.c_ulonglong), ("a", ctypes.c_ulonglong), ("b", ctypes.c_ulonglong),
+                            ("c", ctypes.c_ulonglong), ("d", ctypes.c_ulonglong), ("e", ctypes.c_ulonglong)]
+            e = Etat()
+            e.dwLength = ctypes.sizeof(e)
+            ctypes.windll.kernel32.GlobalMemoryStatusEx(ctypes.byref(e))
+            return int(e.ullTotalPhys)
+        except Exception:
+            return None
+    return None
+
+
+def gpus_nvidia() -> list:
+    """Cartes NVIDIA vues par `nvidia-smi` : [{"nom", "total", "libre"}] en octets. Liste vide si absent ou en échec."""
+    exe = shutil.which("nvidia-smi")
+    if not exe:
+        return []
+    try:
+        r = subprocess.run([exe, "--query-gpu=name,memory.total,memory.free", "--format=csv,noheader,nounits"], capture_output=True,
+                           text=True, timeout=8, **({"creationflags": subprocess.CREATE_NO_WINDOW} if os.name == "nt" else {}))
+    except (OSError, subprocess.SubprocessError):
+        return []
+    cartes = []
+    for ligne in r.stdout.splitlines():
+        morceaux = [x.strip() for x in ligne.split(",")]
+        if len(morceaux) == 3 and morceaux[1].isdigit() and morceaux[2].isdigit():
+            cartes.append({"nom": morceaux[0], "total": int(morceaux[1]) * 1024 ** 2, "libre": int(morceaux[2]) * 1024 ** 2})
+    return cartes
+
+
+def apple_silicon() -> bool:
+    import platform
+    return sys.platform == "darwin" and platform.machine() == "arm64"
+
+
+def materiel() -> dict:
+    """Ce que la machine peut offrir : mémoire vive, cœurs, cartes NVIDIA, Apple Silicon (mémoire partagée avec la carte)."""
+    return {"memoire": memoire_totale(), "coeurs": os.cpu_count(), "gpus": gpus_nvidia(), "apple": apple_silicon()}
+
+
+GO12 = 12 * 1024 ** 3
+
+
+def choix_automatique(m: dict) -> str | None:
+    """« 12b » quand la machine le fait tourner vite sans hésitation (carte NVIDIA de 12 Go ou plus ; Mac Apple Silicon avec 16 Go
+    ou plus), sinon None : il faut alors demander. Mesures (RTX 3070 8 Go) : 12B ≈ 7 mots-morceaux/s contre ≈ 106 pour le 4B."""
+    if any(g["total"] >= GO12 for g in m.get("gpus", [])) or (m.get("apple") and (m.get("memoire") or 0) >= 16 * 1024 ** 3):
+        return "12b"
+    return None
+
+
+def recommandation(m: dict) -> str:
+    """Modèle conseillé : le 12B si le choix est évident, sinon le 4B (rapide ; le 12B reste possible, plus lent)."""
+    return choix_automatique(m) or "4b"
+
+
+def description_materiel(m: dict) -> str:
+    gb = lambda o: f"{o / 1024 ** 3:.0f} Go"
+    morceaux = [f"mémoire {gb(m['memoire'])}" if m.get("memoire") else "mémoire inconnue", f"{m.get('coeurs') or '?'} cœurs"]
+    if m.get("gpus"):
+        morceaux.append(" + ".join(f"{g['nom']} ({gb(g['total'])})" for g in m["gpus"]))
+    elif m.get("apple"):
+        morceaux.append("Apple Silicon (mémoire partagée)")
+    else:
+        morceaux.append("pas de carte NVIDIA détectée")
+    return ", ".join(morceaux)
 
 
 def est_local(url: str) -> bool:

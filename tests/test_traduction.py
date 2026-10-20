@@ -285,11 +285,13 @@ def test_modele_recommande_epingle():
 
 
 # ---------- dans la fenêtre ----------
-@pytest.fixture
-def fen(app, tmp_path, monkeypatch):
+def _creer_fenetre(app, tmp_path, monkeypatch, choix="4b"):
+    """Fenêtre avec l'extension activée. HOME factice : jamais les vrais llama.cpp ni modèles de la machine."""
+    monkeypatch.setenv("HOME", str(tmp_path / "home"))
     monkeypatch.setenv("XDG_CONFIG_HOME", str(tmp_path / "xdg"))
+    monkeypatch.setattr(lg.shutil, "which", lambda n: None)
     s = Store(Paths(tmp_path / "am"))
-    s.sauver_reglages(recovery_asked=True)
+    s.sauver_reglages(recovery_asked=True, **({"plugins": {"traduction": {"modele_choix": choix}}} if choix else {}))
     shutil.copytree(RACINE, s.paths.base / "plugins" / "traduction")
     w = Fenetre(s)
     w.plugins.decouvrir()
@@ -299,9 +301,32 @@ def fen(app, tmp_path, monkeypatch):
     w.texte.setPlainText(FRANCAIS)
     w.sauver()
     monkeypatch.setattr(QApplication, "activeWindow", staticmethod(lambda: None))
+    return w
+
+
+@pytest.fixture
+def fen(app, tmp_path, monkeypatch):
+    w = _creer_fenetre(app, tmp_path, monkeypatch)
     yield w
     w.quitter_vraiment = True
     w.close()
+
+
+@pytest.fixture
+def fen_neuf(app, tmp_path, monkeypatch):
+    """Première activation : aucun modèle choisi."""
+    w = _creer_fenetre(app, tmp_path, monkeypatch, choix=None)
+    yield w
+    w.quitter_vraiment = True
+    w.close()
+
+
+def poser_modele(fen, choix="4b"):
+    """Fichier de modèle factice à l'endroit où l'extension le cherche."""
+    d = fen.plugins.actifs["traduction"][1].dossier_donnees / "modeles"
+    d.mkdir(parents=True, exist_ok=True)
+    (d / lg.MODELES[choix]["nom"]).write_bytes(b"GGUF")
+    return d / lg.MODELES[choix]["nom"]
 
 
 def plugin(fen):
@@ -329,7 +354,7 @@ def dialogue(fen, texte=FRANCAIS, selection=False, src="fr"):
 
 
 def faux_moteur(monkeypatch, fen):
-    monkeypatch.setattr(plugin(fen), "preparer", lambda moteur, src, dst, vue: (lambda m, annule: f"[{src}>{dst}] {m.upper()}"))
+    monkeypatch.setattr(plugin(fen), "preparer", lambda moteur, src, dst, vue, choix=None: (lambda m, annule: f"[{src}>{dst}] {m.upper()}"))
 
 
 def traduire(app, d):
@@ -502,28 +527,40 @@ def test_programme_ou_modele_manquant_explique_et_propose(fen, monkeypatch, tmp_
     monkeypatch.setattr(plugin(fen), "aide_installation", lambda: appels.append("aide"))
     assert plugin(fen)._preparer_llama("fr", "en", None) is None and appels == ["aide"]
     monkeypatch.setattr(mod().logique, "trouver_llama", lambda *a, **k: "/x/llama-server")
-    monkeypatch.setattr(mod().logique, "trouver_modele", lambda *a, **k: None)
-    monkeypatch.setattr(plugin(fen), "telecharger_modele", lambda: appels.append("telecharger"))
-    assert plugin(fen)._preparer_llama("fr", "en", None) is None and appels == ["aide", "telecharger"]
+    monkeypatch.setattr(plugin(fen), "telecharger_modele", lambda choix=None: appels.append(("telecharger", choix)))
+    assert plugin(fen)._preparer_llama("fr", "en", None) is None and appels == ["aide", ("telecharger", "4b")]    # le modèle CHOISI, pas un autre
+    assert plugin(fen)._preparer_llama("fr", "en", None, "12b") is None and appels[-1] == ("telecharger", "12b")
 
 
 def test_telechargement_du_modele_demande_l_accord_avec_taille_et_source(fen, monkeypatch, tmp_path):
     textes, lances = [], []
     monkeypatch.setattr(mod().QMessageBox, "question", lambda *a, **k: textes.append(a[2]) or mod().QMessageBox.StandardButton.No)
     monkeypatch.setattr(mod(), "en_arriere_plan", lambda *a, **k: lances.append(1) or (None, ""))
-    assert plugin(fen).telecharger_modele() is None and not lances                                  # refusé : rien n'est téléchargé
-    assert "2.49 Go" in textes[0] and lg.MODELE_URL in textes[0] and "SHA-256" in textes[0] and "modeles" in textes[0]
+    assert plugin(fen).telecharger_modele("12b") is None and not lances                            # refusé : rien n'est téléchargé
+    assert "Meilleur (12B)" in textes[0] and "7.30 Go" in textes[0] and lg.MODELES["12b"]["url"] in textes[0] and "SHA-256" in textes[0]
+    assert plugin(fen).telecharger_modele("4b") is None and "2.49 Go" in textes[1] and "Rapide (4B)" in textes[1]
+    appel = {}
     monkeypatch.setattr(mod().QMessageBox, "question", lambda *a, **k: mod().QMessageBox.StandardButton.Yes)
     cible = tmp_path / "m.gguf"
-    monkeypatch.setattr(mod(), "en_arriere_plan", lambda titre, msg, fn, annulable=False, parent=None: (cible, ""))
-    assert plugin(fen).telecharger_modele() == str(cible)
-    assert fen.plugins.actifs["traduction"][1].reglages.get("modele") == str(cible)
+
+    def fausse(titre, msg, fn, annulable=False, parent=None):
+        appel["fn"] = fn
+        return cible, ""
+    monkeypatch.setattr(mod(), "en_arriere_plan", fausse)
+    monkeypatch.setattr(mod().logique, "telecharger_modele", lambda dossier, url, nom, sha, taille, **k: appel.update(url=url, nom=nom, sha=sha, taille=taille) or cible)
+    assert plugin(fen).telecharger_modele("12b") == str(cible)
+    appel["fn"](threading.Event(), lambda *a: None)
+    assert appel["nom"] == lg.MODELES["12b"]["nom"] and appel["taille"] == lg.MODELES["12b"]["taille"] and appel["sha"] == lg.MODELES["12b"]["sha256"]
+    assert fen.plugins.actifs["traduction"][1].reglages.get("modele", "") == ""                     # le chemin n'est retenu que pour « fichier personnel »
+    QMessageBox_info = []
+    monkeypatch.setattr(mod().QMessageBox, "information", lambda *a, **k: QMessageBox_info.append(a[2]))
+    assert plugin(fen).telecharger_modele("perso") is None and QMessageBox_info                     # rien à télécharger pour un fichier personnel
 
 
 def test_traduction_complete_avec_le_faux_llama_server(fen, app, faux, monkeypatch):
     r = fen.plugins.actifs["traduction"][1].reglages
     r.set("exe", faux.exe)
-    r.set("modele", faux.modele)
+    poser_modele(fen, "4b")
     d = dialogue(fen)
     d._lancer()
     assert attendre(app, lambda: not d.travail, 30)
@@ -560,13 +597,15 @@ def test_journal_du_serveur_dans_le_dossier_de_l_extension(fen):
 # ---------- réglages ----------
 def test_dialogue_reglages_enregistre_et_n_exige_pas_ollama(fen, monkeypatch):
     d = mod().DialogueReglages(plugin(fen))
+    assert d.choix.currentData() == "4b" and [d.choix.itemData(i) for i in range(d.choix.count())] == ["4b", "12b", "perso"]
+    d.choix.setCurrentIndex(d.choix.findData("12b"))
     d.exe.setText("/opt/llama/llama-server")
     d.modele.setText("/m/t.gguf")
     d.gpu.setText("0")
     d.inactif.setValue(3)
     d._valider()
     r = fen.plugins.actifs["traduction"][1].reglages
-    assert (r.get("exe"), r.get("modele"), r.get("gpu"), r.get("inactivite")) == ("/opt/llama/llama-server", "/m/t.gguf", "0", 3)
+    assert (r.get("modele_choix"), r.get("exe"), r.get("modele"), r.get("gpu"), r.get("inactivite")) == ("12b", "/opt/llama/llama-server", "/m/t.gguf", "0", 3)
     assert r.get("distant_ok") is False and r.get("url") == ""                                      # serveur distant jamais accepté par défaut
     assert "ollama" not in (RACINE / "__init__.py").read_text().lower().replace("sans ollama", "")
 
@@ -589,7 +628,7 @@ def test_ancien_reglage_argos_retombe_sur_llama(fen, app, faux):
     r = fen.plugins.actifs["traduction"][1].reglages
     r.set("moteur", "argos")                                                                        # réglage laissé par une ancienne version
     r.set("exe", faux.exe)
-    r.set("modele", faux.modele)
+    poser_modele(fen, "4b")
     d = dialogue(fen)
     assert d.moteur.currentData() == "llama"
     d._lancer()
@@ -611,3 +650,205 @@ def test_vrai_llama_server_traduit(tmp_path):
         assert "`nginx -t`" in code and "- point a" in code.lower().replace("• ", "- ")                   # le modèle peut mettre une majuscule
     finally:
         srv.arreter()
+
+
+# ---------- deux modèles : 4B rapide, 12B meilleur ----------
+GO = 1024 ** 3
+
+
+def test_modeles_epingles_et_telechargements_verifiables():
+    assert list(lg.MODELES) == ["4b", "12b"]
+    for cle, m in lg.MODELES.items():
+        assert m["url"] == f"https://huggingface.co/mradermacher/translategemma-{cle}-it-GGUF/resolve/main/translategemma-{cle}-it.Q4_K_M.gguf"
+        assert m["nom"] == f"translategemma-{cle}-it.Q4_K_M.gguf" and len(m["sha256"]) == 64 and m["taille"] > 1_000_000_000
+    assert lg.MODELES["4b"]["taille"] == 2_489_909_760 and lg.MODELES["12b"]["taille"] == 7_300_794_112
+    assert lg.MODELES["12b"]["sha256"].startswith("b7aac4b4be7ab0c4")
+
+
+def test_trouver_modele_par_choix(tmp_path, monkeypatch):
+    monkeypatch.setenv("HOME", str(tmp_path / "vide"))
+    donnees = tmp_path / "d"
+    (donnees / "modeles").mkdir(parents=True)
+    perso = tmp_path / "mon.gguf"
+    perso.write_bytes(b"x")
+    assert lg.trouver_modele("", donnees, "4b") is None and lg.trouver_modele(str(perso), donnees, "perso") == str(perso)
+    (donnees / "modeles" / lg.MODELES["12b"]["nom"]).write_bytes(b"x")
+    assert lg.trouver_modele("", donnees, "12b").endswith("12b-it.Q4_K_M.gguf") and lg.trouver_modele("", donnees, "4b") is None
+    assert lg.trouver_modele(str(perso), donnees, "12b").endswith("12b-it.Q4_K_M.gguf")               # un chemin ne remplace pas un modèle choisi
+    assert lg.trouver_modele("/inexistant", donnees, "perso") is None and lg.trouver_modele("", donnees, "inconnu") is None
+
+
+def test_choix_automatique_seulement_quand_c_est_evident():
+    carte = lambda go: {"memoire": 32 * GO, "coeurs": 8, "gpus": [{"nom": "X", "total": go * GO, "libre": go * GO}], "apple": False}
+    assert lg.choix_automatique(carte(24)) == "12b" and lg.choix_automatique(carte(12)) == "12b"
+    assert lg.choix_automatique(carte(8)) is None and lg.choix_automatique(carte(6)) is None            # 8 Go : le 12B n'y tient pas, on demande
+    assert lg.choix_automatique({"memoire": 125 * GO, "coeurs": 16, "gpus": [], "apple": False}) is None   # beaucoup de mémoire mais pas de carte
+    assert lg.choix_automatique({"memoire": 16 * GO, "coeurs": 8, "gpus": [], "apple": True}) == "12b"      # Apple Silicon : mémoire partagée
+    assert lg.choix_automatique({"memoire": 8 * GO, "coeurs": 8, "gpus": [], "apple": True}) is None
+    assert lg.recommandation(carte(24)) == "12b" and lg.recommandation(carte(8)) == "4b"
+
+
+def test_description_du_materiel():
+    m = {"memoire": 125 * GO, "coeurs": 16, "gpus": [{"nom": "NVIDIA GeForce RTX 3070", "total": 8 * GO, "libre": 7 * GO}], "apple": False}
+    assert lg.description_materiel(m) == "mémoire 125 Go, 16 cœurs, NVIDIA GeForce RTX 3070 (8 Go)"
+    assert "pas de carte NVIDIA détectée" in lg.description_materiel({"memoire": None, "coeurs": None, "gpus": [], "apple": False})
+    assert "Apple Silicon" in lg.description_materiel({"memoire": 16 * GO, "coeurs": 8, "gpus": [], "apple": True})
+
+
+def test_detection_des_cartes_nvidia(tmp_path, monkeypatch):
+    smi = tmp_path / "nvidia-smi"
+    smi.write_text('#!/bin/sh\necho "NVIDIA GeForce RTX 3070, 8192, 6785"\necho "NVIDIA Tesla T4, 15360, 15000"\necho "ligne illisible"\n')
+    smi.chmod(smi.stat().st_mode | stat.S_IEXEC)
+    monkeypatch.setattr(lg.shutil, "which", lambda n: str(smi))
+    cartes = lg.gpus_nvidia()
+    assert [(c["nom"], c["total"] // 1024 ** 2, c["libre"] // 1024 ** 2) for c in cartes] == [("NVIDIA GeForce RTX 3070", 8192, 6785), ("NVIDIA Tesla T4", 15360, 15000)]
+    smi.write_text("#!/bin/sh\nexit 1\n")
+    assert lg.gpus_nvidia() == []
+    monkeypatch.setattr(lg.shutil, "which", lambda n: None)
+    assert lg.gpus_nvidia() == [] and (lg.memoire_totale() or 1) > 0
+
+
+# ---------- l'assistant de choix ----------
+def fausse_machine(monkeypatch, go_carte=None, apple=False, ram=32):
+    gpus = [{"nom": "NVIDIA Test", "total": go_carte * GO, "libre": go_carte * GO}] if go_carte else []
+    monkeypatch.setattr(mod().logique, "materiel", lambda: {"memoire": ram * GO, "coeurs": 8, "gpus": gpus, "apple": apple})
+
+
+def test_premiere_activation_propose_le_choix_du_modele(fen_neuf, app, monkeypatch):
+    vus = []
+    monkeypatch.setattr(mod().DialogueChoixModele, "exec", lambda self: vus.append(self) or 0)
+    assert plugin(fen_neuf).modele_choisi() is None
+    assert attendre(app, lambda: bool(vus), 3)                                                       # une demi-seconde après l'activation
+    assert len(vus) == 1 and plugin(fen_neuf).modele_choisi() is None                               # « Plus tard » : rien n'est enregistré
+
+
+def test_pas_de_question_si_un_choix_existe_deja(fen, app, monkeypatch):
+    vus = []
+    monkeypatch.setattr(mod().DialogueChoixModele, "exec", lambda self: vus.append(1) or 0)
+    time.sleep(0.7)
+    app.processEvents()
+    assert vus == [] and plugin(fen).modele_choisi() == "4b"
+
+
+def test_dialogue_de_choix_montre_avantages_inconvenients_et_conseil(fen, monkeypatch):
+    fausse_machine(monkeypatch, go_carte=8)
+    poser_modele(fen, "4b")
+    d = mod().DialogueChoixModele(plugin(fen))
+    assert list(d.radios) == ["4b", "12b", "perso"] and d.choix() == "4b"
+    assert "déjà téléchargé" in d.radios["4b"].text() and "conseillé ici" in d.radios["4b"].text()    # 8 Go de carte : conseil = rapide
+    assert "7.30 Go" in d.radios["12b"].text() and "à télécharger" in d.radios["12b"].text() and "conseillé" not in d.radios["12b"].text()
+    textes = " ".join(x.text() for x in d.findChildren(mod().QLabel))
+    for attendu in ("RTX", "NVIDIA Test", "Conseil : Rapide (4B)", "Nettement plus fidèle", "Beaucoup plus lent", "se trompe sur les nuances",
+                    "Déconseillé sur une machine modeste", "rien n'est envoyé sur Internet"):
+        assert attendu in textes or attendu == "RTX"
+    assert textes.count("✔") >= 4 and textes.count("✘") >= 4                                          # avantages ET inconvénients, pour chaque choix
+
+
+def test_dialogue_conseille_le_12b_sur_une_grosse_carte(fen_neuf, monkeypatch):
+    fausse_machine(monkeypatch, go_carte=24)
+    d = mod().DialogueChoixModele(plugin(fen_neuf))                                                 # aucun choix encore : le conseil est présélectionné
+    assert d.choix() == "12b" and "conseillé ici" in d.radios["12b"].text()
+    assert "Conseil : Meilleur (12B)" in " ".join(x.text() for x in d.findChildren(mod().QLabel))
+
+
+def test_dialogue_garde_le_choix_existant_meme_si_le_conseil_differe(fen, monkeypatch):
+    fausse_machine(monkeypatch, go_carte=24)
+    d = mod().DialogueChoixModele(plugin(fen))                                                      # un choix existe (4B) : on le garde présélectionné
+    assert d.choix() == "4b" and "conseillé ici" in d.radios["12b"].text()
+
+
+def test_fichier_personnel_demande_le_fichier(fen, monkeypatch, tmp_path):
+    fausse_machine(monkeypatch)
+    d = mod().DialogueChoixModele(plugin(fen))
+    d.radios["perso"].setChecked(True)
+    monkeypatch.setattr(mod().QFileDialog, "getOpenFileName", staticmethod(lambda *a, **k: ("", "")))
+    d._valider()
+    assert d.result() == 0 and d.chemin == ""                                                       # pas de fichier : on ne valide pas
+    perso = tmp_path / "p.gguf"
+    monkeypatch.setattr(mod().QFileDialog, "getOpenFileName", staticmethod(lambda *a, **k: (str(perso), "")))
+    d._valider()
+    assert d.chemin == str(perso) and d.result() == 1
+
+
+def test_assistant_enregistre_le_choix_et_propose_le_telechargement(fen, monkeypatch):
+    fausse_machine(monkeypatch, go_carte=8)
+    appels = []
+
+    class Faux:
+        def __init__(self, plugin, parent=None):
+            pass
+
+        def exec(self):
+            return 1
+
+        def choix(self):
+            return "12b"
+        chemin = ""
+    monkeypatch.setattr(mod(), "DialogueChoixModele", Faux)
+    monkeypatch.setattr(plugin(fen), "telecharger_modele", lambda choix=None: appels.append(choix) or None)
+    assert plugin(fen).assistant_modele(force=True) is False and appels == ["12b"]                  # le modèle manque : téléchargement proposé (et refusé ici)
+    r = fen.plugins.actifs["traduction"][1].reglages
+    assert r.get("modele_choix") == "12b" and plugin(fen).modele_choisi() == "12b"
+    poser_modele(fen, "12b")
+    assert plugin(fen).assistant_modele(force=True) and appels == ["12b"]                           # déjà là : aucun téléchargement
+
+
+def test_choix_evident_sur_une_grosse_carte_pas_de_question(fen_neuf, monkeypatch):
+    fausse_machine(monkeypatch, go_carte=24)
+    appels = []
+    monkeypatch.setattr(plugin(fen_neuf), "telecharger_modele", lambda choix=None: appels.append(choix) or None)
+    monkeypatch.setattr(mod().DialogueChoixModele, "exec", lambda self: pytest.fail("la question ne doit pas être posée"))
+    plugin(fen_neuf).assistant_modele()
+    assert plugin(fen_neuf).modele_choisi() == "12b" and appels == ["12b"]                          # choisi tout seul, téléchargement avec accord
+    assert "choisi pour cette machine" in fen_neuf.statusBar().currentMessage() and "Meilleur (12B)" in fen_neuf.statusBar().currentMessage()
+    monkeypatch.setattr(mod().DialogueChoixModele, "exec", lambda self: 0)
+    assert plugin(fen_neuf).assistant_modele(force=True) is False                                   # « Choisir » depuis les réglages : la question est posée
+
+
+def test_preparer_sans_choix_pose_la_question(fen_neuf, monkeypatch):
+    fausse_machine(monkeypatch, go_carte=8)
+    fen_neuf.plugins.actifs["traduction"][1].reglages.set("exe", "/x/llama-server")
+    monkeypatch.setattr(mod().logique, "trouver_llama", lambda *a, **k: "/x/llama-server")
+    vus = []
+    monkeypatch.setattr(mod().DialogueChoixModele, "exec", lambda self: vus.append(1) or 0)
+    assert plugin(fen_neuf)._preparer_llama("fr", "en", None) is None and len(vus) == 1             # pas de choix : on demande, « plus tard » : rien ne part
+
+
+def test_ancienne_configuration_avec_un_chemin_devient_fichier_personnel(fen_neuf, tmp_path):
+    gguf = tmp_path / "ancien.gguf"
+    gguf.write_bytes(b"x")
+    r = fen_neuf.plugins.actifs["traduction"][1].reglages
+    r.set("modele", str(gguf))
+    assert plugin(fen_neuf).modele_choisi() == "perso" and r.get("modele_choix") == "perso"
+    r.set("modele_choix", "")
+    r.set("modele", "/n'existe/pas.gguf")
+    assert plugin(fen_neuf).modele_choisi() is None
+
+
+def test_choix_rapide_du_modele_dans_la_fenetre_de_traduction(fen, app, faux):
+    r = fen.plugins.actifs["traduction"][1].reglages
+    r.set("exe", faux.exe)
+    poser_modele(fen, "4b")
+    poser_modele(fen, "12b")
+    d = dialogue(fen)
+    assert [d.qualite.itemData(i) for i in range(d.qualite.count())] == ["4b", "12b"] and d.qualite.currentData() == "4b"
+    traduire(app, d)
+    argv = [json.loads(p.read_text())["argv"] for p in sorted(faux.dir.glob("argv-*.json"), key=lambda p: p.stat().st_mtime)]
+    assert argv[-1][argv[-1].index("-m") + 1].endswith("translategemma-4b-it.Q4_K_M.gguf")
+    d.qualite.setCurrentIndex(d.qualite.findData("12b"))                                             # même fenêtre : on passe au meilleur modèle
+    traduire(app, d)
+    argv = [json.loads(p.read_text())["argv"] for p in sorted(faux.dir.glob("argv-*.json"), key=lambda p: p.stat().st_mtime)]
+    assert argv[-1][argv[-1].index("-m") + 1].endswith("translategemma-12b-it.Q4_K_M.gguf") and len(argv) == 2    # le serveur a redémarré avec l'autre fichier
+    assert d.resultat.toPlainText().startswith("[TRAD]")
+    r.set("modele_choix", "12b")
+    assert dialogue(fen).qualite.currentData() == "12b"                                              # le choix par défaut vient des réglages
+
+
+def test_choix_perso_apparait_dans_la_fenetre(fen, tmp_path):
+    gguf = tmp_path / "p.gguf"
+    gguf.write_bytes(b"x")
+    r = fen.plugins.actifs["traduction"][1].reglages
+    r.set("modele_choix", "perso")
+    r.set("modele", str(gguf))
+    d = dialogue(fen)
+    assert [d.qualite.itemData(i) for i in range(d.qualite.count())] == ["4b", "12b", "perso"] and d.qualite.currentData() == "perso"
