@@ -63,6 +63,7 @@ else:
 FAUX_KONSOLE = '''#!/usr/bin/env python3
 import os, signal, sys, time
 d = os.environ["FAUX_DIR"]
+open(d + "/pids", "a").write("%d\\n" % os.getpid())          # pour que les tests puissent toujours l'arrêter
 open(d + "/lancements", "a").write(" ".join(sys.argv[1:]) + "\\n")
 ligne = "org.kde.konsole-%d 1 Scrinium\\n" % os.getpid()
 open(d + "/sessions", "a").write(ligne)
@@ -122,13 +123,12 @@ def faux(tmp_path, monkeypatch):
     monkeypatch.setenv("FAUX_PID", str(os.getpid()))
     monkeypatch.setenv("PATH", f"{bin_}{os.pathsep}{os.environ['PATH']}")
     yield d
-    for ligne in (d / "sessions").read_text().splitlines():                       # ne laisse aucun faux Konsole derrière soi
-        service = ligne.split()[0]
-        if service != "org.kde.konsole-111" and service.rsplit("-", 1)[-1].isdigit():
-            try:
-                os.kill(int(service.rsplit("-", 1)[-1]), 15)
-            except OSError:
-                pass
+    pids = d / "pids"                                                                  # ne laisse aucun faux Konsole derrière soi
+    for pid in (pids.read_text().split() if pids.exists() else []):
+        try:
+            os.kill(int(pid), 15)
+        except OSError:
+            pass
 
 
 def envois(d):
