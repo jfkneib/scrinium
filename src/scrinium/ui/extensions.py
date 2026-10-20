@@ -2,7 +2,7 @@
 # Copyright (C) 2026 Jean-François Kneib
 """Interface des extensions : ce qu'une extension peut ajouter à la fenêtre, et la boîte de gestion."""
 from PyQt6.QtCore import QTimer, QUrl, Qt
-from PyQt6.QtGui import QAction, QDesktopServices
+from PyQt6.QtGui import QAction, QDesktopServices, QTextCursor
 from PyQt6.QtWidgets import (QDialog, QDockWidget, QHBoxLayout, QLabel, QListWidget, QListWidgetItem, QMessageBox,
                              QPushButton, QSystemTrayIcon, QVBoxLayout)
 
@@ -66,6 +66,35 @@ class UiPlugin:
         if not e.isEnabled() or self._f.fiche is None:
             return False
         e.textCursor().insertText(texte)
+        e.setFocus()
+        return True
+
+    def texte_complet(self) -> str:
+        """Texte de la note affichée, tel qu'il est dans l'éditeur (y compris ce qui n'est pas encore enregistré) ; \"\" si elle
+        n'est pas modifiable."""
+        return self._f.texte.toPlainText() if self._f.texte.isEnabled() and self._f.fiche is not None else ""
+
+    def remplacer_tout(self, texte: str) -> bool:
+        """Remplace tout le texte de la note affichée (annulable avec Ctrl+Z). False si elle n'est pas modifiable."""
+        e = self._f.texte
+        if not e.isEnabled() or self._f.fiche is None:
+            return False
+        c = e.textCursor()
+        c.select(QTextCursor.SelectionType.Document)
+        c.insertText(texte)
+        e.setTextCursor(c)
+        e.setFocus()
+        return True
+
+    def ajouter_a_la_fin(self, texte: str) -> bool:
+        """Ajoute du texte à la fin de la note affichée. False si elle n'est pas modifiable."""
+        e = self._f.texte
+        if not e.isEnabled() or self._f.fiche is None:
+            return False
+        c = e.textCursor()
+        c.movePosition(QTextCursor.MoveOperation.End)
+        c.insertText(texte)
+        e.setTextCursor(c)
         e.setFocus()
         return True
 

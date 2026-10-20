@@ -76,7 +76,7 @@ Handlers receive keyword arguments; accept `**kw` to stay compatible with future
 `ajouter_action(text, fn, icon=None)` (Extensions menu) · `ajouter_bouton(text, fn, icon=None)` (toolbar) ·
 `ajouter_panneau(title, widget)` (dock, any `QWidget`) · `notifier(title, message)` (desktop notification) ·
 `planifier(seconds, fn, repeter=False)` (timer) · `afficher_fiche(vue)` ·
-`inserer_texte(text)` (insert at the cursor of the open note, `False` if it cannot be edited) · `texte_selectionne()`.
+`inserer_texte(text)` (insert at the cursor of the open note, replacing the selection; `False` if it cannot be edited) · `texte_selectionne()` · `texte_complet()` (whole text as shown in the editor) · `remplacer_tout(text)` · `ajouter_a_la_fin(text)` (undoable with Ctrl+Z).
 Everything added is removed automatically when the extension is disabled.
 
 ## Robustness
