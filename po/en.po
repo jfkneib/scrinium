@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: scrinium 0.2.0\n"
 "Report-Msgid-Bugs-To: \n"
-"PO-Revision-Date: 2026-10-20 16:32+0200\n"
+"PO-Revision-Date: 2026-10-20 17:07+0200\n"
 "Last-Translator: Jean-François Kneib\n"
 "Language-Team: English\n"
 "Language: en\n"
@@ -899,7 +899,7 @@ msgstr "Personal file"
 
 #: plugins/traduction/__init__.py:53
 #: plugins/traduction/__init__.py:613
-#: src/scrinium/ui/capture_rapide.py:48
+#: src/scrinium/ui/capture_rapide.py:52
 msgid "Annuler"
 msgstr "Cancel"
 
@@ -2061,40 +2061,60 @@ msgstr ""
 msgid "Un fichier porte déjà ce nom dans ce dossier : choisissez un autre nom."
 msgstr "A file with this name already exists in this folder: choose another name."
 
-#: src/scrinium/ui/capture_rapide.py:24
+#: src/scrinium/ui/capture_rapide.py:15
+msgid "Sous le coude"
+msgstr "Kept handy"
+
+#: src/scrinium/ui/capture_rapide.py:16
+msgid "Notes rapides"
+msgstr "Quick notes"
+
+#: src/scrinium/ui/capture_rapide.py:25
 msgid "Capture rapide"
 msgstr "Quick capture"
 
-#: src/scrinium/ui/capture_rapide.py:28
+#: src/scrinium/ui/capture_rapide.py:29
 msgid "Tapez ou collez ; Ctrl+Entrée pour enregistrer, Échap pour annuler."
 msgstr "Type or paste; Ctrl+Enter to save, Esc to cancel."
 
-#: src/scrinium/ui/capture_rapide.py:35
+#: src/scrinium/ui/capture_rapide.py:34
+msgid "Thème existant, ou tapez un nom pour le créer."
+msgstr "Existing topic, or type a name to create it."
+
+#: src/scrinium/ui/capture_rapide.py:39
 msgid "Fiche existante, ou tapez un titre pour en créer une."
 msgstr "Existing note, or type a title to create one."
 
-#: src/scrinium/ui/capture_rapide.py:36
+#: src/scrinium/ui/capture_rapide.py:40
 #: src/scrinium/ui/fenetre.py:76
 #: src/scrinium/ui/fenetre.py:259
 msgid "Thème"
 msgstr "Topic"
 
-#: src/scrinium/ui/capture_rapide.py:37
+#: src/scrinium/ui/capture_rapide.py:41
 #: src/scrinium/ui/fenetre.py:74
 msgid "Fiche"
 msgstr "Note"
 
-#: src/scrinium/ui/capture_rapide.py:39
+#: src/scrinium/ui/capture_rapide.py:43
 msgid "Ajouter la date et l'heure"
 msgstr "Add the date and time"
 
-#: src/scrinium/ui/capture_rapide.py:50
+#: src/scrinium/ui/capture_rapide.py:54
 msgid "Enregistrer"
 msgstr "Save"
 
-#: src/scrinium/ui/capture_rapide.py:79
+#: src/scrinium/ui/capture_rapide.py:87
 msgid "Rien à enregistrer."
 msgstr "Nothing to save."
+
+#: src/scrinium/ui/capture_rapide.py:92
+msgid "Choisissez ou tapez un thème."
+msgstr "Pick or type a topic."
+
+#: src/scrinium/ui/capture_rapide.py:95
+msgid "Choisissez ou tapez un titre de fiche."
+msgstr "Pick or type a note title."
 
 #: src/scrinium/ui/extensions.py:126
 msgid "Extensions"

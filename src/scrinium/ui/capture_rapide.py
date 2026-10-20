@@ -10,9 +10,10 @@ from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import (QCheckBox, QComboBox, QDialog, QFormLayout, QHBoxLayout, QLabel, QPlainTextEdit, QPushButton,
                              QVBoxLayout)
 
-from ..i18n import _
+from ..i18n import N_, _
 
-TITRE_DEFAUT = "Notes rapides"      # titre de la fiche de destination tant qu'on n'en a pas choisi une autre
+THEME_DEFAUT = N_("Sous le coude")    # thème proposé même s'il n'existe pas encore (créé à l'enregistrement)
+TITRE_DEFAUT = N_("Notes rapides")      # titre de la fiche de destination tant qu'on n'en a pas choisi une autre
 
 
 class CaptureRapide(QDialog):
@@ -29,7 +30,10 @@ class CaptureRapide(QDialog):
         lay.addWidget(self.texte, 1)
         form = QFormLayout()
         self.theme = QComboBox()
-        self.theme.addItems([t.nom for t in fenetre.store.themes])
+        self.theme.setEditable(True)
+        self.theme.setToolTip(_("Thème existant, ou tapez un nom pour le créer."))
+        noms = [t.nom for t in fenetre.store.themes]
+        self.theme.addItems(noms + ([] if _(THEME_DEFAUT) in noms else [_(THEME_DEFAUT)]))
         self.fiche = QComboBox()
         self.fiche.setEditable(True)
         self.fiche.setToolTip(_("Fiche existante, ou tapez un titre pour en créer une."))
@@ -55,13 +59,17 @@ class CaptureRapide(QDialog):
         lay.addLayout(rang)
         pref = fenetre.store.reglages().get("capture_rapide", {})
         i = self.theme.findText(pref.get("theme", ""))
-        self.theme.setCurrentIndex(max(0, i))
-        self.theme.currentTextChanged.connect(self._remplir_fiches)
+        self.theme.setCurrentIndex(i if i >= 0 else self.theme.count() - 1 if _(THEME_DEFAUT) not in noms else 0)
+        self.theme.editTextChanged.connect(self._remplir_fiches)
         self._remplir_fiches(self.theme.currentText(), pref.get("fiche", _(TITRE_DEFAUT)))
         self.texte.setFocus()
 
+    def _theme_existant(self, nom: str):
+        nom = nom.strip().lower()
+        return next((t for t in self.f.store.themes if t.nom.lower() == nom), None)
+
     def _remplir_fiches(self, theme: str, choix: str | None = None):
-        th = self.f.store.theme(theme)
+        th = self._theme_existant(theme)
         self.fiche.clear()
         if th is not None:
             self.fiche.addItems([x.titre for x in th.fiches if not x.verrou])      # jamais de fiche verrouillée proposée
@@ -79,12 +87,26 @@ class CaptureRapide(QDialog):
             self.erreur.setText(_("Rien à enregistrer."))
             return False
         entete = f"### {time.strftime('%Y-%m-%d %H:%M')}\n" if self.horodate.isChecked() else ""
-        erreur = self.f.ajouter_depuis_cli({"theme": self.theme.currentText(), "fiche": self.fiche.currentText(),
+        nom = self.theme.currentText().strip()
+        if not nom:
+            self.erreur.setText(_("Choisissez ou tapez un thème."))
+            return False
+        if not self.fiche.currentText().strip():
+            self.erreur.setText(_("Choisissez ou tapez un titre de fiche."))
+            return False
+        th = self._theme_existant(nom)
+        if th is None:                                    # nom tapé qui n'existe pas : le thème est créé
+            try:
+                th = self.f.store.nouveau_theme(nom)
+            except OSError as ex:
+                self.erreur.setText(str(ex))
+                return False
+        erreur = self.f.ajouter_depuis_cli({"theme": th.nom, "fiche": self.fiche.currentText(),
                                             "texte": entete + texte, "brut": True})
         if erreur:
             self.erreur.setText(erreur)
             return False
-        self.f.store.sauver_reglages(capture_rapide={"theme": self.theme.currentText(), "fiche": self.fiche.currentText().strip(),
+        self.f.store.sauver_reglages(capture_rapide={"theme": th.nom, "fiche": self.fiche.currentText().strip(),
                                                       "horodate": self.horodate.isChecked()})
         self.close()
         return True

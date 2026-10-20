@@ -882,7 +882,7 @@ msgstr ""
 
 #: plugins/traduction/__init__.py:53
 #: plugins/traduction/__init__.py:613
-#: src/scrinium/ui/capture_rapide.py:48
+#: src/scrinium/ui/capture_rapide.py:52
 msgid "Annuler"
 msgstr ""
 
@@ -1944,39 +1944,59 @@ msgstr ""
 msgid "Un fichier porte déjà ce nom dans ce dossier : choisissez un autre nom."
 msgstr ""
 
-#: src/scrinium/ui/capture_rapide.py:24
+#: src/scrinium/ui/capture_rapide.py:15
+msgid "Sous le coude"
+msgstr ""
+
+#: src/scrinium/ui/capture_rapide.py:16
+msgid "Notes rapides"
+msgstr ""
+
+#: src/scrinium/ui/capture_rapide.py:25
 msgid "Capture rapide"
 msgstr ""
 
-#: src/scrinium/ui/capture_rapide.py:28
+#: src/scrinium/ui/capture_rapide.py:29
 msgid "Tapez ou collez ; Ctrl+Entrée pour enregistrer, Échap pour annuler."
 msgstr ""
 
-#: src/scrinium/ui/capture_rapide.py:35
+#: src/scrinium/ui/capture_rapide.py:34
+msgid "Thème existant, ou tapez un nom pour le créer."
+msgstr ""
+
+#: src/scrinium/ui/capture_rapide.py:39
 msgid "Fiche existante, ou tapez un titre pour en créer une."
 msgstr ""
 
-#: src/scrinium/ui/capture_rapide.py:36
+#: src/scrinium/ui/capture_rapide.py:40
 #: src/scrinium/ui/fenetre.py:76
 #: src/scrinium/ui/fenetre.py:259
 msgid "Thème"
 msgstr ""
 
-#: src/scrinium/ui/capture_rapide.py:37
+#: src/scrinium/ui/capture_rapide.py:41
 #: src/scrinium/ui/fenetre.py:74
 msgid "Fiche"
 msgstr ""
 
-#: src/scrinium/ui/capture_rapide.py:39
+#: src/scrinium/ui/capture_rapide.py:43
 msgid "Ajouter la date et l'heure"
 msgstr ""
 
-#: src/scrinium/ui/capture_rapide.py:50
+#: src/scrinium/ui/capture_rapide.py:54
 msgid "Enregistrer"
 msgstr ""
 
-#: src/scrinium/ui/capture_rapide.py:79
+#: src/scrinium/ui/capture_rapide.py:87
 msgid "Rien à enregistrer."
+msgstr ""
+
+#: src/scrinium/ui/capture_rapide.py:92
+msgid "Choisissez ou tapez un thème."
+msgstr ""
+
+#: src/scrinium/ui/capture_rapide.py:95
+msgid "Choisissez ou tapez un titre de fiche."
 msgstr ""
 
 #: src/scrinium/ui/extensions.py:126
