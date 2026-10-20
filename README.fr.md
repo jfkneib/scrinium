@@ -47,6 +47,7 @@ Au premier lancement, Scrinium crée un thème **Bienvenue** (5 fiches qui expli
 - **Supprimer = corbeille** (`corbeille/` à côté des fiches) : rien n'est effacé.
 - **Zone de notification** : fermer ou réduire la fenêtre la range dans la zone de notification (clic sur l'icône = afficher/cacher, clic droit = menu). Option *Fichier → Réduire dans la zone de notification* pour désactiver ; sans zone de notification sur le bureau (GNOME sans extension AppIndicator), la fenêtre se comporte normalement. En se cachant, Scrinium **referme les fiches verrouillées** : le mot de passe est redemandé.
 - **Instance unique** : relancer `scrinium` réveille la fenêtre déjà ouverte. `scrinium --minimise` démarre caché dans la zone de notification. La case *Fichier → Lancer au démarrage de la session* l'active pour vous (fichier XDG autostart sous Linux, clé Run sous Windows, LaunchAgent sous macOS).
+- **Capture rapide** : `scrinium --rapide` (aussi *Fichier → Capture rapide…*, Ctrl+Alt+N, et le menu de la zone de notification) n'ouvre qu'une petite fenêtre « note rapide » ; Ctrl+Entrée ajoute le texte (daté) à la fiche de votre choix, retenue d'une fois sur l'autre. Pour l'utiliser de partout, liez `scrinium --rapide` à un raccourci clavier dans les réglages du bureau (KDE : *Configuration du système → Raccourcis → Ajouter une commande*). Scrinium lancé dans la zone de notification, elle apparaît aussitôt ; une fiche verrouillée n'est jamais écrite.
 - Options : `--theme NOM` (ouvre sur ce thème), `--nouvelle` (ouvre avec une fiche vide prête à saisir).
 
 ## Données

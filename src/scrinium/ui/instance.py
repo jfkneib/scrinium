@@ -4,6 +4,7 @@
 
 Canal : socket locale réservée à l'utilisateur. Messages :
   `show\t<thème>\t<0|1>`          afficher la fenêtre (sans réponse) ;
+  `capture`                        ouvrir la fenêtre de capture rapide (sans réponse) ;
   `add <n>\n` + n octets de JSON   ajouter du texte à une fiche (réponse `ok` ou `err\t<message>`).
 Une instance dont le dossier de données est différent (SCRINIUM_HOME) a son propre canal.
 """
@@ -39,6 +40,18 @@ def reveiller_existante(theme: str | None = None, nouvelle: bool = False) -> boo
     return True
 
 
+def demander_capture() -> bool:
+    """Si une instance tourne, lui demande d'ouvrir la capture rapide et retourne True."""
+    s = QLocalSocket()
+    s.connectToServer(nom())
+    if not s.waitForConnected(300):
+        return False
+    s.write(b"capture")
+    s.waitForBytesWritten(500)
+    s.disconnectFromServer()
+    return True
+
+
 def envoyer_ajout(payload: dict, delai_ms: int = 8000):
     """Demande à l'instance en cours d'ajouter du texte à une fiche. None s'il n'y a pas d'instance ; sinon (ok, message)."""
     s = QLocalSocket()
@@ -57,6 +70,7 @@ def envoyer_ajout(payload: dict, delai_ms: int = 8000):
 
 class Serveur(QObject):
     reveil = pyqtSignal(str, bool)   # thème demandé, nouvelle fiche
+    capture = pyqtSignal()           # ouvrir la capture rapide
 
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -90,7 +104,10 @@ class Serveur(QObject):
         c.disconnectFromServer()
 
     def _traiter(self, c, tampon: bytearray):
-        if tampon.startswith(b"show"):
+        if tampon.startswith(b"capture"):
+            c.disconnectFromServer()
+            self.capture.emit()
+        elif tampon.startswith(b"show"):
             morceaux = bytes(tampon).decode("utf-8", "replace").split("\t")
             c.disconnectFromServer()
             self.reveil.emit(morceaux[1] if len(morceaux) > 1 else "", len(morceaux) > 2 and morceaux[2] == "1")
