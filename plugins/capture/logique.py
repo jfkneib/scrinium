@@ -10,6 +10,8 @@ import subprocess
 import tempfile
 import time
 
+from scrinium.i18n import N_, _
+
 DELAI_COMMANDE = 30          # secondes
 SORTIE_MAX = 200 * 1024      # octets conservés
 SERVICE = re.compile(r"org\.kde\.konsole-\d+")
@@ -146,14 +148,14 @@ def envoyer(qdbus: str, service: str, session: int, texte: str) -> None:
     if "AccessDenied" in message:
         raise AccesRefuse(message)
     if r.returncode != 0:
-        raise RuntimeError(message or f"qdbus a échoué (code {r.returncode})")
+        raise RuntimeError(message or _("qdbus a échoué (code %d)") % r.returncode)
 
 
 # ---------- actions préparées (panneau d'icônes) ----------
 MODES = {
-    "taper": "Taper dans la console, sans valider",
-    "executer": "Exécuter (après confirmation) et insérer la sortie dans la fiche",
-    "copier": "Copier dans le presse-papiers",
+    "taper": N_("Taper dans la console, sans valider"),
+    "executer": N_("Exécuter (après confirmation) et insérer la sortie dans la fiche"),
+    "copier": N_("Copier dans le presse-papiers"),
 }
 MAX_ACTIONS = 200
 EXEMPLES = (

@@ -949,7 +949,7 @@ def test_fenetre_de_progression_reelle_avec_un_modele_de_plus_de_2_go(app, monke
         time.sleep(0.15)
         prog(3 * 1024 ** 3, total)
         time.sleep(0.15)
-        prog.etat("Vérification de la somme de contrôle (SHA-256)…")
+        prog.etat(mod_reel.logique.Attente("Vérification de la somme de contrôle (SHA-256)…"))
         time.sleep(0.15)
         return "fini"
     res, err = mod_reel.en_arriere_plan("Titre", "Téléchargement du modèle…", travail, annulable=True)

@@ -71,3 +71,8 @@ def langue() -> str:
 
 def _(s: str) -> str:
     return _trad.gettext(s)
+
+
+def N_(s: str) -> str:
+    """Marque une chaîne à extraire pour la traduction SANS la traduire (elle le sera plus tard, avec `_(variable)`)."""
+    return s
