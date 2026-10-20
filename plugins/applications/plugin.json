@@ -1,0 +1,8 @@
+{
+  "titre": "Applications",
+  "version": "0.1",
+  "auteur": "Scrinium",
+  "description": "Panneau d'icônes pour lancer vos applications (Thunderbird, KWrite, LibreOffice…) sans quitter Scrinium. Au besoin, la sélection ou le titre de la fiche peut leur être passé. Rien ne se lance sans votre clic.",
+  "classe": "ApplicationsPlugin",
+  "api": 1
+}

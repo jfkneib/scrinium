@@ -51,8 +51,8 @@ msgid "Aucun événement. « Ajouter » en crée un ; la fiche affichée peut y 
 msgstr ""
 
 #: plugins/agenda/__init__.py:149
+#: plugins/applications/__init__.py:208
 #: plugins/capture/__init__.py:247
-#: plugins/courriel/__init__.py:185
 msgid "Fermer"
 msgstr ""
 
@@ -91,20 +91,20 @@ msgid "Cette fiche n'existe plus ou est verrouillée."
 msgstr ""
 
 #: plugins/agenda/__init__.py:143
+#: plugins/applications/__init__.py:201
 #: plugins/capture/__init__.py:240
-#: plugins/courriel/__init__.py:180
 msgid "Ajouter…"
 msgstr ""
 
 #: plugins/agenda/__init__.py:143
+#: plugins/applications/__init__.py:201
 #: plugins/capture/__init__.py:240
-#: plugins/courriel/__init__.py:180
 msgid "Modifier…"
 msgstr ""
 
 #: plugins/agenda/__init__.py:143
 #: plugins/agenda/__init__.py:188
-#: plugins/capture/__init__.py:240
+#: plugins/applications/__init__.py:201
 msgid "Supprimer"
 msgstr ""
 
@@ -140,6 +140,172 @@ msgstr ""
 msgid "en retard de %d h"
 msgstr ""
 
+#: plugins/applications/__init__.py:69
+#: plugins/applications/__init__.py:300
+msgid "Modifier les applications…"
+msgstr ""
+
+#: plugins/applications/__init__.py:93
+msgid "Applications installées"
+msgstr ""
+
+#: plugins/applications/__init__.py:97
+msgid "Filtrer…"
+msgstr ""
+
+#: plugins/applications/__init__.py:131
+#: plugins/applications/__init__.py:178
+msgid "Application"
+msgstr ""
+
+#: plugins/applications/__init__.py:134
+msgid "Choisir parmi les applications installées…"
+msgstr ""
+
+#: plugins/applications/__init__.py:139
+msgid "Nom d'une icône du thème d'icônes du système (ex. thunderbird, kwrite, system-run), ou chemin d'un fichier image."
+msgstr ""
+
+#: plugins/applications/__init__.py:149
+#: plugins/capture/__init__.py:196
+#: plugins/courriel/__init__.py:201
+msgid "Nom :"
+msgstr ""
+
+#: plugins/applications/__init__.py:150
+#: plugins/capture/__init__.py:197
+msgid "Icône :"
+msgstr ""
+
+#: plugins/applications/__init__.py:151
+#: plugins/capture/__init__.py:199
+msgid "Commande :"
+msgstr ""
+
+#: plugins/applications/__init__.py:152
+msgid "Facultatif : {selection} = texte sélectionné dans la fiche, {fiche} = son titre (passés comme arguments, sans shell). Les applications sont enregistrées en clair : n'y mettez aucun mot de passe."
+msgstr ""
+
+#: plugins/applications/__init__.py:156
+#: plugins/capture/__init__.py:204
+msgid "Description :"
+msgstr ""
+
+#: plugins/applications/__init__.py:193
+#: plugins/applications/__init__.py:292
+#: plugins/applications/__init__.py:294
+msgid "Applications"
+msgstr ""
+
+#: plugins/applications/__init__.py:262
+msgid "Exporter les applications"
+msgstr ""
+
+#: plugins/applications/__init__.py:270
+msgid "Importer des applications"
+msgstr ""
+
+#: plugins/applications/__init__.py:178
+#: plugins/capture/__init__.py:218
+msgid "Le nom et la commande sont obligatoires."
+msgstr ""
+
+#: plugins/applications/__init__.py:202
+#: plugins/capture/__init__.py:241
+msgid "Monter"
+msgstr ""
+
+#: plugins/applications/__init__.py:202
+#: plugins/capture/__init__.py:241
+msgid "Descendre"
+msgstr ""
+
+#: plugins/applications/__init__.py:203
+#: plugins/capture/__init__.py:242
+msgid "Exemples…"
+msgstr ""
+
+#: plugins/applications/__init__.py:203
+#: plugins/capture/__init__.py:242
+msgid "Exporter…"
+msgstr ""
+
+#: plugins/applications/__init__.py:203
+#: plugins/capture/__init__.py:242
+msgid "Importer…"
+msgstr ""
+
+#: plugins/applications/__init__.py:256
+#: plugins/capture/__init__.py:292
+msgid "Exemples"
+msgstr ""
+
+#: plugins/applications/__init__.py:256
+msgid "Aucun exemple de plus : ils sont déjà dans la liste, ou ne sont pas installés."
+msgstr ""
+
+#: plugins/applications/__init__.py:278
+#: plugins/capture/__init__.py:316
+msgid "Importer"
+msgstr ""
+
+#: plugins/applications/__init__.py:293
+msgid "Panneau des applications"
+msgstr ""
+
+#: plugins/applications/__init__.py:298
+msgid "Afficher ou masquer le panneau des applications"
+msgstr ""
+
+#: plugins/applications/__init__.py:278
+msgid "Ajouter %d application(s) à la liste ? Relisez leurs commandes avant de les utiliser."
+msgstr ""
+
+#: plugins/applications/__init__.py:330
+msgid "« %s » demande la sélection : refusé pour une fiche verrouillée."
+msgstr ""
+
+#: plugins/applications/__init__.py:333
+#: plugins/capture/__init__.py:403
+msgid "Sélectionnez d'abord du texte dans la fiche : « %s » en a besoin."
+msgstr ""
+
+#: plugins/applications/__init__.py:338
+msgid "Impossible de lancer « %(nom)s » : %(err)s"
+msgstr ""
+
+#: plugins/applications/logique.py:18
+msgid "Courrier électronique."
+msgstr ""
+
+#: plugins/applications/logique.py:19
+msgid "Éditeur de texte simple."
+msgstr ""
+
+#: plugins/applications/logique.py:21
+msgid "Traitement de texte."
+msgstr ""
+
+#: plugins/applications/logique.py:22
+msgid "Gestionnaire de fichiers."
+msgstr ""
+
+#: plugins/applications/logique.py:23
+msgid "Navigateur web."
+msgstr ""
+
+#: plugins/applications/logique.py:75
+msgid "commande vide"
+msgstr ""
+
+#: plugins/applications/logique.py:151
+msgid "ce n'est pas un export d'applications de Scrinium"
+msgstr ""
+
+#: plugins/applications/logique.py:149
+msgid "fichier illisible"
+msgstr ""
+
 #: plugins/capture/__init__.py:35
 msgid "Pour que Scrinium tape directement dans Konsole, activez dans Konsole l'option « Enable the security sensitive parts of the DBus API » (Paramètres de Konsole). Elle est désactivée par défaut car elle permet à un programme d'envoyer du texte à vos terminaux : c'est votre choix. En attendant, le texte est copié dans le presse-papiers."
 msgstr ""
@@ -173,37 +339,16 @@ msgstr ""
 msgid "Nom d'une icône du thème d'icônes du système (ex. network-wired, drive-harddisk, utilities-terminal, system-run, edit-find)."
 msgstr ""
 
-#: plugins/capture/__init__.py:196
-#: plugins/courriel/__init__.py:201
-msgid "Nom :"
-msgstr ""
-
-#: plugins/capture/__init__.py:197
-msgid "Icône :"
-msgstr ""
-
 #: plugins/capture/__init__.py:198
 msgid "Au clic :"
-msgstr ""
-
-#: plugins/capture/__init__.py:199
-msgid "Commande :"
 msgstr ""
 
 #: plugins/capture/__init__.py:200
 msgid "{selection} = texte sélectionné dans la fiche ; {fiche} = son titre. En mode « Exécuter », ils sont protégés pour le shell. Les actions sont enregistrées en clair : n'y mettez aucun mot de passe."
 msgstr ""
 
-#: plugins/capture/__init__.py:204
-msgid "Description :"
-msgstr ""
-
 #: plugins/capture/__init__.py:233
 msgid "Actions CLI préparées"
-msgstr ""
-
-#: plugins/capture/__init__.py:292
-msgid "Exemples"
 msgstr ""
 
 #: plugins/capture/__init__.py:292
@@ -304,34 +449,6 @@ msgstr ""
 msgid "Icône introuvable : l'icône par défaut sera utilisée."
 msgstr ""
 
-#: plugins/capture/__init__.py:218
-msgid "Le nom et la commande sont obligatoires."
-msgstr ""
-
-#: plugins/capture/__init__.py:241
-msgid "Monter"
-msgstr ""
-
-#: plugins/capture/__init__.py:241
-msgid "Descendre"
-msgstr ""
-
-#: plugins/capture/__init__.py:242
-msgid "Exemples…"
-msgstr ""
-
-#: plugins/capture/__init__.py:242
-msgid "Exporter…"
-msgstr ""
-
-#: plugins/capture/__init__.py:242
-msgid "Importer…"
-msgstr ""
-
-#: plugins/capture/__init__.py:316
-msgid "Importer"
-msgstr ""
-
 #: plugins/capture/__init__.py:362
 msgid "Panneau des actions CLI"
 msgstr ""
@@ -360,10 +477,6 @@ msgstr ""
 
 #: plugins/capture/__init__.py:316
 msgid "Ajouter %d action(s) CLI à la liste ? Relisez leurs commandes avant de les utiliser."
-msgstr ""
-
-#: plugins/capture/__init__.py:403
-msgid "Sélectionnez d'abord du texte dans la fiche : « %s » en a besoin."
 msgstr ""
 
 #: plugins/capture/__init__.py:408
