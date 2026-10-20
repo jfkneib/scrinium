@@ -236,7 +236,7 @@ def apple_silicon() -> bool:
 
 def materiel() -> dict:
     """Ce que la machine peut offrir : mémoire vive, cœurs, cartes NVIDIA, Apple Silicon (mémoire partagée avec la carte)."""
-    return {"memoire": memoire_totale(), "coeurs": os.cpu_count(), "gpus": gpus_nvidia(), "apple": apple_silicon()}
+    return {"memoire": memoire_totale(), "coeurs": os.cpu_count(), "gpus": gpus_nvidia(), "apple": apple_silicon(), "avx2": avx2_present()}
 
 
 GO12 = 12 * 1024 ** 3
@@ -255,18 +255,111 @@ def recommandation(m: dict) -> str:
     return choix_automatique(m) or "4b"
 
 
+def _meminfo(chemin: str = "/proc/meminfo") -> dict:
+    try:
+        return {l.split(":")[0]: int(l.split()[1]) * 1024 for l in open(chemin, encoding="utf-8") if ":" in l and len(l.split()) >= 2}
+    except (OSError, ValueError):
+        return {}
+
+
+def memoire_disponible(chemin: str = "/proc/meminfo") -> int | None:
+    """Mémoire que le système peut donner MAINTENANT sans rien fermer, en octets (Linux : MemAvailable ; Windows : mémoire physique
+    libre ; macOS : pages libres + inactives). None si on ne sait pas la lire : on ne bloque alors rien."""
+    v = _meminfo(chemin).get("MemAvailable")
+    if v:
+        return v
+    if os.name == "nt":
+        try:
+            import ctypes
+
+            class Etat(ctypes.Structure):
+                _fields_ = [("dwLength", ctypes.c_ulong), ("dwMemoryLoad", ctypes.c_ulong), ("ullTotalPhys", ctypes.c_ulonglong),
+                            ("ullAvailPhys", ctypes.c_ulonglong), ("a", ctypes.c_ulonglong), ("b", ctypes.c_ulonglong),
+                            ("c", ctypes.c_ulonglong), ("d", ctypes.c_ulonglong), ("e", ctypes.c_ulonglong)]
+            e = Etat()
+            e.dwLength = ctypes.sizeof(e)
+            ctypes.windll.kernel32.GlobalMemoryStatusEx(ctypes.byref(e))
+            return int(e.ullAvailPhys)
+        except Exception:
+            return None
+    if sys.platform == "darwin":
+        try:
+            sortie = subprocess.run(["vm_stat"], capture_output=True, text=True, timeout=5).stdout
+            taille = int(re.search(r"page size of (\d+)", sortie)[1])
+            pages = sum(int(re.search(rf"Pages {nom}:\s+(\d+)", sortie)[1]) for nom in ("free", "inactive", "speculative"))
+            return pages * taille
+        except (OSError, subprocess.SubprocessError, TypeError, ValueError):
+            return None
+    return None
+
+
+def swap_present(chemin: str = "/proc/meminfo") -> bool | None:
+    info = _meminfo(chemin)
+    return None if "SwapTotal" not in info else info["SwapTotal"] > 0
+
+
+MO = 1048576
+# Mémoire du serveur llama.cpp, MESURÉE le 2026-10-20 (build b11669, processeur seul, CPU avec AVX2), en octets :
+# (anonyme = non récupérable, seule cause d'arrêts forcés ; résidente = anonyme + fichier du modèle, nécessaire pour aller vite).
+# 4B : 2 100 + 2 387 Mo ; 12B : 6 583 + 6 975 Mo ; 12B avec carte de 8 Go (6,7 Go libres) : 749 + 4 045 Mo.
+BESOIN_MEMOIRE = {"4b": (2100 * MO, 4500 * MO), "12b": (6600 * MO, 13600 * MO)}
+SANS_AVX2 = 0.7        # sans AVX2, llama.cpp ne réarrange pas les poids : mesuré 3,1 Go pour le 4B sur un i5 de 2012 (contre 4,5 Go)
+
+
+def avx2_present(chemin: str = "/proc/cpuinfo") -> bool | None:
+    """True/False sous Linux x86 (drapeaux du processeur) ; None si on ne sait pas (le calcul reste alors prudent)."""
+    try:
+        for ligne in open(chemin, encoding="utf-8"):
+            if ligne.startswith("flags"):
+                return "avx2" in ligne.split()
+    except OSError:
+        pass
+    return None
+
+
+def besoin_memoire(choix: str, fichier: str | None = None, gpus=(), avx2: bool | None = None) -> tuple:
+    """(mémoire anonyme, mémoire résidente) à prévoir pour ce modèle, en octets. Une carte graphique qui a de la place libre
+    (`gpus` : dictionnaires avec « libre ») en prend une grande part : mesuré, 12B 13,6 Go -> 8,0 Go avec 6,7 Go de carte libres."""
+    if choix in BESOIN_MEMOIRE:
+        anonyme, residente = BESOIN_MEMOIRE[choix]
+    else:                                                   # fichier personnel : mêmes proportions que les mesures
+        try:
+            taille = os.path.getsize(fichier) if fichier else 4 * 1024 ** 3
+        except OSError:
+            taille = 4 * 1024 ** 3
+        anonyme, residente = taille * 0.9, taille * 1.86
+    if avx2 is False:
+        anonyme, residente = anonyme * SANS_AVX2, residente * SANS_AVX2
+    vram = max((g.get("libre", 0) for g in gpus), default=0)
+    if vram:
+        anonyme, residente = max(0.12 * anonyme, anonyme - 0.87 * vram), max(0.35 * residente, residente - 0.83 * vram)
+    return int(anonyme), int(residente)
+
+
+def diagnostic_memoire(disponible: int | None, besoin: tuple) -> str:
+    """« ok » ; « juste » (tient, mais le modèle sera évincé et tout ralentira) ; « danger » (moins que la mémoire non récupérable :
+    arrêt forcé de programmes probable, surtout sans swap). Mémoire disponible inconnue : « ok » (on ne bloque rien)."""
+    if disponible is None:
+        return "ok"
+    if disponible < besoin[0]:
+        return "danger"
+    return "juste" if disponible < besoin[1] else "ok"
+
+
 def avertissement_modele(m: dict, cle: str) -> str:
-    """Mise en garde quand la machine est trop juste pour ce modèle (chaîne vide si tout va bien). Mesures : le 4B demande 3 à 5 Go
-    de mémoire (3,1 Go sur un i5 de 2012, 4,4 à 4,6 Go sur deux autres machines) ; le 12B au moins 8 à 9 Go (estimation)."""
+    """Mise en garde à l'affichage du choix quand la machine est trop juste pour ce modèle, d'après sa mémoire TOTALE
+    (chaîne vide si tout va bien). Au lancement, `diagnostic_memoire` regarde la mémoire réellement disponible."""
     mem = m.get("memoire") or 0
     if not mem:
         return ""
-    go = f"{mem / 1024 ** 3:.0f} Go"
-    if cle == "12b" and mem < 11 * 1024 ** 3 and not any(g["total"] >= 8 * 1024 ** 3 for g in m.get("gpus", [])):
-        return f"Cette machine n'a que {go} de mémoire : le modèle « Meilleur (12B) » (8 à 9 Go) risque de la saturer."
-    if cle == "4b" and mem < 5 * 1024 ** 3:
-        return f"Cette machine n'a que {go} de mémoire : même le modèle rapide (3 à 5 Go) sera juste."
-    return ""
+    gpus = [{"libre": g["total"]} for g in m.get("gpus", [])]
+    residente = besoin_memoire(cle, None, gpus, m.get("avx2"))[1]
+    if mem >= residente:
+        return ""
+    go, besoin = f"{mem / 1024 ** 3:.0f} Go", f"{residente / 1024 ** 3:.1f}".replace(".", ",") + " Go"
+    if cle == "12b":
+        return f"Cette machine n'a que {go} de mémoire : le modèle « Meilleur (12B) » en demande jusqu'à {besoin} : il risque de la saturer."
+    return f"Cette machine n'a que {go} de mémoire : même le modèle rapide (jusqu'à {besoin}) sera juste."
 
 
 def description_materiel(m: dict) -> str:
