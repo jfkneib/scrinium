@@ -18,94 +18,125 @@ msgstr ""
 msgid "Événement"
 msgstr ""
 
-#: plugins/agenda/__init__.py:40
+#: plugins/agenda/__init__.py:42
 #: src/scrinium/ui/fenetre.py:151
 msgid "Titre"
 msgstr ""
 
-#: plugins/agenda/__init__.py:41
-msgid "Date et heure"
+#: plugins/agenda/__init__.py:43
+msgid "Date"
 msgstr ""
 
-#: plugins/agenda/__init__.py:68
-#: plugins/agenda/__init__.py:142
-#: plugins/agenda/__init__.py:131
+#: plugins/agenda/__init__.py:44
+msgid "Heure (24 h, ex. 14:30)"
+msgstr ""
+
+#: plugins/agenda/__init__.py:52
+msgid "Jouer un son au rappel"
+msgstr ""
+
+#: plugins/agenda/__init__.py:99
+#: plugins/agenda/__init__.py:281
+msgid "Rappel"
+msgstr ""
+
+#: plugins/agenda/__init__.py:133
+#: plugins/agenda/__init__.py:207
+#: plugins/agenda/__init__.py:118
 msgid "Agenda"
 msgstr ""
 
-#: plugins/agenda/__init__.py:74
+#: plugins/agenda/__init__.py:139
 msgid "Aucun événement. « Ajouter » en crée un ; la fiche affichée peut y être liée."
 msgstr ""
 
-#: plugins/agenda/__init__.py:84
+#: plugins/agenda/__init__.py:149
 #: plugins/capture/__init__.py:247
 #: plugins/courriel/__init__.py:185
 msgid "Fermer"
 msgstr ""
 
-#: plugins/agenda/__init__.py:141
+#: plugins/agenda/__init__.py:206
 msgid "Agenda…"
 msgstr ""
 
-#: plugins/agenda/__init__.py:78
+#: plugins/agenda/__init__.py:46
+msgid "+10 min"
+msgstr ""
+
+#: plugins/agenda/__init__.py:46
+msgid "+1 h"
+msgstr ""
+
+#: plugins/agenda/__init__.py:47
+msgid "Demain 9:00"
+msgstr ""
+
+#: plugins/agenda/__init__.py:107
+#: plugins/agenda/__init__.py:144
+msgid "Ouvrir la fiche"
+msgstr ""
+
+#: plugins/agenda/__init__.py:110
+msgid "Repousser de 10 min"
+msgstr ""
+
+#: plugins/agenda/__init__.py:110
+msgid "Fait"
+msgstr ""
+
+#: plugins/agenda/__init__.py:118
+#: plugins/agenda/__init__.py:196
+msgid "Cette fiche n'existe plus ou est verrouillée."
+msgstr ""
+
+#: plugins/agenda/__init__.py:143
 #: plugins/capture/__init__.py:240
 #: plugins/courriel/__init__.py:180
 msgid "Ajouter…"
 msgstr ""
 
-#: plugins/agenda/__init__.py:78
+#: plugins/agenda/__init__.py:143
 #: plugins/capture/__init__.py:240
 #: plugins/courriel/__init__.py:180
 msgid "Modifier…"
 msgstr ""
 
-#: plugins/agenda/__init__.py:78
-#: plugins/agenda/__init__.py:123
+#: plugins/agenda/__init__.py:143
+#: plugins/agenda/__init__.py:188
 #: plugins/capture/__init__.py:240
 msgid "Supprimer"
 msgstr ""
 
-#: plugins/agenda/__init__.py:79
-msgid "Ouvrir la fiche"
-msgstr ""
-
-#: plugins/agenda/__init__.py:131
-msgid "Cette fiche n'existe plus ou est verrouillée."
-msgstr ""
-
-#: plugins/agenda/__init__.py:192
-msgid "Rappel"
-msgstr ""
-
-#: plugins/agenda/__init__.py:45
+#: plugins/agenda/__init__.py:58
 msgid "Lier à la fiche « %(theme)s / %(titre)s »"
 msgstr ""
 
-#: plugins/agenda/__init__.py:123
+#: plugins/agenda/__init__.py:188
 msgid "Supprimer « %s » ?"
 msgstr ""
 
-#: plugins/agenda/logique.py:88
+#: plugins/agenda/logique.py:124
 msgid "dans %d j"
 msgstr ""
 
-#: plugins/agenda/logique.py:83
+#: plugins/agenda/logique.py:119
 msgid "en retard de %d j"
 msgstr ""
 
-#: plugins/agenda/logique.py:85
+#: plugins/agenda/logique.py:121
 msgid "dans %d min"
 msgstr ""
 
-#: plugins/agenda/logique.py:87
+#: plugins/agenda/logique.py:123
 msgid "dans %d h"
 msgstr ""
 
-#: plugins/agenda/logique.py:80
+#: plugins/agenda/logique.py:116
 msgid "en retard de %d min"
 msgstr ""
 
-#: plugins/agenda/logique.py:82
+#: plugins/agenda/logique.py:118
 msgid "en retard de %d h"
 msgstr ""
 

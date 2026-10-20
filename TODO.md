@@ -37,8 +37,8 @@ Une fiche peut contenir une ou plusieurs images, en plus du texte ou à sa place
 - ☐ Essai réel avec une vraie photo JPEG avec EXIF (test automatique limité aux commentaires PNG) · ☐ tests sous Windows/macOS (noms de fichiers, titres ne différant que par la casse)
 
 ## 2. Plugin `agenda` : rappels (version minimale écrite le 2026-10-21, sur `dev`, v0.3)
-Fait : `plugins/agenda/` (événements datés, liés ou non à une fiche non verrouillée, fenêtre « Agenda », notification à l'heure, manqués annoncés au démarrage « en retard »), 8 tests. Stockage dans les réglages du plugin. Reste, en option :
-- ☐ Répétitions (quotidien, hebdo, mensuel, annuel), « Repousser de 10 min » / « Fait », petit calendrier, export `.ics`
+Fait : `plugins/agenda/` (événements datés, liés ou non à une fiche non verrouillée, fenêtre « Agenda », date et heure séparées avec raccourcis +10 min / +1 h / demain 9:00, notification + fenêtre de rappel au premier plan avec « Ouvrir la fiche » / « Repousser de 10 min » / « Fait », son facultatif par événement, manqués annoncés au démarrage), 10 tests. Stockage dans les réglages du plugin. Reste, en option :
+- ☐ Répétitions (quotidien, hebdo, mensuel, annuel), durées de report au choix, clic sur la notification système (l'API `notifier` n'a pas de rappel), petit calendrier, export `.ics`
 Idées d'origine (non faites) :
 Ne pas faire un agenda complet : des **fiches avec une date**. Repose sur l'API plugins (métadonnées, planificateur, notifications).
 - ☐ Date/heure facultative sur une fiche (ligne en tête du `.md`, ex. `@rappel: 2026-11-03 09:00`)

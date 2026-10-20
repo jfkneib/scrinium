@@ -62,6 +62,18 @@ class Reglages(dict):
         self[k] = v
 
 
+@pytest.fixture(autouse=True)
+def silence(monkeypatch):
+    """Aucun son réel, aucune vraie fenêtre de rappel laissée ouverte."""
+    sons = []
+    monkeypatch.setattr(lg, "jouer_son", lambda: sons.append(1) or True)
+    monkeypatch.setattr(QApplication, "beep", staticmethod(lambda: sons.append("bip")))
+    yield sons
+    for w in QApplication.topLevelWidgets():
+        if isinstance(w, mod.RappelPopup):
+            w.close()
+
+
 def faux_ctx(fiches=(), courante=None):
     notes, ouvertes = [], []
     ui = SimpleNamespace(ajouter_action=lambda *a: None, ajouter_bouton=lambda *a: None, planifier=lambda *a, **k: None,
@@ -73,6 +85,43 @@ def faux_ctx(fiches=(), courante=None):
 
 def fiche(titre, verrou=False):
     return SimpleNamespace(theme="T", titre=titre, verrou=verrou)
+
+
+def test_son_facultatif(silence):
+    app = QApplication.instance() or QApplication([])
+    assert app
+    ctx, notes, _o = faux_ctx()
+    p = mod.AgendaPlugin()
+    p.activer(ctx)
+    p.ajouter("avec", datetime.now() - timedelta(seconds=5))
+    p.ajouter("sans", datetime.now() - timedelta(seconds=5), son=False)
+    p.verifier()
+    assert len(notes) == 2 and silence == [1]                 # un seul son : celui de l'événement qui en demande un
+    assert [e["son"] for e in p.evenements()] == [True, False] or sorted(e["son"] for e in p.evenements()) == [False, True]
+
+
+def test_popup_repousser_et_fait():
+    app = QApplication.instance() or QApplication([])
+    assert app
+    ctx, _n, ouvertes = faux_ctx([fiche("Libre")])
+    p = mod.AgendaPlugin()
+    p.activer(ctx)
+    p.ajouter("R1", datetime.now() - timedelta(seconds=5), {"theme": "T", "titre": "Libre"})
+    p.verifier()
+    assert len(p.popups) == 1 and p.popups[0].isVisible()
+    p.popups[0]._ouvrir()
+    assert len(ouvertes) == 1
+    p.popups[0]._repousser()
+    e = p.evenements()[0]
+    assert not e["notifie"] and not e["fait"] and datetime.now() + timedelta(minutes=8) < logique_date(e) < datetime.now() + timedelta(minutes=11)
+    p.verifier()
+    assert len(p.popups) == 1                                  # pas de nouvelle fenêtre avant l'échéance
+    p.marquer_fait(e["id"])
+    assert p.evenements()[0]["fait"] and lg.a_notifier(p.evenements(), datetime.now() + timedelta(days=1)) == []
+
+
+def logique_date(e):
+    return lg.en_date(e["quand"])
 
 
 def test_plugin_notifie_une_seule_fois():
@@ -124,5 +173,9 @@ def test_dialogues_se_construisent():
     assert dlg.liste.count() == 1 and "Réunion" in dlg.liste.item(0).text() and dlg.vide.isHidden()
     d = mod.DialogueEvenement(None, fiche=p.fiche_liable())
     d.titre.setText("Nouveau")
-    titre, quand, lien = d.resultat()
-    assert titre == "Nouveau" and lien == {"theme": "T", "titre": "Libre"} and quand.second == 0
+    titre, quand, lien, son = d.resultat()
+    assert titre == "Nouveau" and lien == {"theme": "T", "titre": "Libre"} and son is True and quand.second == 0
+    d._demain()
+    assert d.quand().hour == 9 and d.quand().date() == (datetime.now() + timedelta(days=1)).date()
+    d._dans(hours=1)
+    assert timedelta(minutes=58) < d.quand() - datetime.now() < timedelta(minutes=62)
