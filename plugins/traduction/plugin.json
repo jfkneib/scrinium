@@ -2,7 +2,7 @@
   "titre": "Traduction",
   "version": "0.1",
   "auteur": "Scrinium",
-  "description": "Traduit la sélection ou la fiche : TranslateGemma via llama.cpp (local, sans Ollama) ou Argos Translate (hors ligne). Rien ne quitte votre machine ; aucune installation ni téléchargement sans votre accord.",
+  "description": "Traduit la sélection ou la fiche : TranslateGemma via llama.cpp (local, sans Ollama). Rien ne quitte votre machine ; aucun téléchargement sans votre accord.",
   "classe": "TraductionPlugin",
   "api": 1
 }

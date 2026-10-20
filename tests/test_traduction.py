@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 # Copyright (C) 2026 Jean-François Kneib
-"""Extension « Traduction » : logique, faux llama-server, téléchargement du modèle, faux Argos, fonctionnement dans la fenêtre."""
+"""Extension « Traduction » : logique, faux llama-server, téléchargement du modèle, fonctionnement dans la fenêtre."""
 import hashlib
 import http.server
 import importlib.util
@@ -284,80 +284,6 @@ def test_modele_recommande_epingle():
     assert len(lg.MODELE_SHA256) == 64 and lg.MODELE_TAILLE == 2_489_909_760 and lg.MODELE_NOM.endswith("Q4_K_M.gguf")
 
 
-# ---------- faux Argos ----------
-@pytest.fixture
-def argos(tmp_path, monkeypatch):
-    etat = types.SimpleNamespace(installes={"fr": {"en"}, "en": {"fr"}}, telecharges=[], index=0)
-    pk, st, tr = types.ModuleType("argostranslate.package"), types.ModuleType("argostranslate.settings"), types.ModuleType("argostranslate.translate")
-    racine = types.ModuleType("argostranslate")
-    racine.package, racine.settings, racine.translate = pk, st, tr
-    st.data_dir = st.package_data_dir = None
-
-    class Paquet:
-        def __init__(self, a, b):
-            self.from_code, self.to_code = a, b
-
-        def download(self):
-            etat.telecharges.append((self.from_code, self.to_code))
-            return f"{self.from_code}-{self.to_code}.argosmodel"
-    pk.update_package_index = lambda: setattr(etat, "index", etat.index + 1)
-    pk.get_available_packages = lambda: [Paquet("fr", "en"), Paquet("en", "fr"), Paquet("en", "es"), Paquet("es", "en"), Paquet("en", "de")]
-
-    def installer(chemin):
-        a, b = chemin.split(".")[0].split("-")
-        etat.installes.setdefault(a, set()).add(b)
-    pk.install_from_path = installer
-
-    class Langue:
-        def __init__(self, code):
-            self.code = code
-
-        def get_translation(self, autre):
-            direct = autre.code in etat.installes.get(self.code, set())
-            pivot = "en" in etat.installes.get(self.code, set()) and autre.code in etat.installes.get("en", set())   # comme Argos : via l'anglais
-            if not (direct or pivot):
-                return None
-            return types.SimpleNamespace(translate=lambda t: f"({self.code}>{autre.code}) {t} ")
-    tr.get_installed_languages = lambda: [Langue(c) for c in sorted(set(etat.installes) | {x for v in etat.installes.values() for x in v})]
-    for nom, mod in (("argostranslate", racine), ("argostranslate.package", pk), ("argostranslate.settings", st), ("argostranslate.translate", tr)):
-        monkeypatch.setitem(sys.modules, nom, mod)
-    return etat
-
-
-def test_argos_present_ou_absent(monkeypatch):
-    for nom in ("argostranslate", "argostranslate.package", "argostranslate.settings", "argostranslate.translate"):
-        monkeypatch.delitem(sys.modules, nom, raising=False)
-    monkeypatch.setattr(lg.importlib.util, "find_spec", lambda n: None)
-    assert not lg.argos_present()
-    with pytest.raises(lg.ErreurMoteur, match="inutilisable"):
-        lg.argos_langues_installees(None)
-
-
-def test_argos_installe_traduit_et_range_ses_donnees(argos, tmp_path):
-    assert lg.argos_langues_installees(tmp_path / "argos") == {"fr", "en"}
-    assert argos_set(tmp_path) and (tmp_path / "argos" / "packages").is_dir()                   # paquets rangés dans le dossier de l'extension
-    assert lg.argos_paire_installee("fr", "en", tmp_path) and not lg.argos_paire_installee("fr", "es", tmp_path)
-    assert lg.argos_traduire("Bonjour", "fr", "en", tmp_path) == "(fr>en) Bonjour"
-    with pytest.raises(lg.ErreurMoteur, match="non installé"):
-        lg.argos_traduire("Bonjour", "fr", "es", tmp_path)
-
-
-def argos_set(tmp_path):
-    import argostranslate.settings as st
-    return st.package_data_dir == tmp_path / "argos" / "packages"
-
-
-def test_argos_propose_les_modeles_manquants_avec_pivot(argos, tmp_path):
-    direct = lg.argos_modeles_necessaires("fr", "en", tmp_path)
-    assert [(p.from_code, p.to_code) for p in direct] == [("fr", "en")] and argos.index == 1
-    pivot = lg.argos_modeles_necessaires("fr", "es", tmp_path)                                   # pas de fr→es : fr→en puis en→es
-    assert [(p.from_code, p.to_code) for p in pivot] == [("fr", "en"), ("en", "es")]
-    with pytest.raises(lg.ErreurMoteur, match="pas de modèle"):
-        lg.argos_modeles_necessaires("fr", "ja", tmp_path)
-    lg.argos_installer_paquets(pivot, tmp_path)
-    assert argos.telecharges == [("fr", "en"), ("en", "es")] and lg.argos_paire_installee("en", "es", tmp_path)
-
-
 # ---------- dans la fenêtre ----------
 @pytest.fixture
 def fen(app, tmp_path, monkeypatch):
@@ -631,53 +557,43 @@ def test_journal_du_serveur_dans_le_dossier_de_l_extension(fen):
     assert plugin(fen).serveur.journal == fen.plugins.actifs["traduction"][1].dossier_donnees / "llama-server.log"
 
 
-# ---------- Argos dans la fenêtre ----------
-def test_argos_deja_pret(fen, argos, monkeypatch):
-    sync(monkeypatch)
-    f = plugin(fen)._preparer_argos("fr", "en")
-    assert f("Bonjour", None) == "(fr>en) Bonjour"
-
-
-def test_argos_modele_manquant_demande_l_accord_puis_installe(fen, argos, monkeypatch):
-    sync(monkeypatch)
-    demandes = []
-    monkeypatch.setattr(mod().QMessageBox, "question", lambda *a, **k: demandes.append(a[2]) or mod().QMessageBox.StandardButton.No)
-    assert plugin(fen)._preparer_argos("fr", "es") is None and argos.telecharges == []              # refusé : rien n'est téléchargé
-    assert "fr → en, en → es" in demandes[0] and "index public" in demandes[0]
-    monkeypatch.setattr(mod().QMessageBox, "question", lambda *a, **k: mod().QMessageBox.StandardButton.Yes)
-    f = plugin(fen)._preparer_argos("fr", "es")
-    assert argos.telecharges and f("Salut", None) == "(fr>es) Salut"
-
-
-def test_argos_pas_de_modele_du_tout(fen, argos, monkeypatch):
-    sync(monkeypatch)
-    avertis = []
-    monkeypatch.setattr(mod().QMessageBox, "warning", lambda *a, **k: avertis.append(a[2]))
-    assert plugin(fen)._preparer_argos("fr", "ja") is None and "pas de modèle" in avertis[0]
-
-
-def test_argos_non_installe_propose_l_installation_legere(fen, monkeypatch):
-    monkeypatch.setattr(mod().logique, "argos_present", lambda: False)
-    questions = []
-    monkeypatch.setattr(mod().QMessageBox, "question", lambda *a, **k: questions.append(a[2]) or mod().QMessageBox.StandardButton.No)
-    assert plugin(fen)._preparer_argos("fr", "en") is None
-    assert "PyTorch n'est pas ajouté" in questions[0] and "argos" not in questions[0].lower().replace("argos translate", "")  or True
-    assert not (fen.plugins.actifs["traduction"][1].dossier_donnees / "deps").exists()              # refusé : rien n'est créé
-
-
 # ---------- réglages ----------
 def test_dialogue_reglages_enregistre_et_n_exige_pas_ollama(fen, monkeypatch):
     d = mod().DialogueReglages(plugin(fen))
-    d.moteur.setCurrentIndex(d.moteur.findData("argos"))
     d.exe.setText("/opt/llama/llama-server")
     d.modele.setText("/m/t.gguf")
     d.gpu.setText("0")
     d.inactif.setValue(3)
     d._valider()
     r = fen.plugins.actifs["traduction"][1].reglages
-    assert (r.get("moteur"), r.get("exe"), r.get("modele"), r.get("gpu"), r.get("inactivite")) == ("argos", "/opt/llama/llama-server", "/m/t.gguf", "0", 3)
+    assert (r.get("exe"), r.get("modele"), r.get("gpu"), r.get("inactivite")) == ("/opt/llama/llama-server", "/m/t.gguf", "0", 3)
     assert r.get("distant_ok") is False and r.get("url") == ""                                      # serveur distant jamais accepté par défaut
     assert "ollama" not in (RACINE / "__init__.py").read_text().lower().replace("sans ollama", "")
+
+
+# ---------- Argos retiré (il exige PyTorch) ----------
+def test_argos_n_est_plus_propose(fen, app, monkeypatch):
+    assert list(mod().MOTEURS) == ["llama"]
+    d = dialogue(fen)
+    d.show()
+    app.processEvents()
+    assert d.moteur.count() == 1 and not d.moteur.isVisible()                                       # un seul moteur : pas de liste à montrer
+    reglages = mod().DialogueReglages(plugin(fen))
+    textes = [w.text() for w in reglages.findChildren((mod().QLabel, mod().QPushButton)) if hasattr(w, "text")]
+    assert not any("argos" in x.lower() for x in textes)                                            # ni libellé ni bouton d'installation
+    code = (RACINE / "__init__.py").read_text() + (RACINE / "logique.py").read_text()
+    assert "QProcess" not in code and '"pip"' not in code and "argostranslate" not in code.lower().replace("(argos translate a été retiré", "")   # plus aucune installation de paquet
+
+
+def test_ancien_reglage_argos_retombe_sur_llama(fen, app, faux):
+    r = fen.plugins.actifs["traduction"][1].reglages
+    r.set("moteur", "argos")                                                                        # réglage laissé par une ancienne version
+    r.set("exe", faux.exe)
+    r.set("modele", faux.modele)
+    d = dialogue(fen)
+    assert d.moteur.currentData() == "llama"
+    d._lancer()
+    assert attendre(app, lambda: not d.travail, 30) and d.resultat.toPlainText().startswith("[TRAD]")
 
 
 # ---------- essai réel (facultatif : SCRINIUM_TEST_LLAMA=1) ----------
