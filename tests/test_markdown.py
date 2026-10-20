@@ -137,3 +137,27 @@ def test_second_clic_retire_les_marques_autour_de_la_selection(app):
     e = editeur("a **mot** b", 4, 7)                             # « mot » seul, marques autour
     md.entourer(e, "**", "gras")
     assert e.toPlainText() == "a mot b"
+
+
+def test_lien_sur_une_adresse_selectionnee(app):
+    u = "https://spo.medulla-tech.io/mmc/index.php?sessionexpired=1"
+    e = editeur("ouvrir " + u + " ici", 7, 7 + len(u))
+    md.lien(e)
+    assert e.toPlainText() == "ouvrir <" + u + "> ici"
+    c = e.textCursor()
+    c.setPosition(7)
+    c.setPosition(7 + len(u) + 2, QTextCursor.MoveMode.KeepAnchor)
+    e.setTextCursor(c)
+    md.lien(e)                                                       # second clic : on retire les chevrons
+    assert e.toPlainText() == "ouvrir " + u + " ici"
+    e = editeur("www.exemple.fr", 0, 14)
+    md.lien(e)
+    assert e.toPlainText() == "<https://www.exemple.fr>"
+    assert md.sans_format("<https://x.fr/a?b=1>") == "https://x.fr/a?b=1"
+
+
+def test_apercu_rend_une_adresse_cliquable(app):
+    a = md.Apercu()
+    for texte in ("<https://x.fr/a?b=1>", "https://x.fr/a?b=1", "[x](https://x.fr/a?b=1)"):
+        a.afficher(texte)
+        assert 'href="https://x.fr/a?b=1"' in a.toHtml(), texte
