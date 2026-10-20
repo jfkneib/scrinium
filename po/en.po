@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: scrinium 0.2.0\n"
 "Report-Msgid-Bugs-To: \n"
-"PO-Revision-Date: 2026-10-20 11:58+0200\n"
+"PO-Revision-Date: 2026-10-20 12:06+0200\n"
 "Last-Translator: Jean-François Kneib\n"
 "Language-Team: English\n"
 "Language: en\n"
@@ -1538,6 +1538,22 @@ msgstr "Image %(n)s unreadable: %(ex)s"
 #: src/scrinium/cli.py:25
 msgid "  (+ %d image(s))"
 msgstr "  (+ %d image(s))"
+
+#: src/scrinium/core/capture.py:51
+msgid "titre de fiche vide"
+msgstr "empty note title"
+
+#: src/scrinium/core/capture.py:40
+msgid "thème introuvable : %(nom)s (thèmes : %(liste)s)"
+msgstr "topic not found: %(nom)s (topics: %(liste)s)"
+
+#: src/scrinium/core/capture.py:54
+msgid "fiche verrouillée : « %s » doit d'abord être déverrouillée dans la fenêtre de Scrinium"
+msgstr "locked note: \"%s\" must first be unlocked in the Scrinium window"
+
+#: src/scrinium/core/capture.py:40
+msgid "aucun"
+msgstr "none"
 
 #: src/scrinium/core/exemples.py:11
 #: src/scrinium/core/store.py:154

@@ -1507,6 +1507,22 @@ msgstr ""
 msgid "  (+ %d image(s))"
 msgstr ""
 
+#: src/scrinium/core/capture.py:51
+msgid "titre de fiche vide"
+msgstr ""
+
+#: src/scrinium/core/capture.py:40
+msgid "thème introuvable : %(nom)s (thèmes : %(liste)s)"
+msgstr ""
+
+#: src/scrinium/core/capture.py:54
+msgid "fiche verrouillée : « %s » doit d'abord être déverrouillée dans la fenêtre de Scrinium"
+msgstr ""
+
+#: src/scrinium/core/capture.py:40
+msgid "aucun"
+msgstr ""
+
 #: src/scrinium/core/exemples.py:11
 #: src/scrinium/core/store.py:154
 #: src/scrinium/ui/fenetre.py:49

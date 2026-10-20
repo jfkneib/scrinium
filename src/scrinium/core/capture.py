@@ -8,6 +8,7 @@ déjà ouverte, qui écrit alors elle-même pour que l'éditeur reste cohérent.
 import re
 import time
 
+from ..i18n import _
 from .store import Fiche, Store, Theme
 
 TAILLE_MAX = 256 * 1024        # octets de texte conservés par ajout
@@ -36,7 +37,7 @@ def bloc(texte: str, commande: str = "", brut: bool = False, horodatage: str | N
 def _theme(store: Store, nom: str) -> Theme:
     th = store.theme(nom) or next((t for t in store.themes if t.nom.lower() == nom.strip().lower()), None)
     if th is None:
-        raise ValueError(f"thème introuvable : {nom} (thèmes : {', '.join(t.nom for t in store.themes) or 'aucun'})")
+        raise ValueError(_("thème introuvable : %(nom)s (thèmes : %(liste)s)") % {"nom": nom, "liste": ", ".join(t.nom for t in store.themes) or _("aucun")})
     return th
 
 
@@ -47,10 +48,10 @@ def ajouter(store: Store, theme: str, titre: str, texte: str, commande: str = ""
     th = _theme(store, theme)
     titre = titre.strip()
     if not titre:
-        raise ValueError("titre de fiche vide")
+        raise ValueError(_("titre de fiche vide"))
     f = next((x for x in th.fiches if x.titre.lower() == titre.lower()), None)
     if f is not None and f.fermee:
-        raise ValueError(f"fiche verrouillée : « {f.titre} » doit d'abord être déverrouillée dans la fenêtre de Scrinium")
+        raise ValueError(_("fiche verrouillée : « %s » doit d'abord être déverrouillée dans la fenêtre de Scrinium") % f.titre)
     ajout = bloc(tronquer(texte), commande, brut, horodatage)
     if f is None:
         f = store.nouvelle_fiche(th)
