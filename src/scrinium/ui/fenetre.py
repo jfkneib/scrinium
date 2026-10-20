@@ -7,7 +7,7 @@ from PyQt6.QtCore import QEvent, QSize, Qt, QTimer
 from PyQt6.QtGui import QAction, QActionGroup, QKeySequence
 from PyQt6.QtWidgets import (QApplication, QFileDialog, QHBoxLayout, QInputDialog, QLabel, QLineEdit, QListWidget,
                              QListWidgetItem, QMainWindow, QMenu, QMessageBox, QPushButton, QSplitter,
-                             QSystemTrayIcon, QToolBar, QVBoxLayout, QWidget)
+                             QStackedWidget, QSystemTrayIcon, QToolBar, QVBoxLayout, QWidget)
 
 from .. import __version__
 from ..core import autostart, capture, crypto
@@ -18,6 +18,7 @@ from .assistant import AssistantCle
 from .extensions import DialogueExtensions, UiPlugin
 from .icons import icone, icone_appli
 from .images import BandePieces, Editeur
+from .markdown import Apercu, BarreFormat, entourer
 
 ORANGE, VERT, GRIS = "#c77700", "#2e8b3a", "gray"
 
@@ -169,8 +170,15 @@ class Fenetre(QMainWindow):
         droite = QWidget()
         ld = QVBoxLayout(droite)
         ld.setContentsMargins(0, 0, 0, 0)
+        self.apercu = Apercu()
+        self.format = BarreFormat(self.texte)
+        self.format.apercu_demande.connect(self.basculer_apercu)
+        self.pile = QStackedWidget()
+        self.pile.addWidget(self.texte)
+        self.pile.addWidget(self.apercu)
         ld.addLayout(ligne)
-        ld.addWidget(self.texte, 1)
+        ld.addWidget(self.format)
+        ld.addWidget(self.pile, 1)
         ld.addWidget(self.bande)
         ld.addWidget(self.statut)
 
@@ -187,7 +195,16 @@ class Fenetre(QMainWindow):
         self.titre.textEdited.connect(self._modifie)
         self.texte.textChanged.connect(self._modifie)
         self.titre.editingFinished.connect(self.sauver)
-        for seq, slot in (("Ctrl+S", self._forcer), ("Ctrl+F", lambda: self.recherche.setFocus())):
+        for seq, slot in (("Ctrl+B", lambda: entourer(self.texte, "**", _("gras"))),
+                          ("Ctrl+I", lambda: entourer(self.texte, "*", _("italique")))):
+            a = QAction(self.texte)
+            a.setShortcut(QKeySequence(seq))
+            a.setShortcutContext(Qt.ShortcutContext.WidgetShortcut)      # seulement quand l'éditeur a le focus
+            a.triggered.connect(slot)
+            self.texte.addAction(a)
+        self.texte.textChanged.connect(self._maj_apercu)
+        for seq, slot in (("Ctrl+S", self._forcer), ("Ctrl+F", lambda: self.recherche.setFocus()),
+                          ("Ctrl+E", lambda: self.format.b_apercu.isEnabled() and self.format.b_apercu.toggle())):
             a = QAction(self)
             a.setShortcut(QKeySequence(seq))
             a.triggered.connect(slot)
@@ -333,6 +350,20 @@ class Fenetre(QMainWindow):
     def _etat_editeur(self, actif):
         self.titre.setEnabled(actif)
         self.texte.setEnabled(actif)
+        self.format.setEnabled(actif)
+        if not actif and self.format.b_apercu.isChecked():
+            self.format.b_apercu.setChecked(False)
+
+    def basculer_apercu(self, actif: bool):
+        """Aperçu Markdown (lecture seule, rien n'est écrit) ou édition."""
+        self.format.definir_apercu(actif)
+        if actif:
+            self.apercu.afficher(self.texte.toPlainText())
+        self.pile.setCurrentWidget(self.apercu if actif else self.texte)
+
+    def _maj_apercu(self):
+        if self.pile.currentWidget() is self.apercu:
+            self.apercu.afficher(self.texte.toPlainText())
 
     def _statut(self, txt, couleur=GRIS):
         self.statut.setText(txt)
