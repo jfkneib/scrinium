@@ -1,0 +1,8 @@
+{
+  "titre": "Agenda et rappels",
+  "version": "0.1",
+  "auteur": "Scrinium",
+  "description": "Rappels et échéances, liés ou non à une fiche : liste des prochains événements et notification à l'heure dite. Rien n'est lié à une fiche verrouillée.",
+  "classe": "AgendaPlugin",
+  "api": 1
+}
