@@ -104,7 +104,7 @@ def test_aucune_fiche_ou_fermee_sort_de_l_apercu(fen):  # noqa: F811
 
 def test_liens_seulement_http_https_mailto(app, monkeypatch):
     ouverts = []
-    monkeypatch.setattr(md.QDesktopServices, "openUrl", staticmethod(lambda u: ouverts.append(u.toString())))
+    monkeypatch.setattr(md.QDesktopServices, "openUrl", staticmethod(lambda u: ouverts.append(u.toString()) or True))
     a = md.Apercu()
     for u in ("https://exemple.fr/", "http://x.fr", "mailto:a@x.fr", "file:///etc/passwd", "javascript:alert(1)", "smb://serveur/x"):
         a._lien(QUrl(u))
@@ -161,3 +161,31 @@ def test_apercu_rend_une_adresse_cliquable(app):
     for texte in ("<https://x.fr/a?b=1>", "https://x.fr/a?b=1", "[x](https://x.fr/a?b=1)"):
         a.afficher(texte)
         assert 'href="https://x.fr/a?b=1"' in a.toHtml(), texte
+
+
+def test_navigateur_choisi_pour_les_liens(app, monkeypatch):
+    lances, systeme = [], []
+    monkeypatch.setattr(md.QDesktopServices, "openUrl", staticmethod(lambda u: systeme.append(u.toString()) or True))
+    monkeypatch.setattr(md.subprocess, "Popen", lambda argv, **kw: lances.append(argv))
+    monkeypatch.setattr(md.shutil, "which", lambda n: "/usr/bin/" + n if n in ("firefox", "brave-browser") else None)
+    a = md.Apercu()
+    a.navigateur = lambda: "brave-browser --incognito"
+    a._lien(QUrl("https://x.fr/"))
+    assert lances == [["brave-browser", "--incognito", "https://x.fr/"]] and systeme == []
+    a.navigateur = lambda: "opera-inexistant"                          # commande introuvable : repli sur le système
+    a._lien(QUrl("https://y.fr/"))
+    assert systeme == ["https://y.fr/"]
+    a.navigateur = lambda: "firefox"
+    a._lien(QUrl("mailto:a@x.fr"))                                     # le courrier reste au système
+    assert systeme[-1] == "mailto:a@x.fr" and len(lances) == 1
+    assert md.navigateurs_installes() == ["firefox", "brave-browser"]
+
+
+def test_menu_navigateur_enregistre_le_choix(fen, monkeypatch):  # noqa: F811
+    from PyQt6.QtWidgets import QInputDialog
+    monkeypatch.setattr(QInputDialog, "getItem", staticmethod(lambda *a, **k: ("firefox", True)))
+    fen.choisir_navigateur()
+    assert fen.store.reglages()["navigateur"] == "firefox" and fen.apercu.navigateur() == "firefox"
+    monkeypatch.setattr(QInputDialog, "getItem", staticmethod(lambda *a, **k: ("Navigateur du système (par défaut)", True)))
+    fen.choisir_navigateur()
+    assert fen.store.reglages()["navigateur"] == ""
