@@ -255,6 +255,20 @@ def recommandation(m: dict) -> str:
     return choix_automatique(m) or "4b"
 
 
+def avertissement_modele(m: dict, cle: str) -> str:
+    """Mise en garde quand la machine est trop juste pour ce modèle (chaîne vide si tout va bien). Mesures : le 4B demande 3 à 5 Go
+    de mémoire (3,1 Go sur un i5 de 2012, 4,4 à 4,6 Go sur deux autres machines) ; le 12B au moins 8 à 9 Go (estimation)."""
+    mem = m.get("memoire") or 0
+    if not mem:
+        return ""
+    go = f"{mem / 1024 ** 3:.0f} Go"
+    if cle == "12b" and mem < 11 * 1024 ** 3 and not any(g["total"] >= 8 * 1024 ** 3 for g in m.get("gpus", [])):
+        return f"Cette machine n'a que {go} de mémoire : le modèle « Meilleur (12B) » (8 à 9 Go) risque de la saturer."
+    if cle == "4b" and mem < 5 * 1024 ** 3:
+        return f"Cette machine n'a que {go} de mémoire : même le modèle rapide (3 à 5 Go) sera juste."
+    return ""
+
+
 def description_materiel(m: dict) -> str:
     gb = lambda o: f"{o / 1024 ** 3:.0f} Go"
     morceaux = [f"mémoire {gb(m['memoire'])}" if m.get("memoire") else "mémoire inconnue", f"{m.get('coeurs') or '?'} cœurs"]

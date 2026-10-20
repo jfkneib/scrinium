@@ -852,3 +852,36 @@ def test_choix_perso_apparait_dans_la_fenetre(fen, tmp_path):
     r.set("modele", str(gguf))
     d = dialogue(fen)
     assert [d.qualite.itemData(i) for i in range(d.qualite.count())] == ["4b", "12b", "perso"] and d.qualite.currentData() == "perso"
+
+
+# ---------- machines modestes : mises en garde ----------
+def test_avertissements_selon_la_memoire():
+    machine = lambda go, carte=0: {"memoire": go * GO, "coeurs": 4, "apple": False,
+                                   "gpus": [{"nom": "X", "total": carte * GO, "libre": carte * GO}] if carte else []}
+    assert "7 Go" in lg.avertissement_modele(machine(7), "12b") and "saturer" in lg.avertissement_modele(machine(7), "12b")
+    assert lg.avertissement_modele(machine(7), "4b") == "" and lg.avertissement_modele(machine(15), "12b") == ""       # le 4B passe sur 7 Go (mesuré), le 12B passe sur 15 Go
+    assert "même le modèle rapide" in lg.avertissement_modele(machine(4), "4b")
+    assert lg.avertissement_modele(machine(7, carte=12), "12b") == "" and lg.avertissement_modele(machine(7, carte=8), "12b") == ""   # une carte de 8 Go compense
+    assert lg.avertissement_modele({"memoire": None, "coeurs": 4, "gpus": [], "apple": False}, "12b") == ""             # mémoire inconnue : pas d'alarme
+
+
+def test_dialogue_signale_une_machine_trop_juste_et_demande_confirmation(fen, monkeypatch):
+    monkeypatch.setattr(mod().logique, "materiel", lambda: {"memoire": 7 * GO, "coeurs": 4, "gpus": [], "apple": False})   # type OptiPlex
+    d = mod().DialogueChoixModele(plugin(fen))
+    assert "⚠" in d.radios["12b"].text() and "⚠" not in d.radios["4b"].text()
+    assert "saturer" in d.alertes["12b"] and d.alertes["4b"] == ""
+    textes = " ".join(x.text() for x in d.findChildren(mod().QLabel))
+    assert "n'a que 7 Go de mémoire" in textes and "i5 de 2012" in textes                           # mise en garde visible + mesure sur vieille machine
+    d.radios["12b"].setChecked(True)
+    questions = []
+    monkeypatch.setattr(mod().QMessageBox, "question", lambda *a, **k: questions.append(a[2]) or mod().QMessageBox.StandardButton.No)
+    d._valider()
+    assert d.result() == 0 and "Choisir quand même ?" in questions[0]                                # refusé : la fenêtre reste ouverte
+    monkeypatch.setattr(mod().QMessageBox, "question", lambda *a, **k: mod().QMessageBox.StandardButton.Yes)
+    d._valider()
+    assert d.result() == 1 and d.choix() == "12b"                                                    # choisi en connaissance de cause
+    d4 = mod().DialogueChoixModele(plugin(fen))
+    d4.radios["4b"].setChecked(True)
+    monkeypatch.setattr(mod().QMessageBox, "question", lambda *a, **k: pytest.fail("pas de question pour le 4B sur 7 Go"))
+    d4._valider()
+    assert d4.result() == 1
