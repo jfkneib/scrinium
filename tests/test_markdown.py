@@ -109,3 +109,31 @@ def test_liens_seulement_http_https_mailto(app, monkeypatch):
     for u in ("https://exemple.fr/", "http://x.fr", "mailto:a@x.fr", "file:///etc/passwd", "javascript:alert(1)", "smb://serveur/x"):
         a._lien(QUrl(u))
     assert ouverts == ["https://exemple.fr/", "http://x.fr", "mailto:a@x.fr"]
+
+
+def test_sans_format():
+    sf = md.sans_format
+    assert sf("## Titre") == "Titre" and sf("- a\n* b\n1. c\n> d") == "a\nb\nc\nd"
+    assert sf("**gras** et *italique* et `code`") == "gras et italique et code"
+    assert sf("voir [ici](https://x.fr) ok") == "voir ici ok"
+    assert sf("```\nls -l\n```") == "ls -l\n"
+    assert sf("snake_case_nom et 2*3*4") == "snake_case_nom et 2*3*4"          # pas de faux positifs
+    assert sf("texte simple") == "texte simple"
+    assert sf("![img](a.png)") == "![img](a.png)"
+
+
+def test_effacer_la_mise_en_forme_ligne_et_selection(app):
+    e = editeur("# Titre\n- **un** mot\nfin", 10)                  # curseur dans la ligne 2, sans sélection
+    md.effacer_format(e)
+    assert e.toPlainText() == "# Titre\nun mot\nfin"
+    e.undo()
+    assert e.toPlainText() == "# Titre\n- **un** mot\nfin"
+    e = editeur("# Titre\n- **un** mot\nfin", 0, 20)
+    md.effacer_format(e)
+    assert e.toPlainText() == "Titre\nun mot\nfin"
+
+
+def test_second_clic_retire_les_marques_autour_de_la_selection(app):
+    e = editeur("a **mot** b", 4, 7)                             # « mot » seul, marques autour
+    md.entourer(e, "**", "gras")
+    assert e.toPlainText() == "a mot b"
