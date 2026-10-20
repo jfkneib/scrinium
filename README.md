@@ -49,6 +49,7 @@ and a few template topics to fill in (Personal, Home, Computers, Travel). Delete
 - **Notification area**: closing or minimising the window sends it to the notification area (click the icon to show/hide, right-click for the menu). Turn it off with *File → Minimise to the notification area*. On a desktop without a notification area (GNOME without the AppIndicator extension) the window behaves normally. When it hides, Scrinium **closes open locked notes**: the password is asked again.
 - **Single instance**: launching `scrinium` again wakes up the window that is already open. `scrinium --minimise` starts hidden in the notification area. The *File → Start at login* checkbox sets this up for you (XDG autostart file on Linux, Run key on Windows, LaunchAgent on macOS).
 - Options: `--theme NAME` (open on that topic), `--nouvelle` / `--new` (open with an empty note ready to type).
+- **Quick capture**: `scrinium --rapide` (also *File → Quick capture…*, Ctrl+Alt+N, and the notification-area menu) opens only a small "quick note" window; Ctrl+Enter appends the text (dated) to a note of your choice, which is remembered. To use it from anywhere, bind `scrinium --rapide` to a keyboard shortcut in your desktop settings (KDE: *System Settings → Keyboard → Shortcuts → Add Command*). With Scrinium running in the notification area it appears instantly; locked notes are never written to.
 - **Language**: automatic (system language), or *Help → Language*, or the `SCRINIUM_LANG` environment variable (`en`, `fr`).
 
 ## Data

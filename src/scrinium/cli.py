@@ -125,6 +125,8 @@ def main(argv=None) -> int:
     p.add_argument("--new", "--nouvelle", dest="nouvelle", action="store_true", help=_("ouvre avec une nouvelle fiche"))
     p.add_argument("--minimise", action="store_true",
                    help=_("démarre caché dans la zone de notification (ex. lancement à l'ouverture de session)"))
+    p.add_argument("--rapide", "--quick", dest="rapide", action="store_true",
+                   help=_("ouvre seulement la petite fenêtre de capture rapide (à lier à un raccourci clavier du bureau)"))
     sub = p.add_subparsers(dest="cmd")
     r = sub.add_parser("rescue", aliases=["secours"], help=_("rouvrir une fiche verrouillée avec le fichier de secours (sans interface)"))
     r.add_argument("action", choices=["list", "open", "unlock", "lister", "ouvrir", "deverrouiller"])
@@ -156,14 +158,19 @@ def main(argv=None) -> int:
     if qt_tr.load(f"qtbase_{langue}", QLibraryInfo.path(QLibraryInfo.LibraryPath.TranslationsPath)):
         app.installTranslator(qt_tr)
     app.setDesktopFileName("scrinium")
-    if instance.reveiller_existante(a.theme, a.nouvelle):   # déjà lancé (peut-être dans la zone de notification)
+    if a.rapide and instance.demander_capture():             # instance déjà lancée : elle ouvre la capture
+        return 0
+    if not a.rapide and instance.reveiller_existante(a.theme, a.nouvelle):   # déjà lancé (peut-être dans la zone de notification)
         return 0
     w = Fenetre(Store(Paths()), theme=a.theme, nouvelle=a.nouvelle)
     serveur = instance.Serveur(w)
     serveur.ajout = w.ajouter_depuis_cli
     serveur.reveil.connect(lambda th, nv: w.montrer(th or None, nv))
-    if not (a.minimise and w.tray_actif):
+    serveur.capture.connect(w.capture_rapide)
+    if not ((a.minimise or a.rapide) and w.tray_actif):
         w.show()
+    if a.rapide:
+        w.capture_rapide()
     return app.exec()
 
 

@@ -15,6 +15,7 @@ from ..core.plugins import FicheVue, Gestionnaire
 from ..core.store import ICONE_DEFAUT, Store, propre
 from ..i18n import _
 from .assistant import AssistantCle
+from .capture_rapide import CaptureRapide
 from .extensions import DialogueExtensions, UiPlugin
 from .icons import icone, icone_appli
 from .images import BandePieces, Editeur
@@ -87,6 +88,7 @@ class Fenetre(QMainWindow):
         mf = m.addMenu(_("&Fichier"))
         mf.addAction(self.a_fiche)
         mf.addAction(self.a_theme)
+        mf.addAction(self._action(_("Capture rapide…"), "document-edit", self.capture_rapide, "Ctrl+Alt+N"))
         mf.addSeparator()
         self.a_tray = QAction(_("Réduire dans la zone de notification"), self, checkable=True)
         self.a_tray.setChecked(bool(self.store.reglages().get("tray", True)))
@@ -428,6 +430,15 @@ class Fenetre(QMainWindow):
                                   QSystemTrayIcon.MessageIcon.Information, 4000)
         return ""
 
+    def capture_rapide(self):
+        """Petite fenêtre de note rapide, au premier plan (la fenêtre principale n'est pas affichée)."""
+        self.sauver()
+        d = CaptureRapide(self)
+        self._capture = d                           # référence : la fenêtre n'a pas de parent
+        d.show()
+        d.raise_()
+        d.activateWindow()
+
     def pieces_modifiees(self):
         """Appelé par la bande après un ajout ou une suppression d'image."""
         f, t = self.fiche, self.fiche_theme
@@ -545,6 +556,7 @@ class Fenetre(QMainWindow):
         m = QMenu(self)
         m.addAction(icone("view-pim-notes"), _("Ouvrir Scrinium"), self.montrer)
         m.addAction(icone("document-new"), _("Nouvelle fiche"), lambda: self.montrer(nouvelle=True))
+        m.addAction(icone("document-edit"), _("Capture rapide…"), self.capture_rapide)
         m.addSeparator()
         m.addAction(icone("application-exit"), _("Quitter"), self.quitter)
         self.tray.setContextMenu(m)
