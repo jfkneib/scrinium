@@ -36,7 +36,10 @@ Une fiche peut contenir une ou plusieurs images, en plus du texte ou à sa place
 - ☐ Traductions anglaises (voir section 0) · ☐ rotation, annotation de l'image · ☐ option de réglage des limites (2560 px, 8 Mo…) dans `settings.json` (clé `pieces_jointes`, prévue dans la spécification)
 - ☐ Essai réel avec une vraie photo JPEG avec EXIF (test automatique limité aux commentaires PNG) · ☐ tests sous Windows/macOS (noms de fichiers, titres ne différant que par la casse)
 
-## 2. Plugin `rappels` : rappels et petit calendrier (pas commencé)
+## 2. Plugin `agenda` : rappels (version minimale écrite le 2026-10-21, sur `dev`, v0.3)
+Fait : `plugins/agenda/` (événements datés, liés ou non à une fiche non verrouillée, fenêtre « Agenda », notification à l'heure, manqués annoncés au démarrage « en retard »), 8 tests. Stockage dans les réglages du plugin. Reste, en option :
+- ☐ Répétitions (quotidien, hebdo, mensuel, annuel), « Repousser de 10 min » / « Fait », petit calendrier, export `.ics`
+Idées d'origine (non faites) :
 Ne pas faire un agenda complet : des **fiches avec une date**. Repose sur l'API plugins (métadonnées, planificateur, notifications).
 - ☐ Date/heure facultative sur une fiche (ligne en tête du `.md`, ex. `@rappel: 2026-11-03 09:00`)
 - ☐ Alarme simple : notification du bureau à l'heure (zone de notification déjà là, lancement automatique déjà là) ; répétition simple (quotidien, hebdo, mensuel, annuel pour les anniversaires)
@@ -117,7 +120,7 @@ Partager des fiches entre machines et/ou personnes : dépôt sur le réseau loca
 - ☐ Tests : deux instances sur le même dossier, modification simultanée, coupure réseau pendant l'écriture
 
 ## 4. Multi-plateforme
-- ☐ Builds Windows (PyInstaller + Inno Setup) et macOS (`.dmg`) par GitHub Actions
+- ☐ Builds Windows (PyInstaller + **NSIS** `.nsi`, décidé pour la v0.3 ; construction du setup possible sous Linux avec `apt install nsis`, PyInstaller sous Windows / GitHub Action) et macOS (`.dmg`) par GitHub Actions
 - ☐ Vérifier sous Windows et macOS : lancement automatique, zone de notification, droits des fichiers (chmod sans effet sous Windows)
 - ☐ Flatpak (en dernier : le sandbox complique le fichier de secours et l'accès à Ollama)
 - ☐ Android : réécriture à part, lecture du même format ; nécessite la synchronisation (Syncthing/Nextcloud), voir plus bas

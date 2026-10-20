@@ -14,6 +14,101 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
+#: plugins/agenda/__init__.py:31
+msgid "Événement"
+msgstr ""
+
+#: plugins/agenda/__init__.py:40
+#: src/scrinium/ui/fenetre.py:151
+msgid "Titre"
+msgstr ""
+
+#: plugins/agenda/__init__.py:41
+msgid "Date et heure"
+msgstr ""
+
+#: plugins/agenda/__init__.py:68
+#: plugins/agenda/__init__.py:142
+#: plugins/agenda/__init__.py:131
+msgid "Agenda"
+msgstr ""
+
+#: plugins/agenda/__init__.py:74
+msgid "Aucun événement. « Ajouter » en crée un ; la fiche affichée peut y être liée."
+msgstr ""
+
+#: plugins/agenda/__init__.py:84
+#: plugins/capture/__init__.py:247
+#: plugins/courriel/__init__.py:185
+msgid "Fermer"
+msgstr ""
+
+#: plugins/agenda/__init__.py:141
+msgid "Agenda…"
+msgstr ""
+
+#: plugins/agenda/__init__.py:78
+#: plugins/capture/__init__.py:240
+#: plugins/courriel/__init__.py:180
+msgid "Ajouter…"
+msgstr ""
+
+#: plugins/agenda/__init__.py:78
+#: plugins/capture/__init__.py:240
+#: plugins/courriel/__init__.py:180
+msgid "Modifier…"
+msgstr ""
+
+#: plugins/agenda/__init__.py:78
+#: plugins/agenda/__init__.py:123
+#: plugins/capture/__init__.py:240
+msgid "Supprimer"
+msgstr ""
+
+#: plugins/agenda/__init__.py:79
+msgid "Ouvrir la fiche"
+msgstr ""
+
+#: plugins/agenda/__init__.py:131
+msgid "Cette fiche n'existe plus ou est verrouillée."
+msgstr ""
+
+#: plugins/agenda/__init__.py:192
+msgid "Rappel"
+msgstr ""
+
+#: plugins/agenda/__init__.py:45
+msgid "Lier à la fiche « %(theme)s / %(titre)s »"
+msgstr ""
+
+#: plugins/agenda/__init__.py:123
+msgid "Supprimer « %s » ?"
+msgstr ""
+
+#: plugins/agenda/logique.py:88
+msgid "dans %d j"
+msgstr ""
+
+#: plugins/agenda/logique.py:83
+msgid "en retard de %d j"
+msgstr ""
+
+#: plugins/agenda/logique.py:85
+msgid "dans %d min"
+msgstr ""
+
+#: plugins/agenda/logique.py:87
+msgid "dans %d h"
+msgstr ""
+
+#: plugins/agenda/logique.py:80
+msgid "en retard de %d min"
+msgstr ""
+
+#: plugins/agenda/logique.py:82
+msgid "en retard de %d h"
+msgstr ""
+
 #: plugins/capture/__init__.py:35
 msgid "Pour que Scrinium tape directement dans Konsole, activez dans Konsole l'option « Enable the security sensitive parts of the DBus API » (Paramètres de Konsole). Elle est désactivée par défaut car elle permet à un programme d'envoyer du texte à vos terminaux : c'est votre choix. En attendant, le texte est copié dans le presse-papiers."
 msgstr ""
@@ -74,12 +169,6 @@ msgstr ""
 
 #: plugins/capture/__init__.py:233
 msgid "Actions préparées"
-msgstr ""
-
-#: plugins/capture/__init__.py:247
-#: plugins/courriel/__init__.py:185
-#: plugins/ocr/__init__.py:114
-msgid "Fermer"
 msgstr ""
 
 #: plugins/capture/__init__.py:292
@@ -186,22 +275,6 @@ msgstr ""
 
 #: plugins/capture/__init__.py:218
 msgid "Le nom et la commande sont obligatoires."
-msgstr ""
-
-#: plugins/capture/__init__.py:240
-#: plugins/courriel/__init__.py:180
-msgid "Ajouter…"
-msgstr ""
-
-#: plugins/capture/__init__.py:240
-#: plugins/courriel/__init__.py:180
-msgid "Modifier…"
-msgstr ""
-
-#: plugins/capture/__init__.py:240
-#: plugins/courriel/__init__.py:180
-#: src/scrinium/ui/fenetre.py:414
-msgid "Supprimer"
 msgstr ""
 
 #: plugins/capture/__init__.py:241
@@ -1942,10 +2015,6 @@ msgstr ""
 
 #: src/scrinium/ui/fenetre.py:142
 msgid "Supprimer la fiche"
-msgstr ""
-
-#: src/scrinium/ui/fenetre.py:151
-msgid "Titre"
 msgstr ""
 
 #: src/scrinium/ui/fenetre.py:156
