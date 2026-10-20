@@ -2322,12 +2322,12 @@ msgid "Fiches rangées par thème, verrouillables (AES-256-GCM)."
 msgstr ""
 
 #: src/scrinium/ui/fenetre.py:198
-#: src/scrinium/ui/markdown.py:118
+#: src/scrinium/ui/markdown.py:155
 msgid "gras"
 msgstr ""
 
 #: src/scrinium/ui/fenetre.py:199
-#: src/scrinium/ui/markdown.py:119
+#: src/scrinium/ui/markdown.py:156
 msgid "italique"
 msgstr ""
 
@@ -2474,54 +2474,58 @@ msgstr ""
 msgid "recadrée"
 msgstr ""
 
-#: src/scrinium/ui/markdown.py:82
+#: src/scrinium/ui/markdown.py:88
 msgid "texte"
 msgstr ""
 
-#: src/scrinium/ui/markdown.py:138
+#: src/scrinium/ui/markdown.py:176
 msgid "Aperçu"
 msgstr ""
 
-#: src/scrinium/ui/markdown.py:139
+#: src/scrinium/ui/markdown.py:177
 msgid "Afficher la fiche mise en forme (Ctrl+E) ; ne modifie rien"
 msgstr ""
 
-#: src/scrinium/ui/markdown.py:118
+#: src/scrinium/ui/markdown.py:155
 msgid "Gras (Ctrl+B)"
 msgstr ""
 
-#: src/scrinium/ui/markdown.py:119
+#: src/scrinium/ui/markdown.py:156
 msgid "Italique (Ctrl+I)"
 msgstr ""
 
-#: src/scrinium/ui/markdown.py:120
+#: src/scrinium/ui/markdown.py:157
 msgid "Titre (clics successifs : #, ##, ###, aucun)"
 msgstr ""
 
-#: src/scrinium/ui/markdown.py:121
+#: src/scrinium/ui/markdown.py:158
 msgid "Liste à puces"
 msgstr ""
 
-#: src/scrinium/ui/markdown.py:122
+#: src/scrinium/ui/markdown.py:159
 msgid "Liste numérotée"
 msgstr ""
 
-#: src/scrinium/ui/markdown.py:123
+#: src/scrinium/ui/markdown.py:160
 msgid "Citation"
 msgstr ""
 
-#: src/scrinium/ui/markdown.py:124
+#: src/scrinium/ui/markdown.py:161
 msgid "Code (dans la ligne)"
 msgstr ""
 
-#: src/scrinium/ui/markdown.py:125
+#: src/scrinium/ui/markdown.py:162
 msgid "Bloc de code"
 msgstr ""
 
-#: src/scrinium/ui/markdown.py:126
+#: src/scrinium/ui/markdown.py:163
 msgid "Lien"
 msgstr ""
 
-#: src/scrinium/ui/markdown.py:124
+#: src/scrinium/ui/markdown.py:164
+msgid "Effacer la mise en forme (sélection ou ligne)"
+msgstr ""
+
+#: src/scrinium/ui/markdown.py:161
 msgid "code"
 msgstr ""

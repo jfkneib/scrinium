@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: scrinium 0.2.0\n"
 "Report-Msgid-Bugs-To: \n"
-"PO-Revision-Date: 2026-10-20 13:53+0200\n"
+"PO-Revision-Date: 2026-10-20 13:59+0200\n"
 "Last-Translator: Jean-François Kneib\n"
 "Language-Team: English\n"
 "Language: en\n"
@@ -2451,12 +2451,12 @@ msgid "Fiches rangées par thème, verrouillables (AES-256-GCM)."
 msgstr "Notes organised by topic, lockable (AES-256-GCM)."
 
 #: src/scrinium/ui/fenetre.py:198
-#: src/scrinium/ui/markdown.py:118
+#: src/scrinium/ui/markdown.py:155
 msgid "gras"
 msgstr "bold"
 
 #: src/scrinium/ui/fenetre.py:199
-#: src/scrinium/ui/markdown.py:119
+#: src/scrinium/ui/markdown.py:156
 msgid "italique"
 msgstr "italic"
 
@@ -2603,54 +2603,58 @@ msgstr "Image"
 msgid "recadrée"
 msgstr "cropped"
 
-#: src/scrinium/ui/markdown.py:82
+#: src/scrinium/ui/markdown.py:88
 msgid "texte"
 msgstr "text"
 
-#: src/scrinium/ui/markdown.py:138
+#: src/scrinium/ui/markdown.py:176
 msgid "Aperçu"
 msgstr "Preview"
 
-#: src/scrinium/ui/markdown.py:139
+#: src/scrinium/ui/markdown.py:177
 msgid "Afficher la fiche mise en forme (Ctrl+E) ; ne modifie rien"
 msgstr "Show the formatted note (Ctrl+E); changes nothing"
 
-#: src/scrinium/ui/markdown.py:118
+#: src/scrinium/ui/markdown.py:155
 msgid "Gras (Ctrl+B)"
 msgstr "Bold (Ctrl+B)"
 
-#: src/scrinium/ui/markdown.py:119
+#: src/scrinium/ui/markdown.py:156
 msgid "Italique (Ctrl+I)"
 msgstr "Italic (Ctrl+I)"
 
-#: src/scrinium/ui/markdown.py:120
+#: src/scrinium/ui/markdown.py:157
 msgid "Titre (clics successifs : #, ##, ###, aucun)"
 msgstr "Heading (repeated clicks: #, ##, ###, none)"
 
-#: src/scrinium/ui/markdown.py:121
+#: src/scrinium/ui/markdown.py:158
 msgid "Liste à puces"
 msgstr "Bulleted list"
 
-#: src/scrinium/ui/markdown.py:122
+#: src/scrinium/ui/markdown.py:159
 msgid "Liste numérotée"
 msgstr "Numbered list"
 
-#: src/scrinium/ui/markdown.py:123
+#: src/scrinium/ui/markdown.py:160
 msgid "Citation"
 msgstr "Quote"
 
-#: src/scrinium/ui/markdown.py:124
+#: src/scrinium/ui/markdown.py:161
 msgid "Code (dans la ligne)"
 msgstr "Inline code"
 
-#: src/scrinium/ui/markdown.py:125
+#: src/scrinium/ui/markdown.py:162
 msgid "Bloc de code"
 msgstr "Code block"
 
-#: src/scrinium/ui/markdown.py:126
+#: src/scrinium/ui/markdown.py:163
 msgid "Lien"
 msgstr "Link"
 
-#: src/scrinium/ui/markdown.py:124
+#: src/scrinium/ui/markdown.py:164
+msgid "Effacer la mise en forme (sélection ou ligne)"
+msgstr "Clear formatting (selection or line)"
+
+#: src/scrinium/ui/markdown.py:161
 msgid "code"
 msgstr "code"

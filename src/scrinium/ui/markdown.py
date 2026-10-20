@@ -23,8 +23,14 @@ def entourer(ed: QPlainTextEdit, marque: str, exemple: str) -> None:
     n = len(marque)
     if c.hasSelection():
         t = c.selectedText()
+        d, f = c.selectionStart(), c.selectionEnd()
+        brut = c.document().toPlainText()
         if len(t) >= 2 * n and t.startswith(marque) and t.endswith(marque):
             c.insertText(t[n:-n])
+        elif brut[max(0, d - n):d] == marque and brut[f:f + n] == marque:       # marques juste autour de la sélection
+            c.setPosition(f + n)
+            c.setPosition(d - n, QTextCursor.MoveMode.KeepAnchor)
+            c.insertText(t)
         else:
             c.insertText(marque + t + marque)
     else:
@@ -102,6 +108,37 @@ def bloc_code(ed: QPlainTextEdit) -> None:
     ed.setTextCursor(c)
 
 
+_FENCE = re.compile(r"^[ \t]*```.*\n?", re.M)
+_PREFIXE = re.compile(r"^([ \t]*)(?:#{1,6}[ \t]+|[-*+][ \t]+|\d+[.)][ \t]+|>[ \t]?)", re.M)
+_LIEN = re.compile(r"(?<!!)\[([^\]\n]*)\]\([^)\n]*\)")
+_GRAS = re.compile(r"\*\*(?=\S)(.+?)(?<=\S)\*\*|(?<!\w)__(?=\S)(.+?)(?<=\S)__(?!\w)")
+_ITALIQUE = re.compile(r"(?<![*\w])\*(?![\s*])(.+?)(?<![\s*])\*(?![*\w])|(?<![_\w])_(?![\s_])(.+?)(?<![\s_])_(?![_\w])")
+_CODE = re.compile(r"`([^`\n]+)`")
+
+
+def sans_format(texte: str) -> str:
+    """Le texte sans syntaxe Markdown : titres, listes, citations, gras, italique, code, liens, clôtures (le contenu reste)."""
+    texte = _FENCE.sub("", texte)
+    texte = _PREFIXE.sub(r"\1", texte)
+    texte = _LIEN.sub(r"\1", texte)
+    texte = _GRAS.sub(lambda m: m[1] or m[2], texte)
+    texte = _ITALIQUE.sub(lambda m: m[1] or m[2], texte)
+    return _CODE.sub(r"\1", texte)
+
+
+def effacer_format(ed: QPlainTextEdit) -> None:
+    """Retire la mise en forme de la sélection, ou de la ligne courante s'il n'y a pas de sélection."""
+    c = ed.textCursor()
+    c.beginEditBlock()
+    if not c.hasSelection():
+        c.movePosition(QTextCursor.MoveOperation.StartOfBlock)
+        c.movePosition(QTextCursor.MoveOperation.EndOfBlock, QTextCursor.MoveMode.KeepAnchor)
+    t = c.selectedText().replace("\u2029", "\n")
+    c.insertText(sans_format(t))
+    c.endEditBlock()
+    ed.setTextCursor(c)
+
+
 # ---------- interface ----------
 class BarreFormat(QWidget):
     """Rangée de petits boutons de mise en forme + bouton « Aperçu » (bascule édition / lecture)."""
@@ -123,7 +160,8 @@ class BarreFormat(QWidget):
                 ("❝", _("Citation"), lambda: prefixer(self.ed, "> "), ""),
                 ("</>", _("Code (dans la ligne)"), lambda: entourer(self.ed, "`", _("code")), "font-family: monospace;"),
                 ("{ }", _("Bloc de code"), lambda: bloc_code(self.ed), "font-family: monospace;"),
-                ("🔗", _("Lien"), lambda: lien(self.ed), "")):
+                ("🔗", _("Lien"), lambda: lien(self.ed), ""),
+                ("Tx", _("Effacer la mise en forme (sélection ou ligne)"), lambda: effacer_format(self.ed), "")):
             b = QToolButton()
             b.setText(texte)
             b.setToolTip(astuce)
