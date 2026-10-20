@@ -84,7 +84,7 @@ scrinium secours deverrouiller "titre" --cle ~/cle-de-secours.pem
 
 ## Extensions
 
-Scrinium peut être étendu par des plugins. Sept sont livrés avec lui (et avec le `.deb`) : **agenda** (rappels datés, liés ou non à une fiche), **applications** (panneau d'icônes pour lancer Thunderbird, KWrite, LibreOffice…), **OCR** (Tesseract, texte des images jointes), **dictée** (faster-whisper local), **courriel** (envoi d'une fiche par SMTP), **capture et console** (sortie d'une commande dans la fiche, sélection envoyée à Konsole) et **traduction** (TranslateGemma via llama.cpp, sans Ollama). Ils sont
+Scrinium peut être étendu par des plugins. Huit sont livrés avec lui (et avec le `.deb`) : **lecture à voix haute** (une fiche, la sélection ou tout un thème, en français ou en anglais : voix Piper ou espeak-ng ; une fiche verrouillée n'est jamais lue), **agenda** (rappels datés, liés ou non à une fiche), **applications** (panneau d'icônes pour lancer Thunderbird, KWrite, LibreOffice…), **OCR** (Tesseract, texte des images jointes), **dictée** (faster-whisper local), **courriel** (envoi d'une fiche par SMTP), **capture et console** (sortie d'une commande dans la fiche, sélection envoyée à Konsole) et **traduction** (TranslateGemma via llama.cpp, sans Ollama). Ils sont
 **désactivés par défaut** : *Extensions → Gérer les extensions…* les liste et les active un par un, après un
 avertissement (une extension est du code Python qui s'exécute avec les mêmes droits que Scrinium : n'activez que celles
 que vous connaissez). Déposez le dossier d'une extension dans `<dossier de données>/plugins/`, ou installez un paquet qui

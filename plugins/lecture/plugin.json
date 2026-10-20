@@ -1,0 +1,8 @@
+{
+  "titre": "Lecture à voix haute",
+  "version": "0.1",
+  "auteur": "Scrinium",
+  "description": "Lit à voix haute une fiche, la sélection ou toutes les fiches d'un thème, en français ou en anglais : voix Piper (naturelle, hors ligne) ou espeak-ng. Les fiches verrouillées ne sont jamais lues. Rien n'est installé ni téléchargé sans votre accord.",
+  "classe": "LecturePlugin",
+  "api": 1
+}

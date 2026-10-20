@@ -11,7 +11,7 @@ Package: scrinium
 Architecture: all
 Depends: ${python3:Depends}, ${misc:Depends}, python3-pyqt6, python3-pyqt6.qtsvg, python3-cryptography
 Recommends: python3-pip
-Suggests: tesseract-ocr, tesseract-ocr-fra, pulseaudio-utils | alsa-utils
+Suggests: tesseract-ocr, tesseract-ocr-fra, pulseaudio-utils | alsa-utils, espeak-ng
 Description: notes organised by topic, lockable with a password
  Scrinium keeps short notes (numbers, procedures, codes) as cards grouped by
  topic, automatically saved as plain text files.

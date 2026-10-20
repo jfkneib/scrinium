@@ -8,7 +8,7 @@ from pathlib import Path
 import pytest
 
 RACINE = Path(__file__).resolve().parent.parent
-OFFICIELLES = {"agenda", "applications", "capture", "courriel", "dictee", "ocr", "traduction"}
+OFFICIELLES = {"agenda", "applications", "capture", "courriel", "dictee", "lecture", "ocr", "traduction"}
 
 
 @pytest.fixture(scope="module")
