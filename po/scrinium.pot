@@ -19,7 +19,7 @@ msgid "Événement"
 msgstr ""
 
 #: plugins/agenda/__init__.py:42
-#: src/scrinium/ui/fenetre.py:151
+#: src/scrinium/ui/fenetre.py:152
 msgid "Titre"
 msgstr ""
 
@@ -882,7 +882,7 @@ msgstr ""
 
 #: plugins/traduction/__init__.py:53
 #: plugins/traduction/__init__.py:613
-#: src/scrinium/ui/fenetre.py:679
+#: src/scrinium/ui/fenetre.py:710
 msgid "Annuler"
 msgstr ""
 
@@ -1263,8 +1263,8 @@ msgid "Le serveur %s n'est pas local : le texte serait envoyé hors de cette mac
 msgstr ""
 
 #: plugins/traduction/__init__.py:552
-#: src/scrinium/ui/fenetre.py:605
-#: src/scrinium/ui/fenetre.py:614
+#: src/scrinium/ui/fenetre.py:636
+#: src/scrinium/ui/fenetre.py:645
 msgid "Fiche verrouillée"
 msgstr ""
 
@@ -1629,7 +1629,7 @@ msgstr ""
 
 #: src/scrinium/core/exemples.py:11
 #: src/scrinium/core/store.py:154
-#: src/scrinium/ui/fenetre.py:49
+#: src/scrinium/ui/fenetre.py:50
 msgid "Bienvenue"
 msgstr ""
 
@@ -1892,7 +1892,7 @@ msgid "Mot de passe du fichier (facultatif) :"
 msgstr ""
 
 #: src/scrinium/ui/assistant.py:67
-#: src/scrinium/ui/fenetre.py:639
+#: src/scrinium/ui/fenetre.py:670
 msgid "Confirmer le mot de passe :"
 msgstr ""
 
@@ -1901,7 +1901,7 @@ msgid "Un mot de passe sur le fichier ajoute une protection si on vous le vole :
 msgstr ""
 
 #: src/scrinium/ui/assistant.py:75
-#: src/scrinium/ui/fenetre.py:677
+#: src/scrinium/ui/fenetre.py:708
 msgid "Créer le fichier de secours"
 msgstr ""
 
@@ -1918,8 +1918,8 @@ msgid "Ouvrir le dossier"
 msgstr ""
 
 #: src/scrinium/ui/assistant.py:88
-#: src/scrinium/ui/fenetre.py:637
-#: src/scrinium/ui/fenetre.py:641
+#: src/scrinium/ui/fenetre.py:668
+#: src/scrinium/ui/fenetre.py:672
 msgid "Mot de passe"
 msgstr ""
 
@@ -1984,372 +1984,382 @@ msgstr ""
 msgid "Impossible d'activer : %s"
 msgstr ""
 
-#: src/scrinium/ui/fenetre.py:29
+#: src/scrinium/ui/fenetre.py:30
 msgid "★ Toutes les fiches"
 msgstr ""
 
-#: src/scrinium/ui/fenetre.py:39
-#: src/scrinium/ui/fenetre.py:438
-#: src/scrinium/ui/fenetre.py:497
+#: src/scrinium/ui/fenetre.py:40
+#: src/scrinium/ui/fenetre.py:469
+#: src/scrinium/ui/fenetre.py:528
 msgid "Scrinium"
 msgstr ""
 
-#: src/scrinium/ui/fenetre.py:72
+#: src/scrinium/ui/fenetre.py:73
 msgid "Fiche"
 msgstr ""
 
-#: src/scrinium/ui/fenetre.py:73
+#: src/scrinium/ui/fenetre.py:74
 msgid "Nouvelle fiche (Ctrl+N)"
 msgstr ""
 
-#: src/scrinium/ui/fenetre.py:74
-#: src/scrinium/ui/fenetre.py:238
+#: src/scrinium/ui/fenetre.py:75
+#: src/scrinium/ui/fenetre.py:255
 msgid "Thème"
 msgstr ""
 
-#: src/scrinium/ui/fenetre.py:75
-#: src/scrinium/ui/fenetre.py:233
+#: src/scrinium/ui/fenetre.py:76
+#: src/scrinium/ui/fenetre.py:250
 msgid "Nouveau thème"
 msgstr ""
 
-#: src/scrinium/ui/fenetre.py:79
+#: src/scrinium/ui/fenetre.py:80
 msgid "Chercher (Ctrl+F)…"
 msgstr ""
 
-#: src/scrinium/ui/fenetre.py:86
+#: src/scrinium/ui/fenetre.py:87
 msgid "&Fichier"
 msgstr ""
 
-#: src/scrinium/ui/fenetre.py:90
+#: src/scrinium/ui/fenetre.py:91
 msgid "Réduire dans la zone de notification"
 msgstr ""
 
-#: src/scrinium/ui/fenetre.py:94
+#: src/scrinium/ui/fenetre.py:95
 msgid "Lancer au démarrage de la session"
 msgstr ""
 
-#: src/scrinium/ui/fenetre.py:100
+#: src/scrinium/ui/fenetre.py:101
 msgid "&Sécurité"
 msgstr ""
 
-#: src/scrinium/ui/fenetre.py:103
+#: src/scrinium/ui/fenetre.py:104
 msgid "E&xtensions"
 msgstr ""
 
-#: src/scrinium/ui/fenetre.py:106
+#: src/scrinium/ui/fenetre.py:107
 msgid "&Aide"
 msgstr ""
 
-#: src/scrinium/ui/fenetre.py:107
+#: src/scrinium/ui/fenetre.py:108
 msgid "&Langue"
 msgstr ""
 
-#: src/scrinium/ui/fenetre.py:142
+#: src/scrinium/ui/fenetre.py:143
 msgid "Supprimer la fiche"
 msgstr ""
 
-#: src/scrinium/ui/fenetre.py:156
+#: src/scrinium/ui/fenetre.py:157
 msgid "Copier la note"
 msgstr ""
 
-#: src/scrinium/ui/fenetre.py:158
-#: src/scrinium/ui/fenetre.py:566
-#: src/scrinium/ui/fenetre.py:572
+#: src/scrinium/ui/fenetre.py:159
+#: src/scrinium/ui/fenetre.py:597
+#: src/scrinium/ui/fenetre.py:603
 msgid "Verrouiller…"
 msgstr ""
 
-#: src/scrinium/ui/fenetre.py:165
+#: src/scrinium/ui/fenetre.py:166
 msgid "Note"
 msgstr ""
 
-#: src/scrinium/ui/fenetre.py:227
+#: src/scrinium/ui/fenetre.py:244
 msgid "Renommer…"
 msgstr ""
 
-#: src/scrinium/ui/fenetre.py:228
+#: src/scrinium/ui/fenetre.py:245
 msgid "Icône…"
 msgstr ""
 
-#: src/scrinium/ui/fenetre.py:229
+#: src/scrinium/ui/fenetre.py:246
 msgid "Supprimer…"
 msgstr ""
 
-#: src/scrinium/ui/fenetre.py:233
+#: src/scrinium/ui/fenetre.py:250
 msgid "Nom du thème :"
 msgstr ""
 
-#: src/scrinium/ui/fenetre.py:251
+#: src/scrinium/ui/fenetre.py:268
 msgid "Renommer"
 msgstr ""
 
-#: src/scrinium/ui/fenetre.py:251
+#: src/scrinium/ui/fenetre.py:268
 msgid "Nouveau nom :"
 msgstr ""
 
-#: src/scrinium/ui/fenetre.py:267
-#: src/scrinium/ui/fenetre.py:126
+#: src/scrinium/ui/fenetre.py:284
+#: src/scrinium/ui/fenetre.py:127
 msgid "Icône du thème"
 msgstr ""
 
-#: src/scrinium/ui/fenetre.py:268
+#: src/scrinium/ui/fenetre.py:285
 msgid "Nom d'icône du thème d'icônes du système, ex : folder-documents, phone, network-wired, applications-development, view-pim-notes :"
 msgstr ""
 
-#: src/scrinium/ui/fenetre.py:293
-#: src/scrinium/ui/fenetre.py:415
+#: src/scrinium/ui/fenetre.py:310
+#: src/scrinium/ui/fenetre.py:446
 msgid "(sans titre)"
 msgstr ""
 
-#: src/scrinium/ui/fenetre.py:426
+#: src/scrinium/ui/fenetre.py:457
 msgid "● modification en cours…"
 msgstr ""
 
-#: src/scrinium/ui/fenetre.py:465
+#: src/scrinium/ui/fenetre.py:496
 msgid "Extension désactivée"
 msgstr ""
 
-#: src/scrinium/ui/fenetre.py:478
+#: src/scrinium/ui/fenetre.py:509
 msgid "Langue"
 msgstr ""
 
-#: src/scrinium/ui/fenetre.py:478
+#: src/scrinium/ui/fenetre.py:509
 msgid "Langue modifiée : redémarrez Scrinium pour l'appliquer."
 msgstr ""
 
-#: src/scrinium/ui/fenetre.py:499
+#: src/scrinium/ui/fenetre.py:530
 msgid "Ouvrir Scrinium"
 msgstr ""
 
-#: src/scrinium/ui/fenetre.py:500
+#: src/scrinium/ui/fenetre.py:531
 msgid "Nouvelle fiche"
 msgstr ""
 
-#: src/scrinium/ui/fenetre.py:502
-#: src/scrinium/ui/fenetre.py:99
+#: src/scrinium/ui/fenetre.py:533
+#: src/scrinium/ui/fenetre.py:100
 msgid "Quitter"
 msgstr ""
 
-#: src/scrinium/ui/fenetre.py:628
-#: src/scrinium/ui/fenetre.py:624
+#: src/scrinium/ui/fenetre.py:659
+#: src/scrinium/ui/fenetre.py:655
 msgid "Mot de passe oublié : le fichier de secours permettra de rouvrir la fiche."
 msgstr ""
 
-#: src/scrinium/ui/fenetre.py:633
-#: src/scrinium/ui/fenetre.py:639
-#: src/scrinium/ui/fenetre.py:646
+#: src/scrinium/ui/fenetre.py:664
+#: src/scrinium/ui/fenetre.py:670
+#: src/scrinium/ui/fenetre.py:677
 msgid "Verrouiller"
 msgstr ""
 
-#: src/scrinium/ui/fenetre.py:633
+#: src/scrinium/ui/fenetre.py:664
 msgid "Mot de passe (4 caractères minimum) :"
 msgstr ""
 
-#: src/scrinium/ui/fenetre.py:674
+#: src/scrinium/ui/fenetre.py:705
 msgid "Avant de verrouiller : voulez-vous créer un fichier de secours ?"
 msgstr ""
 
-#: src/scrinium/ui/fenetre.py:675
+#: src/scrinium/ui/fenetre.py:706
 msgid "Si vous oubliez le mot de passe d'une fiche, le fichier de secours permet de la rouvrir. Sans lui, une fiche dont le mot de passe est oublié est perdue pour toujours."
 msgstr ""
 
-#: src/scrinium/ui/fenetre.py:678
+#: src/scrinium/ui/fenetre.py:709
 msgid "Verrouiller sans fichier de secours"
 msgstr ""
 
-#: src/scrinium/ui/fenetre.py:733
-#: src/scrinium/ui/fenetre.py:116
+#: src/scrinium/ui/fenetre.py:764
+#: src/scrinium/ui/fenetre.py:117
 msgid "À propos"
 msgstr ""
 
-#: src/scrinium/ui/fenetre.py:101
+#: src/scrinium/ui/fenetre.py:102
 msgid "Fichier de secours…"
 msgstr ""
 
-#: src/scrinium/ui/fenetre.py:102
+#: src/scrinium/ui/fenetre.py:103
 msgid "Rouvrir une fiche avec le fichier de secours…"
 msgstr ""
 
-#: src/scrinium/ui/fenetre.py:104
+#: src/scrinium/ui/fenetre.py:105
 msgid "Gérer les extensions…"
 msgstr ""
 
-#: src/scrinium/ui/fenetre.py:110
+#: src/scrinium/ui/fenetre.py:111
 msgid "Automatique"
 msgstr ""
 
-#: src/scrinium/ui/fenetre.py:125
+#: src/scrinium/ui/fenetre.py:126
 msgid "Renommer le thème"
 msgstr ""
 
-#: src/scrinium/ui/fenetre.py:127
-#: src/scrinium/ui/fenetre.py:280
+#: src/scrinium/ui/fenetre.py:128
+#: src/scrinium/ui/fenetre.py:297
 msgid "Supprimer le thème"
 msgstr ""
 
-#: src/scrinium/ui/fenetre.py:238
+#: src/scrinium/ui/fenetre.py:255
 msgid "Ce thème existe déjà."
 msgstr ""
 
-#: src/scrinium/ui/fenetre.py:295
+#: src/scrinium/ui/fenetre.py:312
 msgid "(verrouillée)"
 msgstr ""
 
-#: src/scrinium/ui/fenetre.py:347
+#: src/scrinium/ui/fenetre.py:378
 msgid ""
 "Fiche verrouillée.\n"
 "\n"
 "Cliquer sur « Déverrouiller… » (ou double-clic sur la fiche) et saisir le mot de passe."
 msgstr ""
 
-#: src/scrinium/ui/fenetre.py:466
+#: src/scrinium/ui/fenetre.py:497
 msgid ""
 "L'extension « %(nom)s » a été désactivée après des erreurs répétées :\n"
 "%(erreur)s"
 msgstr ""
 
-#: src/scrinium/ui/fenetre.py:494
+#: src/scrinium/ui/fenetre.py:525
 msgid "Pas de zone de notification sur ce bureau."
 msgstr ""
 
-#: src/scrinium/ui/fenetre.py:605
+#: src/scrinium/ui/fenetre.py:636
 msgid "Mot de passe de « %s » :"
 msgstr ""
 
-#: src/scrinium/ui/fenetre.py:626
+#: src/scrinium/ui/fenetre.py:657
 msgid "Pas de fichier de secours : mot de passe oublié = fiche perdue."
 msgstr ""
 
-#: src/scrinium/ui/fenetre.py:629
+#: src/scrinium/ui/fenetre.py:660
 msgid "Verrouiller la fiche"
 msgstr ""
 
-#: src/scrinium/ui/fenetre.py:637
+#: src/scrinium/ui/fenetre.py:668
 msgid "Trop court (4 caractères minimum)."
 msgstr ""
 
-#: src/scrinium/ui/fenetre.py:641
+#: src/scrinium/ui/fenetre.py:672
 msgid "Les deux saisies sont différentes, fiche non verrouillée."
 msgstr ""
 
-#: src/scrinium/ui/fenetre.py:654
-#: src/scrinium/ui/fenetre.py:662
-#: src/scrinium/ui/fenetre.py:570
+#: src/scrinium/ui/fenetre.py:685
+#: src/scrinium/ui/fenetre.py:693
+#: src/scrinium/ui/fenetre.py:601
 msgid "Retirer le mot de passe"
 msgstr ""
 
-#: src/scrinium/ui/fenetre.py:655
+#: src/scrinium/ui/fenetre.py:686
 msgid "Le texte et les images de la fiche seront de nouveau stockés en clair. Continuer ?"
 msgstr ""
 
-#: src/scrinium/ui/fenetre.py:703
+#: src/scrinium/ui/fenetre.py:734
 msgid "Sélectionnez d'abord une fiche verrouillée."
 msgstr ""
 
-#: src/scrinium/ui/fenetre.py:711
+#: src/scrinium/ui/fenetre.py:742
 msgid "Mot de passe du fichier de secours :"
 msgstr ""
 
-#: src/scrinium/ui/fenetre.py:720
+#: src/scrinium/ui/fenetre.py:751
 msgid "Fiche rouverte. La remettre en clair (retirer le mot de passe) ?"
 msgstr ""
 
-#: src/scrinium/ui/fenetre.py:726
+#: src/scrinium/ui/fenetre.py:757
 msgid "Fiche toujours verrouillée."
 msgstr ""
 
-#: src/scrinium/ui/fenetre.py:281
+#: src/scrinium/ui/fenetre.py:298
 msgid ""
 "Mettre « %(nom)s » et ses %(n)d fiche(s) à la corbeille ?\n"
 "(%(dossier)s)"
 msgstr ""
 
-#: src/scrinium/ui/fenetre.py:349
+#: src/scrinium/ui/fenetre.py:380
 msgid "Verrouillée"
 msgstr ""
 
-#: src/scrinium/ui/fenetre.py:352
+#: src/scrinium/ui/fenetre.py:383
 msgid "Verrouillée (ouverte)"
 msgstr ""
 
-#: src/scrinium/ui/fenetre.py:352
-#: src/scrinium/ui/fenetre.py:447
+#: src/scrinium/ui/fenetre.py:383
+#: src/scrinium/ui/fenetre.py:478
 msgid "✔ Enregistré"
 msgstr ""
 
-#: src/scrinium/ui/fenetre.py:356
+#: src/scrinium/ui/fenetre.py:387
 msgid "Aucune fiche : « Fiche » (Ctrl+N)"
 msgstr ""
 
-#: src/scrinium/ui/fenetre.py:380
+#: src/scrinium/ui/fenetre.py:411
 msgid "Ajouté à « %(theme)s / %(fiche)s »"
 msgstr ""
 
-#: src/scrinium/ui/fenetre.py:415
+#: src/scrinium/ui/fenetre.py:446
 msgid "Mettre la fiche « %s » à la corbeille ?"
 msgstr ""
 
-#: src/scrinium/ui/fenetre.py:484
+#: src/scrinium/ui/fenetre.py:515
 msgid "Démarrage de la session"
 msgstr ""
 
-#: src/scrinium/ui/fenetre.py:568
+#: src/scrinium/ui/fenetre.py:599
 msgid "Déverrouiller…"
 msgstr ""
 
-#: src/scrinium/ui/fenetre.py:582
+#: src/scrinium/ui/fenetre.py:613
 msgid "✔ Note copiée dans le presse-papiers"
 msgstr ""
 
-#: src/scrinium/ui/fenetre.py:611
+#: src/scrinium/ui/fenetre.py:642
 msgid "Mot de passe incorrect."
 msgstr ""
 
-#: src/scrinium/ui/fenetre.py:630
+#: src/scrinium/ui/fenetre.py:661
 msgid ""
 "Le texte et les images de la fiche seront chiffrés avec un mot de passe (le titre reste visible).\n"
 "\n"
 msgstr ""
 
-#: src/scrinium/ui/fenetre.py:692
+#: src/scrinium/ui/fenetre.py:723
 msgid ""
 "Un fichier de secours est déjà actif.\n"
 "\n"
 "En créer un nouveau ? Il servira pour les fiches verrouillées à partir de maintenant ; les fiches déjà verrouillées ne s'ouvriront qu'avec l'ancien."
 msgstr ""
 
-#: src/scrinium/ui/fenetre.py:735
+#: src/scrinium/ui/fenetre.py:766
 msgid "Fiches rangées par thème, verrouillables (AES-256-GCM)."
 msgstr ""
 
-#: src/scrinium/ui/fenetre.py:388
+#: src/scrinium/ui/fenetre.py:198
+#: src/scrinium/ui/markdown.py:118
+msgid "gras"
+msgstr ""
+
+#: src/scrinium/ui/fenetre.py:199
+#: src/scrinium/ui/markdown.py:119
+msgid "italique"
+msgstr ""
+
+#: src/scrinium/ui/fenetre.py:419
 msgid "✔ Images mises à jour"
 msgstr ""
 
-#: src/scrinium/ui/fenetre.py:441
+#: src/scrinium/ui/fenetre.py:472
 msgid "✔ Enregistré à"
 msgstr ""
 
-#: src/scrinium/ui/fenetre.py:484
+#: src/scrinium/ui/fenetre.py:515
 msgid "Impossible de modifier le lancement automatique : %s"
 msgstr ""
 
-#: src/scrinium/ui/fenetre.py:614
+#: src/scrinium/ui/fenetre.py:645
 msgid "Lecture impossible : %s"
 msgstr ""
 
-#: src/scrinium/ui/fenetre.py:646
+#: src/scrinium/ui/fenetre.py:677
 msgid "Fiche non verrouillée : %s"
 msgstr ""
 
-#: src/scrinium/ui/fenetre.py:662
+#: src/scrinium/ui/fenetre.py:693
 msgid "Verrou conservé : %s"
 msgstr ""
 
-#: src/scrinium/ui/fenetre.py:717
+#: src/scrinium/ui/fenetre.py:748
 msgid "Impossible de rouvrir la fiche : %s"
 msgstr ""
 
-#: src/scrinium/ui/fenetre.py:353
+#: src/scrinium/ui/fenetre.py:384
 msgid "modifié le"
 msgstr ""
 
@@ -2462,4 +2472,56 @@ msgstr ""
 
 #: src/scrinium/ui/images.py:312
 msgid "recadrée"
+msgstr ""
+
+#: src/scrinium/ui/markdown.py:82
+msgid "texte"
+msgstr ""
+
+#: src/scrinium/ui/markdown.py:138
+msgid "Aperçu"
+msgstr ""
+
+#: src/scrinium/ui/markdown.py:139
+msgid "Afficher la fiche mise en forme (Ctrl+E) ; ne modifie rien"
+msgstr ""
+
+#: src/scrinium/ui/markdown.py:118
+msgid "Gras (Ctrl+B)"
+msgstr ""
+
+#: src/scrinium/ui/markdown.py:119
+msgid "Italique (Ctrl+I)"
+msgstr ""
+
+#: src/scrinium/ui/markdown.py:120
+msgid "Titre (clics successifs : #, ##, ###, aucun)"
+msgstr ""
+
+#: src/scrinium/ui/markdown.py:121
+msgid "Liste à puces"
+msgstr ""
+
+#: src/scrinium/ui/markdown.py:122
+msgid "Liste numérotée"
+msgstr ""
+
+#: src/scrinium/ui/markdown.py:123
+msgid "Citation"
+msgstr ""
+
+#: src/scrinium/ui/markdown.py:124
+msgid "Code (dans la ligne)"
+msgstr ""
+
+#: src/scrinium/ui/markdown.py:125
+msgid "Bloc de code"
+msgstr ""
+
+#: src/scrinium/ui/markdown.py:126
+msgid "Lien"
+msgstr ""
+
+#: src/scrinium/ui/markdown.py:124
+msgid "code"
 msgstr ""
