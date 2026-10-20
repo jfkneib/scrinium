@@ -119,7 +119,7 @@ DESCRIPTIONS = {
            [_("Qualité correcte pour des textes simples ou techniques, mais il se trompe sur les nuances, les accords et le style "
               "littéraire (essai réel : « son détresse », « vague de confusion » pour « shiver of incomprehension »).")]),
     "12b": ([_("Nettement plus fidèle aux nuances, aux accords et au style : la phrase littéraire d'essai est traduite correctement.")],
-            [_("Lourd : 7,30 Go à télécharger, et au moins 8 à 9 Go de mémoire libre (carte graphique ou mémoire vive) : estimation."),
+            [_("Lourd : 7,30 Go à télécharger ; mémoire : jusqu'à 13,6 Go sur processeur seul, environ 8 Go avec une carte graphique de 8 Go (mesuré)."),
              _("Beaucoup plus lent : environ 10 secondes pour deux phrases avec une carte de 8 Go, 20 secondes sur le processeur seul. "
                "Rapide seulement avec une grande carte graphique (12 Go ou plus)."),
              _("Déconseillé sur une machine modeste.")]),
@@ -568,6 +568,14 @@ class TraductionPlugin(Plugin):
             modele = self.telecharger_modele(choix)
             if not modele:
                 return None
+        decision = self._verifier_memoire(choix, modele)         # assez de mémoire LIBRE maintenant ? (pas seulement au total)
+        if decision == "annuler":
+            return None
+        if decision == "rapide":                                  # l'utilisateur préfère le modèle rapide : mêmes vérifications pour lui
+            choix = "4b"
+            modele = logique.trouver_modele("", self.ctx.dossier_donnees, "4b") or self.telecharger_modele("4b")
+            if not modele or self._verifier_memoire("4b", modele) == "annuler":
+                return None
         gpu = r.get("gpu", "")
 
         def fonction(morceau, annule):
@@ -576,6 +584,38 @@ class TraductionPlugin(Plugin):
         return fonction
 
     # ---------- téléchargement (toujours avec accord) ----------
+    def _verifier_memoire(self, choix, modele) -> str:
+        """Avant de lancer le moteur : y a-t-il assez de mémoire DISPONIBLE ? « ok » (continuer), « rapide » (passer au 4B) ou « annuler ».
+        « danger » : moins que la mémoire non récupérable (arrêts forcés possibles, surtout sans swap) ; « juste » : ça tient mais plus
+        lentement. Rien à vérifier si le serveur tourne déjà avec ce modèle, ou si la mémoire disponible est inconnue."""
+        if self.serveur.vivant() and self.serveur.config and self.serveur.config[1] == modele:
+            return "ok"
+        disponible = logique.memoire_disponible()
+        besoin = logique.besoin_memoire(choix, modele, logique.gpus_nvidia(), logique.avx2_present())
+        verdict = logique.diagnostic_memoire(disponible, besoin)
+        if verdict == "ok":
+            return "ok"
+        go = lambda o: f"{o / 1024 ** 3:.1f}".replace(".", ",") + " Go"
+        valeurs = {"d": go(disponible), "m": _libelle_modele(choix), "a": go(besoin[0]), "r": go(besoin[1])}
+        if verdict == "danger":
+            suite = (_("Cette machine n'a pas de mémoire d'échange (swap) : le système pourrait fermer d'autres programmes de force.")
+                     if logique.swap_present() is False else _("La machine risque de ralentir très fortement."))
+            texte = _("Il n'y a que %(d)s de mémoire disponible ; « %(m)s » en demande au moins %(a)s (jusqu'à %(r)s pour aller vite).") % valeurs + "\n\n" + suite
+        else:
+            texte = _("%(d)s de mémoire disponible : « %(m)s » tiendra mais ira plus lentement (il en faut %(r)s pour aller vite). "
+                      "Fermer quelques programmes aidera.") % valeurs
+        m = QMessageBox(_parent())
+        m.setIcon(QMessageBox.Icon.Warning)
+        m.setWindowTitle(_("Mémoire insuffisante") if verdict == "danger" else _("Mémoire un peu juste"))
+        m.setText(texte)
+        rapide = m.addButton(_("Utiliser le modèle rapide (4B)"), QMessageBox.ButtonRole.ActionRole) if choix != "4b" else None
+        continuer = m.addButton(_("Continuer quand même"), QMessageBox.ButtonRole.AcceptRole)
+        annuler = m.addButton(_("Annuler"), QMessageBox.ButtonRole.RejectRole)
+        m.setDefaultButton((rapide or annuler) if verdict == "danger" else continuer)
+        m.exec()
+        clic = m.clickedButton()
+        return "rapide" if rapide is not None and clic is rapide else ("ok" if clic is continuer else "annuler")
+
     def modele_choisi(self):
         """« 4b », « 12b », « perso » ou None si l'utilisateur n'a pas encore choisi. Reprend une ancienne configuration (chemin seul)."""
         r = self.ctx.reglages

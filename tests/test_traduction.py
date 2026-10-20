@@ -969,3 +969,165 @@ def test_notification_apres_un_telechargement_reussi(fen, monkeypatch, tmp_path)
     monkeypatch.setattr(mod(), "en_arriere_plan", lambda *a, **k: (None, "annulé"))
     fen.statusBar().clearMessage()
     assert plugin(fen).telecharger_modele("12b") is None and fen.statusBar().currentMessage() == ""             # annulé : pas de fausse bonne nouvelle
+
+
+# ---------- mémoire : on vérifie la mémoire LIBRE avant de lancer, pas seulement le total ----------
+def test_lecture_de_la_memoire_disponible_et_du_swap(tmp_path):
+    info = tmp_path / "meminfo"
+    info.write_text("MemTotal:       16000000 kB\nMemFree:          500000 kB\nMemAvailable:    6200000 kB\nSwapTotal:             0 kB\n")
+    assert lg.memoire_disponible(str(info)) == 6_200_000 * 1024 and lg.swap_present(str(info)) is False
+    info.write_text("MemAvailable:    1000 kB\nSwapTotal:       2048 kB\n")
+    assert lg.swap_present(str(info)) is True
+    assert lg.swap_present(str(tmp_path / "absent")) is None                                       # illisible : inconnu, on ne bloque rien
+    assert lg.diagnostic_memoire(None, (1, 2)) == "ok"
+    cpu = tmp_path / "cpuinfo"
+    cpu.write_text("processor : 0\nflags : fpu sse avx avx2 fma\n")
+    assert lg.avx2_present(str(cpu)) is True
+    cpu.write_text("processor : 0\nflags : fpu sse avx f16c\n")
+    assert lg.avx2_present(str(cpu)) is False and lg.avx2_present(str(tmp_path / "absent")) is None
+
+
+def test_besoin_de_memoire_conforme_aux_mesures():
+    mo = 1048576
+    a4, r4 = lg.besoin_memoire("4b", None, (), True)
+    a12, r12 = lg.besoin_memoire("12b", None, (), True)
+    assert (a4 // mo, r4 // mo) == (2100, 4500) and (a12 // mo, r12 // mo) == (6600, 13600)             # mesures du 2026-10-20
+    assert lg.besoin_memoire("12b", None, [{"libre": int(6.7 * 1024 ** 3)}], True)[1] // mo in range(7600, 8100)   # carte : mesuré 7 954 Mo
+    assert lg.besoin_memoire("12b", None, [{"libre": int(6.7 * 1024 ** 3)}], True)[0] // mo < 1000             # mesuré 749 Mo
+    assert lg.besoin_memoire("4b", None, (), False)[1] == int(4500 * mo * 0.7)                              # sans AVX2 : 3,1 Go (mesuré sur un i5 de 2012)
+    grosse = lg.besoin_memoire("12b", None, [{"libre": 48 * 1024 ** 3}], True)
+    assert grosse[1] >= 0.35 * 13600 * mo - 1 and grosse[0] >= 0.12 * 6600 * mo - 1                           # jamais zéro, même avec une énorme carte
+
+
+def test_besoin_d_un_fichier_personnel(tmp_path):
+    gguf = tmp_path / "p.gguf"
+    gguf.write_bytes(b"\0" * 1_000_000)
+    anonyme, residente = lg.besoin_memoire("perso", str(gguf), (), True)
+    assert anonyme == 900_000 and residente == 1_860_000                                                      # mêmes proportions que les mesures
+    assert lg.besoin_memoire("perso", "/inexistant.gguf", (), True)[1] > 4 * 1024 ** 3                         # fichier introuvable : prudence
+
+
+def test_trois_niveaux_de_diagnostic():
+    go = 1024 ** 3
+    besoin = lg.besoin_memoire("12b", None, (), True)                                                          # 6,4 Go non récupérables, 13,3 Go pour aller vite
+    assert lg.diagnostic_memoire(6 * go, besoin) == "danger"                                                    # l'Inspiron d'hier : 6 Go libres
+    assert lg.diagnostic_memoire(11 * go, besoin) == "juste" and lg.diagnostic_memoire(20 * go, besoin) == "ok"
+    assert lg.diagnostic_memoire(int(3.9 * go), lg.besoin_memoire("4b", None, (), False)) == "ok"               # l'OptiPlex (3,9 Go libres) fait tourner le 4B
+
+
+def preparer_memoire(fen, monkeypatch, disponible, choix="12b", swap=False, gpus=()):
+    """Fenêtre avec les deux fichiers de modèle factices et une mémoire disponible imposée."""
+    r = fen.plugins.actifs["traduction"][1].reglages
+    r.set("modele_choix", choix)
+    for c in ("4b", "12b"):
+        poser_modele(fen, c)
+    monkeypatch.setattr(mod().logique, "memoire_disponible", lambda *a, **k: disponible)
+    monkeypatch.setattr(mod().logique, "swap_present", lambda *a, **k: swap)
+    monkeypatch.setattr(mod().logique, "gpus_nvidia", lambda: list(gpus))
+    monkeypatch.setattr(mod().logique, "avx2_present", lambda *a, **k: True)
+
+
+def cliquer(monkeypatch, bouton):
+    """Remplace l'ouverture de la boîte par un clic sur le bouton dont le texte contient `bouton` ; garde ce qui a été montré."""
+    vu = {}
+
+    def faux_exec(self):
+        vu.update(texte=self.text(), titre=self.windowTitle(), boutons=[b.text() for b in self.buttons()],
+                  defaut=self.defaultButton().text() if self.defaultButton() else "")
+        if bouton:
+            next(b for b in self.buttons() if bouton in b.text()).click()
+        return 0
+    monkeypatch.setattr(mod().QMessageBox, "exec", faux_exec)
+    return vu
+
+
+def modele_demarre(faux):
+    """Nom du fichier de modèle avec lequel le dernier faux serveur a été lancé."""
+    argv = [json.loads(p.read_text())["argv"] for p in sorted(faux.dir.glob("argv-*.json"), key=lambda p: p.stat().st_mtime)]
+    return Path(argv[-1][argv[-1].index("-m") + 1]).name if argv else None
+
+
+def test_assez_de_memoire_aucune_question(fen, faux, monkeypatch):
+    preparer_memoire(fen, monkeypatch, 40 * GO)
+    fen.plugins.actifs["traduction"][1].reglages.set("exe", faux.exe)
+    vu = cliquer(monkeypatch, None)
+    f = plugin(fen)._preparer_llama("fr", "en", None)
+    assert callable(f) and vu == {}                                                                          # aucune boîte
+
+
+def test_danger_et_choix_du_modele_rapide(fen, faux, monkeypatch):
+    preparer_memoire(fen, monkeypatch, 6 * GO)                                                               # type Inspiron : 6 Go libres, pas de swap
+    fen.plugins.actifs["traduction"][1].reglages.set("exe", faux.exe)
+    vu = cliquer(monkeypatch, "modèle rapide")
+    f = plugin(fen)._preparer_llama("fr", "en", None)
+    assert "6,0 Go de mémoire disponible" in vu["texte"] and "Meilleur (12B)" in vu["texte"] and "au moins 6,4 Go" in vu["texte"]
+    assert "jusqu'à 13,3 Go" in vu["texte"] and "pas de mémoire d'échange" in vu["texte"] and "fermer d'autres programmes de force" in vu["texte"]
+    assert vu["titre"] == "Mémoire insuffisante" and vu["defaut"] == "Utiliser le modèle rapide (4B)"       # le choix prudent est le choix par défaut
+    assert any("Continuer quand même" in b for b in vu["boutons"]) and any("Annuler" in b for b in vu["boutons"])
+    f("Bonjour", lambda: False)                                                                              # le moteur démarre : avec quel fichier ?
+    assert modele_demarre(faux) == lg.MODELES["4b"]["nom"]                                                   # le modèle RAPIDE, pas le 12B
+
+
+def test_danger_continuer_quand_meme_garde_le_12b(fen, faux, monkeypatch):
+    preparer_memoire(fen, monkeypatch, 6 * GO)
+    fen.plugins.actifs["traduction"][1].reglages.set("exe", faux.exe)
+    cliquer(monkeypatch, "Continuer quand même")
+    f = plugin(fen)._preparer_llama("fr", "en", None)
+    f("Bonjour", lambda: False)
+    assert modele_demarre(faux) == lg.MODELES["12b"]["nom"]                                                  # l'utilisateur a choisi en connaissance de cause
+
+
+def test_danger_annuler_ne_lance_rien(fen, faux, monkeypatch):
+    preparer_memoire(fen, monkeypatch, 6 * GO)
+    fen.plugins.actifs["traduction"][1].reglages.set("exe", faux.exe)
+    cliquer(monkeypatch, "Annuler")
+    assert plugin(fen)._preparer_llama("fr", "en", None) is None and modele_demarre(faux) is None and not plugin(fen).serveur.vivant()
+
+
+def test_avec_swap_le_message_parle_de_ralentissement(fen, faux, monkeypatch):
+    preparer_memoire(fen, monkeypatch, 6 * GO, swap=True)
+    fen.plugins.actifs["traduction"][1].reglages.set("exe", faux.exe)
+    vu = cliquer(monkeypatch, "Annuler")
+    plugin(fen)._preparer_llama("fr", "en", None)
+    assert "ralentir très fortement" in vu["texte"] and "mémoire d'échange" not in vu["texte"]
+
+
+def test_memoire_juste_previent_sans_alarme(fen, faux, monkeypatch):
+    preparer_memoire(fen, monkeypatch, 11 * GO)                                                              # ça tient (6,4 Go) mais pas pour aller vite (13,3 Go)
+    fen.plugins.actifs["traduction"][1].reglages.set("exe", faux.exe)
+    vu = cliquer(monkeypatch, "Continuer quand même")
+    f = plugin(fen)._preparer_llama("fr", "en", None)
+    assert callable(f) and vu["titre"] == "Mémoire un peu juste" and "tiendra mais ira plus lentement" in vu["texte"]
+    assert vu["defaut"] == "Continuer quand même" and "force" not in vu["texte"]                            # pas d'alarme sur un risque qui n'existe pas
+
+
+def test_le_modele_rapide_n_a_pas_d_option_rapide(fen, faux, monkeypatch):
+    preparer_memoire(fen, monkeypatch, 1 * GO, choix="4b")                                                    # même le 4B ne tient pas
+    fen.plugins.actifs["traduction"][1].reglages.set("exe", faux.exe)
+    vu = cliquer(monkeypatch, "Annuler")
+    assert plugin(fen)._preparer_llama("fr", "en", None) is None
+    assert not any("rapide" in b for b in vu["boutons"]) and vu["defaut"] == "Annuler"
+
+
+def test_pas_de_verification_si_le_serveur_tourne_deja_avec_ce_modele(fen, faux, monkeypatch):
+    preparer_memoire(fen, monkeypatch, 40 * GO)
+    fen.plugins.actifs["traduction"][1].reglages.set("exe", faux.exe)
+    f = plugin(fen)._preparer_llama("fr", "en", None)
+    f("Bonjour", lambda: False)                                                                              # le serveur 12B tourne
+    monkeypatch.setattr(mod().logique, "memoire_disponible", lambda *a, **k: 1 * GO)                         # la mémoire s'effondre ensuite…
+    vu = cliquer(monkeypatch, None)
+    assert callable(plugin(fen)._preparer_llama("fr", "en", None)) and vu == {}                               # …mais rien de nouveau n'est chargé : pas d'alarme inutile
+
+
+def test_memoire_inconnue_ne_bloque_rien(fen, faux, monkeypatch):
+    preparer_memoire(fen, monkeypatch, None)
+    fen.plugins.actifs["traduction"][1].reglages.set("exe", faux.exe)
+    vu = cliquer(monkeypatch, None)
+    assert callable(plugin(fen)._preparer_llama("fr", "en", None)) and vu == {}
+
+
+def test_une_grosse_carte_libre_evite_l_alerte(fen, faux, monkeypatch):
+    preparer_memoire(fen, monkeypatch, 9 * GO, gpus=[{"nom": "X", "total": 12 * GO, "libre": 11 * GO}])    # 12B sur carte de 12 Go : peu de mémoire vive nécessaire
+    fen.plugins.actifs["traduction"][1].reglages.set("exe", faux.exe)
+    vu = cliquer(monkeypatch, None)
+    assert callable(plugin(fen)._preparer_llama("fr", "en", None)) and vu == {}
