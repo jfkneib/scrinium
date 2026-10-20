@@ -14,16 +14,16 @@ Qt interface (PyQt6): Linux, Windows, macOS (Windows and macOS packages: coming)
 
 ## Installation
 
-**Debian / Ubuntu**: download `scrinium_0.1.0_all.deb` from the [**Releases page**](https://github.com/jfkneib/scrinium/releases/latest) (section *Assets*, at the bottom), or directly:
+**Debian / Ubuntu**: download `scrinium_0.2.0_all.deb` from the [**Releases page**](https://github.com/jfkneib/scrinium/releases/latest) (section *Assets*, at the bottom), or directly:
 
 ```bash
-wget https://github.com/jfkneib/scrinium/releases/download/v0.1.0/scrinium_0.1.0_all.deb
+wget https://github.com/jfkneib/scrinium/releases/download/v0.2.0/scrinium_0.2.0_all.deb
 ```
 
 then install it:
 
 ```bash
-sudo apt install ./scrinium_0.1.0_all.deb
+sudo apt install ./scrinium_0.2.0_all.deb
 ```
 
 To check the download, also get `SHA256SUMS` from the same page and run `sha256sum -c SHA256SUMS`.
@@ -86,10 +86,10 @@ scrinium rescue unlock "title" --key ~/rescue-file.pem    # puts the note back i
 
 ## Extensions
 
-Scrinium can be extended with plugins (reminders, OCR, dictation… are planned as plugins). They are **disabled by default**:
+Scrinium can be extended with plugins. Five are shipped with it (and with the `.deb`): **OCR** (Tesseract, text of attached images), **dictation** (local faster-whisper), **email** (send a note by SMTP), **capture and console** (run a command into a note, send the selection to Konsole) and **translation** (TranslateGemma through llama.cpp, no Ollama needed). They are **disabled by default**:
 *Extensions → Manage extensions…* lists them and enables them one by one, after a warning (an extension is Python code
 running with the same rights as Scrinium: only enable ones you trust). Drop an extension folder into
-`<data folder>/plugins/`, or install a package that provides one. A working example is in [`plugins/hello`](plugins/hello);
+`<data folder>/plugins/`, or install a package that provides one. Each one lists the optional programs it needs (Tesseract, faster-whisper, llama.cpp…) and asks before installing or downloading anything; nothing leaves your machine except the email you send. A working example is in [`plugins/hello`](plugins/hello);
 the API is documented in [`docs/plugins.md`](docs/plugins.md). A faulty extension never prevents Scrinium from starting
 and is disabled automatically after repeated errors.
 
@@ -117,8 +117,9 @@ check that every string is translated and that placeholders such as `%s` match).
 changing the code:
 
 ```bash
-xgettext --language=Python --keyword=_ --from-code=UTF-8 --sort-by-file -o po/scrinium.pot $(git ls-files 'src/*.py')
-msgmerge -U po/en.po po/scrinium.pot
+python3 outils/i18n.py manquantes manquantes.json   # strings without translation (JSON {french: ""})
+python3 outils/i18n.py fusionner traductions.json    # merge them, rewrites po/en.po and po/scrinium.pot
+python3 outils/i18n.py verifier                      # fails if a string or a %s placeholder is missing
 ```
 
 ## Name and icon
