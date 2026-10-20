@@ -8,12 +8,13 @@
   téléchargement sans votre accord, avec taille et provenance affichées. (Argos Translate a été retiré : il exige PyTorch.)
 """
 import threading
+from pathlib import Path
 
 from PyQt6.QtCore import QEventLoop, QObject, QUrl, pyqtSignal
 from PyQt6.QtGui import QDesktopServices
 from PyQt6.QtWidgets import (QApplication, QCheckBox, QComboBox, QDialog, QDialogButtonBox, QFileDialog, QFormLayout, QHBoxLayout,
                              QLabel, QLineEdit, QMessageBox, QPlainTextEdit, QProgressBar, QProgressDialog, QPushButton,
-                             QSpinBox, QVBoxLayout)
+                             QRadioButton, QSpinBox, QVBoxLayout)
 
 from scrinium.core.plugins import Plugin
 from scrinium.i18n import _
@@ -84,6 +85,85 @@ def en_arriere_plan(titre: str, message: str, fonction, annulable: bool = False,
     return sortie.get("res"), sortie.get("err", "")
 
 
+# Avantages et inconvénients montrés au choix du modèle. Chiffres MESURÉS le 2026-10-20 (RTX 3070 8 Go, processeur 16 cœurs) :
+# 4B ≈ 106 mots-morceaux/s sur la carte, ≈ 10/s sur le processeur ; 12B ≈ 7/s (carte de 8 Go : modèle réparti), ≈ 3/s sur le processeur.
+DESCRIPTIONS = {
+    "4b": ([_("Léger : 2,49 Go à télécharger, environ 4,4 Go de mémoire."),
+            _("Très rapide : moins d'une seconde par paragraphe avec une carte graphique, 3 à 5 secondes sur un processeur récent."),
+            _("Convient aux machines modestes.")],
+           [_("Qualité correcte pour des textes simples ou techniques, mais il se trompe sur les nuances, les accords et le style "
+              "littéraire (essai réel : « son détresse », « vague de confusion » pour « shiver of incomprehension »).")]),
+    "12b": ([_("Nettement plus fidèle aux nuances, aux accords et au style : la phrase littéraire d'essai est traduite correctement.")],
+            [_("Lourd : 7,30 Go à télécharger, et au moins 8 à 9 Go de mémoire libre (carte graphique ou mémoire vive) : estimation."),
+             _("Beaucoup plus lent : environ 10 secondes pour deux phrases avec une carte de 8 Go, 20 secondes sur le processeur seul. "
+               "Rapide seulement avec une grande carte graphique (12 Go ou plus)."),
+             _("Déconseillé sur une machine modeste.")]),
+    logique.CHOIX_PERSO: ([_("Vous gardez le contrôle : autre quantification, ou fichier déjà présent sur la machine.")],
+                          [_("Le modèle doit comprendre la consigne de TranslateGemma ; aucune garantie pour un autre modèle.")]),
+}
+
+
+def _libelle_modele(cle: str) -> str:
+    return logique.MODELES[cle]["libelle"] if cle in logique.MODELES else _("Fichier personnel")
+
+
+class DialogueChoixModele(QDialog):
+    """Quel modèle de traduction installer ? Avantages, inconvénients, mesures, conseil pour cette machine."""
+
+    def __init__(self, plugin, parent=None):
+        super().__init__(parent)
+        self.p = plugin
+        self.chemin = ""
+        self.setWindowTitle(_("Choisir le modèle de traduction"))
+        self.resize(640, 640)
+        lay = QVBoxLayout(self)
+        intro = QLabel(_("La traduction se fait sur votre machine : rien n'est envoyé sur Internet. Le modèle est un fichier à télécharger "
+                         "une fois (avec votre accord). Plus il est gros, meilleure est la traduction, et plus elle est lente."))
+        intro.setWordWrap(True)
+        lay.addWidget(intro)
+        self.mat = logique.materiel()
+        self.conseil = logique.recommandation(self.mat)
+        machine = QLabel(_("Cette machine : %(m)s.\nConseil : %(c)s.") % {"m": logique.description_materiel(self.mat),
+                                                                         "c": _libelle_modele(self.conseil)})
+        machine.setWordWrap(True)
+        lay.addWidget(machine)
+        self.radios = {}
+        courant = plugin.modele_choisi() or self.conseil
+        for cle in (*logique.MODELES, logique.CHOIX_PERSO):
+            plus, moins = DESCRIPTIONS[cle]
+            present = cle in logique.MODELES and logique.trouver_modele("", plugin.ctx.dossier_donnees, cle)
+            etat = (_(" — déjà téléchargé") if present else _(" — à télécharger (%s)") % _taille(logique.MODELES[cle]["taille"])) \
+                if cle in logique.MODELES else ""
+            radio = QRadioButton(f"{_libelle_modele(cle)}{etat}" + (_("   ← conseillé ici") if cle == self.conseil else ""))
+            f = radio.font()
+            f.setBold(True)
+            radio.setFont(f)
+            radio.setChecked(cle == courant)
+            self.radios[cle] = radio
+            detail = QLabel("<ul style='margin:0'>" + "".join(f"<li>✔ {x}</li>" for x in plus) + "".join(f"<li>✘ {x}</li>" for x in moins) + "</ul>")
+            detail.setWordWrap(True)
+            lay.addWidget(radio)
+            lay.addWidget(detail)
+        lay.addStretch()
+        b = QDialogButtonBox(QDialogButtonBox.StandardButton.Ok | QDialogButtonBox.StandardButton.Cancel)
+        b.button(QDialogButtonBox.StandardButton.Ok).setText(_("Choisir"))
+        b.button(QDialogButtonBox.StandardButton.Cancel).setText(_("Plus tard"))
+        b.accepted.connect(self._valider)
+        b.rejected.connect(self.reject)
+        lay.addWidget(b)
+
+    def choix(self) -> str:
+        return next((cle for cle, r in self.radios.items() if r.isChecked()), self.conseil)
+
+    def _valider(self):
+        if self.choix() == logique.CHOIX_PERSO:
+            chemin, _f = QFileDialog.getOpenFileName(self, _("Modèle .gguf"), "", "GGUF (*.gguf)")
+            if not chemin:
+                return
+            self.chemin = chemin
+        self.accept()
+
+
 class DialogueReglages(QDialog):
     def __init__(self, plugin, parent=None):
         super().__init__(parent)
@@ -105,11 +185,18 @@ class DialogueReglages(QDialog):
         b1 = QPushButton(_("Parcourir…"))
         b1.clicked.connect(lambda: self._choisir(self.exe, _("Programme llama-server")))
         f.addRow(_("Programme llama-server :"), self._ligne(self.exe, b1))
+        self.choix = QComboBox()
+        for cle in (*logique.MODELES, logique.CHOIX_PERSO):
+            self.choix.addItem(_libelle_modele(cle), cle)
+        self.choix.setCurrentIndex(max(0, self.choix.findData(plugin.modele_choisi() or "4b")))
+        bm = QPushButton(_("Avantages et inconvénients…"))
+        bm.clicked.connect(self._assistant)
+        f.addRow(_("Modèle :"), self._ligne(self.choix, bm))
         self.modele = QLineEdit(r.get("modele", ""))
-        self.modele.setPlaceholderText(logique.trouver_modele("", plugin.ctx.dossier_donnees) or _("(modèle introuvable)"))
+        self.modele.setPlaceholderText(_("(chemin d'un fichier .gguf : seulement pour « Fichier personnel »)"))
         b2 = QPushButton(_("Parcourir…"))
         b2.clicked.connect(lambda: self._choisir(self.modele, _("Modèle .gguf"), "GGUF (*.gguf)"))
-        f.addRow(_("Modèle (.gguf) :"), self._ligne(self.modele, b2))
+        f.addRow(_("Fichier personnel :"), self._ligne(self.modele, b2))
         self.gpu = QLineEdit(r.get("gpu", ""))
         self.gpu.setPlaceholderText(_("automatique"))
         self.gpu.setToolTip(_("Nombre de couches sur la carte graphique (option -ngl). Vide = automatique ; 0 = processeur seul."))
@@ -125,7 +212,7 @@ class DialogueReglages(QDialog):
         self.inactif.setSuffix(_(" min"))
         f.addRow(_("Arrêter le serveur après inactivité :"), self.inactif)
         ligne = QHBoxLayout()
-        for texte, fn in ((_("Aide à l'installation…"), plugin.aide_installation), (_("Télécharger le modèle…"), plugin.telecharger_modele),
+        for texte, fn in ((_("Aide à l'installation…"), plugin.aide_installation), (_("Télécharger le modèle…"), lambda: plugin.telecharger_modele(self.choix.currentData())),
                           (_("Tester"), self._tester)):
             b = QPushButton(texte)
             b.clicked.connect(fn)
@@ -148,6 +235,12 @@ class DialogueReglages(QDialog):
         if chemin:
             champ.setText(chemin)
 
+    def _assistant(self):
+        if self.p.assistant_modele(force=True):
+            r = self.p.ctx.reglages
+            self.choix.setCurrentIndex(max(0, self.choix.findData(r.get("modele_choix", "4b"))))
+            self.modele.setText(r.get("modele", ""))
+
     def _tester(self):
         self._enregistrer()
         self.p.tester_llama()
@@ -156,6 +249,7 @@ class DialogueReglages(QDialog):
         r = self.p.ctx.reglages
         r.set("moteur", self.moteur.currentData())
         r.set("exe", self.exe.text().strip())
+        r.set("modele_choix", self.choix.currentData())
         r.set("modele", self.modele.text().strip())
         r.set("gpu", self.gpu.text().strip())
         r.set("url", self.url.text().strip())
@@ -205,6 +299,17 @@ class DialogueTraduction(QDialog):
         for w in ((self.moteur,) if len(MOTEURS) > 1 else ()) + (self.src, echange, self.dst):
             ligne.addWidget(w, 0 if w is echange else 1)
         lay.addLayout(ligne)
+        qualite = QHBoxLayout()
+        self.qualite = QComboBox()
+        for cle in (*logique.MODELES, logique.CHOIX_PERSO):
+            if cle != logique.CHOIX_PERSO or plugin.modele_choisi() == logique.CHOIX_PERSO:
+                self.qualite.addItem(_libelle_modele(cle), cle)
+        self.qualite.setCurrentIndex(max(0, self.qualite.findData(plugin.modele_choisi() or "4b")))
+        self.qualite.setToolTip(_("Rapide : quelques secondes. Meilleur : plus fidèle, plusieurs fois plus lent. (Le choix par défaut se change dans les réglages.)"))
+        qualite.addWidget(QLabel(_("Modèle :")))
+        qualite.addWidget(self.qualite, 1)
+        qualite.addStretch(2)
+        lay.addLayout(qualite)
         self.info = QLabel(_("Langue détectée : %s") % logique.LANGUES[self.detectee][1] if self.detectee
                            else _("Langue source non détectée : choisissez-la."))
         lay.addWidget(self.info)
@@ -278,7 +383,7 @@ class DialogueTraduction(QDialog):
             QMessageBox.information(self, _("Traduction"), _("Les langues source et cible sont identiques."))
             return
         moteur = self.moteur.currentData()
-        fonction = self.p.preparer(moteur, src, dst, self.vue)
+        fonction = self.p.preparer(moteur, src, dst, self.vue, self.qualite.currentData())
         if fonction is None:
             return
         self.p.ctx.reglages.set("cible", dst)
@@ -360,6 +465,8 @@ class TraductionPlugin(Plugin):
         ctx.ui.ajouter_action(_("Traduire la sélection ou la fiche…"), self.traduire, "preferences-desktop-locale")
         ctx.ui.ajouter_action(_("Réglages de la traduction…"), self.reglages, "configure")
         ctx.ui.planifier(60, self._surveiller, repeter=True)
+        if self.modele_choisi() is None and not ctx.reglages.get("url", "").strip():
+            ctx.ui.planifier(0.5, self.assistant_modele)          # première activation : on demande quel modèle (et on explique)
 
     def desactiver(self):
         self.serveur.arreter()
@@ -395,12 +502,12 @@ class TraductionPlugin(Plugin):
             QDesktopServices.openUrl(QUrl(logique.PAGE_VERSIONS))
 
     # ---------- préparation d'un moteur ----------
-    def preparer(self, moteur, src, dst, vue):
+    def preparer(self, moteur, src, dst, vue, choix=None):
         """Retourne `fonction(morceau, annule) -> str` prête, ou None après avoir expliqué ce qui manque ou demandé un accord.
         (Un ancien réglage inconnu, par exemple « argos », retombe sur llama.cpp.)"""
-        return self._preparer_llama(src, dst, vue)
+        return self._preparer_llama(src, dst, vue, choix)
 
-    def _preparer_llama(self, src, dst, vue):
+    def _preparer_llama(self, src, dst, vue, choix=None):
         r = self.ctx.reglages
         src_url = r.get("url", "").strip()
         if src_url:
@@ -419,9 +526,14 @@ class TraductionPlugin(Plugin):
         if not exe:
             self.aide_installation()
             return None
-        modele = logique.trouver_modele(r.get("modele", ""), self.ctx.dossier_donnees)
+        choix = choix or self.modele_choisi()
+        if choix is None:                                   # jamais choisi : on explique et on demande
+            if not self.assistant_modele():
+                return None
+            choix = self.modele_choisi()
+        modele = logique.trouver_modele(r.get("modele", ""), self.ctx.dossier_donnees, choix)
         if not modele:
-            modele = self.telecharger_modele()
+            modele = self.telecharger_modele(choix)
             if not modele:
                 return None
         gpu = r.get("gpu", "")
@@ -432,23 +544,62 @@ class TraductionPlugin(Plugin):
         return fonction
 
     # ---------- téléchargement (toujours avec accord) ----------
-    def telecharger_modele(self):
-        """Propose de télécharger le modèle recommandé ; retourne son chemin, ou None."""
+    def modele_choisi(self):
+        """« 4b », « 12b », « perso » ou None si l'utilisateur n'a pas encore choisi. Reprend une ancienne configuration (chemin seul)."""
+        r = self.ctx.reglages
+        c = r.get("modele_choix")
+        if c in logique.MODELES or c == logique.CHOIX_PERSO:
+            return c
+        ancien = r.get("modele", "")
+        if ancien and Path(ancien).is_file():
+            r.set("modele_choix", logique.CHOIX_PERSO)
+            return logique.CHOIX_PERSO
+        return None
+
+    def assistant_modele(self, force: bool = False) -> bool:
+        """Choix du modèle. Sur une machine qui fait tourner le 12B sans hésitation (carte NVIDIA de 12 Go ou plus, Mac Apple Silicon
+        avec 16 Go), le choix est évident : pas de question (sauf `force`). Dans tous les autres cas, avantages et inconvénients.
+        Le téléchargement demande toujours l'accord de l'utilisateur. True si un modèle est choisi et disponible."""
+        r = self.ctx.reglages
+        auto = logique.choix_automatique(logique.materiel())
+        if auto and not force:
+            r.set("modele_choix", auto)
+            self.ctx.ui.notifier(_("Traduction"), _("Modèle « %s » choisi pour cette machine (modifiable dans les réglages).") % _libelle_modele(auto))
+            return bool(self._assurer_modele(auto))
+        d = DialogueChoixModele(self, _parent())
+        if not d.exec():
+            return False
+        choix = d.choix()
+        r.set("modele_choix", choix)
+        r.set("modele", d.chemin if choix == logique.CHOIX_PERSO else "")
+        return bool(self._assurer_modele(choix))
+
+    def _assurer_modele(self, choix):
+        fichier = logique.trouver_modele(self.ctx.reglages.get("modele", ""), self.ctx.dossier_donnees, choix)
+        return fichier or (self.telecharger_modele(choix) if choix in logique.MODELES else None)
+
+    def telecharger_modele(self, choix=None):
+        """Propose de télécharger le modèle choisi (taille, source et destination affichées) ; retourne son chemin, ou None."""
+        choix = choix or self.modele_choisi() or "4b"
+        if choix not in logique.MODELES:
+            QMessageBox.information(_parent(), _("Modèle de traduction"), _("Choisissez un fichier .gguf dans les réglages."))
+            return None
+        m = logique.MODELES[choix]
         dossier = self.ctx.dossier_donnees / "modeles"
         if QMessageBox.question(
                 _parent(), _("Modèle de traduction"),
-                _("Il manque le modèle de traduction (TranslateGemma 4B, quantifié Q4_K_M, licence Gemma).\n\nTaille : %(t)s\nSource : %(u)s\n"
+                _("Il manque le modèle « %(n)s » (TranslateGemma, quantifié Q4_K_M, licence Gemma).\n\nTaille : %(t)s\nSource : %(u)s\n"
                   "Destination : %(d)s\n\nLa somme de contrôle SHA-256 est vérifiée. Télécharger maintenant ?")
-                % {"t": _taille(logique.MODELE_TAILLE), "u": logique.MODELE_URL, "d": dossier}) != QMessageBox.StandardButton.Yes:
+                % {"n": m["libelle"], "t": _taille(m["taille"]), "u": m["url"], "d": dossier}) != QMessageBox.StandardButton.Yes:
             return None
         chemin, err = en_arriere_plan(_("Modèle de traduction"), _("Téléchargement du modèle…"),
-                                      lambda annuler, prog: logique.telecharger_modele(dossier, progression=prog, annuler=annuler.is_set),
+                                      lambda annuler, prog: logique.telecharger_modele(dossier, m["url"], m["nom"], m["sha256"], m["taille"],
+                                                                                        progression=prog, annuler=annuler.is_set),
                                       annulable=True)
         if err:
             if err != "annulé":
                 QMessageBox.warning(_parent(), _("Modèle de traduction"), err)
             return None
-        self.ctx.reglages.set("modele", str(chemin))
         return str(chemin)
 
     def tester_llama(self):
