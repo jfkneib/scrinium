@@ -14,16 +14,16 @@ Interface Qt (PyQt6) : Linux, Windows, macOS (paquets Windows/macOS : à venir).
 
 ## Installation
 
-**Debian / Ubuntu** : téléchargez `scrinium_0.1.0_all.deb` sur la [**page des versions (Releases)**](https://github.com/jfkneib/scrinium/releases/latest) (section *Assets*, tout en bas), ou directement :
+**Debian / Ubuntu** : téléchargez `scrinium_0.2.0_all.deb` sur la [**page des versions (Releases)**](https://github.com/jfkneib/scrinium/releases/latest) (section *Assets*, tout en bas), ou directement :
 
 ```bash
-wget https://github.com/jfkneib/scrinium/releases/download/v0.1.0/scrinium_0.1.0_all.deb
+wget https://github.com/jfkneib/scrinium/releases/download/v0.2.0/scrinium_0.2.0_all.deb
 ```
 
 puis installez-le :
 
 ```bash
-sudo apt install ./scrinium_0.1.0_all.deb
+sudo apt install ./scrinium_0.2.0_all.deb
 ```
 
 Pour vérifier le téléchargement, récupérez aussi `SHA256SUMS` sur la même page et lancez `sha256sum -c SHA256SUMS`.
@@ -83,11 +83,11 @@ scrinium secours deverrouiller "titre" --cle ~/cle-de-secours.pem
 
 ## Extensions
 
-Scrinium peut être étendu par des plugins (rappels, OCR, dictée… sont prévus sous forme de plugins). Ils sont
+Scrinium peut être étendu par des plugins. Cinq sont livrés avec lui (et avec le `.deb`) : **OCR** (Tesseract, texte des images jointes), **dictée** (faster-whisper local), **courriel** (envoi d'une fiche par SMTP), **capture et console** (sortie d'une commande dans la fiche, sélection envoyée à Konsole) et **traduction** (TranslateGemma via llama.cpp, sans Ollama). Ils sont
 **désactivés par défaut** : *Extensions → Gérer les extensions…* les liste et les active un par un, après un
 avertissement (une extension est du code Python qui s'exécute avec les mêmes droits que Scrinium : n'activez que celles
 que vous connaissez). Déposez le dossier d'une extension dans `<dossier de données>/plugins/`, ou installez un paquet qui
-en fournit une. Un exemple fonctionnel est dans [`plugins/hello`](plugins/hello) ; l'API est décrite dans
+en fournit une. Chacune indique les programmes facultatifs dont elle a besoin (Tesseract, faster-whisper, llama.cpp…) et demande avant d'installer ou de télécharger quoi que ce soit ; rien ne quitte votre machine, hors le courriel que vous envoyez. Un exemple fonctionnel est dans [`plugins/hello`](plugins/hello) ; l'API est décrite dans
 [`docs/plugins.md`](docs/plugins.md) (en anglais). Une extension défaillante n'empêche jamais Scrinium de démarrer et
 est désactivée automatiquement après des erreurs répétées.
 

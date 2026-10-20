@@ -1,3 +1,13 @@
+scrinium (0.2.0) unstable; urgency=medium
+
+  * Images jointes aux fiches (collage, glisser-déposer, recadrage), chiffrées
+    avec la fiche ; "scrinium ajouter" et "rescue open --images".
+  * Cinq extensions officielles livrées (désactivées par défaut) : OCR,
+    dictée, courriel, capture et console, traduction.
+  * Traduction anglaise complète (531 textes).
+
+ -- Jean-François Kneib <kneib.jean-francois@cegetel.net>  Tue, 20 Oct 2026 12:02:39 +0200
+
 scrinium (0.1.0) unstable; urgency=medium
 
   * Première version publique : interface Qt, cœur indépendant de l'interface,

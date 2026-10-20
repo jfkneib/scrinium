@@ -1,4 +1,4 @@
-.TH SCRINIUM 1 "October 2026" "scrinium 0.1.0" "User Commands"
+.TH SCRINIUM 1 "October 2026" "scrinium 0.2.0" "User Commands"
 .SH NAME
 scrinium \- notes organised by topic, lockable with a password
 .SH SYNOPSIS
@@ -6,7 +6,10 @@ scrinium \- notes organised by topic, lockable with a password
 [\fB\-\-theme\fR \fINAME\fR] [\fB\-\-new\fR] [\fB\-\-minimise\fR]
 .br
 .B scrinium rescue
-{\fBlist\fR|\fBopen\fR|\fBunlock\fR} [\fITITLE\fR] [\fB\-\-key\fR \fIFILE\fR]
+{\fBlist\fR|\fBopen\fR|\fBunlock\fR} [\fITITLE\fR] [\fB\-\-key\fR \fIFILE\fR] [\fB\-\-images\fR \fIDIR\fR]
+.br
+.B scrinium add
+\fB\-t\fR \fITOPIC\fR \fB\-f\fR \fITITLE\fR [\fB\-c\fR \fITEXT\fR] [\fB\-\-replace\fR] [\fB\-\-raw\fR]
 .SH DESCRIPTION
 .B Scrinium
 keeps short notes (numbers, procedures, codes) as cards grouped by topic, automatically saved as plain text files.
@@ -34,12 +37,18 @@ Print the version and exit.
 List locked notes and tell whether they can be reopened with a rescue file.
 .TP
 .BI "scrinium rescue open " TITLE " \-\-key " FILE
-Print the text of a locked note using the rescue file (PEM private key).
+Print the text of a locked note using the rescue file (PEM private key). With \fB\-\-images\fR \fIDIR\fR, also write the images attached to the note, decrypted, into \fIDIR\fR (PLAIN, mode 700).
 .TP
 .BI "scrinium rescue unlock " TITLE " \-\-key " FILE
 Put a locked note back in plain text.
 .PP
 The French spellings \fBsecours lister|ouvrir|deverrouiller\fR and \fB\-\-cle\fR are also accepted.
+.SH ADD COMMAND
+.TP
+.BI "scrinium add \-t " TOPIC " \-f " TITLE
+Append the text received on standard input to a note (created if needed), under a dated header, e.g.
+\fBip a | scrinium add \-t Computing \-f Network \-c "ip a"\fR. \fB\-\-replace\fR replaces the text instead,
+\fB\-\-raw\fR adds it as is. The French spelling \fBajouter\fR is also accepted.
 .SH FILES
 .TP
 .I ~/.config/scrinium/
