@@ -2,7 +2,12 @@
 # Copyright (C) 2026 Jean-François Kneib
 """Partie sans interface de l'extension « Agenda et rappels » : événements, échéances, rappels à notifier.
 
-Un événement : {"id", "titre", "quand" ("AAAA-MM-JJ HH:MM", heure locale), "fiche" ({"theme", "titre"} ou None), "notifie" (bool)}."""
+Un événement : {"id", "titre", "quand" ("AAAA-MM-JJ HH:MM", heure locale), "fiche" ({"theme", "titre"} ou None), "notifie" (bool),
+"fait" (bool), "son" (bool)}."""
+import os
+import shutil
+import subprocess
+import sys
 import uuid
 from datetime import datetime, timedelta
 
@@ -35,7 +40,7 @@ def normaliser(e) -> dict | None:
     else:
         fiche = None
     return {"id": str(e.get("id") or uuid.uuid4().hex[:12]), "titre": titre[:200], "quand": en_texte(quand), "fiche": fiche,
-            "notifie": bool(e.get("notifie"))}
+            "notifie": bool(e.get("notifie")), "fait": bool(e.get("fait")), "son": e.get("son", True) is not False}
 
 
 def charger(brut) -> list:
@@ -49,11 +54,12 @@ def charger(brut) -> list:
     return sorted(res, key=lambda x: x["quand"])[:MAX_EVENEMENTS]
 
 
-def ajouter(evenements: list, titre: str, quand: datetime, fiche: dict | None = None, id_: str | None = None) -> dict:
+def ajouter(evenements: list, titre: str, quand: datetime, fiche: dict | None = None, id_: str | None = None,
+            son: bool = True) -> dict:
     """Ajoute un événement (ValueError si le titre est vide ou la liste pleine) ; renvoie l'événement créé."""
     if len(evenements) >= MAX_EVENEMENTS:
         raise ValueError("trop d'événements")
-    n = normaliser({"titre": titre, "quand": en_texte(quand), "fiche": fiche, "id": id_})
+    n = normaliser({"titre": titre, "quand": en_texte(quand), "fiche": fiche, "id": id_, "son": son})
     if n is None:
         raise ValueError("titre vide")
     evenements.append(n)
@@ -63,11 +69,41 @@ def ajouter(evenements: list, titre: str, quand: datetime, fiche: dict | None = 
 
 def a_notifier(evenements: list, maintenant: datetime) -> list:
     """Événements dont l'heure est venue et qui n'ont pas encore été annoncés."""
-    return [e for e in evenements if not e["notifie"] and en_date(e["quand"]) <= maintenant]
+    return [e for e in evenements if not e["notifie"] and not e["fait"] and en_date(e["quand"]) <= maintenant]
 
 
 def a_venir(evenements: list, maintenant: datetime) -> list:
-    return [e for e in evenements if en_date(e["quand"]) > maintenant]
+    return [e for e in evenements if not e["fait"] and en_date(e["quand"]) > maintenant]
+
+
+def repousser(e: dict, minutes: int, maintenant: datetime) -> None:
+    """Nouvelle échéance `minutes` après maintenant ; l'événement sera annoncé de nouveau."""
+    e["quand"] = en_texte((maintenant + timedelta(minutes=minutes)).replace(second=0, microsecond=0))
+    e["notifie"] = e["fait"] = False
+
+
+def commande_son() -> list | None:
+    """Commande qui joue un son d'alerte sur ce système, ou None (l'interface retombe alors sur le bip de Qt)."""
+    if sys.platform.startswith("linux"):
+        for fichier in ("/usr/share/sounds/freedesktop/stereo/message.oga", "/usr/share/sounds/freedesktop/stereo/bell.oga"):
+            for lecteur in ("paplay", "pw-play"):
+                if shutil.which(lecteur) and os.path.exists(fichier):
+                    return [lecteur, fichier]
+        if shutil.which("canberra-gtk-play"):
+            return ["canberra-gtk-play", "-i", "message"]
+    return None
+
+
+def jouer_son() -> bool:
+    """Joue le son d'alerte sans attendre ; False si aucun lecteur n'est disponible."""
+    cmd = commande_son()
+    if cmd is None:
+        return False
+    try:
+        subprocess.Popen(cmd, stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        return True
+    except OSError:
+        return False
 
 
 def delai_texte(quand: datetime, maintenant: datetime) -> str:

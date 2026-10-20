@@ -7,11 +7,11 @@
   était fermé sont annoncés au démarrage, marqués « en retard »).
 - Aucun lien vers une fiche verrouillée (son titre resterait lisible dans les réglages).
 - Les événements sont dans les réglages de l'extension (settings.json)."""
-from datetime import datetime
+from datetime import datetime, timedelta
 
-from PyQt6.QtCore import QDateTime, Qt
-from PyQt6.QtWidgets import (QApplication, QCheckBox, QDateTimeEdit, QDialog, QDialogButtonBox, QFormLayout, QHBoxLayout,
-                             QLabel, QLineEdit, QListWidget, QListWidgetItem, QMessageBox, QPushButton, QVBoxLayout)
+from PyQt6.QtCore import QDate, QTime, Qt
+from PyQt6.QtWidgets import (QApplication, QCheckBox, QDateEdit, QDialog, QDialogButtonBox, QFormLayout, QHBoxLayout,
+                             QLabel, QLineEdit, QListWidget, QListWidgetItem, QMessageBox, QPushButton, QTimeEdit, QVBoxLayout)
 
 from scrinium.core.plugins import Plugin
 from scrinium.i18n import _
@@ -31,14 +31,27 @@ class DialogueEvenement(QDialog):
         self.setWindowTitle(_("Événement"))
         lay = QFormLayout(self)
         self.titre = QLineEdit((e or {}).get("titre", ""))
-        self.quand = QDateTimeEdit(QDateTime.currentDateTime().addSecs(3600))
-        self.quand.setDisplayFormat("yyyy-MM-dd HH:mm")
-        self.quand.setCalendarPopup(True)
-        d = logique.en_date((e or {}).get("quand", ""))
-        if d:
-            self.quand.setDateTime(QDateTime(d))
+        self.date = QDateEdit()
+        self.date.setDisplayFormat("yyyy-MM-dd")
+        self.date.setCalendarPopup(True)
+        self.heure = QTimeEdit()
+        self.heure.setDisplayFormat("HH:mm")
+        d = logique.en_date((e or {}).get("quand", "")) or (datetime.now() + timedelta(hours=1))
+        self.date.setDate(QDate(d.year, d.month, d.day))
+        self.heure.setTime(QTime(d.hour, d.minute))
         lay.addRow(_("Titre"), self.titre)
-        lay.addRow(_("Date et heure"), self.quand)
+        lay.addRow(_("Date"), self.date)
+        lay.addRow(_("Heure (24 h, ex. 14:30)"), self.heure)
+        rapide = QHBoxLayout()
+        for texte, fn in ((_("+10 min"), lambda: self._dans(minutes=10)), (_("+1 h"), lambda: self._dans(hours=1)),
+                          (_("Demain 9:00"), self._demain)):
+            b = QPushButton(texte)
+            b.clicked.connect(fn)
+            rapide.addWidget(b)
+        lay.addRow(rapide)
+        self.son = QCheckBox(_("Jouer un son au rappel"))
+        self.son.setChecked((e or {}).get("son", True))
+        lay.addRow(self.son)
         self.lier = None
         self._fiche = (e or {}).get("fiche") or fiche
         if self._fiche:
@@ -50,15 +63,67 @@ class DialogueEvenement(QDialog):
         boutons.rejected.connect(self.reject)
         lay.addRow(boutons)
 
+    def _fixer(self, d: datetime):
+        self.date.setDate(QDate(d.year, d.month, d.day))
+        self.heure.setTime(QTime(d.hour, d.minute))
+
+    def _dans(self, **delai):
+        self._fixer(datetime.now() + timedelta(**delai))
+
+    def _demain(self):
+        self._fixer((datetime.now() + timedelta(days=1)).replace(hour=9, minute=0))
+
     def _valider(self):
         if self.titre.text().strip():
             self.accept()
         else:
             self.titre.setFocus()
 
+    def quand(self) -> datetime:
+        d, t = self.date.date(), self.heure.time()
+        return datetime(d.year(), d.month(), d.day(), t.hour(), t.minute())
+
     def resultat(self) -> tuple:
         fiche = self._fiche if self.lier is not None and self.lier.isChecked() else None
-        return self.titre.text(), self.quand.dateTime().toPyDateTime().replace(second=0, microsecond=0), fiche
+        return self.titre.text(), self.quand(), fiche, self.son.isChecked()
+
+
+class RappelPopup(QDialog):
+    """Fenêtre de rappel, non modale et au premier plan : ouvrir la fiche, repousser, ou marquer comme fait."""
+
+    def __init__(self, plugin, e):
+        super().__init__(None)
+        self.p, self.e = plugin, e
+        self.setAttribute(Qt.WidgetAttribute.WA_DeleteOnClose)
+        self.setWindowFlag(Qt.WindowType.WindowStaysOnTopHint)
+        self.setWindowTitle(_("Rappel"))
+        lay = QVBoxLayout(self)
+        t = QLabel(f"<b>{e['titre'].replace('<', '&lt;')}</b>")
+        t.setTextFormat(Qt.TextFormat.RichText)
+        lay.addWidget(t)
+        lay.addWidget(QLabel(f"{e['quand']}   ({logique.delai_texte(logique.en_date(e['quand']), datetime.now())})"))
+        rang = QHBoxLayout()
+        if e["fiche"]:
+            b = QPushButton(_("Ouvrir la fiche"))
+            b.clicked.connect(self._ouvrir)
+            rang.addWidget(b)
+        for texte, fn in ((_("Repousser de 10 min"), self._repousser), (_("Fait"), self._fait)):
+            b = QPushButton(texte)
+            b.clicked.connect(fn)
+            rang.addWidget(b)
+        lay.addLayout(rang)
+
+    def _ouvrir(self):
+        if not self.p.ouvrir_fiche(self.e["fiche"]):
+            QMessageBox.information(self, _("Agenda"), _("Cette fiche n'existe plus ou est verrouillée."))
+
+    def _repousser(self):
+        self.p.repousser(self.e["id"], 10)
+        self.close()
+
+    def _fait(self):
+        self.p.marquer_fait(self.e["id"])
+        self.close()
 
 
 class DialogueAgenda(QDialog):
@@ -93,7 +158,8 @@ class DialogueAgenda(QDialog):
         for e in self.p.evenements():
             d = logique.en_date(e["quand"])
             lien = f"   ·   {e['fiche']['theme']} / {e['fiche']['titre']}" if e["fiche"] else ""
-            it = QListWidgetItem(f"{e['quand']}   ({logique.delai_texte(d, maintenant)})   {e['titre']}{lien}")
+            etat = "✓" if e["fait"] else logique.delai_texte(d, maintenant)
+            it = QListWidgetItem(f"{e['quand']}   ({etat})   {e['titre']}{lien}")
             it.setData(Qt.ItemDataRole.UserRole, e["id"])
             self.liste.addItem(it)
         self.vide.setVisible(self.liste.count() == 0)
@@ -114,8 +180,7 @@ class DialogueAgenda(QDialog):
             return
         d = DialogueEvenement(self, e)
         if d.exec():
-            titre, quand, fiche = d.resultat()
-            self.p.remplacer(e["id"], titre, quand, fiche)
+            self.p.remplacer(e["id"], *d.resultat())
             self.rafraichir()
 
     def supprimer(self):
@@ -140,6 +205,7 @@ class AgendaPlugin(Plugin):
             return
         ctx.ui.ajouter_action(_("Agenda…"), self.afficher, "view-calendar")
         ctx.ui.ajouter_bouton(_("Agenda"), self.afficher, "view-calendar")
+        self.popups = []
         ctx.ui.planifier(INTERVALLE, self.verifier, repeter=True)
         ctx.ui.planifier(2, self.verifier)           # événements manqués pendant que Scrinium était fermé
 
@@ -150,15 +216,28 @@ class AgendaPlugin(Plugin):
     def _sauver(self, evenements: list):
         self.ctx.reglages.set("evenements", evenements)
 
-    def ajouter(self, titre, quand, fiche=None):
+    def ajouter(self, titre, quand, fiche=None, son=True):
         evs = self.evenements()
-        logique.ajouter(evs, titre, quand, fiche)
+        logique.ajouter(evs, titre, quand, fiche, son=son)
         self._sauver(evs)
 
-    def remplacer(self, id_, titre, quand, fiche=None):
+    def remplacer(self, id_, titre, quand, fiche=None, son=True):
         evs = [e for e in self.evenements() if e["id"] != id_]
-        logique.ajouter(evs, titre, quand, fiche, id_)       # même identifiant ; « notifie » repart à zéro
+        logique.ajouter(evs, titre, quand, fiche, id_, son)       # même identifiant ; « notifie » repart à zéro
         self._sauver(evs)
+
+    def _modifier(self, id_, fn):
+        evs = self.evenements()
+        for e in evs:
+            if e["id"] == id_:
+                fn(e)
+        self._sauver(sorted(evs, key=lambda x: x["quand"]))
+
+    def repousser(self, id_, minutes=10):
+        self._modifier(id_, lambda e: logique.repousser(e, minutes, datetime.now()))
+
+    def marquer_fait(self, id_):
+        self._modifier(id_, lambda e: e.update(fait=True))
 
     def supprimer(self, id_):
         self._sauver([e for e in self.evenements() if e["id"] != id_])
@@ -176,6 +255,16 @@ class AgendaPlugin(Plugin):
                 return True
         return False
 
+    def _popup(self, e):
+        if QApplication.instance() is None:
+            return
+        try:
+            p = RappelPopup(self, dict(e))
+            self.popups = [x for x in self.popups if x.isVisible()] + [p]
+            p.show()
+        except Exception:            # une fenêtre de rappel ratée ne doit pas empêcher la notification ni le marquage
+            pass
+
     # ---------- actions ----------
     def afficher(self):
         DialogueAgenda(self, _parent()).exec()
@@ -191,5 +280,8 @@ class AgendaPlugin(Plugin):
             suffixe = f" ({logique.delai_texte(d, maintenant)})" if retard.total_seconds() > 120 else ""
             self.ctx.ui.notifier(_("Rappel"), f"{e['titre']}{suffixe}")
             e["notifie"] = True
+            if e["son"] and not logique.jouer_son() and QApplication.instance() is not None:
+                QApplication.beep()
+            self._popup(e)
         if dus:
             self._sauver(evs)
