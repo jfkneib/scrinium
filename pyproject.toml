@@ -18,7 +18,7 @@ classifiers = [
 ]
 
 [project.optional-dependencies]
-test = ["pytest"]
+test = ["pytest", "setuptools>=68"]      # setuptools : les tests d'emballage lancent setup.py
 
 [project.scripts]
 scrinium = "scrinium.cli:main"
