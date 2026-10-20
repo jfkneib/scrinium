@@ -434,6 +434,32 @@ def traduire_texte(texte: str, src: str, dst: str, fonction, progression=None, a
 
 
 # ---------- téléchargement du modèle ----------
+def _mo(octets: float) -> str:
+    return f"{octets / 1048576:,.0f}".replace(",", " ") + " Mo"
+
+
+def _duree(secondes: float) -> str:
+    if secondes < 60:
+        return f"{max(1, int(secondes))} s"
+    if secondes < 3600:
+        return f"environ {round(secondes / 60)} min"
+    return f"environ {int(secondes // 3600)} h {round(secondes % 3600 / 60):02d} min"
+
+
+def progression_texte(fait: int, total: int, ecoule: float = 0.0, base: int = 0) -> str:
+    """« 1 234 Mo / 7 300 Mo (17 %) — 8 Mo/s — reste environ 12 min ». Le débit ne compte que ce qui a été reçu depuis `base`
+    (une reprise ne doit pas le gonfler) et n'apparaît qu'après quelques secondes."""
+    if total <= 0:
+        return ""
+    texte = f"{_mo(fait)} / {_mo(total)} ({min(100, int(fait * 100 / total))} %)"
+    recu = fait - base
+    if ecoule >= 3 and recu > 0:
+        debit = recu / ecoule
+        texte += f" — {debit / 1048576:.0f} Mo/s — reste {_duree((total - fait) / debit)}"
+    return texte
+
+
+
 def sha256_fichier(chemin: Path) -> str:
     h = hashlib.sha256()
     with open(chemin, "rb") as f:
@@ -443,13 +469,20 @@ def sha256_fichier(chemin: Path) -> str:
 
 
 def telecharger_modele(dossier: Path, url: str = MODELE_URL, nom: str = MODELE_NOM, sha256: str = MODELE_SHA256,
-                       taille: int = MODELE_TAILLE, progression=None, annuler=None) -> Path:
-    """Télécharge le modèle dans `dossier` (reprise possible), vérifie taille et SHA-256, puis le renomme. Retourne le chemin."""
+                       taille: int = MODELE_TAILLE, progression=None, annuler=None, etat=None) -> Path:
+    """Télécharge le modèle dans `dossier` (reprise possible), vérifie taille et SHA-256, puis le renomme. Retourne le chemin.
+    `progression(octets_reçus, total)` ; `etat(texte)` annonce les étapes (connexion, vérification) pour que l'utilisateur sache où on en est."""
+    etat = etat or (lambda texte: None)
     dossier.mkdir(parents=True, exist_ok=True)
     final, partiel = dossier / nom, dossier / (nom + ".part")
-    if final.is_file() and final.stat().st_size == taille and sha256_fichier(final) == sha256:
-        return final
+    if final.is_file() and final.stat().st_size == taille:
+        etat("Vérification du fichier déjà présent (somme de contrôle)…")
+        if sha256_fichier(final) == sha256:
+            return final
     deja = partiel.stat().st_size if partiel.exists() else 0
+    etat("Connexion au serveur de téléchargement…" + (" (reprise d'un téléchargement interrompu)" if deja else ""))
+    if progression:
+        progression(deja, taille)
     en_tetes = {"Range": f"bytes={deja}-"} if deja else {}
     try:
         with urllib.request.urlopen(urllib.request.Request(url, headers=en_tetes), timeout=60) as r:
@@ -468,6 +501,7 @@ def telecharger_modele(dossier: Path, url: str = MODELE_URL, nom: str = MODELE_N
                         progression(deja, taille)
     except urllib.error.URLError as ex:
         raise ErreurMoteur(f"téléchargement impossible : {ex}") from ex
+    etat("Vérification de la somme de contrôle (SHA-256)…")
     if partiel.stat().st_size != taille or sha256_fichier(partiel) != sha256:
         partiel.unlink(missing_ok=True)
         raise ErreurMoteur("fichier téléchargé incorrect (taille ou somme de contrôle) : supprimé")

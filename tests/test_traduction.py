@@ -885,3 +885,87 @@ def test_dialogue_signale_une_machine_trop_juste_et_demande_confirmation(fen, mo
     monkeypatch.setattr(mod().QMessageBox, "question", lambda *a, **k: pytest.fail("pas de question pour le 4B sur 7 Go"))
     d4._valider()
     assert d4.result() == 1
+
+
+# ---------- fenêtre de téléchargement : on doit toujours savoir où on en est ----------
+def test_progression_texte_lisible_et_sans_debordement():
+    mo = 1048576
+    assert lg.progression_texte(1234 * mo, 7_300_794_112, 0) == "1 234 Mo / 6 963 Mo (17 %)"                # pas de débit tout de suite
+    assert lg.progression_texte(0, 7_300_794_112, 1) == "0 Mo / 6 963 Mo (0 %)"
+    t = lg.progression_texte(1000 * mo, 7_300_794_112, 125)                                                   # 8 Mo/s depuis 125 s
+    assert "(14 %)" in t and "— 8 Mo/s —" in t and "reste environ 12 min" in t
+    assert "reste 40 s" in lg.progression_texte(6600 * mo, 6963 * mo, 100) or "reste" in lg.progression_texte(6600 * mo, 6963 * mo, 100)
+    depart = 5000 * mo                                                                                       # reprise à 5 000 Mo : le débit ne compte que le nouveau
+    assert "— 10 Mo/s —" in lg.progression_texte(5000 * mo + 1000 * mo, 6963 * mo, 100, base=depart)
+    assert lg.progression_texte(10, 0) == "" and "(100 %)" in lg.progression_texte(2 * 1024 ** 3, 1024 ** 3)
+    assert "h" in lg.progression_texte(10 * mo, 70_000 * mo, 100)                                             # très long : en heures
+
+
+def test_telechargement_annonce_ses_etapes(tmp_path, web):
+    etapes = []
+    sha, taille = hashlib.sha256(CONTENU).hexdigest(), len(CONTENU)
+    lg.telecharger_modele(tmp_path, web, "m.gguf", sha, taille, etat=etapes.append)
+    assert etapes[0].startswith("Connexion au serveur") and "SHA-256" in etapes[-1]
+    etapes.clear()
+    lg.telecharger_modele(tmp_path, web, "m.gguf", sha, taille, etat=etapes.append)                          # déjà présent
+    assert etapes == ["Vérification du fichier déjà présent (somme de contrôle)…"]
+    (tmp_path / "m.gguf").unlink()
+    (tmp_path / "m.gguf.part").write_bytes(CONTENU[:1000])
+    etapes.clear()
+    suivi = []
+    lg.telecharger_modele(tmp_path, web, "m.gguf", sha, taille, progression=lambda f, t: suivi.append((f, t)), etat=etapes.append)
+    assert "reprise" in etapes[0] and suivi[0] == (1000, taille)                                              # la progression part tout de suite (barre non figée)
+
+
+def test_fenetre_de_progression_reelle_avec_un_modele_de_plus_de_2_go(app, monkeypatch):
+    """Régression : la barre de Qt n'accepte que 32 bits et le signal les déformait (7,3 Go -> négatif) : la fenêtre restait figée."""
+    import sys as _sys
+    appels = {"max": [], "val": [], "texte": []}
+    erreurs = []
+    monkeypatch.setattr(_sys, "excepthook", lambda *a: erreurs.append(a))
+    spec = importlib.util.spec_from_file_location("trad_init_reel", RACINE / "__init__.py", submodule_search_locations=[str(RACINE)])
+    mod_reel = importlib.util.module_from_spec(spec)
+    _sys.modules["trad_init_reel"] = mod_reel
+    spec.loader.exec_module(mod_reel)
+
+    class Espion(mod_reel.QProgressDialog):
+        def setMaximum(self, m):
+            appels["max"].append(m)
+            super().setMaximum(m)
+
+        def setValue(self, v):
+            appels["val"].append(v)
+            super().setValue(v)
+
+        def setLabelText(self, t):
+            appels["texte"].append(t)
+            super().setLabelText(t)
+    monkeypatch.setattr(mod_reel, "QProgressDialog", Espion)
+    total = lg.MODELES["12b"]["taille"]
+
+    def travail(annuler, prog):
+        prog.etat("Connexion au serveur…")
+        prog(1 << 20, total)
+        time.sleep(0.15)
+        prog(3 * 1024 ** 3, total)
+        time.sleep(0.15)
+        prog.etat("Vérification de la somme de contrôle (SHA-256)…")
+        time.sleep(0.15)
+        return "fini"
+    res, err = mod_reel.en_arriere_plan("Titre", "Téléchargement du modèle…", travail, annulable=True)
+    assert (res, err) == ("fini", "") and erreurs == []
+    assert all(0 < m < 2 ** 31 for m in appels["max"] if m) and 6962 in appels["max"] and 0 in appels["max"]       # en Mo ; 0 = barre « en attente » pendant la vérification
+    assert 3072 in appels["val"]                                                                              # 3 Go reçus = 3 072 Mo
+    texte = "\n".join(appels["texte"])
+    assert "Connexion au serveur" in texte and "(44 %)" in texte and "Mo /" in texte and "Vérification de la somme de contrôle" in texte
+    _sys.modules.pop("trad_init_reel", None)
+
+
+def test_notification_apres_un_telechargement_reussi(fen, monkeypatch, tmp_path):
+    monkeypatch.setattr(mod().QMessageBox, "question", lambda *a, **k: mod().QMessageBox.StandardButton.Yes)
+    monkeypatch.setattr(mod(), "en_arriere_plan", lambda *a, **k: (tmp_path / "m.gguf", ""))
+    assert plugin(fen).telecharger_modele("12b") == str(tmp_path / "m.gguf")
+    assert "Meilleur (12B)" in fen.statusBar().currentMessage() and "téléchargé et vérifié" in fen.statusBar().currentMessage()
+    monkeypatch.setattr(mod(), "en_arriere_plan", lambda *a, **k: (None, "annulé"))
+    fen.statusBar().clearMessage()
+    assert plugin(fen).telecharger_modele("12b") is None and fen.statusBar().currentMessage() == ""             # annulé : pas de fausse bonne nouvelle

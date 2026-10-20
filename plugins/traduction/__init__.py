@@ -8,6 +8,7 @@
   téléchargement sans votre accord, avec taille et provenance affichées. (Argos Translate a été retiré : il exige PyTorch.)
 """
 import threading
+import time
 from pathlib import Path
 
 from PyQt6.QtCore import QEventLoop, QObject, QUrl, pyqtSignal
@@ -34,7 +35,7 @@ def _taille(octets: int) -> str:
 
 class _Pont(QObject):
     """Ramène dans le fil de l'interface ce qui se passe dans un fil de travail."""
-    progression = pyqtSignal(int, int)
+    progression = pyqtSignal(object, object)       # « object » : un entier Qt de 32 bits déformerait les tailles de plus de 2 Go
     etat = pyqtSignal(str)
     fini = pyqtSignal(object, str)          # (résultat, erreur) ; erreur "" = réussi
 
@@ -47,19 +48,24 @@ def _emettre(signal, *args):
 
 
 def en_arriere_plan(titre: str, message: str, fonction, annulable: bool = False, parent=None):
-    """Exécute fonction(annuler: threading.Event, progression) dans un fil, avec une fenêtre d'attente. (résultat, erreur)."""
+    """Exécute fonction(annuler: threading.Event, progression) dans un fil, avec une fenêtre qui dit où on en est. (résultat, erreur).
+    `progression(fait, total)` met à jour la barre (en Mo : la barre de Qt n'accepte que des entiers de 32 bits) avec pourcentage,
+    débit et temps restant ; `progression.etat(texte)` annonce une étape (ex. « Vérification… »)."""
     dlg = QProgressDialog(message, _("Annuler") if annulable else None, 0, 0, parent or _parent())
     dlg.setWindowTitle(titre)
     dlg.setMinimumDuration(0)
     dlg.setAutoClose(False)
     dlg.setAutoReset(False)
+    dlg.setMinimumWidth(460)
     annuler = threading.Event()
     pont = _Pont()
     boucle = QEventLoop()
     sortie = {}
+    suivi = {"base": None, "debut": time.time()}
 
     def progression(fait, total):
         _emettre(pont.progression, int(fait), int(total))
+    progression.etat = lambda texte: _emettre(pont.etat, str(texte))
 
     def travail():
         try:
@@ -71,11 +77,28 @@ def en_arriere_plan(titre: str, message: str, fonction, annulable: bool = False,
         _emettre(pont.fini, None, "")
 
     def maj(fait, total):
-        if total > 0:
-            dlg.setMaximum(total)
-            dlg.setValue(min(fait, total))
-            dlg.setLabelText(f"{message}\n{_taille(fait)} / {_taille(total)}" if total > 1e6 else message)
+        try:
+            if total > 0:
+                if suivi["base"] is None:
+                    suivi["base"], suivi["debut"] = fait, time.time()
+                mo = 1048576
+                maxi = max(1, total // mo)
+                dlg.setMaximum(maxi)
+                dlg.setValue(min(fait // mo, maxi))
+                dlg.setLabelText(f"{suivi.get('etat') or message}\n{logique.progression_texte(fait, total, time.time() - suivi['debut'], suivi['base'])}")
+        except Exception:                                  # une erreur d'affichage ne doit jamais interrompre le travail
+            pass
+
+    def etape(texte):
+        try:
+            suivi["etat"] = texte if "Vérification" not in texte else None
+            dlg.setLabelText(texte)
+            if "Vérification" in texte:
+                dlg.setMaximum(0)                          # durée inconnue : barre « en attente »
+        except Exception:
+            pass
     pont.progression.connect(maj)
+    pont.etat.connect(etape)
     pont.fini.connect(lambda *_a: boucle.quit())
     dlg.canceled.connect(annuler.set)
     threading.Thread(target=travail, daemon=True).start()
@@ -601,14 +624,16 @@ class TraductionPlugin(Plugin):
                   "Destination : %(d)s\n\nLa somme de contrôle SHA-256 est vérifiée. Télécharger maintenant ?")
                 % {"n": m["libelle"], "t": _taille(m["taille"]), "u": m["url"], "d": dossier}) != QMessageBox.StandardButton.Yes:
             return None
-        chemin, err = en_arriere_plan(_("Modèle de traduction"), _("Téléchargement du modèle…"),
+        chemin, err = en_arriere_plan(_("Modèle de traduction : %s") % m["libelle"], _("Téléchargement de %(n)s (%(t)s)…") % {"n": m["nom"], "t": _taille(m["taille"])},
                                       lambda annuler, prog: logique.telecharger_modele(dossier, m["url"], m["nom"], m["sha256"], m["taille"],
-                                                                                        progression=prog, annuler=annuler.is_set),
+                                                                                        progression=prog, annuler=annuler.is_set,
+                                                                                        etat=getattr(prog, "etat", None)),
                                       annulable=True)
         if err:
             if err != "annulé":
                 QMessageBox.warning(_parent(), _("Modèle de traduction"), err)
             return None
+        self.ctx.ui.notifier(_("Traduction"), _("Modèle « %s » téléchargé et vérifié.") % m["libelle"])
         return str(chemin)
 
     def tester_llama(self):
