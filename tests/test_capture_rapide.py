@@ -9,6 +9,7 @@ os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
 pytest.importorskip("PyQt6")
 from PyQt6.QtWidgets import QApplication  # noqa: E402
 
+from scrinium.i18n import _  # noqa: E402
 from scrinium.ui import capture_rapide as cr  # noqa: E402
 from scrinium.ui import instance  # noqa: E402
 from tests.test_ui import app, fen  # noqa: E402,F401,F811
@@ -71,4 +72,44 @@ def test_sans_instance_demander_capture_est_faux(monkeypatch):
 
 
 def test_titre_par_defaut():
-    assert cr.TITRE_DEFAUT == "Notes rapides"
+    assert _(cr.TITRE_DEFAUT) == "Notes rapides"
+
+
+def test_theme_propose_meme_inexistant_et_cree_a_l_enregistrement(fen):  # noqa: F811
+    fen.capture_rapide()
+    d = fen._capture
+    assert d.theme.currentText() == _(cr.THEME_DEFAUT) and fen.store.theme(_(cr.THEME_DEFAUT)) is None     # proposé, pas encore créé
+    d.texte.setPlainText("une note")
+    assert d.enregistrer()
+    th = fen.store.theme(_(cr.THEME_DEFAUT))
+    assert th is not None and any("une note" in (f.texte or "") for f in th.fiches)
+    fen.capture_rapide()
+    assert fen._capture.theme.currentText() == _(cr.THEME_DEFAUT)                                          # retenu, et listé une seule fois
+    assert [fen._capture.theme.itemText(i) for i in range(fen._capture.theme.count())].count(_(cr.THEME_DEFAUT)) == 1
+
+
+def test_theme_tape_a_la_main_est_cree_sans_doublon_de_casse(fen):  # noqa: F811
+    nb = len(fen.store.themes)
+    fen.capture_rapide()
+    d = fen._capture
+    d.theme.setEditText("perso")                     # existe sous le nom « Perso » : pas de nouveau thème
+    d.fiche.setEditText("x")
+    d.texte.setPlainText("a")
+    assert d.enregistrer() and len(fen.store.themes) == nb
+    fen.capture_rapide()
+    d = fen._capture
+    d.theme.setEditText("Projet Neuf")
+    d.fiche.setEditText("x")
+    d.texte.setPlainText("b")
+    assert d.enregistrer() and fen.store.theme("Projet Neuf") is not None and len(fen.store.themes) == nb + 1
+
+
+def test_pas_de_theme_cree_si_rien_a_enregistrer(fen):  # noqa: F811
+    nb = len(fen.store.themes)
+    fen.capture_rapide()
+    d = fen._capture
+    d.theme.setEditText("Fantôme")
+    assert not d.enregistrer()                       # texte vide
+    d.texte.setPlainText("t")
+    d.fiche.setEditText("  ")
+    assert not d.enregistrer() and len(fen.store.themes) == nb and fen.store.theme("Fantôme") is None
