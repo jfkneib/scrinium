@@ -161,12 +161,12 @@ msgid "Exécution…"
 msgstr ""
 
 #: plugins/capture/__init__.py:152
-msgid "Modifier les actions…"
+msgid "Modifier les actions CLI…"
 msgstr ""
 
 #: plugins/capture/__init__.py:177
 #: plugins/capture/__init__.py:218
-msgid "Action"
+msgid "Action CLI"
 msgstr ""
 
 #: plugins/capture/__init__.py:182
@@ -199,7 +199,7 @@ msgid "Description :"
 msgstr ""
 
 #: plugins/capture/__init__.py:233
-msgid "Actions préparées"
+msgid "Actions CLI préparées"
 msgstr ""
 
 #: plugins/capture/__init__.py:292
@@ -207,15 +207,15 @@ msgid "Exemples"
 msgstr ""
 
 #: plugins/capture/__init__.py:292
-msgid "Ajouter les actions d'exemple à la fin de la liste ? (Aucune n'est lancée.)"
+msgid "Ajouter les actions CLI d'exemple à la fin de la liste ? (Aucune n'est lancée.)"
 msgstr ""
 
 #: plugins/capture/__init__.py:300
-msgid "Exporter les actions"
+msgid "Exporter les actions CLI"
 msgstr ""
 
 #: plugins/capture/__init__.py:308
-msgid "Importer des actions"
+msgid "Importer des actions CLI"
 msgstr ""
 
 #: plugins/capture/__init__.py:326
@@ -233,7 +233,7 @@ msgstr ""
 #: plugins/capture/__init__.py:361
 #: plugins/capture/__init__.py:363
 #: plugins/capture/__init__.py:403
-msgid "Actions"
+msgid "Actions CLI"
 msgstr ""
 
 #: plugins/capture/__init__.py:369
@@ -259,7 +259,7 @@ msgid "Exécuter une commande et insérer la sortie…"
 msgstr ""
 
 #: plugins/capture/__init__.py:374
-msgid "Modifier les actions préparées…"
+msgid "Modifier les actions CLI préparées…"
 msgstr ""
 
 #: plugins/capture/__init__.py:375
@@ -333,11 +333,11 @@ msgid "Importer"
 msgstr ""
 
 #: plugins/capture/__init__.py:362
-msgid "Panneau des actions"
+msgid "Panneau des actions CLI"
 msgstr ""
 
 #: plugins/capture/__init__.py:367
-msgid "Afficher ou masquer le panneau des actions préparées"
+msgid "Afficher ou masquer le panneau des actions CLI préparées"
 msgstr ""
 
 #: plugins/capture/__init__.py:419
@@ -359,7 +359,7 @@ msgid "La commande est lancée par votre shell, uniquement quand vous cliquez su
 msgstr ""
 
 #: plugins/capture/__init__.py:316
-msgid "Ajouter %d action(s) à la liste ? Relisez leurs commandes avant de les utiliser."
+msgid "Ajouter %d action(s) CLI à la liste ? Relisez leurs commandes avant de les utiliser."
 msgstr ""
 
 #: plugins/capture/__init__.py:403
@@ -2055,6 +2055,10 @@ msgstr ""
 #: src/scrinium/ui/fenetre.py:496
 #: src/scrinium/ui/fenetre.py:555
 msgid "Scrinium"
+msgstr ""
+
+#: src/scrinium/ui/fenetre.py:69
+msgid "Actions"
 msgstr ""
 
 #: src/scrinium/ui/fenetre.py:75

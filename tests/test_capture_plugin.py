@@ -434,7 +434,7 @@ def test_panneau_liste_les_exemples_avec_infobulles(fen):
     it = next(p.panneau.liste.item(i) for i in range(p.panneau.liste.count()) if p.panneau.liste.item(i).text() == "Disques")
     tip = it.toolTip()
     assert "df -h" in tip and "Espace disque" in tip and "confirmation" in tip                          # commande, description, mode
-    assert p.dock.windowTitle() == "Actions"
+    assert p.dock.windowTitle() == "Actions CLI"
 
 
 def test_infobulle_echappe_le_html():
@@ -552,7 +552,7 @@ def test_panneau_ferme_se_rouvre_par_la_barre_et_le_menu(fen, app):
     p = plugin(fen)
     fen.show()
     app.processEvents()
-    barre = next(a for a in fen.barre.actions() if a.text() == "Actions")                              # bouton visible dans la barre
+    barre = next(a for a in fen.barre.actions() if a.text() == "Actions CLI")                              # bouton visible dans la barre
     menu = next(a for a in fen.menu_ext.actions() if a.text() == "Panneau des actions")
     assert barre.isCheckable() and barre.isChecked() and menu.isChecked() and not p.dock.isHidden()
     assert fen.menu_ext.actions()[2].text() == "Panneau des actions"                                   # en tête du menu (après « Gérer… » et le séparateur)
@@ -573,7 +573,7 @@ def test_fenetre_reduite_ne_decoche_pas_le_bouton(fen, app):
     p = plugin(fen)
     fen.show()
     app.processEvents()
-    barre = next(a for a in fen.barre.actions() if a.text() == "Actions")
+    barre = next(a for a in fen.barre.actions() if a.text() == "Actions CLI")
     fen.hide()
     app.processEvents()
     assert barre.isChecked() and not p.dock.isHidden()                                                  # fenêtre cachée ≠ panneau fermé
