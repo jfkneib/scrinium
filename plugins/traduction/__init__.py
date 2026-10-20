@@ -86,11 +86,13 @@ def en_arriere_plan(titre: str, message: str, fonction, annulable: bool = False,
 
 
 # Avantages et inconvénients montrés au choix du modèle. Chiffres MESURÉS le 2026-10-20 (RTX 3070 8 Go, processeur 16 cœurs) :
-# 4B ≈ 106 mots-morceaux/s sur la carte, ≈ 10/s sur le processeur ; 12B ≈ 7/s (carte de 8 Go : modèle réparti), ≈ 3/s sur le processeur.
+# 4B ≈ 106 mots-morceaux/s sur la carte, ≈ 10/s sur le processeur récent (16 threads), ≈ 7 à 8/s sur un i7-7500U (2017) et un i5-3570 (2012) ;
+# 12B ≈ 7/s (carte de 8 Go : modèle réparti), ≈ 3/s sur le processeur. Mémoire maximale du 4B : 3,1 / 4,4 / 4,6 Go.
 DESCRIPTIONS = {
-    "4b": ([_("Léger : 2,49 Go à télécharger, environ 4,4 Go de mémoire."),
-            _("Très rapide : moins d'une seconde par paragraphe avec une carte graphique, 3 à 5 secondes sur un processeur récent."),
-            _("Convient aux machines modestes.")],
+    "4b": ([_("Léger : 2,49 Go à télécharger, 3 à 5 Go de mémoire (mesuré sur trois machines)."),
+            _("Très rapide avec une carte graphique (moins d'une seconde par paragraphe), 3 à 5 secondes sur un processeur récent."),
+            _("Tourne même sur de vieilles machines sans carte graphique : environ 14 à 15 secondes pour deux phrases sur un i7 de 2017 "
+              "et sur un i5 de 2012.")],
            [_("Qualité correcte pour des textes simples ou techniques, mais il se trompe sur les nuances, les accords et le style "
               "littéraire (essai réel : « son détresse », « vague de confusion » pour « shiver of incomprehension »).")]),
     "12b": ([_("Nettement plus fidèle aux nuances, aux accords et au style : la phrase littéraire d'essai est traduite correctement.")],
@@ -127,7 +129,7 @@ class DialogueChoixModele(QDialog):
                                                                          "c": _libelle_modele(self.conseil)})
         machine.setWordWrap(True)
         lay.addWidget(machine)
-        self.radios = {}
+        self.radios, self.alertes = {}, {}
         courant = plugin.modele_choisi() or self.conseil
         for cle in (*logique.MODELES, logique.CHOIX_PERSO):
             plus, moins = DESCRIPTIONS[cle]
@@ -140,7 +142,11 @@ class DialogueChoixModele(QDialog):
             radio.setFont(f)
             radio.setChecked(cle == courant)
             self.radios[cle] = radio
-            detail = QLabel("<ul style='margin:0'>" + "".join(f"<li>✔ {x}</li>" for x in plus) + "".join(f"<li>✘ {x}</li>" for x in moins) + "</ul>")
+            alerte = logique.avertissement_modele(self.mat, cle)
+            self.alertes[cle] = alerte
+            if alerte:
+                radio.setText(radio.text() + "  ⚠")
+            detail = QLabel(("<p style='color:#c0392b'><b>⚠ " + alerte + "</b></p>" if alerte else "") + "<ul style='margin:0'>" + "".join(f"<li>✔ {x}</li>" for x in plus) + "".join(f"<li>✘ {x}</li>" for x in moins) + "</ul>")
             detail.setWordWrap(True)
             lay.addWidget(radio)
             lay.addWidget(detail)
@@ -156,6 +162,9 @@ class DialogueChoixModele(QDialog):
         return next((cle for cle, r in self.radios.items() if r.isChecked()), self.conseil)
 
     def _valider(self):
+        alerte = self.alertes.get(self.choix(), "")
+        if alerte and QMessageBox.question(self, _("Machine juste"), alerte + "\n\n" + _("Choisir quand même ?")) != QMessageBox.StandardButton.Yes:
+            return
         if self.choix() == logique.CHOIX_PERSO:
             chemin, _f = QFileDialog.getOpenFileName(self, _("Modèle .gguf"), "", "GGUF (*.gguf)")
             if not chemin:
