@@ -6,10 +6,16 @@ Légende : ☐ à faire · ◐ en cours · ✔ fait. Ordre = priorité proposée
 - ✔ Dépôt `jfkneib/scrinium` ; releases `v0.1.0` (2026-10-15) et **`v0.2.0` (2026-10-20)** avec le `.deb` et `SHA256SUMS` ; `.deb` testé sur Debian 13 (VM neuve, snapshot `propre`) et installé sur Ubuntu 26.04 (2 machines)
 - ✔ v0.2 : plugins livrés dans le `.deb` (dossier `plugins_officiels`, désactivés par défaut), README FR/EN, page `man` (`add`, `rescue open --images`), traductions anglaises complètes (`outils/i18n.py`, test de complétude)
 - ✔ GitHub Actions écrits (`.github/workflows/tests.yml` : tests sur Python 3.10 / 3.12 / 3.13, vert ; `paquet-deb.yml` : `.deb` + `SHA256SUMS` dans une release **brouillon** à chaque tag) · ☐ le workflow du `.deb` n'a **jamais tourné** (premier vrai tag de la v0.3)
-- ☐ **Release v0.3** : numéro de version (`__init__.py`, `debian/changelog`, man, README), build du `.deb`, test sur la VM, **demander avant de publier**. Contenu déjà sur `dev` : agenda, applications, lecture à voix haute, aperçu Markdown, navigateur des liens, capture rapide, « Actions CLI », CI
+- ◐ **Release v0.3.0** (2026-10-21) : version 0.3.0 (code, changelog, man, README), `main` fusionné, **tag `v0.3.0` poussé**, `.deb` construit à la main et testé sur la VM Debian 13, release créée en **brouillon** (`.deb` + `SHA256SUMS`) · ☐ **publier le brouillon** (action de l'utilisateur sur le site) · ☐ télécharger le `.deb` publié, vérifier `SHA256SUMS`, l'installer sur l'XPS (0.1.0 aujourd'hui) pour valider code + paquet · ☐ relancer le workflow `.deb` depuis l'onglet Actions (*Run workflow*, tag `v0.3.0`) : le jeton en ligne de commande n'a pas le droit de le déclencher ; son premier essai a échoué (`build-essential` manquant, corrigé)
 - ☐ Installateur Windows : PyInstaller + **NSIS** (voir section 4) ; une VM Windows est nécessaire pour l'essayer
 - ☐ Tester sur Ubuntu 24.04 LTS et Debian 12 · ☐ capture d'écran dans le README
 - ☐ Revue de sécurité (chiffrement, fichier de secours, plugins qui lancent des commandes, liens de l'aperçu) · ☐ essai avec un parc de ~5 000 fiches (démarrage, recherche, liste)
+
+## Inviter à installer Scrinium (idée du 2026-10-21)
+- ✔ Brouillon de la fiche personnelle : `doc_jfk/invitation-scrinium.md` (dossier local non publié) : présentation, installation Debian/Ubuntu avec vérification de la somme de contrôle, autres Linux (`install.sh`), message provisoire Windows/macOS, premier lancement, extensions ; à coller dans une fiche puis à envoyer avec le plugin courriel
+- ☐ Fiche livrée dans Scrinium : 6e fiche du thème « Bienvenue » (« Inviter quelqu'un ») + entrée de menu (*Fichier → Inviter à installer…*) qui crée la fiche depuis un modèle et ouvre l'envoi par courriel avec sujet prérempli (le thème Bienvenue n'est vu que par les nouveaux utilisateurs : le menu sert aux autres) · FR/EN à décider
+- ☐ Nom de fichier **stable** pour le `.deb` dans les releases (`scrinium_latest_all.deb` → `releases/latest/download/…`) pour que les liens ne citent plus de numéro de version ; script `install-scrinium.sh` (détecte le système, installe, propose d'activer les extensions une par une)
+- ☐ Windows et macOS : texte provisoire jusqu'à l'installateur NSIS (section 4) ; l'e-mail ne peut pas installer à la place du destinataire, il explique et fournit les liens
 
 ## Plugins : où en est-on (2026-10-21)
 ✔ faits et essayés : `ocr`, `dictee`, `courriel`, `capture` (« Actions CLI »), `traduction`, `agenda`, `applications`, `lecture` (Piper + espeak-ng, essayé par l'utilisateur) · ☐ à venir : transports de synchronisation (`sync-webdav`, `sync-git`, `sync-lan`, après le chantier du cœur, section 3 quater) · OCR « intelligent » via Ollama · dictée Vosk · tmux dans la capture.
@@ -102,6 +108,9 @@ Traduire la sélection (ou toute la fiche) ; fenêtre de résultat : **insérer 
 
 
 ## 3 quater. Partage de fiches et synchronisation (à prévoir tôt : touche au cœur)
+**Décidé le 2026-10-21 : c'est le chantier de la prochaine version (v0.4), en deux volets, dans cet ordre :**
+- ☐ **(a) Synchroniser ses propres PC** (XPS, Inspiron, OptiPlex) : un dossier synchronisé par un outil externe (Syncthing, Nextcloud/WebDAV) puis plugins de transport ; le cœur ne connaît que des dossiers ; conflits jamais écrasés en silence ; fiches verrouillées sans risque (chiffrées), fiches en clair avertissement
+- ☐ **(b) Partager des thèmes avec d'autres personnes** (serveur cloud de fiches) : identités, droits par thème, qui a modifié quoi, clé de secours par utilisateur, conflits ; beaucoup plus gros, après le (a)
 Partager des fiches entre machines et/ou personnes : dépôt sur le réseau local (SMB/NFS/dossier partagé), cloud (Nextcloud/WebDAV, Syncthing, Dropbox…) ou dépôt git.
 - ☐ **Plusieurs dépôts de fiches** : aujourd'hui `Store` a un seul dossier racine. Prévoir une liste de « dépôts » (personnel + partagés), chacun avec son dossier, ses thèmes, son éventuel fichier de secours (`recovery.pub` par dépôt, pas global). À concevoir AVANT la v0.2 pour ne pas casser le format.
 - ☐ Un thème (ou un dépôt) peut être **partagé** : indicateur dans la liste, réglage « dossier partagé » (chemin local d'un montage réseau, ou dossier synchronisé)
