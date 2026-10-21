@@ -10,7 +10,7 @@
 from datetime import datetime, timedelta
 
 from PyQt6.QtCore import QDate, QTime, Qt
-from PyQt6.QtWidgets import (QApplication, QCheckBox, QDateEdit, QDialog, QDialogButtonBox, QFormLayout, QHBoxLayout,
+from PyQt6.QtWidgets import (QApplication, QCheckBox, QComboBox, QDateEdit, QDialog, QDialogButtonBox, QFormLayout, QHBoxLayout,
                              QLabel, QLineEdit, QListWidget, QListWidgetItem, QMessageBox, QPushButton, QTimeEdit, QVBoxLayout)
 
 from scrinium.core.plugins import Plugin
@@ -36,7 +36,7 @@ class DialogueEvenement(QDialog):
         self.date.setCalendarPopup(True)
         self.heure = QTimeEdit()
         self.heure.setDisplayFormat("HH:mm")
-        d = logique.en_date((e or {}).get("quand", "")) or (datetime.now() + timedelta(hours=1))
+        d = logique.en_date((e or {}).get("ancre") or (e or {}).get("quand", "")) or (datetime.now() + timedelta(hours=1))
         self.date.setDate(QDate(d.year, d.month, d.day))
         self.heure.setTime(QTime(d.hour, d.minute))
         lay.addRow(_("Titre"), self.titre)
@@ -49,6 +49,12 @@ class DialogueEvenement(QDialog):
             b.clicked.connect(fn)
             rapide.addWidget(b)
         lay.addRow(rapide)
+        self.repete = QComboBox()
+        for cle, libelle in logique.REPETITIONS.items():
+            self.repete.addItem(_(libelle), cle)
+        self.repete.setCurrentIndex(max(0, self.repete.findData((e or {}).get("repete", ""))))
+        self.repete.setToolTip(_("La date ci-dessus est celle de départ ; Scrinium annonce ensuite chaque occurrence."))
+        lay.addRow(_("Répéter"), self.repete)
         self.son = QCheckBox(_("Jouer un son au rappel"))
         self.son.setChecked((e or {}).get("son", True))
         lay.addRow(self.son)
@@ -85,7 +91,7 @@ class DialogueEvenement(QDialog):
 
     def resultat(self) -> tuple:
         fiche = self._fiche if self.lier is not None and self.lier.isChecked() else None
-        return self.titre.text(), self.quand(), fiche, self.son.isChecked()
+        return self.titre.text(), self.quand(), fiche, self.son.isChecked(), self.repete.currentData()
 
 
 class RappelPopup(QDialog):
@@ -118,11 +124,16 @@ class RappelPopup(QDialog):
             QMessageBox.information(self, _("Agenda"), _("Cette fiche n'existe plus ou est verrouillée."))
 
     def _repousser(self):
-        self.p.repousser(self.e["id"], 10)
+        if self.e["repete"]:          # la série a déjà avancé : le report est un rappel isolé, la série n'est pas décalée
+            self.p.ajouter(self.e["titre"], (datetime.now() + timedelta(minutes=10)).replace(second=0, microsecond=0),
+                           self.e["fiche"], self.e["son"])
+        else:
+            self.p.repousser(self.e["id"], 10)
         self.close()
 
     def _fait(self):
-        self.p.marquer_fait(self.e["id"])
+        if not self.e["repete"]:      # une série n'est jamais « terminée » : son occurrence suivante est déjà programmée
+            self.p.marquer_fait(self.e["id"])
         self.close()
 
 
@@ -159,7 +170,8 @@ class DialogueAgenda(QDialog):
             d = logique.en_date(e["quand"])
             lien = f"   ·   {e['fiche']['theme']} / {e['fiche']['titre']}" if e["fiche"] else ""
             etat = "✓" if e["fait"] else logique.delai_texte(d, maintenant)
-            it = QListWidgetItem(f"{e['quand']}   ({etat})   {e['titre']}{lien}")
+            serie = f"   ↻ {_(logique.REPETITIONS[e['repete']]).lower()}" if e["repete"] else ""
+            it = QListWidgetItem(f"{e['quand']}   ({etat})   {e['titre']}{serie}{lien}")
             it.setData(Qt.ItemDataRole.UserRole, e["id"])
             self.liste.addItem(it)
         self.vide.setVisible(self.liste.count() == 0)
@@ -216,14 +228,14 @@ class AgendaPlugin(Plugin):
     def _sauver(self, evenements: list):
         self.ctx.reglages.set("evenements", evenements)
 
-    def ajouter(self, titre, quand, fiche=None, son=True):
+    def ajouter(self, titre, quand, fiche=None, son=True, repete=""):
         evs = self.evenements()
-        logique.ajouter(evs, titre, quand, fiche, son=son)
+        logique.ajouter(evs, titre, quand, fiche, son=son, repete=repete)
         self._sauver(evs)
 
-    def remplacer(self, id_, titre, quand, fiche=None, son=True):
+    def remplacer(self, id_, titre, quand, fiche=None, son=True, repete=""):
         evs = [e for e in self.evenements() if e["id"] != id_]
-        logique.ajouter(evs, titre, quand, fiche, id_, son)       # même identifiant ; « notifie » repart à zéro
+        logique.ajouter(evs, titre, quand, fiche, id_, son, repete)       # même identifiant ; « notifie » repart à zéro
         self._sauver(evs)
 
     def _modifier(self, id_, fn):
@@ -279,9 +291,12 @@ class AgendaPlugin(Plugin):
             retard = maintenant - d
             suffixe = f" ({logique.delai_texte(d, maintenant)})" if retard.total_seconds() > 120 else ""
             self.ctx.ui.notifier(_("Rappel"), f"{e['titre']}{suffixe}")
-            e["notifie"] = True
             if e["son"] and not logique.jouer_son() and QApplication.instance() is not None:
                 QApplication.beep()
             self._popup(e)
+            if e["repete"]:
+                logique.avancer(e, maintenant)       # prochaine occurrence ; une série manquée longtemps = une seule alerte
+            else:
+                e["notifie"] = True
         if dus:
             self._sauver(evs)

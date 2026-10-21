@@ -39,7 +39,8 @@ Une fiche peut contenir une ou plusieurs images, en plus du texte ou à sa place
 
 ## 2. Plugin `agenda` : rappels (fait ; reste : répétitions, calendrier)
 - ✔ `plugins/agenda/` (2026-10-21, `dev`) : événements datés, liés ou non à une fiche **non verrouillée** (jamais de lien vers une fiche verrouillée : son titre resterait lisible dans les réglages) ; fenêtre « Agenda » ; date et heure séparées avec raccourcis (+10 min, +1 h, demain 9:00) ; notification + fenêtre de rappel au premier plan (« Ouvrir la fiche », « Repousser de 10 min », « Fait ») ; son facultatif par événement ; événements manqués annoncés au démarrage (« en retard ») ; stockage dans les réglages du plugin ; 10 tests
-- ☐ Répétitions (quotidien, hebdo, mensuel, annuel — anniversaires), durées de report au choix, clic sur la notification système (l'API `notifier` n'a pas de rappel), petit calendrier (`QCalendarWidget`, jours avec rappels en gras), export `.ics`
+- ✔ Répétitions (2026-10-21, `dev`) : jamais / chaque jour / semaine / mois / année ; l'événement garde sa date de départ (`ancre`) et son échéance est la prochaine occurrence (fin de mois : le 31 devient 30/28/29, pas de dérive ; 29 février → 28) ; une série manquée longtemps ne donne qu'une alerte ; un anniversaire passé reçoit tout de suite sa prochaine occurrence sans alerte ; « Repousser » sur une série crée un rappel isolé, « Fait » ne termine pas la série. 7 tests de plus (17)
+- ☐ Jours ouvrés / intervalles (toutes les 2 semaines), fin de série, âge dans le titre d'un anniversaire · ☐ durées de report au choix, clic sur la notification système (l'API `notifier` n'a pas de rappel), petit calendrier (`QCalendarWidget`, jours avec rappels en gras), export `.ics`
 - ☐ Import des anniversaires du thème « Anniversaires » (idée)
 
 ## 3. Plugin `ocr` : texte des images (fait ; reste : Ollama, clic droit)
