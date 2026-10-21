@@ -173,9 +173,115 @@ def test_dialogues_se_construisent():
     assert dlg.liste.count() == 1 and "Réunion" in dlg.liste.item(0).text() and dlg.vide.isHidden()
     d = mod.DialogueEvenement(None, fiche=p.fiche_liable())
     d.titre.setText("Nouveau")
-    titre, quand, lien, son = d.resultat()
-    assert titre == "Nouveau" and lien == {"theme": "T", "titre": "Libre"} and son is True and quand.second == 0
+    titre, quand, lien, son, repete = d.resultat()
+    assert titre == "Nouveau" and lien == {"theme": "T", "titre": "Libre"} and son is True and repete == "" and quand.second == 0
     d._demain()
     assert d.quand().hour == 9 and d.quand().date() == (datetime.now() + timedelta(days=1)).date()
     d._dans(hours=1)
     assert timedelta(minutes=58) < d.quand() - datetime.now() < timedelta(minutes=62)
+
+
+# ---------- répétitions ----------
+def dt(texte):
+    return datetime.strptime(texte, "%Y-%m-%d %H:%M")
+
+
+def test_occurrences_et_fins_de_mois():
+    a = dt("2026-01-31 09:00")
+    assert lg.occurrence(a, "jour", 3) == dt("2026-02-03 09:00") and lg.occurrence(a, "semaine", 2) == dt("2026-02-14 09:00")
+    assert [lg.occurrence(a, "mois", n) for n in (1, 2, 13)] == [dt("2026-02-28 09:00"), dt("2026-03-31 09:00"), dt("2027-02-28 09:00")]
+    assert lg.occurrence(dt("2028-01-31 09:00"), "mois", 1) == dt("2028-02-29 09:00")                      # année bissextile
+    bissextile = dt("2024-02-29 08:00")
+    assert lg.occurrence(bissextile, "annee", 1) == dt("2025-02-28 08:00") and lg.occurrence(bissextile, "annee", 4) == bissextile.replace(year=2028)
+
+
+def test_prochaine_strictement_apres_sans_derive():
+    a = dt("2026-01-31 09:00")
+    assert lg.prochaine(a, "mois", dt("2026-01-31 09:00")) == dt("2026-02-28 09:00")                       # strictement après
+    assert lg.prochaine(a, "mois", dt("2026-03-15 12:00")) == dt("2026-03-31 09:00")                       # le 31 revient : pas de dérive au 28
+    assert lg.prochaine(a, "jour", dt("2026-01-31 09:00")) == dt("2026-02-01 09:00")
+    assert lg.prochaine(a, "semaine", dt("2026-01-31 09:01")) == dt("2026-02-07 09:00")
+    assert lg.prochaine(dt("2020-03-12 09:00"), "annee", dt("2026-10-21 10:00")) == dt("2027-03-12 09:00")
+    assert lg.prochaine(dt("2020-03-12 09:00"), "annee", dt("2026-03-12 08:00")) == dt("2026-03-12 09:00")
+    assert lg.prochaine(a, "", dt("2030-01-01 00:00")) == a and lg.prochaine(a, "jour", dt("2025-01-01 00:00")) == a      # série pas commencée
+    assert lg.prochaine(dt("2000-01-01 06:30"), "jour", dt("2026-10-21 07:00")) == dt("2026-10-22 06:30")                  # longue série
+
+
+def test_normaliser_repetition():
+    n = lg.normaliser({"titre": "x", "quand": "2026-10-21 09:00", "repete": "mois", "ancre": "2026-01-05 09:00"})
+    assert n["repete"] == "mois" and n["ancre"] == "2026-01-05 09:00"
+    assert lg.normaliser({"titre": "x", "quand": "2026-10-21 09:00", "repete": "toutes les lunes"})["repete"] == ""
+    sans = lg.normaliser({"titre": "x", "quand": "2026-10-21 09:00", "ancre": "2020-01-01 00:00"})
+    assert sans["repete"] == "" and sans["ancre"] == "2026-10-21 09:00"            # sans répétition, l'ancre ne sert à rien
+    assert lg.normaliser({"titre": "x", "quand": "2026-10-21 09:00", "repete": "mois"})["ancre"] == "2026-10-21 09:00"
+
+
+def test_anniversaire_passe_recoit_sa_prochaine_occurrence_sans_alerte():
+    evs = []
+    now = dt("2026-10-21 10:00")
+    e = lg.ajouter(evs, "Anniversaire", dt("1985-03-12 09:00"), repete="annee", maintenant=now)
+    assert e["quand"] == "2027-03-12 09:00" and e["ancre"] == "1985-03-12 09:00" and lg.a_notifier(evs, now) == []
+    unique = lg.ajouter(evs, "Passé", dt("2026-10-01 09:00"), maintenant=now)
+    assert unique["quand"] == "2026-10-01 09:00"                                   # un événement unique passé reste « en retard »
+
+
+def test_serie_alertee_une_fois_puis_avance(silence):
+    app = QApplication.instance() or QApplication([])
+    assert app
+    ctx, notes, _o = faux_ctx()
+    p = mod.AgendaPlugin()
+    p.activer(ctx)
+    maintenant = datetime.now().replace(second=0, microsecond=0)
+    ancre = maintenant - timedelta(days=10, minutes=1)                 # série quotidienne : 10 occurrences manquées
+    evs = p.evenements()
+    e = lg.ajouter(evs, "Boire de l'eau", ancre, repete="jour", maintenant=ancre - timedelta(seconds=1))
+    e["quand"] = lg.en_texte(ancre)
+    p._sauver(evs)
+    p.verifier()
+    p.verifier()
+    assert len(notes) == 1                                             # une seule alerte malgré les occurrences manquées
+    suivant = p.evenements()[0]
+    assert dt(suivant["quand"]) > maintenant and not suivant["notifie"] and suivant["ancre"] == lg.en_texte(ancre)
+    assert dt(suivant["quand"]) - maintenant <= timedelta(days=1)
+
+
+def test_popup_d_une_serie_repousse_en_rappel_isole_et_fait_ne_termine_pas_la_serie(silence):
+    app = QApplication.instance() or QApplication([])
+    assert app
+    ctx, _n, _o = faux_ctx()
+    p = mod.AgendaPlugin()
+    p.activer(ctx)
+    ancre = datetime.now().replace(second=0, microsecond=0) - timedelta(minutes=1)
+    evs = []
+    lg.ajouter(evs, "Hebdo", ancre, repete="semaine", maintenant=ancre - timedelta(seconds=1))
+    p._sauver(evs)
+    p.verifier()
+    serie = p.evenements()[0]
+    assert serie["repete"] == "semaine" and dt(serie["quand"]) == ancre + timedelta(weeks=1)
+    popup = p.popups[0]
+    popup._repousser()
+    assert len(p.evenements()) == 2                                    # la série + un rappel isolé dans 10 minutes
+    isole = next(e for e in p.evenements() if not e["repete"])
+    assert timedelta(minutes=8) < dt(isole["quand"]) - datetime.now() < timedelta(minutes=11)
+    reste = next(e for e in p.evenements() if e["repete"])
+    assert reste["quand"] == serie["quand"] and not reste["fait"]      # la série n'a pas bougé
+    mod.RappelPopup(p, dict(reste))._fait()                            # « Fait » sur une série : rien n'est terminé
+    assert next(e for e in p.evenements() if e["repete"])["fait"] is False
+
+
+def test_dialogue_repetition_et_liste(silence):
+    app = QApplication.instance() or QApplication([])
+    assert app
+    ctx, _n, _o = faux_ctx()
+    p = mod.AgendaPlugin()
+    p.activer(ctx)
+    d = mod.DialogueEvenement(None)
+    d.titre.setText("Anniv")
+    d.repete.setCurrentIndex(d.repete.findData("annee"))
+    assert d.resultat()[4] == "annee"
+    p.ajouter("Anniv", dt("1990-05-04 09:00"), None, True, "annee")
+    e = p.evenements()[0]
+    assert e["ancre"] == "1990-05-04 09:00" and dt(e["quand"]) > datetime.now()
+    edition = mod.DialogueEvenement(None, e)
+    assert edition.date.date().year() == 1990 and edition.repete.currentData() == "annee"      # on édite la date de départ de la série
+    assert "↻" in mod.DialogueAgenda(p).liste.item(0).text()
