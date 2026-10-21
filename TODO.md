@@ -2,17 +2,18 @@
 
 Légende : ☐ à faire · ◐ en cours · ✔ fait. Ordre = priorité proposée.
 
-## 0. Avant de publier
-- ✔ Dépôt `jfkneib/scrinium` créé et poussé
-- ✔ Release `v0.1.0` publiée avec le `.deb` et `SHA256SUMS`
-- ☐ GitHub Actions : construire le `.deb` et publier la release automatiquement à chaque tag
-- ✔ `.deb` et `install.sh` testés sur Debian 13 (VM neuve) ; `.deb` installé sur Ubuntu 26.04 (2 machines)
-- ☐ Tester sur Ubuntu 24.04 LTS et Debian 12
-- ☐ Capture d'écran dans le README
-- ✔ Page `man scrinium` · ☐ à compléter : sous-commande `ajouter`, option `rescue open --images`
-- ☐ README (FR/EN) : la section « Extensions » dit encore que rappels/OCR/dictée sont « prévus » ; documenter images, OCR, dictée, courriel, capture, `scrinium ajouter`, workflow `dev` → `main`
-- ☐ Livrer les 4 plugins (`dictee`, `courriel`, `ocr`, `capture`) dans le `.deb` (dossier d'exemples) : aujourd'hui `plugins/` n'est qu'une copie à faire à la main
-- ☐ Traductions anglaises (`po/en.po`) des textes ajoutés : images, OCR, dictée, courriel, capture (les plugins affichent le français si la traduction manque)
+## 0. Publication
+- ✔ Dépôt `jfkneib/scrinium` ; releases `v0.1.0` (2026-10-15) et **`v0.2.0` (2026-10-20)** avec le `.deb` et `SHA256SUMS` ; `.deb` testé sur Debian 13 (VM neuve, snapshot `propre`) et installé sur Ubuntu 26.04 (2 machines)
+- ✔ v0.2 : plugins livrés dans le `.deb` (dossier `plugins_officiels`, désactivés par défaut), README FR/EN, page `man` (`add`, `rescue open --images`), traductions anglaises complètes (`outils/i18n.py`, test de complétude)
+- ✔ GitHub Actions écrits (`.github/workflows/tests.yml` : tests sur Python 3.10 / 3.12 / 3.13, vert ; `paquet-deb.yml` : `.deb` + `SHA256SUMS` dans une release **brouillon** à chaque tag) · ☐ le workflow du `.deb` n'a **jamais tourné** (premier vrai tag de la v0.3)
+- ☐ **Release v0.3** : numéro de version (`__init__.py`, `debian/changelog`, man, README), build du `.deb`, test sur la VM, **demander avant de publier**. Contenu déjà sur `dev` : agenda, applications, lecture à voix haute, aperçu Markdown, navigateur des liens, capture rapide, « Actions CLI », CI
+- ☐ Installateur Windows : PyInstaller + **NSIS** (voir section 4) ; une VM Windows est nécessaire pour l'essayer
+- ☐ Tester sur Ubuntu 24.04 LTS et Debian 12 · ☐ capture d'écran dans le README
+- ☐ Revue de sécurité (chiffrement, fichier de secours, plugins qui lancent des commandes, liens de l'aperçu) · ☐ essai avec un parc de ~5 000 fiches (démarrage, recherche, liste)
+
+## Plugins : où en est-on (2026-10-21)
+✔ faits et essayés : `ocr`, `dictee`, `courriel`, `capture` (« Actions CLI »), `traduction`, `agenda`, `applications`, `lecture` (Piper + espeak-ng, essayé par l'utilisateur) · ☐ à venir : transports de synchronisation (`sync-webdav`, `sync-git`, `sync-lan`, après le chantier du cœur, section 3 quater) · OCR « intelligent » via Ollama · dictée Vosk · tmux dans la capture.
+**Idées en réserve (non décidées) :** page de réglages commune aux extensions (huit plugins, chacun a ses fenêtres) · liens `[[fiche]]` entre fiches (aperçu cliquable) · import d'un dossier Markdown / export d'un thème en archive · modèles de fiches · étiquettes en plus des thèmes · recherche avancée (thème, date, OCR) · raccourci global enregistré par Scrinium lui-même.
 
 ## 0 bis. Système de plugins (avant les images, v0.2)
 Le cœur reste petit ; calendrier/alarmes et OCR sont des plugins. Les **pièces jointes** (images) restent dans le cœur :
@@ -22,7 +23,7 @@ leur stockage et leur chiffrement avec la fiche font partie du format de fichier
 - ☐ **Métadonnées d'une fiche verrouillée** : décision prise = tout est chiffré avec le texte (rien en clair) ; à revoir pour les rappels (une fiche verrouillée fermée n'a pas de date lisible)
 - ☐ Page de réglages commune aux extensions (chacune ouvre aujourd'hui ses propres fenêtres)
 - ☐ Point d'accroche pour le menu clic droit des vignettes (OCR « Extraire le texte »)
-- ☐ Publier les plugins en paquets séparés (`scrinium-rappels`, `scrinium-ocr`…) : décision à prendre, ou les embarquer tous dans le `.deb`
+- ✔ Décision prise : les plugins officiels sont embarqués dans le `.deb` (et dans le paquet pip) ; ☐ paquets séparés seulement si un plugin a un jour des dépendances système lourdes
 - ➜ Abandonné : `ctx.ajouter_commande_cli` (sous-commandes ajoutées par les plugins) : `scrinium ajouter` vit dans le cœur
 
 ## 1. Images dans les fiches (v0.2, dans le cœur)
@@ -33,20 +34,12 @@ Une fiche peut contenir une ou plusieurs images, en plus du texte ou à sa place
   - interface : Ctrl+V, glisser-déposer, bouton « Ajouter une image », bande de vignettes, visionneuse, enregistrer sous, copier, supprimer (corbeille), **recadrage** (nouvelle image ou remplacement, ancienne version à la corbeille)
   - fiche verrouillée : images chiffrées, bande cachée tant qu'elle est fermée ; renommer / supprimer la fiche : les `.pj` suivent (corbeille avec même horodatage)
   - `scrinium rescue list/open --images/unlock` pour les pièces ; recherche dans le texte OCR (fiches en clair ou ouvertes)
-- ☐ Traductions anglaises (voir section 0) · ☐ rotation, annotation de l'image · ☐ option de réglage des limites (2560 px, 8 Mo…) dans `settings.json` (clé `pieces_jointes`, prévue dans la spécification)
+- ✔ Traductions anglaises faites · ☐ rotation, annotation de l'image · ☐ option de réglage des limites (2560 px, 8 Mo…) dans `settings.json` (clé `pieces_jointes`, prévue dans la spécification)
 - ☐ Essai réel avec une vraie photo JPEG avec EXIF (test automatique limité aux commentaires PNG) · ☐ tests sous Windows/macOS (noms de fichiers, titres ne différant que par la casse)
 
-## 2. Plugin `agenda` : rappels (version minimale écrite le 2026-10-21, sur `dev`, v0.3)
-Fait : `plugins/agenda/` (événements datés, liés ou non à une fiche non verrouillée, fenêtre « Agenda », date et heure séparées avec raccourcis +10 min / +1 h / demain 9:00, notification + fenêtre de rappel au premier plan avec « Ouvrir la fiche » / « Repousser de 10 min » / « Fait », son facultatif par événement, manqués annoncés au démarrage), 10 tests. Stockage dans les réglages du plugin. Reste, en option :
-- ☐ Répétitions (quotidien, hebdo, mensuel, annuel), durées de report au choix, clic sur la notification système (l'API `notifier` n'a pas de rappel), petit calendrier, export `.ics`
-Idées d'origine (non faites) :
-Ne pas faire un agenda complet : des **fiches avec une date**. Repose sur l'API plugins (métadonnées, planificateur, notifications).
-- ☐ Date/heure facultative sur une fiche (ligne en tête du `.md`, ex. `@rappel: 2026-11-03 09:00`)
-- ☐ Alarme simple : notification du bureau à l'heure (zone de notification déjà là, lancement automatique déjà là) ; répétition simple (quotidien, hebdo, mensuel, annuel pour les anniversaires)
-- ☐ Fiche verrouillée avec rappel : seul le **titre** (déjà visible) est affiché dans la notification, jamais le contenu
-- ☐ Petit calendrier (QCalendarWidget) : jours avec fiches/rappels en gras, clic = liste du jour
-- ☐ « Repousser de 10 min » / « Fait »
-- ☐ Rappels manqués (PC éteint) : les afficher au démarrage
+## 2. Plugin `agenda` : rappels (fait ; reste : répétitions, calendrier)
+- ✔ `plugins/agenda/` (2026-10-21, `dev`) : événements datés, liés ou non à une fiche **non verrouillée** (jamais de lien vers une fiche verrouillée : son titre resterait lisible dans les réglages) ; fenêtre « Agenda » ; date et heure séparées avec raccourcis (+10 min, +1 h, demain 9:00) ; notification + fenêtre de rappel au premier plan (« Ouvrir la fiche », « Repousser de 10 min », « Fait ») ; son facultatif par événement ; événements manqués annoncés au démarrage (« en retard ») ; stockage dans les réglages du plugin ; 10 tests
+- ☐ Répétitions (quotidien, hebdo, mensuel, annuel — anniversaires), durées de report au choix, clic sur la notification système (l'API `notifier` n'a pas de rappel), petit calendrier (`QCalendarWidget`, jours avec rappels en gras), export `.ics`
 - ☐ Import des anniversaires du thème « Anniversaires » (idée)
 
 ## 3. Plugin `ocr` : texte des images (fait ; reste : Ollama, clic droit)
@@ -104,7 +97,7 @@ Traduire la sélection (ou toute la fiche) ; fenêtre de résultat : **insérer 
 - ✔ **Essayé par l'utilisateur sur les trois machines (2026-10-20), « ok » partout** : XPS (carte RTX 3070), Inspiron (processeur seul, téléchargement du 12B observé puis vérifié), OptiPlex (i5 de 2012, 7 Go, modèle rapide). Restent à surveiller : qualité sur d'autres langues, 12B sur grosse carte, lecture de la mémoire sous Windows/macOS.
 - ➜ **Argos Translate RETIRÉ** (2026-10-20, constaté sur l'XPS) : la version 1.11.0 fait `import stanza` sans condition (`argostranslate/sbd.py`, ligne 12), et `stanza` tire PyTorch (plusieurs Go) ; avec un module vide à sa place l'import réussit mais le code lit encore `settings.stanza_available`, réglage qui n'existe plus : contournement bancal, écarté. Le plugin n'a plus aucune installation de paquet ; un ancien réglage `moteur: argos` retombe sur llama.cpp. Restes supprimés le 2026-10-20 à la demande de l'utilisateur : `deps` (296 Mo, 17 paquets pip) et les trois dossiers vides créés par Argos dans le `HOME` (aucun modèle de langue n'avait été téléchargé).
 - ☐ **Piste si on veut un moteur léger (processeur seul, ex. Inspiron)** : notre propre moteur sur **CTranslate2 + SentencePiece** (sans la bibliothèque Argos) avec les modèles de l'index public d'Argos (`argospm-index` : 100 paquets, ex. fr→en et en→fr à `argos-net.com`, ~100 Mo chacun, format CTranslate2 + SentencePiece) ; CTranslate2 s'installe sans PyTorch. À faire : découpage en phrases, appel du modèle, tests, essai réel (demande un téléchargement, donc l'accord de l'utilisateur). Décider après avoir **mesuré llama.cpp sur l'Inspiron** (CPU i7-7500U, 2 cœurs).
-- ☐ Moteurs en ligne facultatifs (DeepL…) : pas faits · ☐ nom `llama` (README récent) à côté de `llama-server` · ☐ téléchargement du binaire llama.cpp par le plugin (aujourd'hui : aide seulement) · ☐ qualité sur le vocabulaire technique et les textes longs · ☐ essai sur l'Inspiron (CPU lent) · ☐ traductions anglaises (po/en.po) de l'interface du plugin
+- ☐ Moteurs en ligne facultatifs (DeepL…) : pas faits · ☐ nom `llama` (README récent) à côté de `llama-server` · ☐ téléchargement du binaire llama.cpp par le plugin (aujourd'hui : aide seulement) · ☐ qualité sur le vocabulaire technique et les textes longs · ☐ essai sur l'Inspiron (CPU lent) · ✔ traductions anglaises de l'interface du plugin
 
 
 ## 3 quater. Partage de fiches et synchronisation (à prévoir tôt : touche au cœur)
@@ -127,7 +120,7 @@ Partager des fiches entre machines et/ou personnes : dépôt sur le réseau loca
 
 ## 5. Améliorations diverses
 - ✔ Plugin `lecture` (2026-10-21, `dev`, v0.3) : lecture à voix haute d'une fiche, de la sélection ou d'un thème entier (fr/en, langue détectée), Piper (paquet pip + voix téléchargée après accord, SHA-256 vérifiés) ou espeak-ng ; pause / suivante / arrêt ; fiches verrouillées jamais lues. **Pas encore essayé avec un vrai Piper ni un vrai espeak-ng** (tests avec de faux moteurs). Reste : Windows (SAPI) et macOS (`say`), voix supplémentaires, surlignage de la phrase lue
-- ✔ Plugin `applications` (2026-10-21, `dev`, v0.3) : panneau d'icônes qui lance des applications (choix parmi les .desktop installés ou commande libre), `{selection}`/`{fiche}` facultatifs passés en arguments sans shell, refusés pour une fiche verrouillée ; séparé des Actions CLI. Reste : Windows/macOS (liste des applications installées), icônes depuis un fichier .desktop propre à l'utilisateur
+- ✔ Plugin `applications` (2026-10-21, `dev`, v0.3, essayé par l'utilisateur) : panneau d'icônes qui lance des applications (choix parmi les .desktop installés ou commande libre), `{selection}`/`{fiche}` facultatifs passés en arguments sans shell, refusés pour une fiche verrouillée ; séparé des Actions CLI. Reste : Windows/macOS (liste des applications installées), icônes depuis un fichier .desktop propre à l'utilisateur
 - ✔ Capture rapide (2026-10-21, `dev`, v0.3) : `scrinium --rapide` / Fichier / zone de notification, fenêtre « note rapide », Ctrl+Entrée = ajout daté à une fiche (retenue), fiches verrouillées refusées ; raccourci global = à lier dans le bureau (KDE : Ajouter une commande). Reste : raccourci enregistré par Scrinium lui-même (KGlobalAccel / portail), pré-remplir depuis la sélection ou le presse-papiers
 - ✔ Mise en forme Markdown (2026-10-21, `dev`, v0.3) : barre de boutons (gras, italique, titre, listes, citation, code, lien ; Ctrl+B / Ctrl+I) qui écrivent la syntaxe, et bouton « Aperçu » (Ctrl+E, lecture seule, liens http/https/mailto seulement). Le fichier reste du Markdown. Reste : coloration en direct dans l'éditeur, export HTML/PDF
 - ☐ Sources du code en anglais (aujourd'hui en français, `po/en.po` traduit du français)
@@ -143,6 +136,7 @@ Partager des fiches entre machines et/ou personnes : dépôt sur le réseau loca
 - ✔ Zone de notification, instance unique, lancement au démarrage, reverrouillage en se cachant
 - ✔ Français / anglais (gettext)
 - ✔ `install.sh`, paquet `.deb`, README FR/EN
-- ✔ `TODO.md` (ce fichier, remis à jour le 2026-10-20)
-- ✔ Workflow git : branche `dev` puis `main`, sans pull request (dépôt perso) ; tests : `python3 -m pytest` (227 + 2 facultatifs) ; les tests tournent TOUJOURS hors écran (`tests/conftest.py` impose `offscreen`, retire `DISPLAY` et interdit toute boîte de dialogue modale non prévue)
+- ✔ `TODO.md` (ce fichier, remis à jour le 2026-10-21)
+- ✔ Dossier local `doc_jfk/` dans le dépôt (exclu par `.git/info/exclude`, jamais publié) pour les documents personnels
+- ✔ Workflow git : branche `dev` puis `main`, sans pull request (dépôt perso) ; tests : `python3 -m pytest` (307 + 2 facultatifs au 2026-10-21 ; CI GitHub sur 3 versions de Python) ; les tests tournent TOUJOURS hors écran (`tests/conftest.py` impose `offscreen`, retire `DISPLAY` et interdit toute boîte de dialogue modale non prévue)
 - ✔ `~/scripts/scrinium/dev.sh` (XPS + Inspiron) : lance les sources avec des données de test séparées
