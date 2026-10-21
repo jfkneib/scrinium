@@ -14,16 +14,16 @@ Interface Qt (PyQt6) : Linux, Windows, macOS (paquets Windows/macOS : à venir).
 
 ## Installation
 
-**Debian / Ubuntu** : téléchargez `scrinium_0.2.0_all.deb` sur la [**page des versions (Releases)**](https://github.com/jfkneib/scrinium/releases/latest) (section *Assets*, tout en bas), ou directement :
+**Debian / Ubuntu** : téléchargez `scrinium_0.3.0_all.deb` sur la [**page des versions (Releases)**](https://github.com/jfkneib/scrinium/releases/latest) (section *Assets*, tout en bas), ou directement :
 
 ```bash
-wget https://github.com/jfkneib/scrinium/releases/download/v0.2.0/scrinium_0.2.0_all.deb
+wget https://github.com/jfkneib/scrinium/releases/download/v0.3.0/scrinium_0.3.0_all.deb
 ```
 
 puis installez-le :
 
 ```bash
-sudo apt install ./scrinium_0.2.0_all.deb
+sudo apt install ./scrinium_0.3.0_all.deb
 ```
 
 Pour vérifier le téléchargement, récupérez aussi `SHA256SUMS` sur la même page et lancez `sha256sum -c SHA256SUMS`.
