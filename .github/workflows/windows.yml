@@ -12,7 +12,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write                      # nécessaire pour joindre l'installateur à la release d'un tag (étape finale)
 
 jobs:
   windows:
@@ -63,8 +63,68 @@ jobs:
         shell: pwsh
         run: Compress-Archive -Path dist\scrinium -DestinationPath Scrinium-windows.zip
 
+      # ---- Installateur (NSIS) : un seul fichier Scrinium-X.Y.Z-setup.exe ---------------------------------------------
+      - name: Installer NSIS
+        shell: pwsh
+        run: |
+          choco install nsis --no-progress -y
+          echo "C:\Program Files (x86)\NSIS" | Out-File -FilePath $env:GITHUB_PATH -Append     # rend makensis utilisable
+
+      - name: Fabriquer l'installateur
+        shell: pwsh
+        run: |
+          $v = python -c "import scrinium; print(scrinium.__version__)"
+          echo "VERSION=$v" | Out-File -FilePath $env:GITHUB_ENV -Append
+          makensis /DVERSION=$v packaging\windows\scrinium.nsi
+          if ($LASTEXITCODE -ne 0) { throw "makensis a échoué" }
+          Get-Item "packaging\windows\Scrinium-$v-setup.exe" | Select-Object Name, Length
+
+      - name: Essai de l'installateur (installation et désinstallation silencieuses)
+        shell: pwsh
+        run: |
+          $setup = (Resolve-Path "packaging\windows\Scrinium-$env:VERSION-setup.exe").Path
+          $cible = "$env:RUNNER_TEMP\Scrinium essai"                  # un chemin avec une espace : cas réel fréquent
+          # Des « fiches » de l'utilisateur : elles doivent survivre à la désinstallation
+          $fiches = "$env:APPDATA\scrinium"; New-Item -ItemType Directory -Force $fiches | Out-Null
+          Set-Content "$fiches\temoin.txt" "mes fiches"
+          # 1. Installation silencieuse (/S) dans un dossier choisi (/D= doit être le DERNIER paramètre)
+          Start-Process $setup -ArgumentList "/S", "/D=$cible" -Wait
+          if (-not (Test-Path "$cible\scrinium.exe")) { throw "scrinium.exe absent après installation" }
+          if (-not (Test-Path "$cible\uninstall.exe")) { throw "uninstall.exe absent" }
+          if (-not (Test-Path "$env:APPDATA\Microsoft\Windows\Start Menu\Programs\Scrinium\Scrinium.lnk")) { throw "raccourci du menu Démarrer absent" }
+          $cle = Get-ItemProperty "HKCU:\Software\Microsoft\Windows\CurrentVersion\Uninstall\Scrinium"
+          if ($cle.DisplayVersion -ne $env:VERSION) { throw "version inscrite : $($cle.DisplayVersion)" }
+          # 2. Le programme installé fonctionne
+          $env:SCRINIUM_HOME = "$env:RUNNER_TEMP\scrinium-installe"
+          & "$cible\scrinium-cli.exe" --version
+          if ($LASTEXITCODE -ne 0) { throw "le programme installé ne démarre pas" }
+          # 3. Désinstallation silencieuse (_?= force l'attente de la fin du désinstalleur)
+          Start-Process "$cible\uninstall.exe" -ArgumentList "/S", "_?=$cible" -Wait
+          Start-Sleep -Seconds 2
+          if (Test-Path "$cible\scrinium.exe") { throw "scrinium.exe encore présent après désinstallation" }
+          if (Test-Path "$env:APPDATA\Microsoft\Windows\Start Menu\Programs\Scrinium\Scrinium.lnk") { throw "raccourci non supprimé" }
+          if (Test-Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Uninstall\Scrinium") { throw "inscription non supprimée" }
+          if (-not (Test-Path "$fiches\temoin.txt")) { throw "LES FICHES ONT ÉTÉ SUPPRIMÉES" }
+          echo "Installation, lancement et désinstallation : OK (les fiches sont conservées)"
+
       - uses: actions/upload-artifact@v4
         with:
           name: Scrinium-windows
-          path: Scrinium-windows.zip
+          path: |
+            Scrinium-windows.zip
+            packaging/windows/Scrinium-*-setup.exe
           retention-days: 30
+
+      # Sur un tag « v… » seulement : l'installateur est joint à la release (brouillon créé au besoin ; le .deb vient
+      # d'un autre workflow). Rien n'est publié : la release reste un brouillon tant que vous ne la publiez pas.
+      - name: Joindre l'installateur à la release
+        if: startsWith(github.ref, 'refs/tags/v')
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $tag = "${{ github.ref_name }}"
+          $fichier = (Get-Item "packaging\windows\Scrinium-*-setup.exe").FullName
+          gh release view $tag 2>$null
+          if ($LASTEXITCODE -ne 0) { gh release create $tag --draft --title "Scrinium $($tag.TrimStart('v'))" --notes "Installateur Windows." 2>$null }
+          gh release upload $tag $fichier --clobber

@@ -251,3 +251,14 @@ def test_hook_absent_ou_non_executable_est_ignore(store):
     h.mkdir(parents=True, exist_ok=True)
     (h / "themes-changed").write_text("#!/bin/sh\nexit 1\n")   # non exécutable
     store.nouveau_theme("Hook non exécutable")
+
+
+def test_autostart_dans_le_programme_windows_gele(monkeypatch):
+    """PyInstaller : sys.executable est scrinium.exe lui-même ; la commande ne doit pas supposer un interpréteur Python."""
+    import sys
+    from scrinium.core import autostart
+    monkeypatch.setattr(sys, "frozen", True, raising=False)
+    monkeypatch.setattr(sys, "executable", r"C:\Users\x\AppData\Local\Programs\Scrinium\scrinium.exe")
+    assert autostart.commande() == [r"C:\Users\x\AppData\Local\Programs\Scrinium\scrinium.exe", "--minimise"]
+    monkeypatch.delattr(sys, "frozen")
+    assert "-m" in autostart.commande() or autostart.commande()[-1] == "--minimise"      # hors PyInstaller : comme avant
