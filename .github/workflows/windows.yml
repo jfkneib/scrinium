@@ -1,0 +1,70 @@
+name: Windows (PyInstaller)
+
+# Construit le programme Windows de Scrinium (dossier avec scrinium.exe) sur une machine Windows de GitHub.
+# Pourquoi sur GitHub : PyInstaller ne sait pas fabriquer un .exe Windows depuis Linux ; il faut un vrai Windows.
+# Déclenché : à chaque push touchant le packaging ou le code, et à chaque tag « v… ».
+# Résultat : un fichier .zip téléchargeable dans l'onglet Actions (« Artifacts »), sans publier de release.
+on:
+  push:
+    branches: [dev, main]
+    paths: ["packaging/windows/**", ".github/workflows/windows.yml", "src/**", "plugins/**", "setup.py", "pyproject.toml", "po/**"]
+    tags: ["v*"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"            # une version précise : le programme emballe CE Python-là
+
+      - name: Installer Scrinium et PyInstaller
+        # « pip install . » (sans -e) est indispensable : c'est lui qui fabrique les traductions et copie les extensions
+        # dans le paquet (voir setup.py). PyInstaller ira ensuite chercher le paquet installé.
+        run: python -m pip install . pyinstaller
+
+      - name: Fabriquer l'icône (facultatif)
+        continue-on-error: true             # sans icône personnalisée, le programme reste utilisable
+        run: python packaging/windows/faire_icone.py src/scrinium/icons/scrinium.svg packaging/windows/scrinium.ico
+
+      - name: Construire avec PyInstaller
+        run: pyinstaller packaging/windows/scrinium.spec --noconfirm
+
+      - name: Vérifications rapides du résultat
+        shell: pwsh
+        run: |
+          $d = "dist\scrinium"
+          # 1. Les fichiers indispensables sont là (huit extensions, traduction anglaise, icônes)
+          $ext = (Get-ChildItem "$d\_internal\scrinium\plugins_officiels" -Directory).Count
+          if ($ext -ne 8) { throw "Extensions embarquées : $ext (8 attendues)" }
+          if (-not (Test-Path "$d\_internal\scrinium\locale\en\LC_MESSAGES\scrinium.mo")) { throw "Traduction anglaise absente" }
+          if (-not (Test-Path "$d\_internal\scrinium\icons\help-about.svg")) { throw "Icônes absentes" }
+          # 2. Le programme en console démarre et lit/écrit des fiches (chiffrement compris) dans un dossier de test
+          $env:SCRINIUM_HOME = "$env:RUNNER_TEMP\scrinium-test"
+          & "$d\scrinium-cli.exe" --version
+          if ($LASTEXITCODE -ne 0) { throw "scrinium-cli --version a échoué" }
+          & "$d\scrinium-cli.exe" rescue list
+          if ($LASTEXITCODE -ne 0) { throw "scrinium-cli rescue list a échoué" }
+          # 3. Le programme graphique démarre et reste ouvert quelques secondes (écran virtuel « offscreen »)
+          $env:QT_QPA_PLATFORM = "offscreen"
+          $env:SCRINIUM_INSTANCE = "ci-windows"
+          $p = Start-Process "$d\scrinium.exe" -PassThru
+          Start-Sleep -Seconds 8
+          if ($p.HasExited) { throw "scrinium.exe s'est arrêté (code $($p.ExitCode))" }
+          Stop-Process -Id $p.Id -Force
+
+      - name: Archive à télécharger
+        shell: pwsh
+        run: Compress-Archive -Path dist\scrinium -DestinationPath Scrinium-windows.zip
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Scrinium-windows
+          path: Scrinium-windows.zip
+          retention-days: 30
