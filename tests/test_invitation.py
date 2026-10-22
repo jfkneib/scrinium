@@ -30,7 +30,8 @@ def test_texte_liens_et_marche_a_suivre():
     assert "mot de passe" in t and "Extensions" in t and t.endswith("\n")
     assert f"v{__version__}" in invitation.texte()                            # par défaut : la version qui crée la fiche
     assert "Windows" in t and "macOS" in t and "pas encore" in t.lower()      # honnête sur ce qui n'existe pas
-    assert "py -m pip install https://github.com/jfkneib/scrinium/archive/refs/tags/v9.8.7.zip" in t
+    assert "releases/download/v9.8.7/Scrinium-9.8.7-setup.exe" in t and "Informations complémentaires" in t      # Windows : installateur
+    assert "pip install https://github.com/jfkneib/scrinium/archive/refs/tags/v9.8.7.zip" in t                  # macOS : en attendant
     for nom in ("Agenda", "Courriel", "Applications", "Lecture à voix haute", "OCR", "Dictée", "Traduction", "Capture et console"):
         assert nom in t                                                       # les extensions intéressantes sont présentées
 

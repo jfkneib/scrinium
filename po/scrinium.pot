@@ -2245,14 +2245,14 @@ msgid ""
 "Pour désinstaller : ./install.sh --uninstall (tes fiches sont conservées)."
 msgstr ""
 
-#: src/scrinium/core/invitation.py:51
+#: src/scrinium/core/invitation.py:52
 msgid ""
 "— Premier lancement —\n"
 "\n"
 "Scrinium crée un thème « Bienvenue » (fiches qui expliquent tout) et propose de créer un fichier de secours : garde-le précieusement, il permet de rouvrir une fiche verrouillée dont tu aurais oublié le mot de passe."
 msgstr ""
 
-#: src/scrinium/core/invitation.py:54
+#: src/scrinium/core/invitation.py:55
 msgid ""
 "— Les extensions —\n"
 "\n"
@@ -2271,7 +2271,7 @@ msgid ""
 "  • Capture et console : insère dans une fiche le résultat d'une commande (Linux)."
 msgstr ""
 
-#: src/scrinium/core/invitation.py:69
+#: src/scrinium/core/invitation.py:70
 msgid "Bonne découverte, et n'hésite pas à me dire ce qui te manque."
 msgstr ""
 
@@ -2301,18 +2301,15 @@ msgstr ""
 msgid ""
 "— Windows —\n"
 "\n"
-"Pas encore de programme d'installation (il est prévu). En attendant, par Python ; je ne l'ai pas encore essayé sous Windows, dis-moi si ça coince :\n"
+"  1. Télécharge le programme d'installation :\n"
+"     %(depot)s/releases/download/v%(v)s/Scrinium-%(v)s-setup.exe\n"
+"  2. Double-clique dessus. Windows peut afficher « Windows a protégé votre ordinateur » : le programme n'est pas signé (c'est payant). Clique sur « Informations complémentaires », puis « Exécuter quand même ».\n"
+"  3. Suis l'assistant (aucun droit administrateur nécessaire). Scrinium apparaît dans le menu Démarrer.\n"
 "\n"
-"  1. Installe Python 3.10 ou plus depuis python.org/downloads, en cochant « Add python.exe to PATH ».\n"
-"  2. Dans PowerShell :\n"
-"\n"
-"    py -m pip install %(depot)s/archive/refs/tags/v%(v)s.zip\n"
-"    scrinium\n"
-"\n"
-"Si « scrinium » n'est pas reconnu : py -c \"import scrinium.cli as c; c.main()\""
+"Pour le désinstaller : Paramètres → Applications. Tes fiches ne sont jamais supprimées. Dis-moi si ça coince."
 msgstr ""
 
-#: src/scrinium/core/invitation.py:46
+#: src/scrinium/core/invitation.py:47
 msgid ""
 "— macOS —\n"
 "\n"
