@@ -13,7 +13,7 @@ Légende : ☐ à faire · ◐ en cours · ✔ fait. Ordre = priorité proposée
 
 ## Inviter à installer Scrinium (idée du 2026-10-21)
 - ✔ Brouillon de la fiche personnelle : `doc_jfk/invitation-scrinium.md` (dossier local non publié) : présentation, installation Debian/Ubuntu avec vérification de la somme de contrôle, autres Linux (`install.sh`), message provisoire Windows/macOS, premier lancement, extensions ; à coller dans une fiche puis à envoyer avec le plugin courriel
-- ☐ Fiche livrée dans Scrinium : 6e fiche du thème « Bienvenue » (« Inviter quelqu'un ») + entrée de menu (*Fichier → Inviter à installer…*) qui crée la fiche depuis un modèle et ouvre l'envoi par courriel avec sujet prérempli (le thème Bienvenue n'est vu que par les nouveaux utilisateurs : le menu sert aux autres) · FR/EN à décider
+- ✔ Fiche livrée dans Scrinium (2026-10-22, `dev`, v0.4) : `core/invitation.py` (texte FR/EN via gettext, liens vers la version qui crée la fiche) ; *Fichier → Inviter à installer Scrinium…* crée la fiche dans un thème « Invitations » (icône courrier), la rouvre sans l'écraser si elle existe, ouvre l'envoi de l'extension Courriel si elle est active (sinon explique) ; 6e fiche « Inviter quelqu'un » dans « Bienvenue » ; 6 tests. Pas encore essayé à l'écran
 - ☐ Nom de fichier **stable** pour le `.deb` dans les releases (`scrinium_latest_all.deb` → `releases/latest/download/…`) pour que les liens ne citent plus de numéro de version ; script `install-scrinium.sh` (détecte le système, installe, propose d'activer les extensions une par une)
 - ☐ Windows et macOS : texte provisoire jusqu'à l'installateur NSIS (section 4) ; l'e-mail ne peut pas installer à la place du destinataire, il explique et fournit les liens
 

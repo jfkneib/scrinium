@@ -45,6 +45,11 @@ def themes(dossier_fiches) -> list:
                 "Chaque fiche est un simple fichier texte (.md) et chaque thème un dossier :\n\n    %s\n\n"
                 "Vous pouvez les lire avec n'importe quel éditeur de texte. Pour les sauvegarder, copiez ce dossier. "
                 "Les fiches verrouillées sont des fichiers .lock, illisibles sans leur mot de passe.") % dossier_fiches),
+                    (_("6 · Inviter quelqu'un"), _(
+                "Pour faire connaître Scrinium à quelqu'un : menu Fichier > « Inviter à installer Scrinium… ». Scrinium "
+                "prépare une fiche (liens de téléchargement, installation selon le système, extensions) que vous pouvez "
+                "relire et adapter, puis envoyer par courriel avec l'extension Courriel (menu Extensions > Gérer les "
+                "extensions…).")),
         ]),
         (_("Perso"), "emblem-favorite", [
             (_("Numéros d'urgence"), _(

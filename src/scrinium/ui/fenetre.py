@@ -10,7 +10,7 @@ from PyQt6.QtWidgets import (QApplication, QFileDialog, QHBoxLayout, QInputDialo
                              QStackedWidget, QSystemTrayIcon, QToolBar, QVBoxLayout, QWidget)
 
 from .. import __version__
-from ..core import autostart, capture, crypto
+from ..core import autostart, capture, crypto, invitation
 from ..core.plugins import FicheVue, Gestionnaire
 from ..core.store import ICONE_DEFAUT, Store, propre
 from ..i18n import _
@@ -89,6 +89,7 @@ class Fenetre(QMainWindow):
         mf.addAction(self.a_fiche)
         mf.addAction(self.a_theme)
         mf.addAction(self._action(_("Capture rapide…"), "document-edit", self.capture_rapide, "Ctrl+Alt+N"))
+        mf.addAction(self._action(_("Inviter à installer Scrinium…"), "mail-send", self.inviter))
         mf.addSeparator()
         self.a_tray = QAction(_("Réduire dans la zone de notification"), self, checkable=True)
         self.a_tray.setChecked(bool(self.store.reglages().get("tray", True)))
@@ -429,6 +430,33 @@ class Fenetre(QMainWindow):
             self.tray.showMessage(_("Scrinium"), _("Ajouté à « %(theme)s / %(fiche)s »") % {"theme": t.nom, "fiche": f.titre},
                                   QSystemTrayIcon.MessageIcon.Information, 4000)
         return ""
+
+    def _theme_invitations(self):
+        th = self.store.nouveau_theme(invitation.nom_theme())
+        self.store.icone_theme(th, "mail-send")
+        return th
+
+    def inviter(self):
+        """Crée (ou rouvre, sans l'écraser) la fiche d'invitation à installer Scrinium, puis propose de l'envoyer par courriel."""
+        self.sauver()
+        th = next((t for t in self.store.themes if t.nom == invitation.nom_theme()), None) or \
+            self._theme_invitations()
+        titre = invitation.titre_fiche()
+        f = next((x for x in th.fiches if x.titre == titre), None)
+        if f is None:
+            f = self.store.nouvelle_fiche(th)
+            self.store.enregistrer(th, f, titre, invitation.texte())
+        self.quitter_fiche()
+        self.maj_themes()
+        self.montrer(theme=th.nom)
+        self.selectionner_fiche(FicheVue(th, f))
+        courriel = self.plugins.actifs.get("courriel")
+        envoyer = getattr(courriel[0], "envoyer", None) if courriel else None
+        if envoyer is not None:
+            QTimer.singleShot(0, envoyer)                 # la fenêtre d'envoi s'ouvre après l'affichage de la fiche
+        else:
+            self._statut(_("Fiche d'invitation prête : relisez-la, puis activez l'extension Courriel (Extensions > Gérer les "
+                           "extensions…) pour l'envoyer."), ORANGE)
 
     def capture_rapide(self):
         """Petite fenêtre de note rapide, au premier plan (la fenêtre principale n'est pas affichée)."""
