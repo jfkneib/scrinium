@@ -2223,7 +2223,7 @@ msgid ""
 msgstr ""
 
 #: src/scrinium/core/invitation.py:13
-msgid "Inviter à installer Scrinium"
+msgid "Invitation à essayer Scrinium"
 msgstr ""
 
 #: src/scrinium/core/invitation.py:17
@@ -2245,34 +2245,39 @@ msgid ""
 "Pour désinstaller : ./install.sh --uninstall (tes fiches sont conservées)."
 msgstr ""
 
-#: src/scrinium/core/invitation.py:39
-msgid ""
-"— Windows et macOS —\n"
-"\n"
-"Pas encore de programme d'installation. Dis-moi quel système tu utilises : je te préparerai la marche à suivre."
-msgstr ""
-
-#: src/scrinium/core/invitation.py:41
+#: src/scrinium/core/invitation.py:51
 msgid ""
 "— Premier lancement —\n"
 "\n"
 "Scrinium crée un thème « Bienvenue » (fiches qui expliquent tout) et propose de créer un fichier de secours : garde-le précieusement, il permet de rouvrir une fiche verrouillée dont tu aurais oublié le mot de passe."
 msgstr ""
 
-#: src/scrinium/core/invitation.py:44
+#: src/scrinium/core/invitation.py:54
 msgid ""
-"— Les extensions (facultatif) —\n"
+"— Les extensions —\n"
 "\n"
-"Menu « Extensions », puis « Gérer les extensions… » : elles sont toutes désactivées au départ, tu actives celles qui t'intéressent. Aucune n'installe ni ne télécharge quoi que ce soit sans te le demander d'abord : agenda (rappels, répétitions), lecture à voix haute, OCR (texte des images), dictée, traduction, courriel, capture et console, applications."
+"Menu « Extensions », puis « Gérer les extensions… » : elles sont toutes désactivées au départ, tu actives celles qui t'intéressent. Aucune n'installe ni ne télécharge quoi que ce soit sans te le demander d'abord.\n"
+"\n"
+"Pour commencer (rien à installer) :\n"
+"  • Agenda : des rappels avec notification et son, qui se répètent (chaque jour, semaine, mois, année : pratique pour les anniversaires), liés ou non à une fiche.\n"
+"  • Courriel : envoie une fiche par courriel (c'est comme ça que je t'ai envoyé celle-ci).\n"
+"  • Applications : un panneau d'icônes pour lancer tes applications préférées.\n"
+"\n"
+"Plus gourmandes (elles proposent d'installer ce qu'il faut, avec ton accord) :\n"
+"  • Lecture à voix haute : lit une fiche ou tout un thème, en français ou en anglais (Linux).\n"
+"  • OCR : extrait le texte des images collées dans une fiche (demande Tesseract).\n"
+"  • Dictée : tu parles, le texte s'écrit dans la fiche, sans rien envoyer sur Internet (Linux).\n"
+"  • Traduction : traduit une fiche avec un modèle qui tourne chez toi ; gros téléchargement (plusieurs Go), pour un ordinateur costaud.\n"
+"  • Capture et console : insère dans une fiche le résultat d'une commande (Linux)."
 msgstr ""
 
-#: src/scrinium/core/invitation.py:48
+#: src/scrinium/core/invitation.py:69
 msgid "Bonne découverte, et n'hésite pas à me dire ce qui te manque."
 msgstr ""
 
 #: src/scrinium/core/invitation.py:24
 msgid ""
-"je t'invite à essayer Scrinium : des fiches rangées par thème (numéros, procédures, codes), que l'on peut verrouiller avec un mot de passe (chiffrement AES-256). Tout reste sur ton ordinateur, dans de simples fichiers texte. Libre et gratuit (GPL-3.0).\n"
+"je t'invite à essayer Scrinium, un petit logiciel de notes que j'ai écrit : des fiches rangées par thème (numéros, procédures, codes), que l'on peut verrouiller avec un mot de passe (chiffrement AES-256). Tout reste sur ton ordinateur, dans de simples fichiers texte. Libre et gratuit (GPL-3.0).\n"
 "\n"
 "Page du projet : %(depot)s"
 msgstr ""
@@ -2290,6 +2295,32 @@ msgid ""
 "    sudo apt install ./scrinium_%(v)s_all.deb\n"
 "\n"
 "La commande sha256sum vérifie que le fichier est intact : elle doit répondre « OK ». Ensuite : menu des applications → Scrinium, ou la commande « scrinium ». Une version plus récente existe peut-être : %(depot)s/releases/latest"
+msgstr ""
+
+#: src/scrinium/core/invitation.py:39
+msgid ""
+"— Windows —\n"
+"\n"
+"Pas encore de programme d'installation (il est prévu). En attendant, par Python ; je ne l'ai pas encore essayé sous Windows, dis-moi si ça coince :\n"
+"\n"
+"  1. Installe Python 3.10 ou plus depuis python.org/downloads, en cochant « Add python.exe to PATH ».\n"
+"  2. Dans PowerShell :\n"
+"\n"
+"    py -m pip install %(depot)s/archive/refs/tags/v%(v)s.zip\n"
+"    scrinium\n"
+"\n"
+"Si « scrinium » n'est pas reconnu : py -c \"import scrinium.cli as c; c.main()\""
+msgstr ""
+
+#: src/scrinium/core/invitation.py:46
+msgid ""
+"— macOS —\n"
+"\n"
+"Pas encore de programme d'installation. En attendant, par Python (je ne l'ai pas encore essayé sous macOS, dis-moi si ça coince) :\n"
+"\n"
+"    python3 -m venv ~/scrinium-venv\n"
+"    ~/scrinium-venv/bin/pip install %(depot)s/archive/refs/tags/v%(v)s.zip\n"
+"    ~/scrinium-venv/bin/scrinium"
 msgstr ""
 
 #: src/scrinium/core/store.py:155
