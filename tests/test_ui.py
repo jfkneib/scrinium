@@ -224,3 +224,19 @@ def test_dialogue_extensions_montre_les_extensions_fournies(fen, tmp_path, monke
     dlg.liste.item(0).setCheckState(Qt.CheckState.Checked)                                             # l'activer demande l'accord (avertissement « code arbitraire »)
     assert demandes and "Démo fournie" in demandes[0] and "demo" not in fen.plugins.actifs
     assert dlg.liste.item(0).checkState() == Qt.CheckState.Unchecked                                   # refusé : elle reste désactivée
+
+
+def test_dialogue_extensions_grise_celles_d_un_autre_systeme(fen, monkeypatch):
+    from PyQt6.QtCore import Qt
+    from scrinium.ui.extensions import DialogueExtensions
+    d = fen.store.paths.base / "plugins" / "linuxseul"
+    d.mkdir(parents=True)
+    (d / "plugin.json").write_text('{"titre": "Linux seul", "classe": "P", "api": 1, "plateformes": ["linux"]}')
+    (d / "__init__.py").write_text("from scrinium.core.plugins import Plugin\nclass P(Plugin):\n    api = 1\n    def activer(self, ctx): pass\n")
+    fen.plugins.decouvrir()
+    monkeypatch.setattr("scrinium.core.plugins.systeme_courant", lambda: "windows")
+    dlg = DialogueExtensions(fen)
+    it = next(dlg.liste.item(i) for i in range(dlg.liste.count()) if dlg.liste.item(i).data(Qt.ItemDataRole.UserRole) == "linuxseul")
+    assert not (it.flags() & Qt.ItemFlag.ItemIsUserCheckable) and "Windows" in it.text() and "Windows" in it.toolTip()
+    dlg.liste.setCurrentItem(it)
+    assert "Windows" in dlg.detail.text()

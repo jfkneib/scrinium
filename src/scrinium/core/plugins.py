@@ -20,6 +20,8 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Callable
 
+from ..i18n import _
+
 API_VERSION = 1
 MAX_ERREURS = 5     # au-delà, l'extension est désactivée automatiquement
 EVENEMENTS = ("demarrage", "arret", "fiche_ouverte", "fiche_enregistree", "fiche_fermee", "themes_modifies",
@@ -53,6 +55,15 @@ class PluginIncompatible(Exception):
     pass
 
 
+# Noms des systèmes tels qu'écrits dans le champ « plateformes » de plugin.json, et leur affichage.
+SYSTEMES = {"linux": "Linux", "windows": "Windows", "macos": "macOS"}
+
+
+def systeme_courant() -> str:
+    """« linux », « windows » ou « macos » (ce que sys.platform appelle linux, win32, darwin)."""
+    return {"win32": "windows", "darwin": "macos"}.get(sys.platform, "linux" if sys.platform.startswith("linux") else sys.platform)
+
+
 @dataclass
 class InfoPlugin:
     nom: str
@@ -64,6 +75,20 @@ class InfoPlugin:
     charger: Callable           # retourne la classe du plugin (importe le code : seulement à l'activation)
     api: int | None = None
     erreur: str = ""
+    plateformes: tuple = ()     # systèmes où l'extension fonctionne (« linux », « windows », « macos ») ; vide = tous
+
+    @property
+    def disponible(self) -> bool:
+        """Faux si l'extension est réservée à d'autres systèmes que celui-ci (elle n'est alors jamais chargée)."""
+        return not self.plateformes or systeme_courant() in self.plateformes
+
+    def indisponibilite(self) -> str:
+        """Texte expliquant pourquoi l'extension ne peut pas être activée ici (chaîne vide si elle le peut)."""
+        if self.disponible:
+            return ""
+        return _("non disponible sous %(ici)s (réservée à : %(ou)s)") % {
+            "ici": SYSTEMES.get(systeme_courant(), systeme_courant()),
+            "ou": ", ".join(SYSTEMES.get(p, p) for p in self.plateformes)}
 
 
 class FicheVue:
@@ -247,7 +272,9 @@ class Gestionnaire:
             self.infos[sub.name] = InfoPlugin(
                 sub.name, str(m.get("titre", sub.name)), str(m.get("version", "?")), str(m.get("description", "")),
                 str(m.get("auteur", "")), source, self._chargeur_dossier(sub, str(m.get("classe", "Plugin"))),
-                api=m.get("api") if isinstance(m.get("api"), int) else None)
+                api=m.get("api") if isinstance(m.get("api"), int) else None,
+                plateformes=tuple(str(x).lower() for x in m.get("plateformes", []) if isinstance(x, str))
+                if isinstance(m.get("plateformes"), list) else ())
 
     @staticmethod
     def _chargeur_dossier(sub: Path, classe: str) -> Callable:
@@ -283,6 +310,9 @@ class Gestionnaire:
         info = self.infos.get(nom)
         if info is None or nom in self.actifs:
             return nom in self.actifs
+        if not info.disponible:         # réservée à un autre système : on n'importe même pas son code, et on le dit clairement
+            info.erreur = info.indisponibilite()
+            return False
         try:
             classe = info.charger()
             api = getattr(classe, "api", None)

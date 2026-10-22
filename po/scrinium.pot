@@ -2323,6 +2323,10 @@ msgid ""
 "    ~/scrinium-venv/bin/scrinium"
 msgstr ""
 
+#: src/scrinium/core/plugins.py:89
+msgid "non disponible sous %(ici)s (réservée à : %(ou)s)"
+msgstr ""
+
 #: src/scrinium/core/store.py:155
 msgid "Exemple verrouillé"
 msgstr ""
@@ -2492,35 +2496,35 @@ msgstr ""
 msgid "Ouvrir le dossier des extensions"
 msgstr ""
 
-#: src/scrinium/ui/extensions.py:175
+#: src/scrinium/ui/extensions.py:180
 msgid "Dossier utilisateur"
 msgstr ""
 
-#: src/scrinium/ui/extensions.py:165
+#: src/scrinium/ui/extensions.py:170
 msgid "Aucune extension installée. Déposez-en dans le dossier des extensions."
 msgstr ""
 
-#: src/scrinium/ui/extensions.py:175
+#: src/scrinium/ui/extensions.py:180
 msgid "Installée comme paquet"
 msgstr ""
 
-#: src/scrinium/ui/extensions.py:175
+#: src/scrinium/ui/extensions.py:180
 msgid "Fournie avec Scrinium"
 msgstr ""
 
-#: src/scrinium/ui/extensions.py:185
+#: src/scrinium/ui/extensions.py:192
 msgid "Activer l'extension"
 msgstr ""
 
-#: src/scrinium/ui/extensions.py:189
+#: src/scrinium/ui/extensions.py:196
 msgid "Extension"
 msgstr ""
 
-#: src/scrinium/ui/extensions.py:186
+#: src/scrinium/ui/extensions.py:193
 msgid "Activer « %s » ? Elle pourra lire les fiches ouvertes."
 msgstr ""
 
-#: src/scrinium/ui/extensions.py:189
+#: src/scrinium/ui/extensions.py:196
 msgid "Impossible d'activer : %s"
 msgstr ""
 
