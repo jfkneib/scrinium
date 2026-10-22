@@ -159,6 +159,11 @@ class DialogueExtensions(QDialog):
             it.setFlags(it.flags() | Qt.ItemFlag.ItemIsUserCheckable)
             it.setCheckState(Qt.CheckState.Checked if nom in self.g.actifs else Qt.CheckState.Unchecked)
             it.setData(Qt.ItemDataRole.UserRole, nom)
+            if not info.disponible:         # réservée à un autre système : grisée, non cochable, avec la raison en infobulle
+                it.setFlags(it.flags() & ~Qt.ItemFlag.ItemIsUserCheckable)
+                it.setForeground(self.palette().placeholderText())
+                it.setText(f"{info.titre}  ({info.version})  —  " + info.indisponibilite())
+                it.setToolTip(info.indisponibilite())
             self.liste.addItem(it)
         self.liste.blockSignals(False)
         if not self.g.infos:
@@ -174,7 +179,9 @@ class DialogueExtensions(QDialog):
         txt += f"<br>{info.description}" if info.description else ""
         source = {"paquet": _("Installée comme paquet"), "officielle": _("Fournie avec Scrinium")}.get(info.source, _("Dossier utilisateur"))
         txt += "<br><i>" + source + "</i>"
-        if info.erreur:
+        if not info.disponible:
+            txt += f"<br><span style='color:#c77700'>⚠ {info.indisponibilite()}</span>"
+        elif info.erreur:
             txt += f"<br><span style='color:#c0392b'>⚠ {info.erreur}</span>"
         self.detail.setText(txt)
 

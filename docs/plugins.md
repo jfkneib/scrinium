@@ -12,6 +12,8 @@ extensions…*). Extensions are disabled by default and are never imported just 
 1. **User folder** — `<data folder>/plugins/<name>/` (see the README for the data folder), containing:
    - `plugin.json` — `{"titre", "version", "auteur", "description", "classe", "api"}` (`classe` = name of the class in
      `__init__.py`, `api` = API version targeted, currently `1`);
+     optional `"plateformes": ["linux"]` (also `"windows"`, `"macos"`) lists the systems where the extension works; on any
+     other system it is shown greyed out in the extensions dialog, never imported, and cannot be enabled (omit the field for "everywhere");
    - `__init__.py` — the code.
    `<name>` must match `[a-z0-9][a-z0-9_-]*`. See [`plugins/hello`](../plugins/hello) for a working example.
 2. **Installed package** — declare an entry point (system or pip package, e.g. `scrinium-reminders`):

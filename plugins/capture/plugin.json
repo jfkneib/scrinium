@@ -4,5 +4,6 @@
   "auteur": "Scrinium",
   "description": "Exécute une commande et insère sa sortie dans la fiche ; envoie le texte sélectionné vers une console (Konsole, ou presse-papiers). Rien n'est lancé ni validé sans votre action.",
   "classe": "CapturePlugin",
-  "api": 1
+  "api": 1,
+  "plateformes": ["linux"]
 }

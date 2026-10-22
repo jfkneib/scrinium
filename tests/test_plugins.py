@@ -265,3 +265,58 @@ def test_les_cinq_extensions_du_depot_se_decouvrent_et_se_chargent(store):
     for nom in ("capture", "courriel", "dictee", "ocr", "traduction"):
         info = g.infos[nom]
         assert info.source == "officielle" and info.api == 1 and info.titre and info.description and info.version     # manifestes complets
+
+
+# ---------- extensions réservées à certains systèmes ----------
+def test_plateformes_lues_sans_executer_le_code(store, tmp_path, monkeypatch):
+    marque = tmp_path / "execute"
+    faire_plugin(store, "linuxseul", f"open({str(marque)!r}, 'w').write('x')\n" + CODE_OK, manifeste={"plateformes": ["Linux"]})
+    faire_plugin(store, "partout", CODE_OK)
+    g = Gestionnaire(store)
+    g.decouvrir()
+    assert g.infos["linuxseul"].plateformes == ("linux",) and g.infos["partout"].plateformes == ()
+    assert not marque.exists()                                                    # la découverte ne charge rien
+
+
+def test_extension_linux_seulement_refusee_sous_windows_sans_importer_son_code(store, tmp_path, monkeypatch):
+    marque = tmp_path / "execute"
+    faire_plugin(store, "linuxseul", f"open({str(marque)!r}, 'w').write('x')\n" + CODE_OK, manifeste={"plateformes": ["linux"]})
+    g = Gestionnaire(store)
+    g.decouvrir()
+    monkeypatch.setattr("scrinium.core.plugins.systeme_courant", lambda: "windows")
+    info = g.infos["linuxseul"]
+    assert not info.disponible and "Windows" in info.indisponibilite() and "Linux" in info.indisponibilite()
+    assert g.activer("linuxseul") is False and "Windows" in info.erreur
+    assert not marque.exists() and "linuxseul" not in g.actifs                    # son code n'a jamais été importé
+    assert "linuxseul" not in g.actifs_reglage()                                  # et le choix n'est pas enregistré comme actif
+    monkeypatch.setattr("scrinium.core.plugins.systeme_courant", lambda: "linux")
+    assert info.disponible and g.activer("linuxseul") is True and marque.exists()
+
+
+def test_extension_sans_plateformes_marche_partout(store, monkeypatch):
+    faire_plugin(store, "partout", CODE_OK)
+    g = Gestionnaire(store)
+    g.decouvrir()
+    for systeme in ("linux", "windows", "macos"):
+        monkeypatch.setattr("scrinium.core.plugins.systeme_courant", lambda s=systeme: s)
+        assert g.infos["partout"].disponible and g.infos["partout"].indisponibilite() == ""
+
+
+def test_choix_enregistre_d_une_extension_indisponible_ignore_au_demarrage(store, monkeypatch):
+    faire_plugin(store, "linuxseul", CODE_OK, manifeste={"plateformes": ["linux"]})
+    store.sauver_reglages(plugins_actifs=["linuxseul"])                           # ex. réglages copiés depuis un ordinateur Linux
+    monkeypatch.setattr("scrinium.core.plugins.systeme_courant", lambda: "windows")
+    g = Gestionnaire(store)
+    g.demarrer()
+    assert "linuxseul" not in g.actifs and g.infos["linuxseul"].erreur             # ignorée sans bruit, avec la raison
+    assert store.reglages()["plugins_actifs"] == ["linuxseul"]                     # le choix reste noté pour un retour sous Linux
+
+
+def test_extensions_officielles_linux_seulement_declarees():
+    import json
+    from pathlib import Path
+    racine = Path(__file__).resolve().parent.parent / "plugins"
+    for nom in ("dictee", "lecture", "capture"):                                    # enregistrement audio / Konsole : Linux
+        assert json.loads((racine / nom / "plugin.json").read_text(encoding="utf-8"))["plateformes"] == ["linux"]
+    for nom in ("agenda", "applications", "courriel", "ocr", "traduction"):
+        assert "plateformes" not in json.loads((racine / nom / "plugin.json").read_text(encoding="utf-8"))

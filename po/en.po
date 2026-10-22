@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: scrinium 0.2.0\n"
 "Report-Msgid-Bugs-To: \n"
-"PO-Revision-Date: 2026-10-22 15:39+0200\n"
+"PO-Revision-Date: 2026-10-22 16:36+0200\n"
 "Last-Translator: Jean-François Kneib\n"
 "Language-Team: English\n"
 "Language: en\n"
@@ -2490,6 +2490,10 @@ msgstr ""
 "    ~/scrinium-venv/bin/pip install %(depot)s/archive/refs/tags/v%(v)s.zip\n"
 "    ~/scrinium-venv/bin/scrinium"
 
+#: src/scrinium/core/plugins.py:89
+msgid "non disponible sous %(ici)s (réservée à : %(ou)s)"
+msgstr "not available on %(ici)s (only for: %(ou)s)"
+
 #: src/scrinium/core/store.py:155
 msgid "Exemple verrouillé"
 msgstr "Locked example"
@@ -2675,35 +2679,35 @@ msgstr "An extension is a program that runs with the same rights as Scrinium: it
 msgid "Ouvrir le dossier des extensions"
 msgstr "Open the extensions folder"
 
-#: src/scrinium/ui/extensions.py:175
+#: src/scrinium/ui/extensions.py:180
 msgid "Dossier utilisateur"
 msgstr "User folder"
 
-#: src/scrinium/ui/extensions.py:165
+#: src/scrinium/ui/extensions.py:170
 msgid "Aucune extension installée. Déposez-en dans le dossier des extensions."
 msgstr "No extensions installed. Drop some into the extensions folder."
 
-#: src/scrinium/ui/extensions.py:175
+#: src/scrinium/ui/extensions.py:180
 msgid "Installée comme paquet"
 msgstr "Installed as a package"
 
-#: src/scrinium/ui/extensions.py:175
+#: src/scrinium/ui/extensions.py:180
 msgid "Fournie avec Scrinium"
 msgstr "Provided with Scrinium"
 
-#: src/scrinium/ui/extensions.py:185
+#: src/scrinium/ui/extensions.py:192
 msgid "Activer l'extension"
 msgstr "Enable the extension"
 
-#: src/scrinium/ui/extensions.py:189
+#: src/scrinium/ui/extensions.py:196
 msgid "Extension"
 msgstr "Extension"
 
-#: src/scrinium/ui/extensions.py:186
+#: src/scrinium/ui/extensions.py:193
 msgid "Activer « %s » ? Elle pourra lire les fiches ouvertes."
 msgstr "Enable \"%s\"? It will be able to read open notes."
 
-#: src/scrinium/ui/extensions.py:189
+#: src/scrinium/ui/extensions.py:196
 msgid "Impossible d'activer : %s"
 msgstr "Could not enable: %s"
 
