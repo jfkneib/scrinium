@@ -50,6 +50,7 @@ and a few template topics to fill in (Personal, Home, Computers, Travel). Delete
 - **Single instance**: launching `scrinium` again wakes up the window that is already open. `scrinium --minimise` starts hidden in the notification area. The *File → Start at login* checkbox sets this up for you (XDG autostart file on Linux, Run key on Windows, LaunchAgent on macOS).
 - Options: `--theme NAME` (open on that topic), `--nouvelle` / `--new` (open with an empty note ready to type).
 - **Quick capture**: `scrinium --rapide` (also *File → Quick capture…*, Ctrl+Alt+N, and the notification-area menu) opens only a small "quick note" window; Ctrl+Enter appends the text (dated) to a note of your choice, which is remembered. The topic can be typed: a name that does not exist yet creates it (proposed by default: "Sous le coude" / "Kept handy"). To use it from anywhere, bind `scrinium --rapide` to a keyboard shortcut in your desktop settings (KDE: *System Settings → Keyboard → Shortcuts → Add Command*). With Scrinium running in the notification area it appears instantly; locked notes are never written to.
+- **Invite someone**: *File → Invite someone to install Scrinium…* creates (or reopens, never overwriting your edits) a ready-to-send note in an "Invitations" topic: download links, installation steps per system, extensions. With the Email extension on, the send window opens right away.
 - **Language**: automatic (system language), or *Help → Language*, or the `SCRINIUM_LANG` environment variable (`en`, `fr`).
 
 ## Data
