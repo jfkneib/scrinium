@@ -29,7 +29,10 @@ def test_texte_liens_et_marche_a_suivre():
     assert not re.search(r"%\(|%s|\{\w+\}", t)                                 # aucune variable de modèle oubliée
     assert "mot de passe" in t and "Extensions" in t and t.endswith("\n")
     assert f"v{__version__}" in invitation.texte()                            # par défaut : la version qui crée la fiche
-    assert "Windows" in t and "pas encore" in t.lower()                       # honnête sur ce qui n'existe pas
+    assert "Windows" in t and "macOS" in t and "pas encore" in t.lower()      # honnête sur ce qui n'existe pas
+    assert "py -m pip install https://github.com/jfkneib/scrinium/archive/refs/tags/v9.8.7.zip" in t
+    for nom in ("Agenda", "Courriel", "Applications", "Lecture à voix haute", "OCR", "Dictée", "Traduction", "Capture et console"):
+        assert nom in t                                                       # les extensions intéressantes sont présentées
 
 
 def test_texte_en_anglais(langue_remise):
@@ -37,7 +40,7 @@ def test_texte_en_anglais(langue_remise):
     t = invitation.texte("9.8.7")
     assert "Hello," in t and "Debian or Ubuntu" in t and "Bonjour" not in t and "Extensions" in t
     assert not re.search(r"%\(|%s", t) and "scrinium_9.8.7_all.deb" in t
-    assert invitation.titre_fiche() == "Invite someone to install Scrinium"
+    assert invitation.titre_fiche() == "Invitation to try Scrinium" and "Windows" in t and "macOS" in t and "Tesseract" in t
 
 
 def test_inviter_cree_une_fois_sans_ecraser(fen):  # noqa: F811
