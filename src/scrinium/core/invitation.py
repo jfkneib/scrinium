@@ -36,13 +36,14 @@ def texte(version: str = __version__) -> str:
         _("— Autres Linux (sans droits administrateur) —\n\nIl faut Python 3.10 ou plus. Télécharge le dossier du projet "
           "(bouton vert « Code » puis « Download ZIP » sur la page ci-dessus), décompresse-le, puis dans ce dossier :\n\n"
           "    ./install.sh\n\nPour désinstaller : ./install.sh --uninstall (tes fiches sont conservées)."),
-        _("— Windows —\n\nPas encore de programme d'installation (il est prévu). En attendant, par Python ; je ne l'ai pas "
-          "encore essayé sous Windows, dis-moi si ça coince :\n\n"
-          "  1. Installe Python 3.10 ou plus depuis python.org/downloads, en cochant « Add python.exe to PATH ».\n"
-          "  2. Dans PowerShell :\n\n"
-          "    py -m pip install %(depot)s/archive/refs/tags/v%(v)s.zip\n"
-          "    scrinium\n\n"
-          "Si « scrinium » n'est pas reconnu : py -c \"import scrinium.cli as c; c.main()\"") % v,
+        _("— Windows —\n\n"
+          "  1. Télécharge le programme d'installation :\n"
+          "     %(depot)s/releases/download/v%(v)s/Scrinium-%(v)s-setup.exe\n"
+          "  2. Double-clique dessus. Windows peut afficher « Windows a protégé votre ordinateur » : le programme n'est "
+          "pas signé (c'est payant). Clique sur « Informations complémentaires », puis « Exécuter quand même ».\n"
+          "  3. Suis l'assistant (aucun droit administrateur nécessaire). Scrinium apparaît dans le menu Démarrer.\n\n"
+          "Pour le désinstaller : Paramètres → Applications. Tes fiches ne sont jamais supprimées. Dis-moi si ça "
+          "coince.") % v,
         _("— macOS —\n\nPas encore de programme d'installation. En attendant, par Python (je ne l'ai pas encore essayé sous "
           "macOS, dis-moi si ça coince) :\n\n"
           "    python3 -m venv ~/scrinium-venv\n"
