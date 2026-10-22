@@ -11,6 +11,8 @@ NOM = "scrinium"
 
 def commande() -> list[str]:
     """Commande lancée à l'ouverture de session : démarre caché dans la zone de notification."""
+    if getattr(sys, "frozen", False):          # programme Windows (PyInstaller) : sys.executable EST scrinium.exe, pas un interpréteur Python
+        return [sys.executable, "--minimise"]
     exe = shutil.which(NOM)
     base = [exe] if exe else [sys.executable, "-m", "scrinium.cli"]
     return base + ["--minimise"]
