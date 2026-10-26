@@ -11,7 +11,7 @@
 import os
 import threading
 
-from PyQt6.QtCore import QObject, Qt, pyqtSignal
+from PyQt6.QtCore import QObject, Qt, QTimer, pyqtSignal
 from PyQt6.QtWidgets import (QApplication, QCheckBox, QComboBox, QDialog, QDialogButtonBox, QFormLayout, QHBoxLayout,
                              QInputDialog, QLabel, QLineEdit, QListWidget, QListWidgetItem, QMessageBox, QPlainTextEdit,
                              QPushButton, QSpinBox, QVBoxLayout)
@@ -245,6 +245,11 @@ class DialogueEnvoi(QDialog):
         self.setWindowTitle(_("Envoyer la fiche par courriel"))
         self.resize(520, 560)
         lay = QVBoxLayout(self)
+        self.erreur = QLabel("")                   # message d'un envoi raté : la fenêtre se rouvre avec vos modifications
+        self.erreur.setWordWrap(True)
+        self.erreur.setStyleSheet("color:#c0392b")
+        self.erreur.setVisible(False)
+        lay.addWidget(self.erreur)
         if vue.verrou:
             av = QLabel(_("⚠ Cette fiche est verrouillée : son texte partira EN CLAIR dans le courriel."))
             av.setWordWrap(True)
@@ -276,6 +281,10 @@ class DialogueEnvoi(QDialog):
         b.accepted.connect(self._valider)
         b.rejected.connect(self.reject)
         lay.addWidget(b)
+
+    def montrer_erreur(self, texte: str):
+        self.erreur.setText("⚠ " + texte)
+        self.erreur.setVisible(True)
 
     def _carnet(self):
         coches = set(self.coches())
@@ -313,6 +322,7 @@ class CourrielPlugin(Plugin):
     def activer(self, ctx):
         self.ctx = ctx
         self.secret = _Secret(ctx.dossier_donnees)
+        self._dialogue = None
         if ctx.ui is None:
             return
         self.pont = _Pont()
@@ -355,19 +365,33 @@ class CourrielPlugin(Plugin):
             if not self.serveur_dialogue():
                 return
             s = self.smtp()
+        self._dialogue = DialogueEnvoi(self, vue, _parent())
+        self._reprendre_envoi()
+
+    def _reprendre_envoi(self):
+        """Affiche la fenêtre d'envoi puis envoie. Après un échec (mauvais mot de passe, serveur injoignable…), la MÊME fenêtre
+        se rouvre avec le message d'erreur : l'objet et le texte modifiés ne sont jamais perdus. Elle ne ferme pour de bon
+        que sur « Annuler » ou après un envoi réussi."""
+        d = self._dialogue
+        if d is None:
+            return
+        s = self.smtp()
+        if not d.exec():
+            self._dialogue = None
+            return
+        # Le mot de passe est demandé APRÈS le clic sur « Envoyer » : annuler ou se tromper laisse la fenêtre rouvrable.
         if s.get("utilisateur") and self.secret.lire(s) is None:
             mdp, ok = QInputDialog.getText(_parent(), _("Courriel"), _("Mot de passe de %s :") % s["utilisateur"],
                                            QLineEdit.EchoMode.Password)
             if not ok:
+                QTimer.singleShot(0, self._reprendre_envoi)
                 return
             self.secret.session = mdp
-        d = DialogueEnvoi(self, vue, _parent())
-        if not d.exec():
-            return
         try:
             msg = logique.construire(s, d.destinataires, d.sujet.text(), d.corps.toPlainText())
         except ValueError as ex:
-            QMessageBox.warning(_parent(), _("Courriel"), str(ex))
+            d.montrer_erreur(str(ex))
+            QTimer.singleShot(0, self._reprendre_envoi)
             return
         self.ctx.reglages.set("derniers", d.destinataires)
         self.ctx.ui.notifier(_("Courriel"), _("Envoi en cours…"))
@@ -383,5 +407,17 @@ class CourrielPlugin(Plugin):
 
     def _fini(self, ok, erreur):
         self.ctx.ui.notifier(_("Courriel"), ok if ok else _("Échec de l'envoi : %s") % erreur)
-        if erreur:
-            QMessageBox.warning(_parent(), _("Courriel"), _("Échec de l'envoi :\n%s") % erreur)
+        if not erreur:
+            self._dialogue = None
+            return
+        if erreur.startswith("SMTPAuthenticationError"):
+            self.secret.session = None       # le mot de passe saisi était faux : on le redemandera à l'envoi suivant
+            texte = _("Le serveur a refusé l'identifiant ou le mot de passe. Cliquez sur « Envoyer » pour le saisir de "
+                      "nouveau (ou corrigez-le dans Extensions → Serveur d'envoi…). Votre message est conservé.")
+        else:
+            texte = _("Échec de l'envoi : %s") % erreur + "\n" + _("Votre message est conservé : vous pouvez réessayer.")
+        if self._dialogue is not None:
+            self._dialogue.montrer_erreur(texte)
+            QTimer.singleShot(0, self._reprendre_envoi)
+        else:
+            QMessageBox.warning(_parent(), _("Courriel"), texte)

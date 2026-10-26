@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: scrinium 0.2.0\n"
 "Report-Msgid-Bugs-To: \n"
-"PO-Revision-Date: 2026-10-26 08:55+0100\n"
+"PO-Revision-Date: 2026-10-26 10:24+0100\n"
 "Last-Translator: Jean-François Kneib\n"
 "Language-Team: English\n"
 "Language: en\n"
@@ -486,7 +486,7 @@ msgid "Afficher ou masquer le panneau des actions CLI préparées"
 msgstr "Show or hide the prepared CLI actions panel"
 
 #: plugins/capture/__init__.py:419
-#: plugins/courriel/__init__.py:345
+#: plugins/courriel/__init__.py:355
 #: plugins/lecture/__init__.py:286
 msgid "Ouvrez d'abord une fiche."
 msgstr "Open a note first."
@@ -617,43 +617,47 @@ msgstr "Address:"
 msgid "Envoyer la fiche par courriel"
 msgstr "Send the note by email"
 
-#: plugins/courriel/__init__.py:263
+#: plugins/courriel/__init__.py:268
 msgid "Gérer le carnet…"
 msgstr "Manage the address book…"
 
-#: plugins/courriel/__init__.py:275
+#: plugins/courriel/__init__.py:280
 msgid "Envoyer"
 msgstr "Send"
 
-#: plugins/courriel/__init__.py:304
+#: plugins/courriel/__init__.py:313
 msgid "Confirmer l'envoi"
 msgstr "Confirm sending"
 
-#: plugins/courriel/__init__.py:320
+#: plugins/courriel/__init__.py:330
 msgid "Envoyer la fiche par courriel…"
 msgstr "Send the note by email…"
 
-#: plugins/courriel/__init__.py:321
+#: plugins/courriel/__init__.py:331
 msgid "Envoyer par courriel"
 msgstr "Send by email"
 
-#: plugins/courriel/__init__.py:322
+#: plugins/courriel/__init__.py:332
 msgid "Carnet d'adresses…"
 msgstr "Address book…"
 
-#: plugins/courriel/__init__.py:323
+#: plugins/courriel/__init__.py:333
 msgid "Serveur d'envoi…"
 msgstr "Outgoing server…"
 
-#: plugins/courriel/__init__.py:373
-#: plugins/courriel/__init__.py:385
-#: plugins/courriel/__init__.py:345
+#: plugins/courriel/__init__.py:397
+#: plugins/courriel/__init__.py:409
+#: plugins/courriel/__init__.py:355
 msgid "Courriel"
 msgstr "Email"
 
-#: plugins/courriel/__init__.py:373
+#: plugins/courriel/__init__.py:397
 msgid "Envoi en cours…"
 msgstr "Sending…"
+
+#: plugins/courriel/__init__.py:415
+msgid "Le serveur a refusé l'identifiant ou le mot de passe. Cliquez sur « Envoyer » pour le saisir de nouveau (ou corrigez-le dans Extensions → Serveur d'envoi…). Votre message est conservé."
+msgstr "The server refused the user name or password. Click \"Send\" to enter it again (or correct it in Extensions → Outgoing server…). Your message is kept."
 
 #: plugins/courriel/__init__.py:111
 msgid "(inchangé)"
@@ -680,32 +684,32 @@ msgstr "A username requires an encrypted channel (STARTTLS or SSL/TLS)."
 msgid "Adresse invalide."
 msgstr "Invalid address."
 
-#: plugins/courriel/__init__.py:249
+#: plugins/courriel/__init__.py:254
 msgid "⚠ Cette fiche est verrouillée : son texte partira EN CLAIR dans le courriel."
 msgstr "⚠ This note is locked: its text will be sent IN CLEAR in the email."
 
-#: plugins/courriel/__init__.py:253
+#: plugins/courriel/__init__.py:258
 msgid "Destinataires (carnet) :"
 msgstr "Recipients (address book):"
 
-#: plugins/courriel/__init__.py:266
+#: plugins/courriel/__init__.py:271
 msgid "Autres adresses (séparées par des virgules) :"
 msgstr "Other addresses (separated by commas):"
 
-#: plugins/courriel/__init__.py:269
+#: plugins/courriel/__init__.py:274
 msgid "Objet :"
 msgstr "Subject:"
 
-#: plugins/courriel/__init__.py:298
-#: plugins/courriel/__init__.py:302
+#: plugins/courriel/__init__.py:307
+#: plugins/courriel/__init__.py:311
 msgid "Adresses"
 msgstr "Addresses"
 
-#: plugins/courriel/__init__.py:302
+#: plugins/courriel/__init__.py:311
 msgid "Choisissez au moins un destinataire."
 msgstr "Choose at least one recipient."
 
-#: plugins/courriel/__init__.py:305
+#: plugins/courriel/__init__.py:314
 msgid ""
 "Envoyer « %s » à :\n"
 "\n"
@@ -715,37 +719,34 @@ msgstr ""
 "\n"
 "%s"
 
-#: plugins/courriel/__init__.py:349
+#: plugins/courriel/__init__.py:359
 msgid "Cette fiche est verrouillée et fermée : déverrouillez-la d'abord. Son contenu n'est jamais envoyé sans que vous l'ayez ouverte."
 msgstr "This note is locked and closed: unlock it first. Its content is never sent unless you have opened it."
 
-#: plugins/courriel/__init__.py:354
+#: plugins/courriel/__init__.py:364
 msgid "Renseignez d'abord le serveur d'envoi."
 msgstr "Set up the outgoing server first."
 
-#: plugins/courriel/__init__.py:298
+#: plugins/courriel/__init__.py:418
+msgid "Votre message est conservé : vous pouvez réessayer."
+msgstr "Your message is kept: you can try again."
+
+#: plugins/courriel/__init__.py:307
 msgid "Adresse(s) invalide(s) : %s"
 msgstr "Invalid address(es): %s"
 
-#: plugins/courriel/__init__.py:359
+#: plugins/courriel/__init__.py:384
 msgid "Mot de passe de %s :"
 msgstr "Password for %s:"
 
-#: plugins/courriel/__init__.py:380
+#: plugins/courriel/__init__.py:404
 msgid "Fiche envoyée à %s."
 msgstr "Note sent to %s."
 
-#: plugins/courriel/__init__.py:385
+#: plugins/courriel/__init__.py:409
+#: plugins/courriel/__init__.py:418
 msgid "Échec de l'envoi : %s"
 msgstr "Sending failed: %s"
-
-#: plugins/courriel/__init__.py:387
-msgid ""
-"Échec de l'envoi :\n"
-"%s"
-msgstr ""
-"Sending failed:\n"
-"%s"
 
 #: plugins/courriel/logique.py:13
 msgid "STARTTLS (port 587)"

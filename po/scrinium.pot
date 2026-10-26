@@ -486,7 +486,7 @@ msgid "Afficher ou masquer le panneau des actions CLI préparées"
 msgstr ""
 
 #: plugins/capture/__init__.py:419
-#: plugins/courriel/__init__.py:345
+#: plugins/courriel/__init__.py:355
 #: plugins/lecture/__init__.py:286
 msgid "Ouvrez d'abord une fiche."
 msgstr ""
@@ -617,42 +617,46 @@ msgstr ""
 msgid "Envoyer la fiche par courriel"
 msgstr ""
 
-#: plugins/courriel/__init__.py:263
+#: plugins/courriel/__init__.py:268
 msgid "Gérer le carnet…"
 msgstr ""
 
-#: plugins/courriel/__init__.py:275
+#: plugins/courriel/__init__.py:280
 msgid "Envoyer"
 msgstr ""
 
-#: plugins/courriel/__init__.py:304
+#: plugins/courriel/__init__.py:313
 msgid "Confirmer l'envoi"
 msgstr ""
 
-#: plugins/courriel/__init__.py:320
+#: plugins/courriel/__init__.py:330
 msgid "Envoyer la fiche par courriel…"
 msgstr ""
 
-#: plugins/courriel/__init__.py:321
+#: plugins/courriel/__init__.py:331
 msgid "Envoyer par courriel"
 msgstr ""
 
-#: plugins/courriel/__init__.py:322
+#: plugins/courriel/__init__.py:332
 msgid "Carnet d'adresses…"
 msgstr ""
 
-#: plugins/courriel/__init__.py:323
+#: plugins/courriel/__init__.py:333
 msgid "Serveur d'envoi…"
 msgstr ""
 
-#: plugins/courriel/__init__.py:373
-#: plugins/courriel/__init__.py:385
-#: plugins/courriel/__init__.py:345
+#: plugins/courriel/__init__.py:397
+#: plugins/courriel/__init__.py:409
+#: plugins/courriel/__init__.py:355
 msgid "Courriel"
 msgstr ""
 
-#: plugins/courriel/__init__.py:373
+#: plugins/courriel/__init__.py:397
 msgid "Envoi en cours…"
+msgstr ""
+
+#: plugins/courriel/__init__.py:415
+msgid "Le serveur a refusé l'identifiant ou le mot de passe. Cliquez sur « Envoyer » pour le saisir de nouveau (ou corrigez-le dans Extensions → Serveur d'envoi…). Votre message est conservé."
 msgstr ""
 
 #: plugins/courriel/__init__.py:111
@@ -680,66 +684,65 @@ msgstr ""
 msgid "Adresse invalide."
 msgstr ""
 
-#: plugins/courriel/__init__.py:249
+#: plugins/courriel/__init__.py:254
 msgid "⚠ Cette fiche est verrouillée : son texte partira EN CLAIR dans le courriel."
 msgstr ""
 
-#: plugins/courriel/__init__.py:253
+#: plugins/courriel/__init__.py:258
 msgid "Destinataires (carnet) :"
 msgstr ""
 
-#: plugins/courriel/__init__.py:266
+#: plugins/courriel/__init__.py:271
 msgid "Autres adresses (séparées par des virgules) :"
 msgstr ""
 
-#: plugins/courriel/__init__.py:269
+#: plugins/courriel/__init__.py:274
 msgid "Objet :"
 msgstr ""
 
-#: plugins/courriel/__init__.py:298
-#: plugins/courriel/__init__.py:302
+#: plugins/courriel/__init__.py:307
+#: plugins/courriel/__init__.py:311
 msgid "Adresses"
 msgstr ""
 
-#: plugins/courriel/__init__.py:302
+#: plugins/courriel/__init__.py:311
 msgid "Choisissez au moins un destinataire."
 msgstr ""
 
-#: plugins/courriel/__init__.py:305
+#: plugins/courriel/__init__.py:314
 msgid ""
 "Envoyer « %s » à :\n"
 "\n"
 "%s"
 msgstr ""
 
-#: plugins/courriel/__init__.py:349
+#: plugins/courriel/__init__.py:359
 msgid "Cette fiche est verrouillée et fermée : déverrouillez-la d'abord. Son contenu n'est jamais envoyé sans que vous l'ayez ouverte."
 msgstr ""
 
-#: plugins/courriel/__init__.py:354
+#: plugins/courriel/__init__.py:364
 msgid "Renseignez d'abord le serveur d'envoi."
 msgstr ""
 
-#: plugins/courriel/__init__.py:298
+#: plugins/courriel/__init__.py:418
+msgid "Votre message est conservé : vous pouvez réessayer."
+msgstr ""
+
+#: plugins/courriel/__init__.py:307
 msgid "Adresse(s) invalide(s) : %s"
 msgstr ""
 
-#: plugins/courriel/__init__.py:359
+#: plugins/courriel/__init__.py:384
 msgid "Mot de passe de %s :"
 msgstr ""
 
-#: plugins/courriel/__init__.py:380
+#: plugins/courriel/__init__.py:404
 msgid "Fiche envoyée à %s."
 msgstr ""
 
-#: plugins/courriel/__init__.py:385
+#: plugins/courriel/__init__.py:409
+#: plugins/courriel/__init__.py:418
 msgid "Échec de l'envoi : %s"
-msgstr ""
-
-#: plugins/courriel/__init__.py:387
-msgid ""
-"Échec de l'envoi :\n"
-"%s"
 msgstr ""
 
 #: plugins/courriel/logique.py:13
