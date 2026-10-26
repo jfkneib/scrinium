@@ -14,21 +14,21 @@ Interface Qt (PyQt6) : Linux, Windows, macOS (paquets Windows/macOS : à venir).
 
 ## Installation
 
-**Debian / Ubuntu** : téléchargez `scrinium_0.4.0_all.deb` sur la [**page des versions (Releases)**](https://github.com/jfkneib/scrinium/releases/latest) (section *Assets*, tout en bas), ou directement :
+**Debian / Ubuntu** : téléchargez `scrinium_0.4.1_all.deb` sur la [**page des versions (Releases)**](https://github.com/jfkneib/scrinium/releases/latest) (section *Assets*, tout en bas), ou directement :
 
 ```bash
-wget https://github.com/jfkneib/scrinium/releases/download/v0.4.0/scrinium_0.4.0_all.deb
+wget https://github.com/jfkneib/scrinium/releases/download/v0.4.1/scrinium_0.4.1_all.deb
 ```
 
 puis installez-le :
 
 ```bash
-sudo apt install ./scrinium_0.4.0_all.deb
+sudo apt install ./scrinium_0.4.1_all.deb
 ```
 
 Pour vérifier le téléchargement, récupérez aussi `SHA256SUMS` sur la même page et lancez `sha256sum -c SHA256SUMS`.
 
-**Windows** : téléchargez `Scrinium-0.4.0-setup.exe` sur la [page des versions](https://github.com/jfkneib/scrinium/releases/latest) (*Assets*) et double-cliquez dessus. Aucun droit administrateur n'est nécessaire (installation pour votre utilisateur, dans `%LOCALAPPDATA%\Programs\Scrinium`, avec un raccourci du menu Démarrer et une entrée dans *Paramètres → Applications* pour le désinstaller). Le programme d'installation n'est **pas signé** : Windows affiche « Windows a protégé votre ordinateur » au premier lancement ; cliquez sur *Informations complémentaires*, puis *Exécuter quand même*. Vos fiches (`%APPDATA%\scrinium`) ne sont jamais supprimées. Les extensions qui demandent des outils Linux (dictée, lecture à voix haute, capture et console) sont grisées sous Windows.
+**Windows** : téléchargez `Scrinium-0.4.1-setup.exe` sur la [page des versions](https://github.com/jfkneib/scrinium/releases/latest) (*Assets*) et double-cliquez dessus. Aucun droit administrateur n'est nécessaire (installation pour votre utilisateur, dans `%LOCALAPPDATA%\Programs\Scrinium`, avec un raccourci du menu Démarrer et une entrée dans *Paramètres → Applications* pour le désinstaller). Le programme d'installation n'est **pas signé** : Windows affiche « Windows a protégé votre ordinateur » au premier lancement ; cliquez sur *Informations complémentaires*, puis *Exécuter quand même*. Vos fiches (`%APPDATA%\scrinium`) ne sont jamais supprimées. Les extensions qui demandent des outils Linux (dictée, lecture à voix haute, capture et console) sont grisées sous Windows.
 
 **Autres distributions** (sans root, depuis ce dépôt) :
 

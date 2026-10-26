@@ -14,21 +14,21 @@ Qt interface (PyQt6): Linux, Windows, macOS (Windows and macOS packages: coming)
 
 ## Installation
 
-**Debian / Ubuntu**: download `scrinium_0.4.0_all.deb` from the [**Releases page**](https://github.com/jfkneib/scrinium/releases/latest) (section *Assets*, at the bottom), or directly:
+**Debian / Ubuntu**: download `scrinium_0.4.1_all.deb` from the [**Releases page**](https://github.com/jfkneib/scrinium/releases/latest) (section *Assets*, at the bottom), or directly:
 
 ```bash
-wget https://github.com/jfkneib/scrinium/releases/download/v0.4.0/scrinium_0.4.0_all.deb
+wget https://github.com/jfkneib/scrinium/releases/download/v0.4.1/scrinium_0.4.1_all.deb
 ```
 
 then install it:
 
 ```bash
-sudo apt install ./scrinium_0.4.0_all.deb
+sudo apt install ./scrinium_0.4.1_all.deb
 ```
 
 To check the download, also get `SHA256SUMS` from the same page and run `sha256sum -c SHA256SUMS`.
 
-**Windows**: download `Scrinium-0.4.0-setup.exe` from the [Releases page](https://github.com/jfkneib/scrinium/releases/latest) (*Assets*) and double-click it. No administrator rights are needed (it installs for your user, in `%LOCALAPPDATA%\Programs\Scrinium`, with a Start menu shortcut and an entry in *Settings → Apps* to uninstall it). The installer is **not signed**: Windows shows "Windows protected your PC" the first time; click *More info*, then *Run anyway*. Your notes (`%APPDATA%\scrinium`) are never deleted. Extensions that need Linux tools (dictation, read aloud, capture and console) are greyed out on Windows.
+**Windows**: download `Scrinium-0.4.1-setup.exe` from the [Releases page](https://github.com/jfkneib/scrinium/releases/latest) (*Assets*) and double-click it. No administrator rights are needed (it installs for your user, in `%LOCALAPPDATA%\Programs\Scrinium`, with a Start menu shortcut and an entry in *Settings → Apps* to uninstall it). The installer is **not signed**: Windows shows "Windows protected your PC" the first time; click *More info*, then *Run anyway*. Your notes (`%APPDATA%\scrinium`) are never deleted. Extensions that need Linux tools (dictation, read aloud, capture and console) are greyed out on Windows.
 
 **Other distributions** (no root needed, from this repository):
 

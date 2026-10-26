@@ -1,3 +1,18 @@
+scrinium (0.4.1) unstable; urgency=medium
+
+  * Correction importante : avec un PyQt6 récent (programme Windows, installation
+    par pip), une commande envoyée à Scrinium déjà ouvert (scrinium ajouter,
+    scrinium --rapide, réveil de la fenêtre) pouvait l'arrêter brutalement une
+    quinzaine de secondes plus tard (minuteur appelant un socket déjà supprimé).
+  * Courriel : après un échec d'envoi (mauvais mot de passe, serveur injoignable),
+    la fenêtre se rouvre avec l'objet et le message modifiés au lieu de les
+    perdre ; le mot de passe refusé est redemandé ; il est demandé après le clic
+    sur « Envoyer ».
+  * Fiche d'invitation : texte générique et poli (vouvoiement).
+  * Tests : une seule application Qt pour toute la session (plantages aléatoires).
+
+ -- Jean-François Kneib <kneib.jean-francois@cegetel.net>  Mon, 26 Oct 2026 11:01:48 +0100
+
 scrinium (0.4.0) unstable; urgency=medium
 
   * Programme d'installation Windows (Scrinium-X.Y.Z-setup.exe, sans droits
