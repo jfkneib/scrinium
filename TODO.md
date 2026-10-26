@@ -110,6 +110,21 @@ Traduire la sélection (ou toute la fiche) ; fenêtre de résultat : **insérer 
 - ☐ Moteurs en ligne facultatifs (DeepL…) : pas faits · ☐ nom `llama` (README récent) à côté de `llama-server` · ☐ téléchargement du binaire llama.cpp par le plugin (aujourd'hui : aide seulement) · ☐ qualité sur le vocabulaire technique et les textes longs · ☐ essai sur l'Inspiron (CPU lent) · ✔ traductions anglaises de l'interface du plugin
 
 
+## 3 quater-a. DÉCISION 2026-10-26 : serveur Scrinium (PHP) + plugin « Partage » (voie A)
+**Vision (l'utilisateur) :** chacun garde son Scrinium **personnel** ; seules les fiches qu'on choisit de **partager** passent par un **serveur Scrinium**. Scrinium n'est qu'un **client** : un plugin « Partage » (activé par chacun) se branche sur un serveur dont l'adresse est configurable. **Tout le monde** peut partager ses fiches (pas seulement l'administrateur) avec trois rôles : **propriétaire / écriture / lecture** (ex. Dédé en lecture-écriture, Alphonse en lecture seule). Le **serveur** fait respecter les droits (un Scrinium modifié ne contourne rien).
+**Pourquoi pas Apache seul (WebDAV + htpasswd)** : les droits s'écrivent à la main dans la config → seul l'administrateur peut partager. **Pourquoi pas Nextcloud/Joplin** : applications complètes avec leur propre format ; Joplin Server : lecture seule documentée pour Joplin Cloud (Équipes), pas confirmée en auto-hébergé.
+**Architecture :**
+- **Serveur** : petit service **PHP** derrière Apache (HTTPS), **SQLite** (ou MariaDB), configurable (URL, chemin des données, compte administrateur). **Hébergement prévu : le Raspberry Pi `SERVEUR-TEST` (192.0.2.20)** : Apache 2.4 + PHP 8.4 + MariaDB 11.8, HTTPS déjà en place, redirection Freebox WAN 16443 → .61:443, sauvegarde quotidienne vers le XPS ; installable ailleurs (un dossier PHP + un fichier de configuration). Rien n'est modifié sur le Pi tant que l'utilisateur ne l'a pas demandé.
+- **API** (JSON sur HTTPS) : connexion (jeton), lister les fiches partagées avec moi, lire, écrire **avec la version de départ** (refus si périmée → copie de conflit côté client), partager / retirer un droit (propriétaire seulement), historique.
+- **Client** : plugin « Partage » : réglage du serveur et du compte, entrée « Partager… » sur une fiche, thème « Partagées » pour ce qui m'est partagé, copie locale (hors ligne) + synchronisation, conflits jamais écrasés en silence.
+- **Sécurité** : HTTPS obligatoire, mots de passe hachés (`password_hash`), jetons à durée limitée, limitation des essais, sauvegardes, journal ; **le serveur peut lire les fiches NON verrouillées** (administrateur) → à dire clairement aux invités.
+**Étapes :**
+1. ☐ **Cœur** : identifiant stable par fiche (UUID en métadonnée, indépendant du titre), détection des changements (créations, modifications, suppressions, pièces jointes), conflits (garder les deux versions), notion de **dépôt** (personnel + partagés) et interface de transport.
+2. ☐ **Serveur minimal + plugin** : comptes, partage de fiches **non verrouillées** (3 rôles), écriture avec contrôle de version, thème « Partagées », hors ligne.
+3. ☐ **Fiches verrouillées partagées** : clé de contenu enveloppée **une fois par membre** avec sa clé personnelle (comme la clé de secours), départ d'un membre = rechiffrement ; le serveur ne les lit jamais.
+4. ☐ **Confort** : invitations (lien ou adresse), historique des versions, gestion des comptes, page d'administration, documentation d'installation du serveur, tests (deux clients, conflits, droits refusés, coupure réseau).
+Plan antérieur (volets a/b ci-dessous) : le (a) « synchroniser mes PC » est couvert par le même mécanisme (mon dépôt personnel peut aussi être synchronisé) ou, en attendant, par Syncthing.
+
 ## 3 quater. Partage de fiches et synchronisation (à prévoir tôt : touche au cœur)
 **Décidé le 2026-10-21 : c'est le chantier de la prochaine version (v0.4), en deux volets, dans cet ordre :**
 - ☐ **(a) Synchroniser ses propres PC** (XPS, Inspiron, OptiPlex) : un dossier synchronisé par un outil externe (Syncthing, Nextcloud/WebDAV) puis plugins de transport ; le cœur ne connaît que des dossiers ; conflits jamais écrasés en silence ; fiches verrouillées sans risque (chiffrées), fiches en clair avertissement
