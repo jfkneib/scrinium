@@ -13,6 +13,24 @@ for variable in ("DISPLAY", "WAYLAND_DISPLAY"):          # même une erreur de c
 import pytest  # noqa: E402
 
 
+@pytest.fixture(scope="session", autouse=True)
+def _application_qt_unique():
+    """UNE SEULE QApplication pour toute la session de tests, gardée en vie jusqu'au bout.
+
+    Avant, chaque fichier de tests en créait une dans une fixture « module » ; à la fin du fichier, Python la détruisait,
+    puis le fichier suivant en recréait une. Or `scrinium.ui.icons` garde un cache d'icônes (QIcon) créées sous l'ancienne
+    application : leur réutilisation sous la nouvelle plantait de façon aléatoire (« Segmentation fault » dans Fenetre._ui,
+    vu sur GitHub en Python 3.12 et 3.13 et une fois en local). Les fichiers de tests continuent d'écrire
+    `QApplication.instance() or QApplication([])` : ils trouvent désormais toujours celle-ci."""
+    try:
+        from PyQt6.QtWidgets import QApplication
+    except ImportError:
+        yield None
+        return
+    app = QApplication.instance() or QApplication([])
+    yield app
+
+
 def pytest_runtest_setup(item):
     try:
         from PyQt6.QtGui import QGuiApplication
