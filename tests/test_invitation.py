@@ -28,6 +28,9 @@ def test_texte_liens_et_marche_a_suivre():
     assert "sudo apt install ./scrinium_9.8.7_all.deb" in t and invitation.DEPOT in t and "./install.sh" in t
     assert not re.search(r"%\(|%s|\{\w+\}", t)                                 # aucune variable de modèle oubliée
     assert "mot de passe" in t and "Extensions" in t and t.endswith("\n")
+    # générique et poli : vouvoiement, aucune formule personnelle de l'expéditeur
+    assert not re.search(r"\b(tu|te|ton|ta|tes|toi)\b|\bje\b|\bj'|\b[tm]'|dis-moi|me dire", t, re.I | re.M), "formule personnelle"
+    assert "vous" in t.lower() and "Bonne découverte" in t
     assert f"v{__version__}" in invitation.texte()                            # par défaut : la version qui crée la fiche
     assert "Windows" in t and "macOS" in t and "pas encore" in t.lower()      # honnête sur ce qui n'existe pas
     assert "releases/download/v9.8.7/Scrinium-9.8.7-setup.exe" in t and "Informations complémentaires" in t      # Windows : installateur
@@ -40,6 +43,7 @@ def test_texte_en_anglais(langue_remise):
     i18n.init("en")
     t = invitation.texte("9.8.7")
     assert "Hello," in t and "Debian or Ubuntu" in t and "Bonjour" not in t and "Extensions" in t
+    assert "tell me" not in t.lower() and "I wrote" not in t and "I invite you" not in t
     assert not re.search(r"%\(|%s", t) and "scrinium_9.8.7_all.deb" in t
     assert invitation.titre_fiche() == "Invitation to try Scrinium" and "Windows" in t and "macOS" in t and "Tesseract" in t
 
