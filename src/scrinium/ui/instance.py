@@ -17,6 +17,7 @@ from PyQt6.QtCore import QObject, QTimer, pyqtSignal
 from PyQt6.QtNetwork import QLocalServer, QLocalSocket
 
 MAX_MESSAGE = 2 * 1024 * 1024
+DELAI_CONNEXION_MS = 15000        # une connexion jamais terminée est fermée au bout de ce délai
 
 
 def nom() -> str:
@@ -94,7 +95,13 @@ class Serveur(QObject):
 
         c.readyRead.connect(lire)
         c.disconnected.connect(c.deleteLater)
-        QTimer.singleShot(15000, c.disconnectFromServer)      # connexion jamais terminée : on la ferme
+        # Connexion jamais terminée : on la ferme au bout du délai. Le minuteur est un ENFANT du socket : il disparaît avec lui.
+        # (Avec QTimer.singleShot(délai, c.disconnectFromServer), le socket, supprimé entre-temps par deleteLater(), était
+        # appelé après coup : « wrapped C/C++ object has been deleted », et avec PyQt6 récent le programme entier s'arrêtait.)
+        minuteur = QTimer(c)
+        minuteur.setSingleShot(True)
+        minuteur.timeout.connect(c.disconnectFromServer)
+        minuteur.start(DELAI_CONNEXION_MS)
         if c.bytesAvailable():
             lire()
 

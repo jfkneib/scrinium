@@ -3,6 +3,7 @@
 """`scrinium ajouter` : texte reçu par un tube vers une fiche (écriture directe, ou par l'instance déjà ouverte)."""
 import io
 import os
+import time
 import threading
 
 import pytest
@@ -199,3 +200,21 @@ def test_cli_via_la_fenetre_ouverte(app, tmp_path, monkeypatch):
     assert en_fil(app, lambda: cli.main(["ajouter", "-t", "Nulle part", "-f", "X"])) == 1
     w.quitter_vraiment = True
     w.close()
+
+
+def test_canal_pas_d_erreur_apres_la_fermeture_du_socket(app, monkeypatch):
+    """Régression : le minuteur de sécurité d'une connexion ne doit pas appeler un socket déjà supprimé
+    (« wrapped C/C++ object of type QLocalSocket has been deleted » : arrêt brutal du programme avec PyQt6 récent)."""
+    import sys
+    monkeypatch.setenv("SCRINIUM_INSTANCE", f"scrinium-test-minuteur-{os.getpid()}")
+    monkeypatch.setattr(instance, "DELAI_CONNEXION_MS", 150)
+    erreurs = []
+    monkeypatch.setattr(sys, "excepthook", lambda *a: erreurs.append(a))
+    srv = instance.Serveur()
+    srv.ajout = lambda p: ""
+    assert en_fil(app, lambda: instance.envoyer_ajout({"fiche": "ok", "texte": "x"})) == (True, "")
+    fin = time.time() + 0.6                                                   # largement au-delà du délai de sécurité
+    while time.time() < fin:
+        app.processEvents()
+        time.sleep(0.01)
+    assert erreurs == []
