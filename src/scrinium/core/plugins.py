@@ -105,6 +105,7 @@ class FicheVue:
     fermee = property(lambda s: s._f.fermee)
     texte = property(lambda s: None if s._f.fermee else s._f.texte)
     meta = property(lambda s: {} if s._f.fermee else dict(s._f.meta))
+    identifiant = property(lambda s: None if s._f.fermee else (s._f.meta.get("id") or None))   # stable ; None tant qu'il n'a pas été créé
 
     def __repr__(self):
         return f"<FicheVue {self.id}{' (verrouillée)' if self.verrou else ''}>"
@@ -213,6 +214,15 @@ class Contexte:
         t, f = self._trouver(vue)
         self._g.store.maj_meta(t, f, **valeurs)
         self._g.emettre("fiche_enregistree", fiche=FicheVue(t, f), origine=self.info.nom)
+
+    def assurer_identifiant(self, vue: FicheVue) -> str:
+        """Identifiant stable de la fiche (créé et enregistré à la première demande). ValueError si verrouillée fermée."""
+        t, f = self._trouver(vue)
+        existait = self._g.store.id_fiche(f) is not None
+        ident = self._g.store.assurer_id(t, f)
+        if not existait:                      # l'événement ne signale qu'une vraie modification de la fiche
+            self._g.emettre("fiche_enregistree", fiche=FicheVue(t, f), origine=self.info.nom)
+        return ident
 
     def modifier(self, vue: FicheVue, titre: str | None = None, texte: str | None = None) -> None:
         t, f = self._trouver(vue)

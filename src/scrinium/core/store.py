@@ -13,6 +13,7 @@ import shutil
 import subprocess
 import sys
 import time
+import uuid
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -284,6 +285,52 @@ class Store:
             else:
                 f.meta[k] = str(v)
         self.enregistrer(th, f, f.titre, f.texte, force=True)
+
+    # ---------- identifiant stable (base du partage et de la synchronisation) ----------
+    CLE_ID = "id"      # clé de métadonnée : la fiche porte son identifiant, indépendant de son titre, de son thème et de son verrou
+
+    @staticmethod
+    def id_fiche(f: Fiche) -> str | None:
+        """Identifiant stable de la fiche, ou None si elle n'en a pas (encore) ou si elle est verrouillée fermée."""
+        return None if f.fermee else (f.meta.get(Store.CLE_ID) or None)
+
+    def assurer_id(self, th: Theme, f: Fiche) -> str:
+        """Identifiant stable de la fiche ; il est CRÉÉ (et enregistré avec la fiche) à la première demande, jamais avant :
+        une fiche qu'on ne partage pas n'est pas modifiée. Il survit au renommage, au changement de thème, au verrouillage.
+        ValueError si la fiche est verrouillée fermée (son identifiant est chiffré avec elle)."""
+        if f.fermee:
+            raise ValueError("fiche verrouillée : déverrouillez-la d'abord")
+        ident = self.id_fiche(f)
+        if ident is None:
+            ident = uuid.uuid4().hex
+            self.maj_meta(th, f, **{self.CLE_ID: ident})
+        return ident
+
+    def trouver_par_id(self, ident: str) -> tuple | None:
+        """(thème, fiche) portant cet identifiant, parmi les fiches lisibles ; None sinon."""
+        for th in self.themes:
+            for f in th.fiches:
+                if self.id_fiche(f) == ident:
+                    return th, f
+        return None
+
+    def ids_en_double(self) -> dict:
+        """{identifiant: [(thème, fiche), …]} pour les identifiants portés par plusieurs fiches (fiche copiée à la main :
+        la copie doit recevoir un nouvel identifiant avant d'être partagée)."""
+        vus: dict = {}
+        for th in self.themes:
+            for f in th.fiches:
+                ident = self.id_fiche(f)
+                if ident:
+                    vus.setdefault(ident, []).append((th, f))
+        return {i: lst for i, lst in vus.items() if len(lst) > 1}
+
+    def renouveler_id(self, th: Theme, f: Fiche) -> str:
+        """Donne à la fiche un NOUVEL identifiant (pour une copie)."""
+        if f.fermee:
+            raise ValueError("fiche verrouillée : déverrouillez-la d'abord")
+        self.maj_meta(th, f, **{self.CLE_ID: None})
+        return self.assurer_id(th, f)
 
     # ---------- verrou ----------
     @property
