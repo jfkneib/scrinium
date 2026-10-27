@@ -15,13 +15,20 @@ Une personne qui n'active jamais le partage garde **exactement** le Scrinium d'a
 - `Store.id_fiche`, `Store.trouver_par_id`, `Store.ids_en_double` (une fiche copiée à la main porte le même identifiant),
   `Store.renouveler_id`. Côté extensions : `FicheVue.identifiant` et `ctx.assurer_identifiant(vue)`.
 
-## 2. Détection des changements — À FAIRE
+## 2. Détection des changements — FAIT (`core/synchro.py`)
 Pour synchroniser, il faut savoir ce qui a changé **depuis la dernière synchronisation**, sans rien envoyer inutilement.
-- Un **état de synchronisation** par dépôt (fichier local, hors des fiches) : pour chaque identifiant, la dernière version connue du
-  serveur, l'empreinte (SHA-256) du contenu synchronisé et le chemin local.
-- Changement local = empreinte actuelle ≠ empreinte synchronisée ; création = fiche partagée sans entrée ; suppression = entrée sans
-  fiche (la corbeille garde une copie) ; les **pièces jointes** (`.pj`) font partie du contenu.
-- Le calcul se fait au démarrage, à l'enregistrement et à la demande ; jamais d'écriture sur une fiche non partagée.
+- **État de synchronisation** par dépôt : `<données>/synchro/<dépôt>.json` (créé en mode privé, jamais dans le dossier des fiches).
+  Pour chaque fiche **suivie** (partagée) : identifiant → {version du serveur, empreinte SHA-256 du contenu, thème, fichier, titre}.
+  Un fichier absent, abîmé ou d'un format inconnu donne un état vide (on compare et on resynchronise, on n'écrase jamais).
+- **Contenu synchronisé** = titre + texte + pièces jointes (nom et empreinte de chaque image) ; pas les métadonnées des extensions
+  ni le texte OCR.
+- `EtatSynchro.valider(store, th, f, version)` : à appeler après une synchronisation **réussie** ; c'est le moment où la fiche
+  devient « suivie » (son identifiant est alors créé). `detecter(store, etat)` compare et rend la liste des **changements locaux**
+  (`modifiee` avec `contenu` et/ou `deplacee`, `supprimee`, `verrouillee`, `inaccessible`) **sans rien modifier**.
+- Une fiche **suivie puis verrouillée** n'est pas prise pour supprimée : ouverte → `verrouillee`, fermée (identifiant invisible) →
+  `inaccessible` (retrouvée par son thème et son nom de fichier). Le contenu verrouillé ne se synchronise qu'à l'étape 3.
+- Une fiche non suivie n'est jamais lue ni modifiée par ce module.
+- Reste (étape 2) : déclencher le calcul (démarrage, enregistrement, demande), et les changements **distants**.
 
 ## 3. Conflits — À FAIRE
 - Chaque enregistrement envoyé au serveur indique la **version de départ**. Si elle n'est plus la dernière (quelqu'un d'autre a
