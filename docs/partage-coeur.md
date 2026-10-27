@@ -30,11 +30,25 @@ Pour synchroniser, il faut savoir ce qui a changé **depuis la dernière synchro
 - Une fiche non suivie n'est jamais lue ni modifiée par ce module.
 - Reste (étape 2) : déclencher le calcul (démarrage, enregistrement, demande), et les changements **distants**.
 
-## 3. Conflits — À FAIRE
-- Chaque enregistrement envoyé au serveur indique la **version de départ**. Si elle n'est plus la dernière (quelqu'un d'autre a
-  enregistré entre-temps), le serveur **refuse**.
-- Le client ne choisit jamais en silence : il garde les **deux** versions (la sienne devient « titre (conflit <date>) », la distante
-  est reprise) et prévient l'utilisateur. Une fiche en lecture seule ne produit jamais d'envoi.
+## 3. Conflits — FAIT (`core/conflits.py`)
+Trois états se comparent pour une fiche suivie : la **base** (dernière synchronisation réussie), le **local** et le **distant**.
+
+| local | distant | action |
+|---|---|---|
+| inchangé | inchangé | rien |
+| inchangé | plus récent | recevoir |
+| modifié | inchangé | envoyer (propriétaire ou écriture) ; **lecture seule : écarter** (jamais envoyé) |
+| modifié | plus récent | **conflit** (ou « aligner » si les deux versions sont identiques) |
+
+- `decider(entrée, modifiée_localement, version_distante, rôle, empreintes)` rend l'action ; le serveur refuse de toute façon un
+  enregistrement dont la version de départ n'est plus la dernière (il fait foi).
+- `resoudre` (conflit, ou modification locale refusée en lecture seule) : la version **locale** est mise de côté dans une **nouvelle
+  fiche** « titre (conflit AAAA-MM-JJ HH:MM) » (ou « copie locale ») avec son texte et ses images, **sans identifiant** (elle n'est
+  pas partagée) ; la version **distante** est reprise dans la fiche d'origine (même identifiant, suivi mis à jour) ; les images
+  remplacées vont à la **corbeille**. La copie est faite **avant** : si elle échoue, l'original n'est pas touché.
+- L'appelant (le plugin) prévient l'utilisateur. Une fiche verrouillée est refusée (étape 3).
+- Reste (étape 2) : les **suppressions** (qui a le droit de supprimer côté serveur ; une fiche supprimée localement mais modifiée
+  ailleurs) et les **renommages simultanés**.
 
 ## 4. Dépôts et transport — À FAIRE
 - Aujourd'hui `Store` a un seul dossier racine. On introduit la notion de **dépôt** : le dépôt personnel (comme aujourd'hui) et
