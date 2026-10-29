@@ -213,7 +213,7 @@ class Store:
         ancien_nom = th.path.name
         os.rename(th.path, nouveau)
         th.path = nouveau
-        self._favoris_renommer(ancien_nom, nouveau.name, theme=True)
+        self._noms_changes(ancien_nom, nouveau.name, theme=True)
         for f in th.fiches:
             f.path = nouveau / f.path.name
         self.themes.sort(key=lambda t: t.nom.lower())
@@ -226,7 +226,7 @@ class Store:
 
     def supprimer_theme(self, th: Theme) -> None:
         self.a_la_corbeille(th.path)
-        self._favoris_renommer(th.path.name, None, theme=True)
+        self._noms_changes(th.path.name, None, theme=True)
         self.themes.remove(th)
         self._hook()   # après le retrait : le hook doit voir la liste à jour
 
@@ -241,7 +241,7 @@ class Store:
     def supprimer_fiche(self, th: Theme, f: Fiche) -> None:
         stamp = time.strftime("%Y%m%d-%H%M%S")
         pj = self.dossier_pj(f)
-        self._favoris_renommer(self._cle_fiche(th, f), None)
+        self._noms_changes(self._cle_fiche(th, f), None)
         self.a_la_corbeille(f.path, stamp=stamp)
         if pj.is_dir():
             self.a_la_corbeille(pj, stamp=stamp)
@@ -260,7 +260,7 @@ class Store:
                 f.path.unlink()
             except OSError:
                 pass
-            self._favoris_renommer(self._cle_fiche(th, f), None)
+            self._noms_changes(self._cle_fiche(th, f), None)
             th.fiches.remove(f)
             return True
         return False
@@ -283,7 +283,7 @@ class Store:
             self._deplacer_pj(ancien, nouveau)   # à tout instant, l'un des deux chemins reste valide
             ancien.unlink()
         if nouveau != ancien:
-            self._favoris_renommer(f"{th.path.name}/{ancien.name}", f"{th.path.name}/{nouveau.name}")
+            self._noms_changes(f"{th.path.name}/{ancien.name}", f"{th.path.name}/{nouveau.name}")
         f.titre, f.texte, f.path = titre, texte, nouveau
         f.maj = time.strftime("%Y-%m-%d %H:%M")
         return True
@@ -361,7 +361,7 @@ class Store:
         self._echanger_pj(nouveau_pj, ancien, nouveau)                  # 3) échange des dossiers
         if ancien.exists():
             ancien.unlink()
-        self._favoris_renommer(f"{th.path.name}/{ancien.name}", f"{th.path.name}/{nouveau.name}")
+        self._noms_changes(f"{th.path.name}/{ancien.name}", f"{th.path.name}/{nouveau.name}")
         f.path, f.verrou, f.cle, f.salt, f.wrap = nouveau, True, cle, salt, wrap
 
     def deverrouiller(self, f: Fiche, mdp: str) -> None:
@@ -380,7 +380,7 @@ class Store:
         self._ecrire_md(nouveau, f.titre, joindre_meta(f.meta, f.texte))
         self._echanger_pj(nouveau_pj, ancien, nouveau)
         ancien.unlink()
-        self._favoris_renommer(f"{th.path.name}/{ancien.name}", f"{th.path.name}/{nouveau.name}")
+        self._noms_changes(f"{th.path.name}/{ancien.name}", f"{th.path.name}/{nouveau.name}")
         f.path, f.verrou, f.cle, f.salt, f.wrap = nouveau, False, None, None, b""
 
     def ouvrir_avec_cle_privee(self, f: Fiche, pem: bytes, phrase: str | None) -> str:
@@ -646,7 +646,7 @@ class Store:
         fav["fiches"] = [x for x in fav["fiches"] if x != cle] + ([cle] if on else [])
         self._sauver_favoris(fav)
 
-    def _favoris_renommer(self, ancien: str, nouveau: str | None, theme: bool = False) -> None:
+    def _favoris_suivre(self, ancien: str, nouveau: str | None, theme: bool = False) -> None:
         """Un thème (theme=True, par son nom) ou une fiche (« thème/fichier ») change de nom (`nouveau`) ou disparaît (None)."""
         fav = self.favoris()
         avant = json.dumps(fav, sort_keys=True)
@@ -659,6 +659,67 @@ class Store:
             fav["fiches"] = [nouveau if x == ancien else x for x in fav["fiches"] if nouveau or x != ancien]
         if json.dumps(fav, sort_keys=True) != avant:
             self._sauver_favoris(fav)
+
+    def _noms_changes(self, ancien: str, nouveau: str | None, theme: bool = False) -> None:
+        """Un thème (theme=True) ou une fiche (« thème/fichier ») change de nom ou disparaît (`nouveau` = None) :
+        les favoris et l'ordre manuel le suivent."""
+        self._favoris_suivre(ancien, nouveau, theme)
+        self._ordre_suivre(ancien, nouveau, theme)
+
+    # ---------- ordre manuel (glisser-déposer) ----------
+    # Réglage de l'utilisateur comme les favoris : {"themes": [noms], "fiches": {thème: [fichiers]}}. Ce qui est listé vient
+    # d'abord, dans cet ordre ; le reste (nouveautés) suit par ordre alphabétique. Sans réglage : ordre alphabétique.
+    def ordre(self) -> dict:
+        brut = self.reglages().get("ordre", {})
+        brut = brut if isinstance(brut, dict) else {}
+        themes = brut.get("themes") if isinstance(brut.get("themes"), list) else []
+        fiches = brut.get("fiches") if isinstance(brut.get("fiches"), dict) else {}
+        return {"themes": [x for x in themes if isinstance(x, str)],
+                "fiches": {k: [x for x in v if isinstance(x, str)] for k, v in fiches.items() if isinstance(v, list)}}
+
+    def _sauver_ordre(self, ordre: dict) -> None:
+        self.sauver_reglages(ordre=ordre)
+
+    def themes_tries(self) -> list:
+        pos = {n: i for i, n in enumerate(self.ordre()["themes"])}
+        return sorted(self.themes, key=lambda t: (pos.get(t.path.name, len(pos)), t.nom.lower()))
+
+    def fiches_triees(self, th: Theme) -> list:
+        pos = {n: i for i, n in enumerate(self.ordre()["fiches"].get(th.path.name, []))}
+        return sorted(th.fiches, key=lambda f: (pos.get(f.path.name, len(pos)), f.titre.lower()))
+
+    def ordonner_themes(self, noms: list | None) -> None:
+        """Fixe l'ordre des thèmes (liste de noms) ; None = retour à l'ordre alphabétique."""
+        o = self.ordre()
+        o["themes"] = [n for n in dict.fromkeys(noms or []) if self.theme(n) is not None]
+        self._sauver_ordre(o)
+
+    def ordonner_fiches(self, th: Theme, fichiers: list | None) -> None:
+        """Fixe l'ordre des fiches d'un thème (noms de fichier) ; None = retour à l'ordre alphabétique."""
+        o = self.ordre()
+        o["fiches"].pop(th.path.name, None)
+        valides = {f.path.name for f in th.fiches}
+        liste = [n for n in dict.fromkeys(fichiers or []) if n in valides]
+        if liste:
+            o["fiches"][th.path.name] = liste
+        self._sauver_ordre(o)
+
+    def _ordre_suivre(self, ancien: str, nouveau: str | None, theme: bool) -> None:
+        o = self.ordre()
+        avant = json.dumps(o, sort_keys=True)
+        if theme:
+            o["themes"] = [nouveau if x == ancien else x for x in o["themes"] if nouveau or x != ancien]
+            if ancien in o["fiches"]:
+                liste = o["fiches"].pop(ancien)
+                if nouveau:
+                    o["fiches"][nouveau] = liste
+        else:
+            th, _sep, fichier = ancien.partition("/")
+            if th in o["fiches"]:
+                nouv = nouveau.partition("/")[2] if nouveau else None
+                o["fiches"][th] = [nouv if x == fichier else x for x in o["fiches"][th] if nouv or x != fichier]
+        if json.dumps(o, sort_keys=True) != avant:
+            self._sauver_ordre(o)
 
     # ---------- réglages et hook ----------
     def reglages(self) -> dict:

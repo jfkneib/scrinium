@@ -4,7 +4,7 @@
 import time
 from pathlib import Path
 
-from PyQt6.QtCore import QEvent, QSize, Qt, QTimer
+from PyQt6.QtCore import QEvent, QSize, Qt, QTimer, pyqtSignal
 from PyQt6.QtGui import QAction, QActionGroup, QKeySequence
 from PyQt6.QtWidgets import (QAbstractItemView, QApplication, QFileDialog, QHBoxLayout, QInputDialog, QLabel, QLineEdit, QListWidget,
                              QListWidgetItem, QMainWindow, QMenu, QMessageBox, QPushButton, QSplitter,
@@ -25,6 +25,23 @@ from .images import BandePieces, Editeur
 from .markdown import Apercu, BarreFormat, entourer, navigateurs_installes
 
 ORANGE, VERT, GRIS = "#c77700", "#2e8b3a", "gray"
+
+
+class ListeOrdonnable(QListWidget):
+    """Liste dont on change l'ordre par glisser-déposer. Les signaux de sélection sont coupés pendant le déplacement (la fiche
+    affichée ne doit pas changer) ; `reordonnee` dit à la fenêtre de relire l'ordre des éléments (donnée `Qt.UserRole`)."""
+    reordonnee = pyqtSignal()
+
+    def dropEvent(self, ev):
+        self.blockSignals(True)
+        try:
+            super().dropEvent(ev)
+        finally:
+            self.blockSignals(False)
+        QTimer.singleShot(0, self.reordonnee.emit)            # une fois le glisser-déposer terminé (la liste est alors définitive)
+
+    def cles(self) -> list:
+        return [self.item(i).data(Qt.ItemDataRole.UserRole) for i in range(self.count())]
 
 
 class Fenetre(QMainWindow):
@@ -124,12 +141,16 @@ class Fenetre(QMainWindow):
             ml.addAction(a)
         mh.addAction(self._action(_("À propos"), "help-about", self.a_propos))
 
-        self.liste_themes = QListWidget()
+        self.liste_themes = ListeOrdonnable()
+        self.liste_themes.setDragDropMode(QAbstractItemView.DragDropMode.InternalMove)
+        self.liste_themes.setDefaultDropAction(Qt.DropAction.MoveAction)
+        self.liste_themes.reordonnee.connect(self._ordre_themes_change)
         self.liste_themes.setIconSize(QSize(20, 20))
         self.liste_themes.setSelectionMode(QAbstractItemView.SelectionMode.ExtendedSelection)   # Ctrl / Maj + clic
         self.liste_themes.currentRowChanged.connect(self._sel_theme)
         self.liste_themes.itemDoubleClicked.connect(lambda *_: self.renommer_theme())
         self._suppr(self.liste_themes, lambda: self.supprimer_theme())
+        self._raccourcis_ordre(self.liste_themes)
         self.liste_themes.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
         self.liste_themes.customContextMenuRequested.connect(self._menu_theme)
         bt = QHBoxLayout()
@@ -151,11 +172,14 @@ class Fenetre(QMainWindow):
         lg.addWidget(self.liste_themes)
         lg.addLayout(bt)
 
-        self.liste = QListWidget()
+        self.liste = ListeOrdonnable()
+        self.liste.setDefaultDropAction(Qt.DropAction.MoveAction)
+        self.liste.reordonnee.connect(self._ordre_fiches_change)
         self.liste.setIconSize(QSize(16, 16))
         self.liste.setSelectionMode(QAbstractItemView.SelectionMode.ExtendedSelection)
         self.liste.currentRowChanged.connect(self._sel_fiche)
         self._suppr(self.liste, lambda: self.supprimer_fiche())
+        self._raccourcis_ordre(self.liste)
         self.liste.itemDoubleClicked.connect(lambda *_: self._double_clic())
         self.liste.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
         self.liste.customContextMenuRequested.connect(self._menu_fiche)
@@ -245,6 +269,14 @@ class Fenetre(QMainWindow):
         self._etat_editeur(False)
 
     # ---------- thèmes ----------
+    def _raccourcis_ordre(self, liste):
+        for seq, delta in (("Alt+Up", -1), ("Alt+Down", 1)):
+            a = QAction(liste)
+            a.setShortcut(QKeySequence(seq))
+            a.setShortcutContext(Qt.ShortcutContext.WidgetShortcut)
+            a.triggered.connect(lambda *_a, d=delta, li=liste: self.deplacer(li, d))
+            liste.addAction(a)
+
     @staticmethod
     def _suppr(liste, slot):
         """Touche Suppr : supprime ce qui est sélectionné dans CETTE liste seulement (jamais dans l'éditeur ni le titre)."""
@@ -255,8 +287,8 @@ class Fenetre(QMainWindow):
         liste.addAction(a)
 
     def _themes_ordonnes(self) -> list:
-        """Thèmes épinglés d'abord (dans l'ordre alphabétique), puis les autres."""
-        return sorted(self.store.themes, key=lambda t: not self.store.theme_epingle(t))
+        """Thèmes épinglés d'abord, puis les autres ; dans chaque groupe, l'ordre choisi à la main (sinon alphabétique)."""
+        return sorted(self.store.themes_tries(), key=lambda t: not self.store.theme_epingle(t))
 
     def _noms(self):
         return [self.TOUS] + [t.nom for t in self._themes_ordonnes()]
@@ -265,16 +297,57 @@ class Fenetre(QMainWindow):
         self.liste_themes.blockSignals(True)
         self.liste_themes.clear()
         it = QListWidgetItem(icone(ICONE_DEFAUT), self.TOUS)
+        it.setFlags(it.flags() & ~Qt.ItemFlag.ItemIsDragEnabled)         # « Toutes les fiches » reste en première ligne
         self.liste_themes.addItem(it)
         for t in self._themes_ordonnes():
             nom_icone = t.icone if not icone(t.icone).isNull() else ICONE_DEFAUT
             ic = avec_epingle(nom_icone) if self.store.theme_epingle(t) else icone(nom_icone)
-            self.liste_themes.addItem(QListWidgetItem(ic, f"{t.nom}  ({len(t.fiches)})"))
+            it = QListWidgetItem(ic, f"{t.nom}  ({len(t.fiches)})")
+            it.setData(Qt.ItemDataRole.UserRole, t.path.name)
+            self.liste_themes.addItem(it)
         if self.theme not in self._noms():
             self.theme = self.TOUS
         self.liste_themes.setCurrentRow(self._noms().index(self.theme))
         self.liste_themes.blockSignals(False)
         self._maj_pins()
+
+    def _ordre_fiches_possible(self) -> bool:
+        return self.theme != self.TOUS and not self.recherche.text().strip()
+
+    def _ordre_themes_change(self):
+        self.store.ordonner_themes([c for c in self.liste_themes.cles() if c])
+        self.maj_themes()
+
+    def _ordre_fiches_change(self):
+        t = self._theme_courant()
+        if t is None or not self._ordre_fiches_possible():
+            return self.maj_fiches()
+        self.store.ordonner_fiches(t, [c for c in self.liste.cles() if c])
+        self.maj_fiches()
+
+    def deplacer(self, liste, delta: int):
+        """Alt+Haut / Alt+Bas : monte ou descend l'élément courant d'une place (même effet que le glisser-déposer)."""
+        if liste is self.liste_themes:
+            cles = [t.path.name for t in self._themes_ordonnes()]
+            t = self._theme_courant()
+            courant = t.path.name if t else None
+        else:
+            if not self._ordre_fiches_possible() or not self.fiche:
+                return
+            cles = [f.path.name for _t, f in self.rows]
+            courant = self.fiche.path.name
+        if courant not in cles:
+            return
+        i, j = cles.index(courant), cles.index(courant) + delta
+        if not 0 <= j < len(cles):
+            return
+        cles[i], cles[j] = cles[j], cles[i]
+        if liste is self.liste_themes:
+            self.store.ordonner_themes(cles)
+            self.maj_themes()
+        else:
+            self.store.ordonner_fiches(self.fiche_theme, cles)
+            self.maj_fiches()
 
     def _maj_pins(self):
         t = self._theme_courant()
@@ -310,6 +383,8 @@ class Fenetre(QMainWindow):
         if n == 1:                                       # plusieurs sélectionnées : seule la suppression est groupée
             m.addAction(avec_epingle(""), _("Désépingler") if self.store.fiche_epinglee(t, f) else _("Épingler"),
                         lambda: self.epingler_fiche(t, f))
+        if self._ordre_fiches_possible() and self.store.ordre()["fiches"].get(t.path.name):
+            m.addAction(_("Remettre les fiches dans l'ordre alphabétique"), self._ordre_alphabetique_fiches)
         m.addAction(icone("edit-delete"), _("Supprimer les %d fiches…") % n if n > 1 else _("Supprimer…"), self.supprimer_fiche)
         m.exec(self.liste.mapToGlobal(pos))
 
@@ -334,8 +409,20 @@ class Fenetre(QMainWindow):
                         self.epingler_theme)
             m.addAction(icone("edit-rename"), _("Renommer…"), self.renommer_theme)
             m.addAction(icone("view-pim-notes"), _("Icône…"), self.icone_theme)
+        if self.store.ordre()["themes"]:
+            m.addAction(_("Remettre les thèmes dans l'ordre alphabétique"), self._ordre_alphabetique_themes)
         m.addAction(icone("edit-delete"), _("Supprimer les %d thèmes…") % n if n > 1 else _("Supprimer…"), self.supprimer_theme)
         m.exec(self.liste_themes.mapToGlobal(pos))
+
+    def _ordre_alphabetique_themes(self):
+        self.store.ordonner_themes(None)
+        self.maj_themes()
+
+    def _ordre_alphabetique_fiches(self):
+        t = self._theme_courant()
+        if t is not None:
+            self.store.ordonner_fiches(t, None)
+            self.maj_fiches()
 
     def nouveau_theme(self):
         n, ok = QInputDialog.getText(self, _("Nouveau thème"), _("Nom du thème :"))
@@ -433,7 +520,7 @@ class Fenetre(QMainWindow):
         for t in self._themes_ordonnes():
             if not q and self.theme != self.TOUS and t.nom != self.theme:
                 continue   # une recherche porte sur tous les thèmes
-            for f in sorted(t.fiches, key=lambda f: f.titre.lower()):
+            for f in self.store.fiches_triees(t):
                 if q and q not in f.titre.lower() and q not in (f.texte or "").lower() and q not in t.nom.lower() \
                         and q not in self.store.texte_ocr(f).lower():
                     continue   # fiche verrouillée fermée : pas de recherche dans le contenu (ni dans ses images)
@@ -442,11 +529,16 @@ class Fenetre(QMainWindow):
         for t, f in trouvees:
             nom_icone = "object-locked" if f.verrou else ""
             ic = avec_epingle(nom_icone) if self.store.fiche_epinglee(t, f) else (icone(nom_icone) if nom_icone else QIcon_vide())
-            self.liste.addItem(QListWidgetItem(ic, self._libelle(t, f, self.theme == self.TOUS or q)))
+            it = QListWidgetItem(ic, self._libelle(t, f, self.theme == self.TOUS or q))
+            it.setData(Qt.ItemDataRole.UserRole, f.path.name)
+            self.liste.addItem(it)
             if f is self.fiche:
                 sel = len(self.rows)
             self.rows.append((t, f))
         self.liste.blockSignals(False)
+        # glisser-déposer : seulement dans la vue d'un thème (l'ordre est propre à chaque thème), jamais pendant une recherche
+        self.liste.setDragDropMode(QAbstractItemView.DragDropMode.InternalMove if self._ordre_fiches_possible()
+                                   else QAbstractItemView.DragDropMode.NoDragDrop)
         if self.rows:
             self.liste.setCurrentRow(sel if sel is not None else 0)
             if sel is None:
