@@ -1,0 +1,65 @@
+#!/usr/bin/env php
+<?php
+declare(strict_types=1);
+
+// Administration en ligne de commande : initialiser, creer-compte, mot-de-passe, comptes.
+require __DIR__ . '/../src/autoload.php';
+
+use Scrinium\Serveur\Application;
+use Scrinium\Serveur\Base;
+use Scrinium\Serveur\ErreurHttp;
+
+$config = require (getenv('SCRINIUM_CONFIG') ?: __DIR__ . '/../config.php');
+$base = Base::depuisConfig($config['db']);
+$app = new Application($base, $config);
+
+function saisir(string $invite): string
+{
+    fwrite(STDERR, $invite);
+    $tty = posix_isatty(STDIN);
+    if ($tty) {
+        shell_exec('stty -echo');
+    }
+    $l = rtrim((string) fgets(STDIN), "\r\n");
+    if ($tty) {
+        shell_exec('stty echo');
+        fwrite(STDERR, "\n");
+    }
+    return $l;
+}
+
+$cmd = $argv[1] ?? '';
+try {
+    switch ($cmd) {
+        case 'initialiser':
+            @mkdir((string) ($config['donnees'] ?? ''), 0750, true);
+            $base->initialiser();
+            echo "Base initialisée.\n";
+            break;
+        case 'creer-compte':
+            $nom = $argv[2] ?? '';
+            $admin = in_array('--admin', $argv, true);
+            $app->comptes()->creer($nom, saisir("Mot de passe pour « $nom » : "), null, $admin);
+            echo "Compte « $nom » créé" . ($admin ? ' (administrateur)' : '') . ".\n";
+            break;
+        case 'mot-de-passe':
+            $nom = $argv[2] ?? '';
+            if (!$app->comptes()->existe($nom)) {
+                throw new ErreurHttp(422, 'Compte inconnu.');
+            }
+            $app->comptes()->changerMotDePasse($nom, saisir("Nouveau mot de passe pour « $nom » : "));
+            echo "Mot de passe changé, sessions fermées.\n";
+            break;
+        case 'comptes':
+            foreach ($base->lignes('SELECT nom, admin, email FROM comptes ORDER BY nom') as $c) {
+                echo $c['nom'] . ($c['admin'] ? ' (admin)' : '') . ($c['email'] ? '  ' . $c['email'] : '') . "\n";
+            }
+            break;
+        default:
+            fwrite(STDERR, "Usage : scrinium-serveur initialiser | creer-compte NOM [--admin] | mot-de-passe NOM | comptes\n");
+            exit(2);
+    }
+} catch (ErreurHttp $e) {
+    fwrite(STDERR, 'Erreur : ' . $e->getMessage() . "\n");
+    exit(1);
+}

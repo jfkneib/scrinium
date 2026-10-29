@@ -1,6 +1,6 @@
 # API de partage de Scrinium (version 1)
 
-Statut : **projet de contrat** (étape 2 du plan, `TODO.md` section « 3 quater-a »). C'est la **source de vérité** entre le serveur
+Statut : **contrat implémenté par `serveur/` (v0.1.0)** (étape 2 du plan, `TODO.md` section « 3 quater-a »). C'est la **source de vérité** entre le serveur
 (`serveur/`, PHP) et le plugin « Partage » (client). Le serveur de référence en mémoire (`core/transport.py`, `ServeurMemoire`) en est la
 version exécutable : tout ce qui est écrit ici y est déjà testé (rôles, version de départ, droits).
 
@@ -61,7 +61,7 @@ depuis sa propre boîte : le serveur n'a besoin d'aucun réglage de messagerie).
 | `POST /fiches/{id}/invitations` | propriétaire | corps `{"email":"dede@…","role":"ecriture"}` → `201 {"id","url","expire_le","role"}` |
 | `GET /fiches/{id}/invitations` | propriétaire | `200 [{"id","email","role","expire_le","etat":"en_attente"|"acceptee"|"expiree"|"annulee"}]` |
 | `DELETE /invitations/{id}` | propriétaire | `204` (annulée : le lien ne marche plus) |
-| `GET /invitations/{jeton}` | **public** | `200 {"invite_par","role","expire_le","compte_existant": false}` : de quoi afficher « X vous invite… » (jamais le contenu) |
+| `GET /invitations/{jeton}` | **public** | `200 {"invite_par","role","expire_le"}` : de quoi afficher « X vous invite… » (jamais le contenu) |
 | `POST /invitations/{jeton}/accepter` | public ou connecté | connecté : `204` (le droit est ajouté à mon compte) ; non connecté : corps `{"compte","mot_de_passe"}` → crée le compte, ajoute le droit, `201 {"jeton": session}` |
 
 - **Lien** : `https://serveur/inviter/<jeton>` (page HTML d'explication, avec un bouton qui ouvre `scrinium://rejoindre?serveur=…&jeton=…`) ;
