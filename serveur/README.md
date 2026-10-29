@@ -35,4 +35,6 @@ Les invitations créent des comptes par défaut ; pour que seul l'administrateur
 Sauvegarder le dossier de données entier (base SQLite + `blobs/`) et `config.php`. Le serveur peut lire les fiches non verrouillées : à dire aux invités.
 
 ## Tests
-`php tests/run.php` (sans dépendance ; exige `pdo_sqlite`).
+`php tests/run.php` (sans dépendance ; exige `pdo_sqlite`). Sur MariaDB : `SCRINIUM_TEST_DB='{"type":"mysql",…}' php tests/run.php` (la base indiquée est **vidée**, prendre une base de test).
+
+Après l'installation d'une extension PHP, **redémarrer** Apache (`restart`, pas `reload`) : mod_php ne la voit pas autrement.

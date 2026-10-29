@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-// Tests du serveur, sans dépendance : `php tests/run.php` (extension pdo_sqlite requise).
+// Tests du serveur, sans dépendance : `php tests/run.php` (extension pdo_sqlite requise, ou SCRINIUM_TEST_DB pour MariaDB).
 require __DIR__ . '/../src/autoload.php';
 
 use Scrinium\Serveur\Application;
@@ -28,8 +28,15 @@ final class Ctx
     public function __construct(array $plus = [])
     {
         $this->dossier = sys_get_temp_dir() . '/scrinium-test-' . bin2hex(random_bytes(4));
-        $base = Base::memoire();
+        // SCRINIUM_TEST_DB='{"type":"mysql",…}' : mêmes tests sur MariaDB (la base indiquée est vidée !).
+        $db = getenv('SCRINIUM_TEST_DB');
+        $base = $db ? Base::depuisConfig(json_decode($db, true)) : Base::memoire();
         $base->initialiser();
+        if ($db) {
+            foreach (['comptes', 'sessions', 'fiches', 'droits', 'blobs', 'fiche_blobs', 'invitations', 'essais', 'journal'] as $t) {
+                $base->pdo->exec("DELETE FROM $t");
+            }
+        }
         $this->app = new Application($base, $plus + ['base_url' => 'https://s.test', 'donnees' => $this->dossier,
             'cout_hash' => 4], fn (): int => $this->t);
     }
