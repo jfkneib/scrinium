@@ -9,7 +9,7 @@ namespace Scrinium\Serveur;
  */
 final class Application
 {
-    public const VERSION = '0.1.0';
+    public const VERSION = '0.2.0';
     private const ROLES = ['lecture' => 1, 'ecriture' => 2, 'proprietaire' => 3];
 
     private Comptes $comptes;

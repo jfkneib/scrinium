@@ -1,6 +1,6 @@
 # API de partage de Scrinium (version 1)
 
-Statut : **contrat implémenté par `serveur/` (v0.1.0)** (étape 2 du plan, `TODO.md` section « 3 quater-a »). C'est la **source de vérité** entre le serveur
+Statut : **contrat implémenté par `serveur/` (v0.2.0)** (étape 2 du plan, `TODO.md` section « 3 quater-a »). C'est la **source de vérité** entre le serveur
 (`serveur/`, PHP) et le plugin « Partage » (client). Le serveur de référence en mémoire (`core/transport.py`, `ServeurMemoire`) en est la
 version exécutable : tout ce qui est écrit ici y est déjà testé (rôles, version de départ, droits).
 
@@ -75,7 +75,7 @@ depuis sa propre boîte : le serveur n'a besoin d'aucun réglage de messagerie).
 - Le droit **reste acquis** après les 48 h (l'expiration ne concerne que le lien) ; le propriétaire le retire via § 4.
 
 ## 6. Découverte et compatibilité
-`GET /api` (public) : `{"api": 1, "serveur": "0.1.0", "inscription": "invitation", "limites": {"image": 8388608, "pieces": 50}}`.
+`GET /api` (public) : `{"api": 1, "serveur": "0.2.0", "inscription": "invitation", "limites": {"image": 8388608, "pieces": 50}}`.
 Le client refuse un serveur d'une autre version majeure d'API et le dit à l'utilisateur ; les ajouts compatibles ne changent pas le numéro.
 
 ## 7. Erreurs
