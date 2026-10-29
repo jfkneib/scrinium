@@ -43,6 +43,37 @@ ALIAS = {
 }
 
 
+_EMAIL = re.compile(r"[A-Za-z0-9._%+-]+@[A-Za-z0-9-]+(?:\.[A-Za-z0-9-]+)*\.[A-Za-z]{2,}")
+_URL = re.compile(r"https?://[^\s<>\"']+", re.I)
+_TEL = re.compile(r"(?<![\w@./:-])\+?\(?\d[\d .()\-]{5,}\d(?![\w@])")
+_DATE = re.compile(r"\d{4}-\d{1,2}-\d{1,2}|\d{1,2}[-.]\d{1,2}[-.]\d{2,4}")
+
+
+def actions(texte: str) -> list:
+    """Éléments d'un texte sur lesquels on peut agir : [(type, valeur affichée, adresse à ouvrir)], sans doublon, dans l'ordre.
+    type : « mail » (mailto:), « tel » (tel:, 7 à 15 chiffres ; les dates ne comptent pas), « web » (http ou https seulement)."""
+    trouves, vus = [], set()
+
+    def ajouter(type_, valeur, cible):
+        if (type_, cible) not in vus:
+            vus.add((type_, cible))
+            trouves.append((type_, valeur, cible))
+    reste = texte or ""
+    for m in _URL.finditer(reste):
+        ajouter("web", m.group(0).rstrip(".,;)"), m.group(0).rstrip(".,;)"))
+    reste = _URL.sub(" ", reste)
+    for m in _EMAIL.finditer(reste):
+        ajouter("mail", m.group(0), "mailto:" + m.group(0))
+    reste = _EMAIL.sub(" ", reste)
+    for m in _TEL.finditer(reste):
+        brut = m.group(0).strip()
+        chiffres = re.sub(r"\D", "", brut)
+        if not 7 <= len(chiffres) <= 15 or _DATE.fullmatch(brut):
+            continue
+        ajouter("tel", brut, "tel:" + ("+" if brut.startswith("+") else "") + chiffres)
+    return trouves
+
+
 def sans_accents(texte: str) -> str:
     return "".join(c for c in unicodedata.normalize("NFD", texte) if not unicodedata.combining(c))
 

@@ -233,3 +233,66 @@ def test_entree_ajoutee_puis_abandonnee_n_est_pas_gardee():
     v.ajouter()
     v._champs[0].setPlainText("Martin")                                  # nommée : elle va sous M, la vue la suit
     assert v.lettres.currentRow() == LETTRES.index("M") and len(v.tableau.lignes) == n + 1
+
+
+# ---------- actions rapides ----------
+from scrinium.core.repertoire import actions  # noqa: E402
+
+
+def test_actions_detecte_courriel_telephone_et_lien_sans_doublon():
+    texte = ("Appeler 06 50 12 45 36 ou +33 6 50 12 45 36, écrire à a-dede@super.com, site https://exemple.fr/x?y=1. "
+             "Le 06.50.12.45.36 est le même numéro.")
+    assert actions(texte) == [
+        ("web", "https://exemple.fr/x?y=1", "https://exemple.fr/x?y=1"),
+        ("mail", "a-dede@super.com", "mailto:a-dede@super.com"),
+        ("tel", "06 50 12 45 36", "tel:0650124536"),
+        ("tel", "+33 6 50 12 45 36", "tel:+33650124536"),
+    ]
+
+
+def test_actions_ignore_dates_codes_postaux_annees_et_schemas_dangereux():
+    assert actions("Né le 2026-10-29, ou 12.03.1990, CP 75000, année 1943, 3114") == []
+    assert actions("javascript:alert(1) file:///etc/passwd ftp://x.org/f") == []
+    assert actions("") == [] and actions(None) == []
+    assert [a[0] for a in actions("mail@x.fr; www.exemple.fr")] == ["mail"]               # « www. » sans schéma : pas un lien
+
+
+def test_url_avec_courriel_dans_l_adresse_ne_double_pas():
+    assert [a[0] for a in actions("https://x.org/?e=a@b.fr")] == ["web"]
+
+
+def _boutons(v):
+    return [v.rapides.itemAt(i).widget() for i in range(v.rapides.count())]
+
+
+def test_vue_affiche_les_actions_de_l_entree(monkeypatch):
+    v = VueRepertoire()
+    v.charger(contacts(("Dedé", "Alphonse", "06 50 12 45 36", "", "a-dede@super.com", "https://exemple.fr")).en_texte())
+    textes = [b.findChildren(type(v.b_ajouter))[0].text() for b in _boutons(v)[1:]]
+    assert [x.split("  ", 1)[1] for x in textes] == ["Appeler 06 50 12 45 36", "Écrire à a-dede@super.com", "Ouvrir https://exemple.fr"]      # ordre des colonnes
+    _lettre(v, "M")                                                                       # aucune entrée affichée : plus d'actions
+    assert _boutons(v) == []
+    _lettre(v, "D")
+    v._champs[2].setPlainText("rien")                                                     # modifié : les actions suivent
+    assert len(_boutons(v)) == 3
+
+
+def test_agir_ouvre_le_bon_schema_et_copie_en_repli(monkeypatch):
+    from PyQt6.QtGui import QDesktopServices, QGuiApplication
+    from scrinium.ui import repertoire as ui_rep
+    v = VueRepertoire()
+    ouverts = []
+    monkeypatch.setattr(QDesktopServices, "openUrl", staticmethod(lambda u: ouverts.append(u.toString()) or True))
+    v.agir("mailto:a@b.fr", "a@b.fr")
+    v.agir("tel:0650124536", "06 50 12 45 36")
+    v.agir("javascript:alert(1)", "x")                                                    # schéma refusé
+    assert ouverts == ["mailto:a@b.fr", "tel:0650124536"]
+    monkeypatch.setattr(QDesktopServices, "openUrl", staticmethod(lambda u: False))
+    monkeypatch.setattr(ui_rep.QToolTip, "showText", staticmethod(lambda *a, **k: None))
+    v.agir("tel:0650124536", "06 50 12 45 36")                                            # rien ne sait appeler : copié
+    assert QGuiApplication.clipboard().text() == "06 50 12 45 36"
+    appels = []
+    monkeypatch.setattr(ui_rep, "ouvrir_url", lambda u, cmd="": appels.append((u.toString(), cmd)) or True)
+    v.navigateur = lambda: "firefox"
+    v.agir("https://exemple.fr", "https://exemple.fr")                                    # les liens passent par le navigateur choisi
+    assert appels == [("https://exemple.fr", "firefox")]

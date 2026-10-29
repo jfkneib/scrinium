@@ -239,6 +239,7 @@ class Fenetre(QMainWindow):
         self.pile.addWidget(self.apercu)
         self.repertoire = VueRepertoire()                      # page des fiches « répertoire » (tableau rangé par lettre)
         self.repertoire.modifie.connect(self._repertoire_modifie)
+        self.repertoire.navigateur = lambda: str(self.store.reglages().get("navigateur", ""))
         self.pile.addWidget(self.repertoire)
         ld.addLayout(ligne)
         ld.addWidget(self.format)

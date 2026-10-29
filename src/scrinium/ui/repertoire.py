@@ -6,15 +6,16 @@ Le tableau lui-même (`core.repertoire.Tableau`) est du texte CSV ; ce widget le
 `modifie(texte)` — la fenêtre l'enregistre comme n'importe quelle fiche."""
 from pathlib import Path
 
-from PyQt6.QtCore import Qt, pyqtSignal
-from PyQt6.QtGui import QFont
+from PyQt6.QtCore import Qt, QUrl, pyqtSignal
+from PyQt6.QtGui import QCursor, QDesktopServices, QFont, QGuiApplication
 from PyQt6.QtWidgets import (QDialog, QDialogButtonBox, QFileDialog, QFormLayout, QHBoxLayout, QInputDialog, QLabel,
                              QLineEdit, QListWidget, QListWidgetItem, QMessageBox, QPlainTextEdit, QPushButton, QRadioButton,
-                             QScrollArea, QVBoxLayout, QWidget)
+                             QScrollArea, QToolTip, QVBoxLayout, QWidget)
 
-from ..core.repertoire import LETTRES, MAX_COLONNES, Tableau
+from ..core.repertoire import LETTRES, MAX_COLONNES, Tableau, actions
 from ..i18n import _
 from .icons import icone
+from .markdown import ouvrir_url
 
 
 class DialogueColonnes(QDialog):
@@ -117,6 +118,7 @@ class VueRepertoire(QWidget):
         self._groupes: dict = {}
         self._champs: list = []
         self._remplissage = False
+        self.navigateur = lambda: ""    # commande de navigateur choisie par l'utilisateur (vide = celui du système)
         self._pendante = None           # numéro d'une entrée tout juste ajoutée et encore vide : reste dans la lettre où on l'a créée
         self._lettre_pendante = "#"
         lay = QVBoxLayout(self)
@@ -157,9 +159,16 @@ class VueRepertoire(QWidget):
         self.entrees.currentRowChanged.connect(self._choisir)
         self.formulaire = QWidget()
         self.form = QFormLayout(self.formulaire)
+        self.rapides = QVBoxLayout()                     # actions rapides : appeler, écrire, ouvrir un lien
+        droite = QWidget()
+        ld = QVBoxLayout(droite)
+        ld.setContentsMargins(0, 0, 0, 0)
+        ld.addWidget(self.formulaire)
+        ld.addLayout(self.rapides)
+        ld.addStretch()
         zone = QScrollArea()
         zone.setWidgetResizable(True)
-        zone.setWidget(self.formulaire)
+        zone.setWidget(droite)
         corps.addWidget(self.lettres)
         corps.addWidget(self.entrees)
         corps.addWidget(zone, 1)
@@ -256,6 +265,7 @@ class VueRepertoire(QWidget):
             e.setEnabled(0 <= i < len(self.tableau.lignes))
         self._remplissage = False
         self.b_supprimer.setEnabled(0 <= i < len(self.tableau.lignes))
+        self._maj_rapides()
 
     # ---------- édition ----------
     def _edite(self, k: int, champ: QPlainTextEdit):
@@ -266,8 +276,59 @@ class VueRepertoire(QWidget):
         if self.tableau.lignes[i][k] == valeur:
             return
         self.tableau.lignes[i][k] = valeur
+        self._maj_rapides()
         self._signaler()
         self._rafraichir(garder=i)
+
+    # ---------- actions rapides ----------
+    def _maj_rapides(self):
+        while self.rapides.count():
+            it = self.rapides.takeAt(0)
+            w = it.widget()
+            if w is not None:
+                w.hide()                      # retiré tout de suite (deleteLater seul le laisserait affiché un instant)
+                w.setParent(None)
+                w.deleteLater()
+        i = self._courante
+        if not 0 <= i < len(self.tableau.lignes):
+            return
+        trouves = []
+        for cellule in self.tableau.lignes[i]:
+            trouves += [a for a in actions(cellule) if a not in trouves]
+        if not trouves:
+            return
+        titre = QLabel("<b>" + _("Actions rapides") + "</b>")
+        self.rapides.addWidget(titre)
+        pictos = {"tel": "☎", "mail": "✉", "web": "↗"}               # des caractères : les mêmes quel que soit le thème d'icônes
+        for type_, valeur, cible in trouves:
+            ligne = QWidget()
+            h = QHBoxLayout(ligne)
+            h.setContentsMargins(0, 0, 0, 0)
+            ouvrir = QPushButton(f"{pictos[type_]}  " + {"tel": _("Appeler"), "mail": _("Écrire à"), "web": _("Ouvrir")}[type_]
+                                 + " " + valeur)
+            ouvrir.setStyleSheet("text-align:left")
+            ouvrir.clicked.connect(lambda *_a, c=cible, v=valeur: self.agir(c, v))
+            copier = QPushButton(icone("edit-copy"), "")
+            copier.setToolTip(_("Copier"))
+            copier.clicked.connect(lambda *_a, v=valeur: self._copier(v))
+            h.addWidget(ouvrir, 1)
+            h.addWidget(copier)
+            self.rapides.addWidget(ligne)
+
+    def agir(self, cible: str, valeur: str):
+        """Ouvre l'adresse : mailto: et tel: par le système, http(s) par le navigateur choisi. Si rien ne sait la traiter
+        (pas d'application d'appel, par exemple), la valeur est copiée dans le presse-papiers."""
+        schema = cible.split(":", 1)[0].lower()
+        if schema not in ("mailto", "tel", "http", "https"):
+            return
+        url = QUrl(cible)
+        ok = ouvrir_url(url, self.navigateur()) if schema in ("http", "https") else QDesktopServices.openUrl(url)
+        if not ok:
+            self._copier(valeur, _("Aucune application pour ouvrir ceci : copié"))
+
+    def _copier(self, valeur: str, message: str | None = None):
+        QGuiApplication.clipboard().setText(valeur)
+        QToolTip.showText(QCursor.pos(), (message or _("Copié")) + " : " + valeur, self)
 
     def _signaler(self):
         self.modifie.emit(self.tableau.en_texte())
