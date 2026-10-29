@@ -1,0 +1,8 @@
+{
+  "titre": "Partage",
+  "version": "0.1",
+  "auteur": "Scrinium",
+  "description": "Partage des fiches avec d'autres personnes via un serveur Scrinium : invitation par courriel (valable 48 h), droits lecture/écriture, synchronisation sans perte (les conflits gardent les deux versions). Les fiches verrouillées ne sont pas partagées.",
+  "classe": "PartagePlugin",
+  "api": 1
+}
