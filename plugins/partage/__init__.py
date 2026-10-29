@@ -7,15 +7,17 @@
 - « Synchroniser les partages » : à la demande (et, si réglé, à intervalle régulier). Les conflits gardent les DEUX versions.
 - Les fiches verrouillées ne sont jamais partagées. Le mot de passe va au trousseau du système si on le demande, sinon il n'est gardé
   que pour la session. Certificat auto-signé : on épingle son empreinte après confirmation.
-Les échanges réseau se font dans le fil de l'interface (délai de 10 s) : la fenêtre peut se figer brièvement si le serveur répond mal."""
+Les échanges réseau se font dans un fil à part (délai de 10 s) ; pendant l'attente, une fenêtre « Veuillez patienter » (affichée
+après 0,4 s) bloque les autres actions mais la fenêtre reste vivante."""
+import threading
 from datetime import datetime
 from urllib.parse import quote
 
-from PyQt6.QtCore import Qt, QUrl
+from PyQt6.QtCore import QEventLoop, QObject, Qt, QUrl, pyqtSignal
 from PyQt6.QtGui import QDesktopServices, QGuiApplication
 from PyQt6.QtWidgets import (QApplication, QCheckBox, QComboBox, QDialog, QDialogButtonBox, QFormLayout, QHBoxLayout, QInputDialog,
-                             QLabel, QLineEdit, QListWidget, QListWidgetItem, QMessageBox, QPlainTextEdit, QPushButton, QRadioButton,
-                             QSpinBox, QVBoxLayout)
+                             QLabel, QLineEdit, QListWidget, QListWidgetItem, QMessageBox, QPlainTextEdit, QProgressDialog, QPushButton,
+                             QRadioButton, QSpinBox, QVBoxLayout)
 
 from scrinium.core.depots import Depot, enregistrer_depot, lire_depots, supprimer_depot
 from scrinium.core.plugins import Plugin
@@ -39,12 +41,46 @@ def _heure(iso: str) -> str:
         return iso
 
 
-class _Attente:
-    def __enter__(self):
-        QApplication.setOverrideCursor(Qt.CursorShape.WaitCursor)
+class _Fin(QObject):
+    fini = pyqtSignal()
 
-    def __exit__(self, *a):
+
+_en_cours = []        # échanges en cours (le minuteur n'en lance pas un second par-dessus)
+
+
+def en_fond(fn, message=None):
+    """Exécute fn() dans un fil à part et rend son résultat (ou relève son exception) dans le fil de l'interface. L'interface reste
+    vivante ; une fenêtre modale « patientez » n'apparaît qu'au-delà de 0,4 s, pour ne pas laisser agir l'utilisateur pendant l'échange."""
+    res = {}
+    fin = _Fin()
+    boucle = QEventLoop()
+    fin.fini.connect(boucle.quit)
+
+    def travail():
+        try:
+            res["v"] = fn()
+        except BaseException as ex:        # relevée dans le fil de l'interface
+            res["e"] = ex
+        fin.fini.emit()
+
+    dlg = QProgressDialog(message or _("Échange avec le serveur de partage…"), None, 0, 0, _parent())
+    dlg.setWindowTitle(_("Partage"))
+    dlg.setWindowModality(Qt.WindowModality.ApplicationModal)
+    dlg.setMinimumDuration(400)
+    dlg.setCancelButton(None)
+    QApplication.setOverrideCursor(Qt.CursorShape.WaitCursor)
+    _en_cours.append(1)
+    try:
+        threading.Thread(target=travail, daemon=True).start()
+        boucle.exec()
+    finally:
+        _en_cours.pop()
+        dlg.reset()
+        dlg.deleteLater()
         QApplication.restoreOverrideCursor()
+    if "e" in res:
+        raise res["e"]
+    return res.get("v")
 
 
 class PartagePlugin(Plugin):
@@ -96,14 +132,19 @@ class PartagePlugin(Plugin):
         return f"{depot.compte}@{depot.url}"
 
     def _mdp(self, depot):
-        mdp = self.secret.lire(self._cle(depot))
-        if mdp is None:
-            mdp, ok = QInputDialog.getText(_parent(), _("Partage"), _("Mot de passe de {compte} sur {url} :").format(
-                compte=depot.compte, url=depot.url), QLineEdit.EchoMode.Password)
-            if not ok or not mdp:
-                return None
-            self.secret.ecrire(self._cle(depot), mdp, False)
-        return mdp
+        """Mot de passe connu (appelé depuis le fil réseau : jamais de boîte de dialogue ici, voir `_demander_mdp`)."""
+        return self.secret.lire(self._cle(depot))
+
+    def _demander_mdp(self, depot) -> bool:
+        """Dans le fil de l'interface, avant l'échange : demande le mot de passe s'il n'est pas connu. False si saisie annulée."""
+        if self.secret.lire(self._cle(depot)) is not None:
+            return True
+        mdp, ok = QInputDialog.getText(_parent(), _("Partage"), _("Mot de passe de {compte} sur {url} :").format(
+            compte=depot.compte, url=depot.url), QLineEdit.EchoMode.Password)
+        if not ok or not mdp:
+            return False
+        self.secret.ecrire(self._cle(depot), mdp, False)
+        return True
 
     def transport(self, depot) -> TransportHttp:
         t = self.transports.get(depot.nom)
@@ -138,9 +179,11 @@ class PartagePlugin(Plugin):
 
     def faire(self, depot, fn):
         """Exécute fn(transport) ; en cas d'erreur, l'explique et retourne None (ErreurTransport) — ou lève les autres."""
+        if not self._demander_mdp(depot):
+            return None
         try:
-            with _Attente():
-                return fn(self.transport(depot))
+            t = self.transport(depot)
+            return en_fond(lambda: fn(t))
         except ErreurTransport as ex:
             if isinstance(ex, NonAuthentifie) and str(ex) == "mot de passe absent":
                 return None                                   # saisie annulée par l'utilisateur
@@ -150,8 +193,7 @@ class PartagePlugin(Plugin):
     def verifier_certificat(self, url: str):
         """Empreinte à épingler (str), None si le certificat est valable tel quel, False si l'utilisateur refuse ou si échec."""
         try:
-            with _Attente():
-                TransportHttp(url, "").decouverte()
+            en_fond(TransportHttp(url, "").decouverte)
             return None
         except CertificatInconnu:
             pass
@@ -159,8 +201,7 @@ class PartagePlugin(Plugin):
             self._erreur(ex)
             return False
         try:
-            with _Attente():
-                emp = empreinte_serveur(url)
+            emp = en_fond(lambda: empreinte_serveur(url))
         except ErreurTransport as ex:
             self._erreur(ex)
             return False
@@ -212,6 +253,8 @@ class PartagePlugin(Plugin):
             self.ctx.ui.notifier(_("Partage"), _("Tout est à jour."))
 
     def synchroniser_tout(self, silencieux=False):
+        if silencieux and _en_cours:
+            return
         depots = self.depots()
         if not depots and not silencieux:
             QMessageBox.information(_parent(), _("Partage"), _("Aucun serveur de partage. Utilisez « Rejoindre un partage… » ou « Serveurs de partage… »."))
@@ -569,10 +612,11 @@ class DialogueRejoindre(QDialog):
             return
         self.emp = emp
         try:
-            with _Attente():
+            def lire():
                 t = TransportHttp(self.serveur, "", None, emp)
                 t.decouverte()
-                inv = t.decrire_invitation(self.jeton)
+                return t.decrire_invitation(self.jeton)
+            inv = en_fond(lire)
         except ErreurTransport as ex:
             self.info.setText("⚠ " + (_("Invitation introuvable, expirée ou déjà utilisée.") if isinstance(ex, Introuvable) else str(ex)))
             return
@@ -621,8 +665,7 @@ class DialogueRejoindre(QDialog):
             self.p.secret.ecrire(self.p._cle(depot), mdp, self.retenir.isChecked())
             t = TransportHttp(depot.url, nom, mdp, self.emp)
             try:
-                with _Attente():
-                    t.rejoindre(self.jeton, None if self.ancien.isChecked() else nom, mdp)
+                en_fond(lambda: t.rejoindre(self.jeton, None if self.ancien.isChecked() else nom, mdp))
             except ErreurTransport as ex:
                 self.p.secret.effacer(self.p._cle(depot))
                 self.p._epingler(depot.nom, None)
