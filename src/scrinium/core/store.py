@@ -210,8 +210,10 @@ class Store:
 
     def renommer_theme(self, th: Theme, nom: str) -> None:
         nouveau = self.paths.fiches / propre(nom, "thème")
+        ancien_nom = th.path.name
         os.rename(th.path, nouveau)
         th.path = nouveau
+        self._favoris_renommer(ancien_nom, nouveau.name, theme=True)
         for f in th.fiches:
             f.path = nouveau / f.path.name
         self.themes.sort(key=lambda t: t.nom.lower())
@@ -224,6 +226,7 @@ class Store:
 
     def supprimer_theme(self, th: Theme) -> None:
         self.a_la_corbeille(th.path)
+        self._favoris_renommer(th.path.name, None, theme=True)
         self.themes.remove(th)
         self._hook()   # après le retrait : le hook doit voir la liste à jour
 
@@ -238,6 +241,7 @@ class Store:
     def supprimer_fiche(self, th: Theme, f: Fiche) -> None:
         stamp = time.strftime("%Y%m%d-%H%M%S")
         pj = self.dossier_pj(f)
+        self._favoris_renommer(self._cle_fiche(th, f), None)
         self.a_la_corbeille(f.path, stamp=stamp)
         if pj.is_dir():
             self.a_la_corbeille(pj, stamp=stamp)
@@ -256,6 +260,7 @@ class Store:
                 f.path.unlink()
             except OSError:
                 pass
+            self._favoris_renommer(self._cle_fiche(th, f), None)
             th.fiches.remove(f)
             return True
         return False
@@ -277,6 +282,8 @@ class Store:
         if nouveau != ancien and ancien.exists():
             self._deplacer_pj(ancien, nouveau)   # à tout instant, l'un des deux chemins reste valide
             ancien.unlink()
+        if nouveau != ancien:
+            self._favoris_renommer(f"{th.path.name}/{ancien.name}", f"{th.path.name}/{nouveau.name}")
         f.titre, f.texte, f.path = titre, texte, nouveau
         f.maj = time.strftime("%Y-%m-%d %H:%M")
         return True
@@ -354,6 +361,7 @@ class Store:
         self._echanger_pj(nouveau_pj, ancien, nouveau)                  # 3) échange des dossiers
         if ancien.exists():
             ancien.unlink()
+        self._favoris_renommer(f"{th.path.name}/{ancien.name}", f"{th.path.name}/{nouveau.name}")
         f.path, f.verrou, f.cle, f.salt, f.wrap = nouveau, True, cle, salt, wrap
 
     def deverrouiller(self, f: Fiche, mdp: str) -> None:
@@ -372,6 +380,7 @@ class Store:
         self._ecrire_md(nouveau, f.titre, joindre_meta(f.meta, f.texte))
         self._echanger_pj(nouveau_pj, ancien, nouveau)
         ancien.unlink()
+        self._favoris_renommer(f"{th.path.name}/{ancien.name}", f"{th.path.name}/{nouveau.name}")
         f.path, f.verrou, f.cle, f.salt, f.wrap = nouveau, False, None, None, b""
 
     def ouvrir_avec_cle_privee(self, f: Fiche, pem: bytes, phrase: str | None) -> str:
@@ -603,6 +612,53 @@ class Store:
                 shutil.rmtree(old, ignore_errors=True)
             else:
                 os.rename(old, pj)
+
+    # ---------- favoris (épinglés) ----------
+    # Réglages de l'utilisateur (settings.json), jamais dans les fiches : ce qu'on épingle n'est pas partagé ni synchronisé.
+    # Un thème est repéré par son nom, une fiche par « thème/fichier » ; les noms suivent les renommages et disparaissent à la suppression.
+    @staticmethod
+    def _cle_fiche(th: Theme, f: Fiche) -> str:
+        return f"{th.path.name}/{f.path.name}"
+
+    def favoris(self) -> dict:
+        brut = self.reglages().get("favoris", {})
+        brut = brut if isinstance(brut, dict) else {}
+        return {k: [x for x in (brut.get(k) if isinstance(brut.get(k), list) else []) if isinstance(x, str)]
+                for k in ("themes", "fiches")}
+
+    def theme_epingle(self, th: Theme) -> bool:
+        return th.path.name in self.favoris()["themes"]
+
+    def fiche_epinglee(self, th: Theme, f: Fiche) -> bool:
+        return self._cle_fiche(th, f) in self.favoris()["fiches"]
+
+    def _sauver_favoris(self, fav: dict) -> None:
+        self.sauver_reglages(favoris=fav)
+
+    def epingler_theme(self, th: Theme, on: bool = True) -> None:
+        fav = self.favoris()
+        fav["themes"] = [x for x in fav["themes"] if x != th.path.name] + ([th.path.name] if on else [])
+        self._sauver_favoris(fav)
+
+    def epingler_fiche(self, th: Theme, f: Fiche, on: bool = True) -> None:
+        fav = self.favoris()
+        cle = self._cle_fiche(th, f)
+        fav["fiches"] = [x for x in fav["fiches"] if x != cle] + ([cle] if on else [])
+        self._sauver_favoris(fav)
+
+    def _favoris_renommer(self, ancien: str, nouveau: str | None, theme: bool = False) -> None:
+        """Un thème (theme=True, par son nom) ou une fiche (« thème/fichier ») change de nom (`nouveau`) ou disparaît (None)."""
+        fav = self.favoris()
+        avant = json.dumps(fav, sort_keys=True)
+        if theme:
+            fav["themes"] = [nouveau if x == ancien else x for x in fav["themes"] if nouveau or x != ancien]
+            fav["fiches"] = [(nouveau + x[len(ancien):] if nouveau else None) if x.startswith(ancien + "/") else x
+                             for x in fav["fiches"]]
+            fav["fiches"] = [x for x in fav["fiches"] if x]
+        else:
+            fav["fiches"] = [nouveau if x == ancien else x for x in fav["fiches"] if nouveau or x != ancien]
+        if json.dumps(fav, sort_keys=True) != avant:
+            self._sauver_favoris(fav)
 
     # ---------- réglages et hook ----------
     def reglages(self) -> dict:

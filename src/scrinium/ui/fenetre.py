@@ -20,7 +20,7 @@ from .capture_rapide import CaptureRapide
 from .extensions import DialogueExtensions, UiPlugin
 from . import export_pdf
 from .choix_icone import DialogueIcone
-from .icons import icone, icone_appli
+from .icons import avec_epingle, icone, icone_appli
 from .images import BandePieces, Editeur
 from .markdown import Apercu, BarreFormat, entourer, navigateurs_installes
 
@@ -132,6 +132,11 @@ class Fenetre(QMainWindow):
         self.liste_themes.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
         self.liste_themes.customContextMenuRequested.connect(self._menu_theme)
         bt = QHBoxLayout()
+        self.b_pin_theme = QPushButton(avec_epingle(""), "")
+        self.b_pin_theme.setCheckable(True)
+        self.b_pin_theme.setToolTip(_("Épingler le thème (il reste en haut de la liste)"))
+        self.b_pin_theme.clicked.connect(lambda *_: self.epingler_theme())
+        bt.addWidget(self.b_pin_theme)
         for ic, tip, slot in (("edit-rename", _("Renommer le thème"), self.renommer_theme),
                               ("view-pim-notes", _("Icône du thème"), self.icone_theme),
                               ("edit-delete", _("Supprimer le thème"), self.supprimer_theme)):
@@ -150,13 +155,22 @@ class Fenetre(QMainWindow):
         self.liste.currentRowChanged.connect(self._sel_fiche)
         self._suppr(self.liste, lambda: self.supprimer_fiche())
         self.liste.itemDoubleClicked.connect(lambda *_: self._double_clic())
+        self.liste.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
+        self.liste.customContextMenuRequested.connect(self._menu_fiche)
         b_sup = QPushButton(icone("edit-delete"), _("Supprimer la fiche"))
         b_sup.clicked.connect(self.supprimer_fiche)
+        self.b_pin_fiche = QPushButton(avec_epingle(""), "")
+        self.b_pin_fiche.setCheckable(True)
+        self.b_pin_fiche.setToolTip(_("Épingler la fiche (elle reste en haut de la liste)"))
+        self.b_pin_fiche.clicked.connect(lambda *_: self.epingler_fiche())
+        bas = QHBoxLayout()
+        bas.addWidget(b_sup, 1)
+        bas.addWidget(self.b_pin_fiche)
         milieu = QWidget()
         lm = QVBoxLayout(milieu)
         lm.setContentsMargins(0, 0, 0, 0)
         lm.addWidget(self.liste)
-        lm.addWidget(b_sup)
+        lm.addLayout(bas)
 
         self.titre = QLineEdit()
         self.titre.setPlaceholderText(_("Titre"))
@@ -238,20 +252,62 @@ class Fenetre(QMainWindow):
         a.triggered.connect(lambda *_: slot())
         liste.addAction(a)
 
+    def _themes_ordonnes(self) -> list:
+        """Thèmes épinglés d'abord (dans l'ordre alphabétique), puis les autres."""
+        return sorted(self.store.themes, key=lambda t: not self.store.theme_epingle(t))
+
     def _noms(self):
-        return [self.TOUS] + [t.nom for t in self.store.themes]
+        return [self.TOUS] + [t.nom for t in self._themes_ordonnes()]
 
     def maj_themes(self):
         self.liste_themes.blockSignals(True)
         self.liste_themes.clear()
         it = QListWidgetItem(icone(ICONE_DEFAUT), self.TOUS)
         self.liste_themes.addItem(it)
-        for t in self.store.themes:
-            self.liste_themes.addItem(QListWidgetItem(icone(t.icone) if not icone(t.icone).isNull() else icone(ICONE_DEFAUT), f"{t.nom}  ({len(t.fiches)})"))
+        for t in self._themes_ordonnes():
+            nom_icone = t.icone if not icone(t.icone).isNull() else ICONE_DEFAUT
+            ic = avec_epingle(nom_icone) if self.store.theme_epingle(t) else icone(nom_icone)
+            self.liste_themes.addItem(QListWidgetItem(ic, f"{t.nom}  ({len(t.fiches)})"))
         if self.theme not in self._noms():
             self.theme = self.TOUS
         self.liste_themes.setCurrentRow(self._noms().index(self.theme))
         self.liste_themes.blockSignals(False)
+        self._maj_pins()
+
+    def _maj_pins(self):
+        t = self._theme_courant()
+        self.b_pin_theme.setEnabled(t is not None)
+        self.b_pin_theme.setChecked(bool(t and self.store.theme_epingle(t)))
+        f = self.fiche
+        self.b_pin_fiche.setEnabled(bool(f and self.fiche_theme))
+        self.b_pin_fiche.setChecked(bool(f and self.fiche_theme and self.store.fiche_epinglee(self.fiche_theme, f)))
+
+    def epingler_theme(self):
+        t = self._theme_courant()
+        if t is None:
+            return
+        self.store.epingler_theme(t, not self.store.theme_epingle(t))
+        self.maj_themes()
+        self.maj_fiches()
+
+    def epingler_fiche(self, theme=None, fiche=None):
+        t, f = (theme, fiche) if fiche is not None else (self.fiche_theme, self.fiche)
+        if f is None or t is None:
+            return
+        self.store.epingler_fiche(t, f, not self.store.fiche_epinglee(t, f))
+        self.maj_fiches()
+        self._maj_pins()
+
+    def _menu_fiche(self, pos):
+        it = self.liste.itemAt(pos)
+        if it is None or not 0 <= self.liste.row(it) < len(self.rows):
+            return
+        t, f = self.rows[self.liste.row(it)]
+        m = QMenu(self)
+        m.addAction(avec_epingle(""), _("Désépingler") if self.store.fiche_epinglee(t, f) else _("Épingler"),
+                    lambda: self.epingler_fiche(t, f))
+        m.addAction(icone("edit-delete"), _("Supprimer…"), self.supprimer_fiche)
+        m.exec(self.liste.mapToGlobal(pos))
 
     def _theme_courant(self):
         return self.store.theme(self.theme)
@@ -262,11 +318,14 @@ class Fenetre(QMainWindow):
         self.quitter_fiche()
         self.theme = self._noms()[row]
         self.maj_fiches()
+        self._maj_pins()
 
     def _menu_theme(self, pos):
         if not self._theme_courant():
             return
         m = QMenu(self)
+        m.addAction(avec_epingle(""), _("Désépingler") if self.store.theme_epingle(self._theme_courant()) else _("Épingler"),
+                    self.epingler_theme)
         m.addAction(icone("edit-rename"), _("Renommer…"), self.renommer_theme)
         m.addAction(icone("view-pim-notes"), _("Icône…"), self.icone_theme)
         m.addAction(icone("edit-delete"), _("Supprimer…"), self.supprimer_theme)
@@ -343,18 +402,23 @@ class Fenetre(QMainWindow):
         self.liste.clear()
         self.rows = []
         sel = None
-        for t in self.store.themes:
+        trouvees = []
+        for t in self._themes_ordonnes():
             if not q and self.theme != self.TOUS and t.nom != self.theme:
                 continue   # une recherche porte sur tous les thèmes
             for f in sorted(t.fiches, key=lambda f: f.titre.lower()):
                 if q and q not in f.titre.lower() and q not in (f.texte or "").lower() and q not in t.nom.lower() \
                         and q not in self.store.texte_ocr(f).lower():
                     continue   # fiche verrouillée fermée : pas de recherche dans le contenu (ni dans ses images)
-                it = QListWidgetItem(icone("object-locked") if f.verrou else QIcon_vide(), self._libelle(t, f, self.theme == self.TOUS or q))
-                self.liste.addItem(it)
-                if f is self.fiche:
-                    sel = len(self.rows)
-                self.rows.append((t, f))
+                trouvees.append((t, f))
+        trouvees.sort(key=lambda tf: not self.store.fiche_epinglee(*tf))          # fiches épinglées d'abord (tri stable)
+        for t, f in trouvees:
+            nom_icone = "object-locked" if f.verrou else ""
+            ic = avec_epingle(nom_icone) if self.store.fiche_epinglee(t, f) else (icone(nom_icone) if nom_icone else QIcon_vide())
+            self.liste.addItem(QListWidgetItem(ic, self._libelle(t, f, self.theme == self.TOUS or q)))
+            if f is self.fiche:
+                sel = len(self.rows)
+            self.rows.append((t, f))
         self.liste.blockSignals(False)
         if self.rows:
             self.liste.setCurrentRow(sel if sel is not None else 0)
@@ -690,6 +754,7 @@ class Fenetre(QMainWindow):
         self.b_verrou.setText(txt)
         self.b_verrou.setIcon(icone(ic))
         self.b_verrou.setEnabled(ok)
+        self._maj_pins()
 
     def exporter_pdf(self):
         """Clic droit sur le contenu : écrit la fiche (titre, texte, images) dans un fichier PDF choisi par l'utilisateur."""
