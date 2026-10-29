@@ -1,8 +1,13 @@
 <?php
 // Copier en config.php (hors du dossier web si possible, sinon variable SCRINIUM_CONFIG) puis adapter.
 return [
-    // Adresse publique du serveur, sans « / » final : sert aux liens d'invitation.
+    // Adresse publique du serveur, sans « / » final : sert aux liens d'invitation. Elle peut porter un préfixe de chemin
+    // quand un proxy inverse sert le serveur sous un sous-dossier (ex. 'https://exemple.org/scrinium', voir caddy/).
     'base_url' => 'https://scrinium.exemple.org',
+
+    // Derrière un proxy inverse (Caddy, nginx…) : adresses des proxys dont on croit l'en-tête X-Forwarded-For. Sans cela, tous les
+    // clients ont l'adresse du proxy et la limitation des essais de connexion les compte ensemble. Vide = pas de proxy.
+    // 'proxies_de_confiance' => ['192.0.2.10'],
 
     // Dossier des données (images). Hors du dossier web, inscriptible par Apache.
     'donnees' => '/srv/scrinium/donnees',

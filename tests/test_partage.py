@@ -284,3 +284,33 @@ def test_serveur_theme_entier(php, tmp_path):
     thd = dede.store.theme("Partagées")
     pretes_d, autres_d, _v = th_mod.fiches_du_theme(dede.store, thd, dede.tr)
     assert pretes_d == [] and "Billets Th" in autres_d
+
+
+# ---------- serveur derrière un proxy : adresse avec préfixe ----------
+def test_prefixe_de_chemin_dans_l_adresse_du_serveur():
+    vus = []
+
+    class H(http.server.BaseHTTPRequestHandler):
+        def do_GET(self):
+            vus.append(self.path)
+            corps = b'{"api": 1, "serveur": "0.2.0", "inscription": "invitation", "limites": {}}'
+            self.send_response(200)
+            self.send_header("Content-Type", "application/json")
+            self.send_header("Content-Length", str(len(corps)))
+            self.end_headers()
+            self.wfile.write(corps)
+
+        def log_message(self, *a):
+            pass
+
+    srv = http.server.HTTPServer(("127.0.0.1", 0), H)
+    threading.Thread(target=srv.serve_forever, daemon=True).start()
+    try:
+        port = srv.server_address[1]
+        ht.TransportHttp(f"http://127.0.0.1:{port}/scrinium/", "jfk").decouverte()
+        ht.TransportHttp(f"http://127.0.0.1:{port}", "jfk").decouverte()
+        assert vus == ["/scrinium/api", "/api"]
+    finally:
+        srv.shutdown()
+    lien = "https://exemple.org:8443/scrinium/inviter/" + JETON
+    assert lg.analyser_invitation(lien) == ("https://exemple.org:8443/scrinium", JETON)

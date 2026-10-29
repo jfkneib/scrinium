@@ -81,6 +81,19 @@ final class Ctx
 const ID = 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa';
 const ID2 = 'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb';
 
+test('adresse du client derrière un proxy de confiance', function () {
+    $proxy = ['192.0.2.10'];
+    $s = fn (string $direct, ?string $xff) => ['REMOTE_ADDR' => $direct] + ($xff === null ? [] : ['HTTP_X_FORWARDED_FOR' => $xff]);
+    verifie(Application::adresseClient($s('203.0.113.7', null), []), '203.0.113.7');                          // pas de proxy déclaré
+    verifie(Application::adresseClient($s('192.0.2.10', '198.51.100.9'), $proxy), '198.51.100.9');       // proxy de confiance
+    verifie(Application::adresseClient($s('203.0.113.7', '1.2.3.4'), $proxy), '203.0.113.7');               // en-tête falsifié, hors proxy
+    verifie(Application::adresseClient($s('192.0.2.10', '9.9.9.9, 198.51.100.9'), $proxy), '198.51.100.9'); // le client a ajouté une fausse adresse
+    verifie(Application::adresseClient($s('192.0.2.10', '198.51.100.9, 192.0.2.10'), $proxy), '198.51.100.9'); // plusieurs sauts
+    verifie(Application::adresseClient($s('192.0.2.10', 'pas-une-adresse'), $proxy), '192.0.2.10');   // illisible
+    verifie(Application::adresseClient($s('192.0.2.10', null), $proxy), '192.0.2.10');
+    verifie(Application::adresseClient($s('2001:db8::1', null), []), '2001:db8::1');
+});
+
 test('découverte et en-têtes', function () {
     $c = new Ctx();
     $r = $c->appel('GET', '/api');

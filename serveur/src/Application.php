@@ -10,6 +10,33 @@ namespace Scrinium\Serveur;
 final class Application
 {
     public const VERSION = '0.2.0';
+
+    /**
+     * Adresse du client. Derrière un proxy inverse (Caddy, nginx…), REMOTE_ADDR est celle du proxy : on lit alors l'en-tête
+     * X-Forwarded-For, mais SEULEMENT si la connexion vient d'un proxy déclaré (`proxies_de_confiance`), en remontant la chaîne
+     * depuis la droite jusqu'à la première adresse qui n'est pas un proxy de confiance. Sinon l'en-tête est ignoré (il se falsifie).
+     *
+     * @param array<string,mixed> $serveur $_SERVER @param list<string> $proxies
+     */
+    public static function adresseClient(array $serveur, array $proxies): string
+    {
+        $direct = (string) ($serveur['REMOTE_ADDR'] ?? '-');
+        $transmis = (string) ($serveur['HTTP_X_FORWARDED_FOR'] ?? '');
+        if ($proxies === [] || !in_array($direct, $proxies, true) || $transmis === '') {
+            return $direct;
+        }
+        $chaine = array_map('trim', explode(',', $transmis));
+        for ($i = count($chaine) - 1; $i >= 0; $i--) {
+            $a = $chaine[$i];
+            if (filter_var($a, FILTER_VALIDATE_IP) === false) {
+                return $direct;                                   // chaîne illisible : on ne se fie à rien
+            }
+            if (!in_array($a, $proxies, true)) {
+                return $a;
+            }
+        }
+        return $direct;
+    }
     private const ROLES = ['lecture' => 1, 'ecriture' => 2, 'proprietaire' => 3];
 
     private Comptes $comptes;

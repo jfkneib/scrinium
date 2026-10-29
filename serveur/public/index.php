@@ -25,7 +25,8 @@ $chemin = rawurldecode((string) parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_UR
 $corps = (string) file_get_contents('php://input');
 
 $app = new Application(Base::depuisConfig($config['db']), $config);
-$r = $app->traiter($_SERVER['REQUEST_METHOD'] ?? 'GET', $chemin, $entetes, $corps, $_SERVER['REMOTE_ADDR'] ?? '-');
+$ip = Application::adresseClient($_SERVER, (array) ($config['proxies_de_confiance'] ?? []));
+$r = $app->traiter($_SERVER['REQUEST_METHOD'] ?? 'GET', $chemin, $entetes, $corps, $ip);
 
 http_response_code($r['statut']);
 foreach ($r['entetes'] as $nom => $valeur) {

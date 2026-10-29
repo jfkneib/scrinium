@@ -89,7 +89,8 @@ class TransportHttp(Transport):
                 recu = hashlib.sha256(c.sock.getpeercert(binary_form=True)).hexdigest()
                 if recu != self.empreinte:
                     raise CertificatInconnu(f"Le certificat du serveur a changé (empreinte {formater_empreinte(recu)}).")
-            c.request(methode, chemin if chemin == "/api" else "/api/v1" + chemin, body=corps, headers=entetes)
+            prefixe = self.u.path.rstrip("/")                  # serveur derrière un proxy : https://hote/scrinium
+            c.request(methode, prefixe + (chemin if chemin == "/api" else "/api/v1" + chemin), body=corps, headers=entetes)
             r = c.getresponse()
             return r.status, r.read(), dict(r.getheaders())
         except ssl.SSLCertVerificationError as ex:
