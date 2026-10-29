@@ -13,6 +13,7 @@ from PyQt6.QtWidgets import (QAbstractItemView, QApplication, QFileDialog, QHBox
 from .. import __version__
 from ..core import autostart, capture, crypto, invitation
 from ..core.plugins import FicheVue, Gestionnaire
+from ..core import repertoire
 from ..core.store import ICONE_DEFAUT, Store, propre
 from ..i18n import _
 from .assistant import AssistantCle
@@ -23,6 +24,7 @@ from .choix_icone import DialogueIcone
 from .icons import avec_epingle, icone, icone_appli
 from .images import BandePieces, Editeur
 from .markdown import Apercu, BarreFormat, entourer, navigateurs_installes
+from .repertoire import VueRepertoire
 
 ORANGE, VERT, GRIS = "#c77700", "#2e8b3a", "gray"
 
@@ -109,6 +111,7 @@ class Fenetre(QMainWindow):
         mf = m.addMenu(_("&Fichier"))
         mf.addAction(self.a_theme)
         mf.addAction(self.a_fiche)
+        mf.addAction(self._action(_("Nouveau répertoire…"), "x-office-address-book", self.nouveau_repertoire, "Ctrl+Alt+R"))
         mf.addAction(self._action(_("Capture rapide…"), "document-edit", self.capture_rapide, "Ctrl+Alt+N"))
         mf.addAction(self._action(_("Inviter à installer Scrinium…"), "mail-send", self.inviter))
         mf.addSeparator()
@@ -233,6 +236,9 @@ class Fenetre(QMainWindow):
         self.pile = QStackedWidget()
         self.pile.addWidget(self.texte)
         self.pile.addWidget(self.apercu)
+        self.repertoire = VueRepertoire()                      # page des fiches « répertoire » (tableau rangé par lettre)
+        self.repertoire.modifie.connect(self._repertoire_modifie)
+        self.pile.addWidget(self.repertoire)
         ld.addLayout(ligne)
         ld.addWidget(self.format)
         ld.addWidget(self.pile, 1)
@@ -527,7 +533,7 @@ class Fenetre(QMainWindow):
                 trouvees.append((t, f))
         trouvees.sort(key=lambda tf: not self.store.fiche_epinglee(*tf))          # fiches épinglées d'abord (tri stable)
         for t, f in trouvees:
-            nom_icone = "object-locked" if f.verrou else ""
+            nom_icone = "object-locked" if f.verrou else ("x-office-address-book" if repertoire.est_repertoire(f.texte) else "")
             ic = avec_epingle(nom_icone) if self.store.fiche_epinglee(t, f) else (icone(nom_icone) if nom_icone else QIcon_vide())
             it = QListWidgetItem(ic, self._libelle(t, f, self.theme == self.TOUS or q))
             it.setData(Qt.ItemDataRole.UserRole, f.path.name)
@@ -607,11 +613,58 @@ class Fenetre(QMainWindow):
             self._statut(_("Aucune fiche : « Fiche » (Ctrl+N)"))
         self._etat_editeur(f is not None and not ferme)
         self.bande.charger(t, f)
+        self._mode_repertoire(bool(f and not ferme and repertoire.est_repertoire(f.texte)))
         self.texte.document().clearUndoRedoStacks()
         self.chargement = False
         self._maj_boutons()
         if f is not None:
             self.plugins.emettre("fiche_ouverte", fiche=FicheVue(t, f))
+
+    def _mode_repertoire(self, actif: bool):
+        """Une fiche répertoire montre sa barre de lettres à la place de l'éditeur de texte (le CSV reste dans `self.texte`)."""
+        if actif:
+            if self.format.b_apercu.isChecked():
+                self.format.b_apercu.setChecked(False)
+            self.repertoire.charger(self.texte.toPlainText())
+            self.pile.setCurrentWidget(self.repertoire)
+        elif self.pile.currentWidget() is self.repertoire:
+            self.pile.setCurrentWidget(self.texte)
+        self.format.setVisible(not actif)
+        self.format.b_apercu.setEnabled(not actif)
+        if actif:
+            self.bande.setVisible(False)             # (sinon la bande se montre ou se cache selon les images, voir `bande.charger`)
+
+    def _repertoire_modifie(self, texte: str):
+        if self.fiche is not None and not self.fiche.fermee:
+            self.texte.setPlainText(texte)           # déclenche l'enregistrement automatique comme une frappe
+
+    def nouveau_repertoire(self):
+        """Crée une fiche répertoire dans le thème courant, à partir d'un modèle de colonnes (modifiables ensuite)."""
+        modeles = [_(m[0]) for m in repertoire.MODELES]
+        choix, ok = QInputDialog.getItem(self, _("Nouveau répertoire"), _("Modèle de colonnes (modifiables ensuite) :"), modeles, 0, False)
+        if not ok:
+            return
+        titre, ok = QInputDialog.getText(self, _("Nouveau répertoire"), _("Titre du répertoire :"), text=_("Répertoire"))
+        if not ok or not titre.strip():
+            return
+        self.quitter_fiche()
+        t = self._theme_courant() or (self.store.themes[0] if self.store.themes else None)
+        if t is None:
+            self.nouveau_theme()
+            t = self._theme_courant()
+            if t is None:
+                return
+        f = self.store.nouvelle_fiche(t)
+        self.store.enregistrer(t, f, titre.strip(), repertoire.texte_modele(modeles.index(choix)))
+        self.recherche.blockSignals(True)
+        self.recherche.clear()
+        self.recherche.blockSignals(False)
+        if self.theme not in (self.TOUS, t.nom):
+            self.theme = t.nom
+        self.fiche, self.fiche_theme = f, t
+        self.maj_themes()
+        self.maj_fiches()
+        self._afficher(t, f)
 
     def ajouter_depuis_cli(self, p: dict) -> str:
         """Appelé par l'instance unique pour `scrinium ajouter` : écrit ici, pour que l'éditeur reste cohérent.
@@ -905,7 +958,10 @@ class Fenetre(QMainWindow):
             except (ValueError, OSError):
                 continue
         try:
-            export_pdf.ecrire_pdf(chemin, self.titre.text(), self.texte.toPlainText(), images)
+            texte = self.texte.toPlainText()
+            if repertoire.est_repertoire(texte):            # un répertoire s'imprime en tableaux, une section par lettre
+                texte = repertoire.Tableau.depuis_texte(texte).en_markdown()
+            export_pdf.ecrire_pdf(chemin, self.titre.text(), texte, images)
         except OSError as ex:
             QMessageBox.critical(self, _("Exporter en PDF"), _("Écriture impossible : %s") % ex)
             return
