@@ -112,3 +112,36 @@ def test_scenario_invitation(php, tmp_path, monkeypatch, messages):
     assert not r2.ok.isEnabled() and "introuvable" in r2.info.text().lower()
     for w in (wa, wb, wc):
         w.close()
+
+
+def test_invitation_envoyee_par_le_plugin_courriel(monkeypatch):
+    from PyQt6.QtWidgets import QApplication
+    appels = []
+
+    class FauxCourriel:
+        def envoyer_message(self, dest, sujet, corps):
+            appels.append((dest, sujet, corps))
+            return True
+
+    class G:
+        actifs = {"courriel": (FauxCourriel(), None)}
+
+    class Ctx:
+        _g = G()
+
+    class P:
+        ctx = Ctx()
+
+    QApplication.instance() or QApplication([])
+    import importlib.util
+    spec = importlib.util.spec_from_file_location("scrinium_plugin_partage_test", RACINE / "__init__.py",
+                                                  submodule_search_locations=[str(RACINE)])
+    mod = importlib.util.module_from_spec(spec)
+    monkeypatch.setitem(sys.modules, spec.name, mod)
+    spec.loader.exec_module(mod)
+    d = mod.DialogueCourriel(P(), "a@b.fr", "Objet", "Corps")
+    assert d.envoyer.isEnabled()
+    d._envoyer()
+    assert appels == [("a@b.fr", "Objet", "Corps")] and d.result() == 1
+    G.actifs = {}
+    assert not mod.DialogueCourriel(P(), "a@b.fr", "O", "C").envoyer.isEnabled()

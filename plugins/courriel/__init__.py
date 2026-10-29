@@ -368,6 +368,31 @@ class CourrielPlugin(Plugin):
         self._dialogue = DialogueEnvoi(self, vue, _parent())
         self._reprendre_envoi()
 
+    def envoyer_message(self, destinataire, sujet, corps) -> bool:
+        """Envoie un message déjà rédigé (appelé par d'autres extensions, ex. Partage ; l'appelant a fait confirmer
+        l'utilisateur). Réglages SMTP et mot de passe demandés au besoin ; True si l'envoi est parti (le résultat est notifié)."""
+        s = self.smtp()
+        if not s.get("hote") or not s.get("expediteur"):
+            QMessageBox.information(_parent(), _("Courriel"), _("Renseignez d'abord le serveur d'envoi."))
+            if not self.serveur_dialogue():
+                return False
+            s = self.smtp()
+        try:
+            msg = logique.construire(s, [destinataire], sujet, corps)
+        except ValueError as ex:
+            QMessageBox.warning(_parent(), _("Courriel"), str(ex))
+            return False
+        if s.get("utilisateur") and self.secret.lire(s) is None:
+            mdp, ok = QInputDialog.getText(_parent(), _("Courriel"), _("Mot de passe de %s :") % s["utilisateur"],
+                                           QLineEdit.EchoMode.Password)
+            if not ok:
+                return False
+            self.secret.session = mdp
+        self._dialogue = None
+        self.ctx.ui.notifier(_("Courriel"), _("Envoi en cours…"))
+        threading.Thread(target=self._envoyer_fil, args=(s, self.secret.lire(s), msg), daemon=True).start()
+        return True
+
     def _reprendre_envoi(self):
         """Affiche la fenêtre d'envoi puis envoie. Après un échec (mauvais mot de passe, serveur injoignable…), la MÊME fenêtre
         se rouvre avec le message d'erreur : l'objet et le texte modifiés ne sont jamais perdus. Elle ne ferme pour de bon
@@ -401,7 +426,7 @@ class CourrielPlugin(Plugin):
     def _envoyer_fil(self, s, mdp, msg):
         try:
             logique.envoyer(s, mdp, msg)
-            self.pont.fini.emit(_("Fiche envoyée à %s.") % msg["To"], "")
+            self.pont.fini.emit(_("Message envoyé à %s.") % msg["To"], "")
         except Exception as ex:
             self.pont.fini.emit("", f"{type(ex).__name__}: {ex}")
 

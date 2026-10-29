@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: scrinium 0.2.0\n"
 "Report-Msgid-Bugs-To: \n"
-"PO-Revision-Date: 2026-10-29 10:41+0100\n"
+"PO-Revision-Date: 2026-10-29 11:55+0100\n"
 "Last-Translator: Jean-François Kneib\n"
 "Language-Team: English\n"
 "Language: en\n"
@@ -624,6 +624,7 @@ msgid "Gérer le carnet…"
 msgstr "Manage the address book…"
 
 #: plugins/courriel/__init__.py:280
+#: plugins/partage/__init__.py:513
 msgid "Envoyer"
 msgstr "Send"
 
@@ -647,17 +648,18 @@ msgstr "Address book…"
 msgid "Serveur d'envoi…"
 msgstr "Outgoing server…"
 
-#: plugins/courriel/__init__.py:397
-#: plugins/courriel/__init__.py:409
-#: plugins/courriel/__init__.py:355
+#: plugins/courriel/__init__.py:392
+#: plugins/courriel/__init__.py:422
+#: plugins/courriel/__init__.py:434
 msgid "Courriel"
 msgstr "Email"
 
-#: plugins/courriel/__init__.py:397
+#: plugins/courriel/__init__.py:392
+#: plugins/courriel/__init__.py:422
 msgid "Envoi en cours…"
 msgstr "Sending…"
 
-#: plugins/courriel/__init__.py:415
+#: plugins/courriel/__init__.py:440
 msgid "Le serveur a refusé l'identifiant ou le mot de passe. Cliquez sur « Envoyer » pour le saisir de nouveau (ou corrigez-le dans Extensions → Serveur d'envoi…). Votre message est conservé."
 msgstr "The server refused the user name or password. Click \"Send\" to enter it again (or correct it in Extensions → Outgoing server…). Your message is kept."
 
@@ -726,10 +728,11 @@ msgid "Cette fiche est verrouillée et fermée : déverrouillez-la d'abord. Son 
 msgstr "This note is locked and closed: unlock it first. Its content is never sent unless you have opened it."
 
 #: plugins/courriel/__init__.py:364
+#: plugins/courriel/__init__.py:376
 msgid "Renseignez d'abord le serveur d'envoi."
 msgstr "Set up the outgoing server first."
 
-#: plugins/courriel/__init__.py:418
+#: plugins/courriel/__init__.py:443
 msgid "Votre message est conservé : vous pouvez réessayer."
 msgstr "Your message is kept: you can try again."
 
@@ -737,16 +740,17 @@ msgstr "Your message is kept: you can try again."
 msgid "Adresse(s) invalide(s) : %s"
 msgstr "Invalid address(es): %s"
 
-#: plugins/courriel/__init__.py:384
+#: plugins/courriel/__init__.py:386
+#: plugins/courriel/__init__.py:409
 msgid "Mot de passe de %s :"
 msgstr "Password for %s:"
 
-#: plugins/courriel/__init__.py:404
-msgid "Fiche envoyée à %s."
+#: plugins/courriel/__init__.py:429
+msgid "Message envoyé à %s."
 msgstr "Note sent to %s."
 
-#: plugins/courriel/__init__.py:409
-#: plugins/courriel/__init__.py:418
+#: plugins/courriel/__init__.py:434
+#: plugins/courriel/__init__.py:443
 msgid "Échec de l'envoi : %s"
 msgstr "Sending failed: %s"
 
@@ -1329,7 +1333,7 @@ msgid "Ajouter un serveur de partage"
 msgstr "Add a sharing server"
 
 #: plugins/partage/__init__.py:257
-#: plugins/partage/__init__.py:582
+#: plugins/partage/__init__.py:593
 msgid "Mémoriser le mot de passe (trousseau du système)"
 msgstr "Remember the password (system keyring)"
 
@@ -1415,24 +1419,24 @@ msgstr "Copy the message"
 msgid "Ouvrir dans mon logiciel de courriel"
 msgstr "Open in my email program"
 
-#: plugins/partage/__init__.py:530
+#: plugins/partage/__init__.py:541
 msgid "Rejoindre un partage"
 msgstr "Join a share"
 
-#: plugins/partage/__init__.py:537
+#: plugins/partage/__init__.py:548
 msgid "Vérifier l'invitation"
 msgstr "Check the invitation"
 
-#: plugins/partage/__init__.py:545
+#: plugins/partage/__init__.py:556
 msgid "Rejoindre"
 msgstr "Join"
 
-#: plugins/partage/__init__.py:568
+#: plugins/partage/__init__.py:579
 #: plugins/partage/logique.py:46
 msgid "lire et modifier"
 msgstr "read and edit"
 
-#: plugins/partage/__init__.py:568
+#: plugins/partage/__init__.py:579
 #: plugins/partage/logique.py:46
 msgid "lire"
 msgstr "read"
@@ -1523,23 +1527,31 @@ msgstr "(cannot read the rights: see the error message)"
 msgid "Adresse de courriel invalide."
 msgstr "Invalid email address."
 
-#: plugins/partage/__init__.py:533
+#: plugins/partage/__init__.py:514
+msgid "Envoie le message avec l'extension Courriel (activez-la dans les extensions)"
+msgstr "Sends the message with the Email extension (enable it in the extensions)"
+
+#: plugins/partage/__init__.py:515
+msgid "Envoie le message depuis votre boîte, via l'extension Courriel"
+msgstr "Sends the message from your mailbox, through the Email extension"
+
+#: plugins/partage/__init__.py:544
 msgid "Collez le lien reçu par courriel :"
 msgstr "Paste the link you received by email:"
 
-#: plugins/partage/__init__.py:577
+#: plugins/partage/__init__.py:588
 msgid "Créer un compte sur ce serveur"
 msgstr "Create an account on this server"
 
-#: plugins/partage/__init__.py:579
+#: plugins/partage/__init__.py:590
 msgid "J'ai déjà un compte sur ce serveur"
 msgstr "I already have an account on this server"
 
-#: plugins/partage/__init__.py:584
+#: plugins/partage/__init__.py:595
 msgid "Nom de compte :"
 msgstr "Account name:"
 
-#: plugins/partage/__init__.py:585
+#: plugins/partage/__init__.py:596
 msgid "Mot de passe (10 caractères minimum pour un nouveau compte) :"
 msgstr "Password (at least 10 characters for a new account):"
 
@@ -1603,15 +1615,15 @@ msgstr "Forget the server {url}? Notes you received stay here but will no longer
 msgid "Partager « {titre} »"
 msgstr "Share \"{titre}\""
 
-#: plugins/partage/__init__.py:569
+#: plugins/partage/__init__.py:580
 msgid "{qui} vous invite à {droit} une fiche (valable jusqu'au {fin})."
 msgstr "{qui} invites you to {droit} a note (valid until {fin})."
 
-#: plugins/partage/__init__.py:590
+#: plugins/partage/__init__.py:601
 msgid "Les fiches partagées sont stockées sur ce serveur : son administrateur peut les lire."
 msgstr "Shared notes are stored on this server: its administrator can read them."
 
-#: plugins/partage/__init__.py:601
+#: plugins/partage/__init__.py:612
 msgid "Nom de compte et mot de passe requis."
 msgstr "Account name and password required."
 
@@ -1647,11 +1659,11 @@ msgstr ""
 "\n"
 "To be safe, nothing was sent. Check with the administrator, then add the server again."
 
-#: plugins/partage/__init__.py:566
+#: plugins/partage/__init__.py:577
 msgid "Invitation introuvable, expirée ou déjà utilisée."
 msgstr "Invitation not found, expired or already used."
 
-#: plugins/partage/__init__.py:575
+#: plugins/partage/__init__.py:586
 msgid "Vous serez ajouté avec votre compte « {c} » sur ce serveur."
 msgstr "You will be added with your account \"{c}\" on this server."
 

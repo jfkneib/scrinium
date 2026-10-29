@@ -624,6 +624,7 @@ msgid "Gérer le carnet…"
 msgstr ""
 
 #: plugins/courriel/__init__.py:280
+#: plugins/partage/__init__.py:513
 msgid "Envoyer"
 msgstr ""
 
@@ -647,17 +648,18 @@ msgstr ""
 msgid "Serveur d'envoi…"
 msgstr ""
 
-#: plugins/courriel/__init__.py:397
-#: plugins/courriel/__init__.py:409
-#: plugins/courriel/__init__.py:355
+#: plugins/courriel/__init__.py:392
+#: plugins/courriel/__init__.py:422
+#: plugins/courriel/__init__.py:434
 msgid "Courriel"
 msgstr ""
 
-#: plugins/courriel/__init__.py:397
+#: plugins/courriel/__init__.py:392
+#: plugins/courriel/__init__.py:422
 msgid "Envoi en cours…"
 msgstr ""
 
-#: plugins/courriel/__init__.py:415
+#: plugins/courriel/__init__.py:440
 msgid "Le serveur a refusé l'identifiant ou le mot de passe. Cliquez sur « Envoyer » pour le saisir de nouveau (ou corrigez-le dans Extensions → Serveur d'envoi…). Votre message est conservé."
 msgstr ""
 
@@ -723,10 +725,11 @@ msgid "Cette fiche est verrouillée et fermée : déverrouillez-la d'abord. Son 
 msgstr ""
 
 #: plugins/courriel/__init__.py:364
+#: plugins/courriel/__init__.py:376
 msgid "Renseignez d'abord le serveur d'envoi."
 msgstr ""
 
-#: plugins/courriel/__init__.py:418
+#: plugins/courriel/__init__.py:443
 msgid "Votre message est conservé : vous pouvez réessayer."
 msgstr ""
 
@@ -734,16 +737,17 @@ msgstr ""
 msgid "Adresse(s) invalide(s) : %s"
 msgstr ""
 
-#: plugins/courriel/__init__.py:384
+#: plugins/courriel/__init__.py:386
+#: plugins/courriel/__init__.py:409
 msgid "Mot de passe de %s :"
 msgstr ""
 
-#: plugins/courriel/__init__.py:404
-msgid "Fiche envoyée à %s."
+#: plugins/courriel/__init__.py:429
+msgid "Message envoyé à %s."
 msgstr ""
 
-#: plugins/courriel/__init__.py:409
-#: plugins/courriel/__init__.py:418
+#: plugins/courriel/__init__.py:434
+#: plugins/courriel/__init__.py:443
 msgid "Échec de l'envoi : %s"
 msgstr ""
 
@@ -1305,7 +1309,7 @@ msgid "Ajouter un serveur de partage"
 msgstr ""
 
 #: plugins/partage/__init__.py:257
-#: plugins/partage/__init__.py:582
+#: plugins/partage/__init__.py:593
 msgid "Mémoriser le mot de passe (trousseau du système)"
 msgstr ""
 
@@ -1391,24 +1395,24 @@ msgstr ""
 msgid "Ouvrir dans mon logiciel de courriel"
 msgstr ""
 
-#: plugins/partage/__init__.py:530
+#: plugins/partage/__init__.py:541
 msgid "Rejoindre un partage"
 msgstr ""
 
-#: plugins/partage/__init__.py:537
+#: plugins/partage/__init__.py:548
 msgid "Vérifier l'invitation"
 msgstr ""
 
-#: plugins/partage/__init__.py:545
+#: plugins/partage/__init__.py:556
 msgid "Rejoindre"
 msgstr ""
 
-#: plugins/partage/__init__.py:568
+#: plugins/partage/__init__.py:579
 #: plugins/partage/logique.py:46
 msgid "lire et modifier"
 msgstr ""
 
-#: plugins/partage/__init__.py:568
+#: plugins/partage/__init__.py:579
 #: plugins/partage/logique.py:46
 msgid "lire"
 msgstr ""
@@ -1499,23 +1503,31 @@ msgstr ""
 msgid "Adresse de courriel invalide."
 msgstr ""
 
-#: plugins/partage/__init__.py:533
+#: plugins/partage/__init__.py:514
+msgid "Envoie le message avec l'extension Courriel (activez-la dans les extensions)"
+msgstr ""
+
+#: plugins/partage/__init__.py:515
+msgid "Envoie le message depuis votre boîte, via l'extension Courriel"
+msgstr ""
+
+#: plugins/partage/__init__.py:544
 msgid "Collez le lien reçu par courriel :"
 msgstr ""
 
-#: plugins/partage/__init__.py:577
+#: plugins/partage/__init__.py:588
 msgid "Créer un compte sur ce serveur"
 msgstr ""
 
-#: plugins/partage/__init__.py:579
+#: plugins/partage/__init__.py:590
 msgid "J'ai déjà un compte sur ce serveur"
 msgstr ""
 
-#: plugins/partage/__init__.py:584
+#: plugins/partage/__init__.py:595
 msgid "Nom de compte :"
 msgstr ""
 
-#: plugins/partage/__init__.py:585
+#: plugins/partage/__init__.py:596
 msgid "Mot de passe (10 caractères minimum pour un nouveau compte) :"
 msgstr ""
 
@@ -1565,15 +1577,15 @@ msgstr ""
 msgid "Partager « {titre} »"
 msgstr ""
 
-#: plugins/partage/__init__.py:569
+#: plugins/partage/__init__.py:580
 msgid "{qui} vous invite à {droit} une fiche (valable jusqu'au {fin})."
 msgstr ""
 
-#: plugins/partage/__init__.py:590
+#: plugins/partage/__init__.py:601
 msgid "Les fiches partagées sont stockées sur ce serveur : son administrateur peut les lire."
 msgstr ""
 
-#: plugins/partage/__init__.py:601
+#: plugins/partage/__init__.py:612
 msgid "Nom de compte et mot de passe requis."
 msgstr ""
 
@@ -1605,11 +1617,11 @@ msgid ""
 "Par prudence, rien n'a été envoyé. Vérifiez auprès de l'administrateur, puis réajoutez le serveur."
 msgstr ""
 
-#: plugins/partage/__init__.py:566
+#: plugins/partage/__init__.py:577
 msgid "Invitation introuvable, expirée ou déjà utilisée."
 msgstr ""
 
-#: plugins/partage/__init__.py:575
+#: plugins/partage/__init__.py:586
 msgid "Vous serez ajouté avec votre compte « {c} » sur ce serveur."
 msgstr ""
 

@@ -489,15 +489,15 @@ class DialoguePartager(QDialog):
         objet, message = logique.texte_invitation(f.titre, role, inv["url"], _heure(inv["expire_le"]))
         self.email.clear()
         self._rafraichir()
-        DialogueCourriel(self, email, objet, message).exec()
+        DialogueCourriel(self.p, email, objet, message).exec()
 
 
 class DialogueCourriel(QDialog):
     """Message d'invitation prêt à envoyer : copié ou ouvert dans le logiciel de courriel du système."""
 
-    def __init__(self, parent, email, objet, message):
-        super().__init__(parent)
-        self.email, self.objet = email, objet
+    def __init__(self, plugin, email, objet, message):
+        super().__init__(_parent())
+        self.p, self.email, self.objet = plugin, email, objet
         self.setWindowTitle(_("Invitation prête"))
         self.resize(520, 380)
         lay = QVBoxLayout(self)
@@ -509,13 +509,24 @@ class DialogueCourriel(QDialog):
         copier.clicked.connect(lambda: QGuiApplication.clipboard().setText(self.texte.toPlainText()))
         ouvrir = QPushButton(_("Ouvrir dans mon logiciel de courriel"))
         ouvrir.clicked.connect(self._ouvrir)
+        courriel = plugin.ctx._g.actifs.get("courriel")
+        self.envoyer = QPushButton(_("Envoyer"))
+        self.envoyer.setToolTip(_("Envoie le message avec l'extension Courriel (activez-la dans les extensions)")
+                                if courriel is None else _("Envoie le message depuis votre boîte, via l'extension Courriel"))
+        self.envoyer.setEnabled(courriel is not None)
+        self.envoyer.clicked.connect(self._envoyer)
         fermer = QPushButton(_("Fermer"))
         fermer.clicked.connect(self.accept)
-        for b in (copier, ouvrir):
+        for b in (self.envoyer, copier, ouvrir):
             bas.addWidget(b)
         bas.addStretch()
         bas.addWidget(fermer)
         lay.addLayout(bas)
+
+    def _envoyer(self):
+        courriel = self.p.ctx._g.actifs.get("courriel")
+        if courriel is not None and courriel[0].envoyer_message(self.email, self.objet, self.texte.toPlainText()):
+            self.accept()
 
     def _ouvrir(self):
         url = "mailto:{}?subject={}&body={}".format(quote(self.email), quote(self.objet), quote(self.texte.toPlainText()))
