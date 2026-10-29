@@ -25,13 +25,18 @@ def chemin_etat(store: Store, depot: str = "personnel") -> Path:
     return store.paths.base / "synchro" / f"{sur}.json"
 
 
+def empreinte_contenu(titre: str, texte: str, pieces) -> str:
+    """SHA-256 d'un contenu : titre, texte et pièces [(nom, octets)]. Même calcul pour le local et le distant (comparables)."""
+    liste = sorted([nom, hashlib.sha256(octets).hexdigest()] for nom, octets in pieces)
+    corps = json.dumps({"titre": titre, "texte": texte or "", "pieces": liste}, ensure_ascii=False, sort_keys=True)
+    return hashlib.sha256(corps.encode("utf-8")).hexdigest()
+
+
 def empreinte(store: Store, f: Fiche) -> str | None:
     """SHA-256 du contenu synchronisable de la fiche ; None si elle est verrouillée (pas synchronisée à ce stade)."""
     if f.verrou:
         return None
-    pieces = sorted([p.nom, hashlib.sha256(store.lire_piece(f, p)).hexdigest()] for p in store.lister_pieces(f))
-    corps = json.dumps({"titre": f.titre, "texte": f.texte or "", "pieces": pieces}, ensure_ascii=False, sort_keys=True)
-    return hashlib.sha256(corps.encode("utf-8")).hexdigest()
+    return empreinte_contenu(f.titre, f.texte or "", [(p.nom, store.lire_piece(f, p)) for p in store.lister_pieces(f)])
 
 
 @dataclass

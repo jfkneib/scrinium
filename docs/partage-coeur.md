@@ -50,11 +50,23 @@ Trois états se comparent pour une fiche suivie : la **base** (dernière synchro
 - Reste (étape 2) : les **suppressions** (qui a le droit de supprimer côté serveur ; une fiche supprimée localement mais modifiée
   ailleurs) et les **renommages simultanés**.
 
-## 4. Dépôts et transport — À FAIRE
-- Aujourd'hui `Store` a un seul dossier racine. On introduit la notion de **dépôt** : le dépôt personnel (comme aujourd'hui) et
-  des dépôts **partagés** (un par serveur), chacun avec son état de synchronisation.
-- Le cœur ne connaît qu'une **interface de transport** (lister, lire, écrire avec version, partager, retirer un droit) ;
-  le plugin « Partage » en fournit l'implémentation HTTP vers le serveur.
+## 4. Dépôts, transport et synchronisation — FAIT
+- **Dépôts** (`core/depots.py`) : le dépôt **personnel** (les fiches locales, inchangé) et des dépôts **partagés**, un par serveur : un
+  réglage (nom, adresse **https** — http seulement vers l'ordinateur local —, compte, thème d'arrivée, par défaut « Partagées ») dans
+  `settings.json`, **sans mot de passe** (le plugin le garde dans le trousseau). Supprimer un dépôt garde les fiches locales.
+- **Transport** (`core/transport.py`) : l'interface que le plugin implémentera en HTTP (`lister`, `lire`, `ecrire` avec version de départ,
+  `droits`, `partager`, `retirer_droit`, `supprimer`), les erreurs (`Injoignable`, `NonAuthentifie`, `Refuse`, `Introuvable`,
+  `ConflitDeVersion`) et un **serveur de référence en mémoire** (`ServeurMemoire`) qui applique les règles que le vrai serveur PHP devra
+  respecter : trois rôles, version de départ obligatoire, seul le propriétaire partage / retire / supprime, une fiche non partagée est
+  invisible. Il sert de spécification exécutable et de serveur de test.
+- **Synchronisation** (`core/synchroniser.py`) : `synchroniser(store, état, transport)` reçoit les fiches nouvellement partagées, puis
+  envoie / reçoit / aligne / résout chaque fiche suivie, et rend un `Bilan`. `publier` met une fiche en ligne (le compte en devient
+  propriétaire), `partager` donne un droit. Jamais de suppression automatique (ni locale, ni sur le serveur) ; pannes globales =
+  passage interrompu mais **ce qui est fait reste fait** (l'état est enregistré) ; un incident sur une fiche n'arrête pas les autres ;
+  fiches verrouillées ignorées (étape 3) ; passage répété = aucun envoi inutile (idempotent).
+- Testé de bout en bout avec trois postes (propriétaire, écriture, lecture) : réception, aller-retour, lecture seule refusée par le
+  serveur, conflit (le premier à enregistrer gagne, l'autre garde sa version), version périmée, modifications identiques, images
+  jointes, droit retiré puis rendu (la fiche est rattachée, pas dupliquée), suppression locale non propagée, état perdu.
 
 ## 5. Ce qui vient après
 Étape 2 : serveur minimal (comptes, trois rôles propriétaire / écriture / lecture) et plugin. Étape 3 : fiches verrouillées
