@@ -38,6 +38,7 @@ def _charger(nom):
 lg = _charger("logique")
 ht = _charger("http")
 JETON = "ab" * 32
+MDP = {"jfk": "motdepasse-jfk", "dede": "motdepasse-dede", "alphonse": "motdepasse-alphonse"}   # comptes créés par la fixture `php`
 
 
 # ---------- liens d'invitation ----------
@@ -115,49 +116,6 @@ def test_serveur_injoignable():
 
 
 # ---------- le vrai serveur PHP ----------
-def _php_sqlite():
-    php = shutil.which("php")
-    if not php:
-        return None
-    ok = subprocess.run([php, "-r", "exit(extension_loaded('pdo_sqlite') && extension_loaded('mbstring') ? 0 : 1);"]).returncode == 0
-    return php if ok else None
-
-
-MDP = {"jfk": "motdepasse-jfk", "dede": "motdepasse-dede", "alphonse": "motdepasse-alphonse"}
-
-
-@pytest.fixture(scope="module")
-def php(tmp_path_factory):
-    php = _php_sqlite()
-    if not php:
-        pytest.skip("PHP avec pdo_sqlite absent")
-    d = tmp_path_factory.mktemp("serveur")
-    s = socket.socket()
-    s.bind(("127.0.0.1", 0))
-    port = s.getsockname()[1]
-    s.close()
-    url = f"http://127.0.0.1:{port}"
-    (d / "config.php").write_text(f"""<?php return ['base_url' => '{url}', 'donnees' => '{d}/donnees',
-        'db' => ['type' => 'sqlite', 'chemin' => '{d}/s.sqlite'], 'cout_hash' => 4];""")
-    env = dict(os.environ, SCRINIUM_CONFIG=str(d / "config.php"))
-    cli = str(RACINE / "serveur" / "bin" / "scrinium-serveur")
-    subprocess.run([php, cli, "initialiser"], env=env, check=True, capture_output=True)
-    for nom, mdp in MDP.items():
-        subprocess.run([php, cli, "creer-compte", nom], env=env, input=mdp + "\n", text=True, check=True, capture_output=True)
-    pub = RACINE / "serveur" / "public"
-    proc = subprocess.Popen([php, "-S", f"127.0.0.1:{port}", "-t", str(pub), str(pub / "index.php")], env=env,
-                            stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-    for _ in range(50):
-        try:
-            socket.create_connection(("127.0.0.1", port), timeout=0.2).close()
-            break
-        except OSError:
-            time.sleep(0.1)
-    yield url
-    proc.terminate()
-    proc.wait(5)
-
-
 class Poste:
     def __init__(self, tmp_path, url, compte, mdp=None):
         self.store = Store(Paths(tmp_path / compte))

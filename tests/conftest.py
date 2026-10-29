@@ -5,6 +5,11 @@
 `os.environ.setdefault` ne suffit pas : si la session définit déjà QT_QPA_PLATFORM (xcb, wayland), la valeur est conservée et les
 tests ouvrent de vraies fenêtres. Ici on l'impose, avant l'import de Qt, et on arrête tout si une autre plateforme est en service."""
 import os
+import shutil
+import socket
+import subprocess
+import time
+from pathlib import Path
 
 os.environ["QT_QPA_PLATFORM"] = "offscreen"
 for variable in ("DISPLAY", "WAYLAND_DISPLAY"):          # même une erreur de configuration ne doit pas pouvoir atteindre l'écran
@@ -70,3 +75,53 @@ def _sans_extensions_officielles(monkeypatch):
     from scrinium.core import plugins
     plugins.dossiers_officiels_reels = getattr(plugins, "dossiers_officiels_reels", plugins.dossiers_officiels)
     monkeypatch.setattr(plugins, "dossiers_officiels", lambda: [])
+
+
+RACINE = Path(__file__).resolve().parent.parent
+
+def _php_sqlite():
+    php = shutil.which("php")
+    if not php:
+        return None
+    ok = subprocess.run([php, "-r", "exit(extension_loaded('pdo_sqlite') && extension_loaded('mbstring') ? 0 : 1);"]).returncode == 0
+    return php if ok else None
+
+
+MDP = {"jfk": "motdepasse-jfk", "dede": "motdepasse-dede", "alphonse": "motdepasse-alphonse"}
+
+
+@pytest.fixture(scope="session")
+def php(tmp_path_factory):
+    if os.environ.get("SCRINIUM_TEST_PHP_URL"):         # serveur déjà lancé ailleurs (comptes jfk, dede, alphonse existants)
+        yield os.environ["SCRINIUM_TEST_PHP_URL"]
+        return
+    php = _php_sqlite()
+    if not php:
+        pytest.skip("PHP avec pdo_sqlite absent")
+    d = tmp_path_factory.mktemp("serveur")
+    s = socket.socket()
+    s.bind(("127.0.0.1", 0))
+    port = s.getsockname()[1]
+    s.close()
+    url = f"http://127.0.0.1:{port}"
+    (d / "config.php").write_text(f"""<?php return ['base_url' => '{url}', 'donnees' => '{d}/donnees',
+        'db' => ['type' => 'sqlite', 'chemin' => '{d}/s.sqlite'], 'cout_hash' => 4];""")
+    env = dict(os.environ, SCRINIUM_CONFIG=str(d / "config.php"))
+    cli = str(RACINE / "serveur" / "bin" / "scrinium-serveur")
+    subprocess.run([php, cli, "initialiser"], env=env, check=True, capture_output=True)
+    for nom, mdp in MDP.items():
+        subprocess.run([php, cli, "creer-compte", nom], env=env, input=mdp + "\n", text=True, check=True, capture_output=True)
+    pub = RACINE / "serveur" / "public"
+    proc = subprocess.Popen([php, "-S", f"127.0.0.1:{port}", "-t", str(pub), str(pub / "index.php")], env=env,
+                            stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    for _ in range(50):
+        try:
+            socket.create_connection(("127.0.0.1", port), timeout=0.2).close()
+            break
+        except OSError:
+            time.sleep(0.1)
+    yield url
+    proc.terminate()
+    proc.wait(5)
+
+

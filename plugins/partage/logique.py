@@ -9,6 +9,11 @@ from scrinium.i18n import _
 JETON = re.compile(r"^[0-9a-f]{64}$")
 ROLES_LIBELLES = {"lecture": "lecture seule", "ecriture": "lecture et écriture"}      # traduits à l'affichage
 SERVICE = "scrinium-partage"
+ADRESSE = re.compile(r"^[^@\s,;<>\"']+@[^@\s,;<>\"']+\.[^@\s,;<>\"']+$")
+
+
+def adresse_valide(a: str) -> bool:
+    return bool(ADRESSE.match(a.strip()))
 
 
 def analyser_invitation(texte: str) -> tuple[str, str]:
