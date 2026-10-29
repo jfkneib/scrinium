@@ -281,6 +281,10 @@ class PartagePlugin(Plugin):
     def rejoindre(self):
         DialogueRejoindre(self).exec()
 
+    def rejoindre_lien(self, lien: str):
+        """Lien `scrinium://rejoindre…` ouvert par le système : pré-remplit la fenêtre, sans contacter le serveur avant le clic."""
+        DialogueRejoindre(self, lien).exec()
+
 
 # ---------- boîtes de dialogue ----------
 class DialogueAjoutServeur(QDialog):
@@ -577,7 +581,7 @@ class DialogueCourriel(QDialog):
 
 
 class DialogueRejoindre(QDialog):
-    def __init__(self, plugin):
+    def __init__(self, plugin, lien=""):
         super().__init__(_parent())
         self.p = plugin
         self.serveur = self.jeton = None
@@ -587,6 +591,7 @@ class DialogueRejoindre(QDialog):
         self.lay.addWidget(QLabel(_("Collez le lien reçu par courriel :")))
         self.lien = QLineEdit()
         self.lien.setPlaceholderText("https://…/inviter/…")
+        self.lien.setText(lien)
         self.lay.addWidget(self.lien)
         self.verifier = QPushButton(_("Vérifier l'invitation"))
         self.verifier.clicked.connect(self._verifier)

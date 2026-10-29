@@ -29,6 +29,7 @@ ln -sf "$VENV/bin/scrinium" "$BIN/scrinium"
 install -m 644 "$SRC/packaging/scrinium.desktop" "$APPS/scrinium.desktop"
 install -m 644 "$SRC/src/scrinium/icons/scrinium.svg" "$ICONS/scrinium.svg"
 command -v update-desktop-database >/dev/null && update-desktop-database "$APPS" 2>/dev/null || true
+command -v xdg-mime >/dev/null && xdg-mime default scrinium.desktop x-scheme-handler/scrinium 2>/dev/null || true   # liens scrinium://
 
 echo "✔ Installé. Lancez « scrinium » ou cherchez « Scrinium » dans le menu."
 case ":$PATH:" in *":$BIN:"*) ;; *) echo "  (ajoutez $BIN à votre PATH si la commande est introuvable)";; esac

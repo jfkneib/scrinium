@@ -128,6 +128,11 @@ Section "$(TXT_PROGRAMME)" SecProgramme
   CreateShortcut  "$SMPROGRAMS\${NOM}\${NOM}.lnk" "$INSTDIR\scrinium.exe"
   CreateShortcut  "$SMPROGRAMS\${NOM}\Désinstaller ${NOM}.lnk" "$INSTDIR\uninstall.exe"
 
+  ; Liens scrinium://… (invitations de partage) : ouverts par scrinium.exe, sans droits administrateur (HKCU).
+  WriteRegStr HKCU "Software\Classes\scrinium" "" "URL:Scrinium"
+  WriteRegStr HKCU "Software\Classes\scrinium" "URL Protocol" ""
+  WriteRegStr HKCU "Software\Classes\scrinium\shell\open\command" "" '"$INSTDIR\scrinium.exe" "%1"'
+
   ; Mémorise le dossier choisi (pour proposer le même lors d'une mise à jour).
   WriteRegStr HKCU "Software\${NOM}" "Dossier" "$INSTDIR"
 
@@ -169,6 +174,7 @@ Section "Uninstall"
   ; sans cela, Windows tenterait de lancer un programme qui n'existe plus à chaque ouverture de session).
   DeleteRegKey HKCU "${CLE_DESINSTALL}"
   DeleteRegKey HKCU "Software\${NOM}"
+  DeleteRegKey HKCU "Software\Classes\scrinium"
   DeleteRegValue HKCU "${CLE_DEMARRAGE}" "scrinium"
 
   ; Rappelle (sauf en mode silencieux) que les fiches sont conservées.

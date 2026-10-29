@@ -142,12 +142,16 @@ def main(argv=None) -> int:
                    help=_("commande à rappeler dans l'en-tête du bloc ajouté"))
     c.add_argument("--remplacer", "--replace", action="store_true", help=_("remplace le texte de la fiche au lieu d'ajouter à la fin"))
     c.add_argument("--brut", "--raw", action="store_true", help=_("ajoute le texte tel quel, sans en-tête daté ni barrières"))
+    argv = list(sys.argv[1:] if argv is None else argv)
+    liens = [x for x in argv if x.lower().startswith("scrinium:")]      # lancé par le système pour un lien scrinium://…
+    argv = [x for x in argv if x not in liens]
     a = p.parse_args(argv)
     if a.cmd in ("add", "ajouter"):
         return _ajouter(a)
     if a.cmd in ("secours", "rescue"):
         a.action = {"list": "lister", "open": "ouvrir", "unlock": "deverrouiller"}.get(a.action, a.action)
         return _recuperer(a)
+    from PyQt6.QtCore import QTimer
     from PyQt6.QtWidgets import QApplication
     from .ui import instance
     from .ui.fenetre import Fenetre
@@ -158,19 +162,25 @@ def main(argv=None) -> int:
     if qt_tr.load(f"qtbase_{langue}", QLibraryInfo.path(QLibraryInfo.LibraryPath.TranslationsPath)):
         app.installTranslator(qt_tr)
     app.setDesktopFileName("scrinium")
+    lien = liens[0] if liens else None
+    if lien and instance.envoyer_lien(lien):                 # instance déjà lancée : elle ouvre le lien
+        return 0
     if a.rapide and instance.demander_capture():             # instance déjà lancée : elle ouvre la capture
         return 0
-    if not a.rapide and instance.reveiller_existante(a.theme, a.nouvelle):   # déjà lancé (peut-être dans la zone de notification)
+    if not lien and not a.rapide and instance.reveiller_existante(a.theme, a.nouvelle):   # déjà lancé (peut-être dans la zone de notification)
         return 0
     w = Fenetre(Store(Paths()), theme=a.theme, nouvelle=a.nouvelle)
     serveur = instance.Serveur(w)
     serveur.ajout = w.ajouter_depuis_cli
     serveur.reveil.connect(lambda th, nv: w.montrer(th or None, nv))
     serveur.capture.connect(w.capture_rapide)
+    serveur.lien.connect(w.ouvrir_lien)
     if not ((a.minimise or a.rapide) and w.tray_actif):
         w.show()
     if a.rapide:
         w.capture_rapide()
+    if lien:
+        QTimer.singleShot(0, lambda: w.ouvrir_lien(lien))
     return app.exec()
 
 

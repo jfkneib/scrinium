@@ -458,6 +458,18 @@ class Fenetre(QMainWindow):
             self._statut(_("Fiche d'invitation prête : relisez-la, puis activez l'extension Courriel (Extensions > Gérer les "
                            "extensions…) pour l'envoyer."), ORANGE)
 
+    def ouvrir_lien(self, url: str):
+        """Lien `scrinium://…` reçu du système : confié à l'extension qui sait le traiter (Partage). Rien n'est fait sans
+        un clic de l'utilisateur dans la fenêtre qu'elle ouvre."""
+        self.montrer()
+        partage = self.plugins.actifs.get("partage")
+        ouvrir = getattr(partage[0], "rejoindre_lien", None) if partage else None
+        if ouvrir is None:
+            self._statut(_("Lien de partage reçu : activez l'extension Partage (Extensions > Gérer les extensions…) pour le "
+                           "utiliser."), ORANGE)
+            return
+        self.plugins.appeler("partage", ouvrir, url)
+
     def capture_rapide(self):
         """Petite fenêtre de note rapide, au premier plan (la fenêtre principale n'est pas affichée)."""
         self.sauver()

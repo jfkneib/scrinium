@@ -585,7 +585,7 @@ msgid "Identifiant :"
 msgstr ""
 
 #: plugins/courriel/__init__.py:121
-#: plugins/partage/__init__.py:303
+#: plugins/partage/__init__.py:307
 msgid "Mot de passe :"
 msgstr ""
 
@@ -611,7 +611,7 @@ msgid "Contact"
 msgstr ""
 
 #: plugins/courriel/__init__.py:202
-#: plugins/partage/__init__.py:435
+#: plugins/partage/__init__.py:439
 msgid "Adresse :"
 msgstr ""
 
@@ -624,7 +624,7 @@ msgid "Gérer le carnet…"
 msgstr ""
 
 #: plugins/courriel/__init__.py:280
-#: plugins/partage/__init__.py:556
+#: plugins/partage/__init__.py:560
 msgid "Envoyer"
 msgstr ""
 
@@ -1314,115 +1314,115 @@ msgstr ""
 msgid "Certificat du serveur"
 msgstr ""
 
-#: plugins/partage/__init__.py:292
+#: plugins/partage/__init__.py:296
 msgid "Ajouter un serveur de partage"
 msgstr ""
 
-#: plugins/partage/__init__.py:300
-#: plugins/partage/__init__.py:637
+#: plugins/partage/__init__.py:304
+#: plugins/partage/__init__.py:642
 msgid "Mémoriser le mot de passe (trousseau du système)"
 msgstr ""
 
-#: plugins/partage/__init__.py:301
+#: plugins/partage/__init__.py:305
 msgid "Adresse du serveur :"
 msgstr ""
 
-#: plugins/partage/__init__.py:302
+#: plugins/partage/__init__.py:306
 msgid "Compte :"
 msgstr ""
 
-#: plugins/partage/__init__.py:340
-#: plugins/partage/__init__.py:386
+#: plugins/partage/__init__.py:344
+#: plugins/partage/__init__.py:390
 msgid "Serveurs de partage"
 msgstr ""
 
-#: plugins/partage/__init__.py:355
+#: plugins/partage/__init__.py:359
 #: plugins/traduction/__init__.py:244
 msgid " min"
 msgstr ""
 
-#: plugins/partage/__init__.py:422
+#: plugins/partage/__init__.py:426
 msgid "Retirer l'accès"
 msgstr ""
 
-#: plugins/partage/__init__.py:433
+#: plugins/partage/__init__.py:437
 msgid "Lecture seule"
 msgstr ""
 
-#: plugins/partage/__init__.py:434
+#: plugins/partage/__init__.py:438
 msgid "Lecture et écriture"
 msgstr ""
 
-#: plugins/partage/__init__.py:436
+#: plugins/partage/__init__.py:440
 msgid "Droits :"
 msgstr ""
 
-#: plugins/partage/__init__.py:438
+#: plugins/partage/__init__.py:442
 msgid "Inviter…"
 msgstr ""
 
-#: plugins/partage/__init__.py:447
+#: plugins/partage/__init__.py:451
 msgid "Annuler l'invitation"
 msgstr ""
 
-#: plugins/partage/__init__.py:484
+#: plugins/partage/__init__.py:488
 msgid "propriétaire"
 msgstr ""
 
-#: plugins/partage/__init__.py:484
+#: plugins/partage/__init__.py:488
 msgid "lecture et écriture"
 msgstr ""
 
-#: plugins/partage/__init__.py:484
+#: plugins/partage/__init__.py:488
 msgid "lecture seule"
 msgstr ""
 
-#: plugins/partage/__init__.py:489
+#: plugins/partage/__init__.py:493
 msgid "en attente"
 msgstr ""
 
-#: plugins/partage/__init__.py:489
+#: plugins/partage/__init__.py:493
 msgid "acceptée"
 msgstr ""
 
-#: plugins/partage/__init__.py:489
+#: plugins/partage/__init__.py:493
 msgid "expirée"
 msgstr ""
 
-#: plugins/partage/__init__.py:489
+#: plugins/partage/__init__.py:493
 msgid "annulée"
 msgstr ""
 
-#: plugins/partage/__init__.py:544
+#: plugins/partage/__init__.py:548
 msgid "Invitation prête"
 msgstr ""
 
-#: plugins/partage/__init__.py:551
+#: plugins/partage/__init__.py:555
 msgid "Copier le message"
 msgstr ""
 
-#: plugins/partage/__init__.py:553
+#: plugins/partage/__init__.py:557
 msgid "Ouvrir dans mon logiciel de courriel"
 msgstr ""
 
-#: plugins/partage/__init__.py:584
+#: plugins/partage/__init__.py:588
 msgid "Rejoindre un partage"
 msgstr ""
 
-#: plugins/partage/__init__.py:591
+#: plugins/partage/__init__.py:596
 msgid "Vérifier l'invitation"
 msgstr ""
 
-#: plugins/partage/__init__.py:599
+#: plugins/partage/__init__.py:604
 msgid "Rejoindre"
 msgstr ""
 
-#: plugins/partage/__init__.py:623
+#: plugins/partage/__init__.py:628
 #: plugins/partage/logique.py:46
 msgid "lire et modifier"
 msgstr ""
 
-#: plugins/partage/__init__.py:623
+#: plugins/partage/__init__.py:628
 #: plugins/partage/logique.py:46
 msgid "lire"
 msgstr ""
@@ -1459,79 +1459,79 @@ msgstr ""
 msgid "Une fiche verrouillée ne se partage pas. Déverrouillez-la d'abord, ou copiez son contenu dans une autre fiche."
 msgstr ""
 
-#: plugins/partage/__init__.py:305
+#: plugins/partage/__init__.py:309
 msgid "Pas encore de compte ? Demandez une invitation au propriétaire d'une fiche, puis « Rejoindre un partage… »."
 msgstr ""
 
-#: plugins/partage/__init__.py:320
+#: plugins/partage/__init__.py:324
 msgid "Mot de passe absent."
 msgstr ""
 
-#: plugins/partage/__init__.py:346
+#: plugins/partage/__init__.py:350
 msgid "Synchroniser"
 msgstr ""
 
-#: plugins/partage/__init__.py:353
+#: plugins/partage/__init__.py:357
 msgid "Synchroniser automatiquement toutes les"
 msgstr ""
 
-#: plugins/partage/__init__.py:354
+#: plugins/partage/__init__.py:358
 msgid "(jamais)"
 msgstr ""
 
-#: plugins/partage/__init__.py:360
+#: plugins/partage/__init__.py:364
 msgid "Pendant un échange, la fenêtre peut se figer quelques secondes si le serveur répond lentement."
 msgstr ""
 
-#: plugins/partage/__init__.py:418
+#: plugins/partage/__init__.py:422
 msgid "Personnes ayant accès :"
 msgstr ""
 
-#: plugins/partage/__init__.py:428
+#: plugins/partage/__init__.py:432
 msgid "Inviter par courriel (le lien est valable 48 h) :"
 msgstr ""
 
-#: plugins/partage/__init__.py:442
+#: plugins/partage/__init__.py:446
 msgid "Invitations :"
 msgstr ""
 
-#: plugins/partage/__init__.py:477
+#: plugins/partage/__init__.py:481
 msgid "Pas encore partagée : elle sera mise en ligne à la première invitation."
 msgstr ""
 
-#: plugins/partage/__init__.py:481
+#: plugins/partage/__init__.py:485
 msgid "(impossible de lire les droits : voir le message d'erreur)"
 msgstr ""
 
-#: plugins/partage/__init__.py:516
+#: plugins/partage/__init__.py:520
 msgid "Adresse de courriel invalide."
 msgstr ""
 
-#: plugins/partage/__init__.py:557
+#: plugins/partage/__init__.py:561
 msgid "Envoie le message avec l'extension Courriel (activez-la dans les extensions)"
 msgstr ""
 
-#: plugins/partage/__init__.py:558
+#: plugins/partage/__init__.py:562
 msgid "Envoie le message depuis votre boîte, via l'extension Courriel"
 msgstr ""
 
-#: plugins/partage/__init__.py:587
+#: plugins/partage/__init__.py:591
 msgid "Collez le lien reçu par courriel :"
 msgstr ""
 
-#: plugins/partage/__init__.py:632
+#: plugins/partage/__init__.py:637
 msgid "Créer un compte sur ce serveur"
 msgstr ""
 
-#: plugins/partage/__init__.py:634
+#: plugins/partage/__init__.py:639
 msgid "J'ai déjà un compte sur ce serveur"
 msgstr ""
 
-#: plugins/partage/__init__.py:639
+#: plugins/partage/__init__.py:644
 msgid "Nom de compte :"
 msgstr ""
 
-#: plugins/partage/__init__.py:640
+#: plugins/partage/__init__.py:645
 msgid "Mot de passe (10 caractères minimum pour un nouveau compte) :"
 msgstr ""
 
@@ -1577,23 +1577,23 @@ msgid ""
 "  "
 msgstr ""
 
-#: plugins/partage/__init__.py:386
+#: plugins/partage/__init__.py:390
 msgid "Oublier le serveur {url} ? Vos fiches reçues restent ici, mais ne seront plus synchronisées. Rien n'est supprimé sur le serveur."
 msgstr ""
 
-#: plugins/partage/__init__.py:409
+#: plugins/partage/__init__.py:413
 msgid "Partager « {titre} »"
 msgstr ""
 
-#: plugins/partage/__init__.py:624
+#: plugins/partage/__init__.py:629
 msgid "{qui} vous invite à {droit} une fiche (valable jusqu'au {fin})."
 msgstr ""
 
-#: plugins/partage/__init__.py:645
+#: plugins/partage/__init__.py:650
 msgid "Les fiches partagées sont stockées sur ce serveur : son administrateur peut les lire."
 msgstr ""
 
-#: plugins/partage/__init__.py:656
+#: plugins/partage/__init__.py:661
 msgid "Nom de compte et mot de passe requis."
 msgstr ""
 
@@ -1605,11 +1605,11 @@ msgstr ""
 msgid "Tout est à jour."
 msgstr ""
 
-#: plugins/partage/__init__.py:501
+#: plugins/partage/__init__.py:505
 msgid "Retirer l'accès de {c} ? Sa copie reste chez lui, mais ne sera plus mise à jour."
 msgstr ""
 
-#: plugins/partage/__init__.py:547
+#: plugins/partage/__init__.py:551
 msgid "Envoyez ce message à {e}. Le lien ne marche qu'une fois, pendant 48 h."
 msgstr ""
 
@@ -1621,11 +1621,11 @@ msgid ""
 "Par prudence, rien n'a été envoyé. Vérifiez auprès de l'administrateur, puis réajoutez le serveur."
 msgstr ""
 
-#: plugins/partage/__init__.py:621
+#: plugins/partage/__init__.py:626
 msgid "Invitation introuvable, expirée ou déjà utilisée."
 msgstr ""
 
-#: plugins/partage/__init__.py:630
+#: plugins/partage/__init__.py:635
 msgid "Vous serez ajouté avec votre compte « {c} » sur ce serveur."
 msgstr ""
 
@@ -2044,8 +2044,8 @@ msgid "Le serveur %s n'est pas local : le texte serait envoyé hors de cette mac
 msgstr ""
 
 #: plugins/traduction/__init__.py:552
-#: src/scrinium/ui/fenetre.py:692
-#: src/scrinium/ui/fenetre.py:701
+#: src/scrinium/ui/fenetre.py:704
+#: src/scrinium/ui/fenetre.py:713
 msgid "Fiche verrouillée"
 msgstr ""
 
@@ -2776,7 +2776,7 @@ msgid "Mot de passe du fichier (facultatif) :"
 msgstr ""
 
 #: src/scrinium/ui/assistant.py:67
-#: src/scrinium/ui/fenetre.py:726
+#: src/scrinium/ui/fenetre.py:738
 msgid "Confirmer le mot de passe :"
 msgstr ""
 
@@ -2785,7 +2785,7 @@ msgid "Un mot de passe sur le fichier ajoute une protection si on vous le vole :
 msgstr ""
 
 #: src/scrinium/ui/assistant.py:75
-#: src/scrinium/ui/fenetre.py:764
+#: src/scrinium/ui/fenetre.py:776
 msgid "Créer le fichier de secours"
 msgstr ""
 
@@ -2802,8 +2802,8 @@ msgid "Ouvrir le dossier"
 msgstr ""
 
 #: src/scrinium/ui/assistant.py:88
-#: src/scrinium/ui/fenetre.py:724
-#: src/scrinium/ui/fenetre.py:728
+#: src/scrinium/ui/fenetre.py:736
+#: src/scrinium/ui/fenetre.py:740
 msgid "Mot de passe"
 msgstr ""
 
@@ -2932,8 +2932,8 @@ msgid "Navigateur du système (par défaut)"
 msgstr ""
 
 #: src/scrinium/ui/fenetre.py:41
-#: src/scrinium/ui/fenetre.py:524
-#: src/scrinium/ui/fenetre.py:583
+#: src/scrinium/ui/fenetre.py:536
+#: src/scrinium/ui/fenetre.py:595
 msgid "Scrinium"
 msgstr ""
 
@@ -2991,8 +2991,8 @@ msgid "Copier la note"
 msgstr ""
 
 #: src/scrinium/ui/fenetre.py:163
-#: src/scrinium/ui/fenetre.py:653
-#: src/scrinium/ui/fenetre.py:659
+#: src/scrinium/ui/fenetre.py:665
+#: src/scrinium/ui/fenetre.py:671
 msgid "Verrouiller…"
 msgstr ""
 
@@ -3034,7 +3034,7 @@ msgid "Nom d'icône du thème d'icônes du système, ex : folder-documents, phon
 msgstr ""
 
 #: src/scrinium/ui/fenetre.py:315
-#: src/scrinium/ui/fenetre.py:501
+#: src/scrinium/ui/fenetre.py:513
 msgid "(sans titre)"
 msgstr ""
 
@@ -3046,68 +3046,68 @@ msgstr ""
 msgid "Choisissez un navigateur, ou tapez une commande (ex. : firefox) :"
 msgstr ""
 
-#: src/scrinium/ui/fenetre.py:512
+#: src/scrinium/ui/fenetre.py:524
 msgid "● modification en cours…"
 msgstr ""
 
-#: src/scrinium/ui/fenetre.py:551
+#: src/scrinium/ui/fenetre.py:563
 msgid "Extension désactivée"
 msgstr ""
 
-#: src/scrinium/ui/fenetre.py:564
+#: src/scrinium/ui/fenetre.py:576
 msgid "Langue"
 msgstr ""
 
-#: src/scrinium/ui/fenetre.py:564
+#: src/scrinium/ui/fenetre.py:576
 msgid "Langue modifiée : redémarrez Scrinium pour l'appliquer."
 msgstr ""
 
-#: src/scrinium/ui/fenetre.py:585
+#: src/scrinium/ui/fenetre.py:597
 msgid "Ouvrir Scrinium"
 msgstr ""
 
-#: src/scrinium/ui/fenetre.py:586
+#: src/scrinium/ui/fenetre.py:598
 msgid "Nouvelle fiche"
 msgstr ""
 
-#: src/scrinium/ui/fenetre.py:587
+#: src/scrinium/ui/fenetre.py:599
 #: src/scrinium/ui/fenetre.py:91
 msgid "Capture rapide…"
 msgstr ""
 
-#: src/scrinium/ui/fenetre.py:589
+#: src/scrinium/ui/fenetre.py:601
 #: src/scrinium/ui/fenetre.py:104
 msgid "Quitter"
 msgstr ""
 
-#: src/scrinium/ui/fenetre.py:715
-#: src/scrinium/ui/fenetre.py:711
+#: src/scrinium/ui/fenetre.py:727
+#: src/scrinium/ui/fenetre.py:723
 msgid "Mot de passe oublié : le fichier de secours permettra de rouvrir la fiche."
 msgstr ""
 
-#: src/scrinium/ui/fenetre.py:720
-#: src/scrinium/ui/fenetre.py:726
-#: src/scrinium/ui/fenetre.py:733
+#: src/scrinium/ui/fenetre.py:732
+#: src/scrinium/ui/fenetre.py:738
+#: src/scrinium/ui/fenetre.py:745
 msgid "Verrouiller"
 msgstr ""
 
-#: src/scrinium/ui/fenetre.py:720
+#: src/scrinium/ui/fenetre.py:732
 msgid "Mot de passe (4 caractères minimum) :"
 msgstr ""
 
-#: src/scrinium/ui/fenetre.py:761
+#: src/scrinium/ui/fenetre.py:773
 msgid "Avant de verrouiller : voulez-vous créer un fichier de secours ?"
 msgstr ""
 
-#: src/scrinium/ui/fenetre.py:762
+#: src/scrinium/ui/fenetre.py:774
 msgid "Si vous oubliez le mot de passe d'une fiche, le fichier de secours permet de la rouvrir. Sans lui, une fiche dont le mot de passe est oublié est perdue pour toujours."
 msgstr ""
 
-#: src/scrinium/ui/fenetre.py:765
+#: src/scrinium/ui/fenetre.py:777
 msgid "Verrouiller sans fichier de secours"
 msgstr ""
 
-#: src/scrinium/ui/fenetre.py:820
+#: src/scrinium/ui/fenetre.py:832
 #: src/scrinium/ui/fenetre.py:121
 msgid "À propos"
 msgstr ""
@@ -3164,59 +3164,63 @@ msgstr ""
 msgid "Fiche d'invitation prête : relisez-la, puis activez l'extension Courriel (Extensions > Gérer les extensions…) pour l'envoyer."
 msgstr ""
 
-#: src/scrinium/ui/fenetre.py:552
+#: src/scrinium/ui/fenetre.py:468
+msgid "Lien de partage reçu : activez l'extension Partage (Extensions > Gérer les extensions…) pour le utiliser."
+msgstr ""
+
+#: src/scrinium/ui/fenetre.py:564
 msgid ""
 "L'extension « %(nom)s » a été désactivée après des erreurs répétées :\n"
 "%(erreur)s"
 msgstr ""
 
-#: src/scrinium/ui/fenetre.py:580
+#: src/scrinium/ui/fenetre.py:592
 msgid "Pas de zone de notification sur ce bureau."
 msgstr ""
 
-#: src/scrinium/ui/fenetre.py:692
+#: src/scrinium/ui/fenetre.py:704
 msgid "Mot de passe de « %s » :"
 msgstr ""
 
-#: src/scrinium/ui/fenetre.py:713
+#: src/scrinium/ui/fenetre.py:725
 msgid "Pas de fichier de secours : mot de passe oublié = fiche perdue."
 msgstr ""
 
-#: src/scrinium/ui/fenetre.py:716
+#: src/scrinium/ui/fenetre.py:728
 msgid "Verrouiller la fiche"
 msgstr ""
 
-#: src/scrinium/ui/fenetre.py:724
+#: src/scrinium/ui/fenetre.py:736
 msgid "Trop court (4 caractères minimum)."
 msgstr ""
 
-#: src/scrinium/ui/fenetre.py:728
+#: src/scrinium/ui/fenetre.py:740
 msgid "Les deux saisies sont différentes, fiche non verrouillée."
 msgstr ""
 
-#: src/scrinium/ui/fenetre.py:741
-#: src/scrinium/ui/fenetre.py:749
-#: src/scrinium/ui/fenetre.py:657
+#: src/scrinium/ui/fenetre.py:753
+#: src/scrinium/ui/fenetre.py:761
+#: src/scrinium/ui/fenetre.py:669
 msgid "Retirer le mot de passe"
 msgstr ""
 
-#: src/scrinium/ui/fenetre.py:742
+#: src/scrinium/ui/fenetre.py:754
 msgid "Le texte et les images de la fiche seront de nouveau stockés en clair. Continuer ?"
 msgstr ""
 
-#: src/scrinium/ui/fenetre.py:790
+#: src/scrinium/ui/fenetre.py:802
 msgid "Sélectionnez d'abord une fiche verrouillée."
 msgstr ""
 
-#: src/scrinium/ui/fenetre.py:798
+#: src/scrinium/ui/fenetre.py:810
 msgid "Mot de passe du fichier de secours :"
 msgstr ""
 
-#: src/scrinium/ui/fenetre.py:807
+#: src/scrinium/ui/fenetre.py:819
 msgid "Fiche rouverte. La remettre en clair (retirer le mot de passe) ?"
 msgstr ""
 
-#: src/scrinium/ui/fenetre.py:813
+#: src/scrinium/ui/fenetre.py:825
 msgid "Fiche toujours verrouillée."
 msgstr ""
 
@@ -3235,7 +3239,7 @@ msgid "Verrouillée (ouverte)"
 msgstr ""
 
 #: src/scrinium/ui/fenetre.py:402
-#: src/scrinium/ui/fenetre.py:533
+#: src/scrinium/ui/fenetre.py:545
 msgid "✔ Enregistré"
 msgstr ""
 
@@ -3247,40 +3251,40 @@ msgstr ""
 msgid "Ajouté à « %(theme)s / %(fiche)s »"
 msgstr ""
 
-#: src/scrinium/ui/fenetre.py:501
+#: src/scrinium/ui/fenetre.py:513
 msgid "Mettre la fiche « %s » à la corbeille ?"
 msgstr ""
 
-#: src/scrinium/ui/fenetre.py:570
+#: src/scrinium/ui/fenetre.py:582
 msgid "Démarrage de la session"
 msgstr ""
 
-#: src/scrinium/ui/fenetre.py:655
+#: src/scrinium/ui/fenetre.py:667
 msgid "Déverrouiller…"
 msgstr ""
 
-#: src/scrinium/ui/fenetre.py:669
+#: src/scrinium/ui/fenetre.py:681
 msgid "✔ Note copiée dans le presse-papiers"
 msgstr ""
 
-#: src/scrinium/ui/fenetre.py:698
+#: src/scrinium/ui/fenetre.py:710
 msgid "Mot de passe incorrect."
 msgstr ""
 
-#: src/scrinium/ui/fenetre.py:717
+#: src/scrinium/ui/fenetre.py:729
 msgid ""
 "Le texte et les images de la fiche seront chiffrés avec un mot de passe (le titre reste visible).\n"
 "\n"
 msgstr ""
 
-#: src/scrinium/ui/fenetre.py:779
+#: src/scrinium/ui/fenetre.py:791
 msgid ""
 "Un fichier de secours est déjà actif.\n"
 "\n"
 "En créer un nouveau ? Il servira pour les fiches verrouillées à partir de maintenant ; les fiches déjà verrouillées ne s'ouvriront qu'avec l'ancien."
 msgstr ""
 
-#: src/scrinium/ui/fenetre.py:822
+#: src/scrinium/ui/fenetre.py:834
 msgid "Fiches rangées par thème, verrouillables (AES-256-GCM)."
 msgstr ""
 
@@ -3294,31 +3298,31 @@ msgstr ""
 msgid "italique"
 msgstr ""
 
-#: src/scrinium/ui/fenetre.py:474
+#: src/scrinium/ui/fenetre.py:486
 msgid "✔ Images mises à jour"
 msgstr ""
 
-#: src/scrinium/ui/fenetre.py:527
+#: src/scrinium/ui/fenetre.py:539
 msgid "✔ Enregistré à"
 msgstr ""
 
-#: src/scrinium/ui/fenetre.py:570
+#: src/scrinium/ui/fenetre.py:582
 msgid "Impossible de modifier le lancement automatique : %s"
 msgstr ""
 
-#: src/scrinium/ui/fenetre.py:701
+#: src/scrinium/ui/fenetre.py:713
 msgid "Lecture impossible : %s"
 msgstr ""
 
-#: src/scrinium/ui/fenetre.py:733
+#: src/scrinium/ui/fenetre.py:745
 msgid "Fiche non verrouillée : %s"
 msgstr ""
 
-#: src/scrinium/ui/fenetre.py:749
+#: src/scrinium/ui/fenetre.py:761
 msgid "Verrou conservé : %s"
 msgstr ""
 
-#: src/scrinium/ui/fenetre.py:804
+#: src/scrinium/ui/fenetre.py:816
 msgid "Impossible de rouvrir la fiche : %s"
 msgstr ""
 
