@@ -26,7 +26,7 @@ from scrinium.core.synchroniser import partager, publier, synchroniser
 from scrinium.core.transport import ErreurTransport, Injoignable, Introuvable, NonAuthentifie, Refuse
 from scrinium.i18n import _
 
-from . import logique
+from . import logique, theme as themes
 from .http import CertificatInconnu, ServeurIncompatible, TransportHttp, empreinte_serveur, formater_empreinte
 
 
@@ -93,6 +93,7 @@ class PartagePlugin(Plugin):
         if ctx.ui is None:
             return
         ctx.ui.ajouter_action(_("Partager la fiche…"), self.partager_fiche, "document-share")
+        ctx.ui.ajouter_action(_("Partager le thème…"), self.partager_theme, "folder-share")
         ctx.ui.ajouter_action(_("Rejoindre un partage…"), self.rejoindre, "list-add-user")
         ctx.ui.ajouter_action(_("Synchroniser les partages"), self.synchroniser_tout, "view-refresh")
         ctx.ui.ajouter_action(_("Serveurs de partage…"), self.serveurs, "preferences-system-network")
@@ -214,7 +215,15 @@ class PartagePlugin(Plugin):
     # ---------- synchronisation ----------
     def synchroniser_depot(self, depot, silencieux=False):
         etat = EtatSynchro(chemin_etat(self.store, depot.nom)).charger()
-        bilan = self.faire(depot, lambda t: synchroniser(self.store, etat, t, depot.theme))
+        suivis = self.themes_suivis(depot.nom)
+
+        def passage(t):
+            for nom in suivis:                      # nouvelles fiches d'un thème partagé : mises en ligne avec les droits communs
+                th = self.store.theme(nom)
+                if th is not None:
+                    themes.propager(self.store, etat, t, th)
+            return synchroniser(self.store, etat, t, depot.theme)
+        bilan = self.faire(depot, passage)
         if bilan is None:
             return None
         self._rafraichir()
@@ -277,6 +286,24 @@ class PartagePlugin(Plugin):
             if not DialogueAjoutServeur(self).exec():
                 return
         DialoguePartager(self, vue).exec()
+
+    def partager_theme(self):
+        if not self.store.themes:
+            return
+        if not self.depots():
+            if not DialogueAjoutServeur(self).exec():
+                return
+        vue = self.ctx.fiche_courante()
+        DialogueTheme(self, vue._th.nom if vue is not None else None).exec()
+
+    def themes_suivis(self, depot_nom: str) -> list:
+        return list(self.ctx.reglages.get("themes_suivis", {}).get(depot_nom, []))
+
+    def suivre_theme(self, depot_nom: str, theme: str, suivre: bool) -> None:
+        tous = {k: list(v) for k, v in self.ctx.reglages.get("themes_suivis", {}).items()}
+        liste = [t for t in tous.get(depot_nom, []) if t != theme] + ([theme] if suivre else [])
+        tous[depot_nom] = liste
+        self.ctx.reglages.set("themes_suivis", tous)
 
     def rejoindre(self):
         DialogueRejoindre(self).exec()
@@ -539,6 +566,127 @@ class DialoguePartager(QDialog):
         DialogueCourriel(self.p, email, objet, message).exec()
 
 
+class DialogueTheme(QDialog):
+    """Partage d'un thème entier : chaque fiche non verrouillée du thème est partagée ; un seul lien d'invitation."""
+
+    def __init__(self, plugin, theme=None):
+        super().__init__(_parent())
+        self.p = plugin
+        self.setWindowTitle(_("Partager un thème"))
+        self.resize(520, 500)
+        lay = QVBoxLayout(self)
+        self.depots = plugin.depots()
+        self.choix = QComboBox()
+        for d in self.depots:
+            self.choix.addItem("{} — {}".format(d.compte, d.url), d.nom)
+        self.choix.currentIndexChanged.connect(self._rafraichir)
+        lay.addWidget(self.choix)
+        self.theme = QComboBox()
+        for t in plugin.store.themes:
+            self.theme.addItem(t.nom, t.nom)
+        if theme:
+            self.theme.setCurrentIndex(max(0, self.theme.findData(theme)))
+        self.theme.currentIndexChanged.connect(self._rafraichir)
+        lay.addWidget(QLabel(_("Thème :")))
+        lay.addWidget(self.theme)
+        self.resume = QLabel("")
+        self.resume.setWordWrap(True)
+        lay.addWidget(self.resume)
+        lay.addWidget(QLabel(_("Personnes ayant accès à tout le thème :")))
+        self.membres = QListWidget()
+        lay.addWidget(self.membres, 1)
+        self.retirer = QPushButton(_("Retirer l'accès"))
+        self.retirer.clicked.connect(self._retirer)
+        lay.addWidget(self.retirer, 0, Qt.AlignmentFlag.AlignLeft)
+        self.suivre = QCheckBox(_("Mettre aussi en ligne les nouvelles fiches de ce thème, avec les mêmes droits"))
+        self.suivre.setChecked(True)
+        lay.addWidget(self.suivre)
+        lay.addWidget(QLabel(_("Inviter par courriel (un seul lien pour tout le thème, valable 48 h) :")))
+        f = QFormLayout()
+        self.email = QLineEdit()
+        self.email.setPlaceholderText("nom@exemple.org")
+        self.role = QComboBox()
+        self.role.addItem(_("Lecture seule"), "lecture")
+        self.role.addItem(_("Lecture et écriture"), "ecriture")
+        f.addRow(_("Adresse :"), self.email)
+        f.addRow(_("Droits :"), self.role)
+        lay.addLayout(f)
+        bas = QHBoxLayout()
+        inviter = QPushButton(_("Inviter…"))
+        inviter.clicked.connect(self._inviter)
+        bas.addWidget(inviter)
+        bas.addStretch()
+        fermer = QPushButton(_("Fermer"))
+        fermer.clicked.connect(self.accept)
+        bas.addWidget(fermer)
+        lay.addLayout(bas)
+        self._rafraichir()
+
+    def _depot(self):
+        return self.depots[self.choix.currentIndex()]
+
+    def _theme(self):
+        return self.p.store.theme(self.theme.currentData())
+
+    def _etat(self):
+        return EtatSynchro(chemin_etat(self.p.store, self._depot().nom)).charger()
+
+    def _rafraichir(self):
+        self.membres.clear()
+        th = self._theme()
+        self.suivre.setChecked(th is not None and th.nom in self.p.themes_suivis(self._depot().nom))
+        if th is None:
+            return
+        r = self.p.faire(self._depot(), lambda t: themes.fiches_du_theme(self.p.store, th, t))
+        if r is None:
+            self.resume.setText(_("(impossible de lire l'état du partage : voir le message d'erreur)"))
+            return
+        pretes, autres, verrouillees = r
+        txt = _("{n} fiche(s) partageable(s)").format(n=len(pretes))
+        if verrouillees:
+            txt += " — " + _("{n} verrouillée(s), jamais partagée(s)").format(n=verrouillees)
+        if autres:
+            txt += " — " + _("{n} reçue(s) d'un autre compte, non partagée(s)").format(n=len(autres))
+        self.resume.setText(txt)
+        idents = [i for _f, i in pretes if i is not None]
+        droits = self.p.faire(self._depot(), lambda t: themes.droits_communs(t, idents)) if idents else {}
+        for compte, role in sorted((droits or {}).items()):
+            self.membres.addItem(f"{compte} — " + (_("lecture et écriture") if role == "ecriture" else _("lecture seule")))
+
+    def _retirer(self):
+        it = self.membres.currentItem()
+        th = self._theme()
+        if it is None or th is None:
+            return
+        compte = it.text().split(" — ")[0]
+        if QMessageBox.question(self, _("Partage"), _("Retirer l'accès de « {c} » à toutes les fiches du thème ?").format(c=compte)) \
+                == QMessageBox.StandardButton.Yes:
+            self.p.faire(self._depot(), lambda t: themes.retirer_theme(self.p.store, t, th, compte))
+            self._rafraichir()
+
+    def _inviter(self):
+        email = self.email.text().strip()
+        th = self._theme()
+        if th is None or not logique.adresse_valide(email):
+            self.p.avertir(_("Partage"), _("Adresse de courriel invalide."))
+            return
+        depot, role = self._depot(), self.role.currentData()
+        etat = self._etat()
+        try:
+            r = self.p.faire(depot, lambda t: themes.inviter_theme(self.p.store, etat, t, th, email, role))
+        except ValueError as ex:
+            self.p.avertir(_("Partage"), _("Rien à partager : %s") % ex)
+            return
+        if r is None:
+            return
+        n, inv = r
+        self.p.suivre_theme(depot.nom, th.nom, self.suivre.isChecked())
+        objet, message = logique.texte_invitation_theme(th.nom, n, role, inv["url"], _heure(inv["expire_le"]))
+        self.email.clear()
+        self._rafraichir()
+        DialogueCourriel(self.p, email, objet, message).exec()
+
+
 class DialogueCourriel(QDialog):
     """Message d'invitation prêt à envoyer : copié ou ouvert dans le logiciel de courriel du système."""
 
@@ -626,8 +774,10 @@ class DialogueRejoindre(QDialog):
             self.info.setText("⚠ " + (_("Invitation introuvable, expirée ou déjà utilisée.") if isinstance(ex, Introuvable) else str(ex)))
             return
         droit = _("lire et modifier") if inv["role"] == "ecriture" else _("lire")
-        self.info.setText(_("{qui} vous invite à {droit} une fiche (valable jusqu'au {fin}).").format(
-            qui=inv["invite_par"], droit=droit, fin=_heure(inv["expire_le"])))
+        nb = int(inv.get("fiches", 1) or 1)
+        objet = _("{n} fiches").format(n=nb) if nb > 1 else _("une fiche")
+        self.info.setText(_("{qui} vous invite à {droit} {objet} (valable jusqu'au {fin}).").format(
+            qui=inv["invite_par"], droit=droit, objet=objet, fin=_heure(inv["expire_le"])))
         self.existant = next((d for d in self.p.depots() if d.url == self.serveur), None)
         while self.zone.count():
             self.zone.takeAt(0).widget().deleteLater()

@@ -51,6 +51,17 @@ def texte_invitation(titre: str, role: str, url: str, expire: str, de: str = "")
     return objet, message
 
 
+def texte_invitation_theme(theme: str, nombre: int, role: str, url: str, expire: str) -> tuple[str, str]:
+    """(objet, message) de l'invitation à tout un thème (un seul lien pour les `nombre` fiches)."""
+    objet = _("Invitation à partager des fiches Scrinium")
+    droit = _("lire et modifier") if role == "ecriture" else _("lire")
+    message = _("Bonjour,\n\nJe vous invite à {droit} les {nombre} fiches du thème « {theme} » avec Scrinium.\n\n"
+                "Pour accepter, ouvrez ce lien (valable jusqu'au {expire}, à usage unique) :\n{url}\n\n"
+                "Si vous n'avez pas Scrinium, la page du lien vous explique comment l'obtenir.\n\n"
+                "Cordialement").format(droit=droit, nombre=nombre, theme=theme, expire=expire, url=url)
+    return objet, message
+
+
 def nom_depot(url: str, existants=()) -> str:
     """Nom de dépôt tiré de l'adresse du serveur, unique parmi `existants`."""
     u = urlparse(url)

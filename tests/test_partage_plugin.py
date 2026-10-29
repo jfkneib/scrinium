@@ -43,7 +43,7 @@ def _fenetre(tmp_path, monkeypatch, nom):
 def test_menu_et_fiche_verrouillee(tmp_path, monkeypatch, messages):
     w, p = _fenetre(tmp_path, monkeypatch, "a")
     textes = [a.text() for a in w.menu_ext.actions()]
-    for attendu in ("Partager la fiche…", "Rejoindre un partage…", "Synchroniser les partages", "Serveurs de partage…"):
+    for attendu in ("Partager la fiche…", "Partager le thème…", "Rejoindre un partage…", "Synchroniser les partages", "Serveurs de partage…"):
         assert attendu in textes
     p.synchroniser_tout()                                           # aucun serveur : explication, pas d'erreur
     assert messages and "Aucun serveur" in messages[-1][1]
@@ -145,3 +145,46 @@ def test_invitation_envoyee_par_le_plugin_courriel(monkeypatch):
     assert appels == [("a@b.fr", "Objet", "Corps")] and d.result() == 1
     G.actifs = {}
     assert not mod.DialogueCourriel(P(), "a@b.fr", "O", "C").envoyer.isEnabled()
+
+
+def test_scenario_theme_entier(php, tmp_path, monkeypatch, messages):
+    wa, pa = _fenetre(tmp_path, monkeypatch, "jfk-theme")
+    mod = sys.modules[type(pa).__module__]
+    pa.secret.ecrire(f"jfk@{php}", "motdepasse-jfk", False)
+    enregistrer_depot(pa.store, Depot("srv", php, "jfk"))
+    th = pa.store.nouveau_theme("Projet Th")
+    for titre in ("Plan Th", "Budget Th"):
+        f = pa.store.nouvelle_fiche(th)
+        pa.store.enregistrer(th, f, titre, "texte " + titre)
+
+    d = mod.DialogueTheme(pa, "Projet Th")
+    assert "2 fiche(s) partageable(s)" in d.resume.text()
+    capture = {}
+    monkeypatch.setattr(mod.DialogueCourriel, "exec", lambda self: capture.update(texte=self.texte.toPlainText()) or 0)
+    d.email.setText("dede@example.org")
+    d.suivre.setChecked(True)
+    d._inviter()
+    assert "les 2 fiches du thème « Projet Th »" in capture["texte"]
+    assert pa.themes_suivis("srv") == ["Projet Th"]
+    lien = next(l for l in capture["texte"].splitlines() if "/inviter/" in l)
+
+    wb, pb = _fenetre(tmp_path, monkeypatch, "dede-theme")
+    r = mod.DialogueRejoindre(pb)
+    r.lien.setText(lien)
+    r._verifier()
+    assert "vous invite à lire 2 fiches" in r.info.text()
+    r.compte.setText("invite-theme")
+    r.mdp.setText("un-mot-de-passe-solide")
+    r._rejoindre()
+    assert sorted(x.titre for x in pb.store.theme("Partagées").fiches) == ["Budget Th", "Plan Th"]
+
+    # nouvelle fiche dans le thème suivi : mise en ligne à la synchronisation, avec les droits communs
+    f = pa.store.nouvelle_fiche(th)
+    pa.store.enregistrer(th, f, "Planning Th", "lundi")
+    pa.synchroniser_depot(lire_depots(pa.store)[0], silencieux=True)
+    pb.synchroniser_depot(lire_depots(pb.store)[0], silencieux=True)
+    assert "Planning Th" in [x.titre for x in pb.store.theme("Partagées").fiches]
+    d._rafraichir()
+    assert d.membres.count() == 1 and "invite-theme" in d.membres.item(0).text()
+    for w in (wa, wb):
+        w.close()

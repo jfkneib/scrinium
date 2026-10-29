@@ -29,6 +29,8 @@ Prérequis : Apache (ou autre) + PHP ≥ 8.1 avec `pdo_sqlite` (ou `pdo_mysql`),
 
 ## Administration
 `bin/scrinium-serveur` : `initialiser`, `creer-compte NOM [--admin]`, `mot-de-passe NOM`, `comptes`.
+
+**Mise à jour** : remplacez le dossier `serveur/` (sauf `config.php`), puis relancez `bin/scrinium-serveur initialiser` : il ne crée que les tables manquantes (v0.2 : `invitation_fiches`, invitations à plusieurs fiches).
 Les invitations créent des comptes par défaut ; pour que seul l'administrateur en crée, mettre `'invitations_creent_des_comptes' => false`.
 
 ## Sauvegarde

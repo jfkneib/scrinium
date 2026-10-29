@@ -55,6 +55,13 @@ CREATE TABLE IF NOT EXISTS invitations (
     expire_le INTEGER NOT NULL
 );
 
+-- Fiches supplémentaires d'une invitation « thème entier » (la première reste dans invitations.fiche_id).
+CREATE TABLE IF NOT EXISTS invitation_fiches (
+    invitation_id VARCHAR(32) NOT NULL,
+    fiche_id VARCHAR(32) NOT NULL,
+    PRIMARY KEY (invitation_id, fiche_id)
+);
+
 CREATE TABLE IF NOT EXISTS essais (
     cle VARCHAR(190) NOT NULL,
     instant INTEGER NOT NULL

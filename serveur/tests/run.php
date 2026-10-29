@@ -33,7 +33,7 @@ final class Ctx
         $base = $db ? Base::depuisConfig(json_decode($db, true)) : Base::memoire();
         $base->initialiser();
         if ($db) {
-            foreach (['comptes', 'sessions', 'fiches', 'droits', 'blobs', 'fiche_blobs', 'invitations', 'essais', 'journal'] as $t) {
+            foreach (['comptes', 'sessions', 'fiches', 'droits', 'blobs', 'fiche_blobs', 'invitations', 'invitation_fiches', 'essais', 'journal'] as $t) {
                 $base->pdo->exec("DELETE FROM $t");
             }
         }
@@ -256,6 +256,27 @@ test('invitation : scénario complet (nouvelle personne, 48 h, usage unique)', f
     verifie($c->appel('POST', "/api/v1/invitations/$jeton/accepter", ['compte' => 'autre', 'mot_de_passe' => 'un-bon-mot-de-passe'])['statut'], 404);
     verifie($c->appel('GET', "/api/v1/invitations/$jeton")['statut'], 404);
     verifie($c->appel('GET', '/api/v1/fiches/' . ID . '/invitations', null, $jfk)['json'][0]['etat'], 'acceptee');
+});
+
+test('invitation : thème entier (plusieurs fiches, une seule invitation)', function () {
+    $c = new Ctx();
+    $jfk = $c->compte('jfk');
+    $c->fiche($jfk, ID);
+    $ids = [ID, str_repeat('b', 32), str_repeat('c', 32)];
+    foreach (array_slice($ids, 1) as $i) {
+        $c->fiche($jfk, $i);
+    }
+    verifie($c->appel('POST', '/api/v1/invitations', ['email' => 'a@b.fr', 'role' => 'lecture', 'fiches' => [ID, str_repeat('d', 32)]], $jfk)['statut'], 404);
+    verifie($c->appel('POST', '/api/v1/invitations', ['email' => 'a@b.fr', 'role' => 'lecture', 'fiches' => []], $jfk)['statut'], 422);
+    $r = $c->appel('POST', '/api/v1/invitations', ['email' => 'a@b.fr', 'role' => 'lecture', 'fiches' => $ids], $jfk);
+    verifie($r['statut'], 201);
+    $jeton = substr($r['json']['url'], strrpos($r['json']['url'], '/') + 1);
+    verifie($c->appel('GET', "/api/v1/invitations/$jeton")['json']['fiches'], 3);
+    $a = $c->appel('POST', "/api/v1/invitations/$jeton/accepter", ['compte' => 'dede', 'mot_de_passe' => 'un-bon-mot-de-passe']);
+    verifie($a['statut'], 201);
+    $dede = $a['json']['jeton'];
+    verifie(count($c->appel('GET', '/api/v1/fiches', null, $dede)['json']), 3);
+    verifie($c->appel('PUT', '/api/v1/fiches/' . ID, ['titre' => 'T', 'texte' => 'y', 'pieces' => [], 'version_depart' => 1], $dede)['statut'], 403);
 });
 
 test('invitation : expirée après 48 h, le droit déjà acquis reste', function () {

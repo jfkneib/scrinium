@@ -186,6 +186,9 @@ final class Application
                 return $ok(200, $this->listerInvitations($requis(), $r[1]));
             }
         }
+        if ($chemin === '/invitations' && $m === 'POST') {
+            return $ok(201, $this->creerInvitationGroupe($requis(), $this->corpsJson($corps)));
+        }
         if (preg_match('#^/invitations/([0-9a-f]{32})$#', $chemin, $r) && $m === 'DELETE') {
             $this->annulerInvitation($requis(), $r[1]);
             return $ok(204);
@@ -420,7 +423,7 @@ final class Application
     {
         $this->exiger($compte, $id, 'proprietaire');
         $this->base->transaction(function () use ($id): void {
-            foreach (['droits', 'fiche_blobs', 'invitations'] as $t) {
+            foreach (['droits', 'fiche_blobs', 'invitations', 'invitation_fiches'] as $t) {
                 $this->base->requete("DELETE FROM $t WHERE fiche_id = ?", [$id]);
             }
             $this->base->requete('DELETE FROM fiches WHERE id = ?', [$id]);
@@ -480,7 +483,34 @@ final class Application
     /** @param array<string,mixed> $c @return array<string,mixed> */
     private function creerInvitation(string $compte, string $id, array $c): array
     {
-        $this->exiger($compte, $id, 'proprietaire');
+        return $this->inviter($compte, [$id], $c);
+    }
+
+    /** Invitation à plusieurs fiches à la fois (partage d'un thème entier) : `{"email","role","fiches":[id,…]}`.
+     * @param array<string,mixed> $c @return array<string,mixed> */
+    private function creerInvitationGroupe(string $compte, array $c): array
+    {
+        $ids = $c['fiches'] ?? null;
+        if (!is_array($ids) || $ids === [] || count($ids) > 500) {
+            throw new ErreurHttp(422, 'Liste de fiches invalide (1 à 500).');
+        }
+        $propres = [];
+        foreach ($ids as $i) {
+            if (!is_string($i) || !preg_match('/^[0-9a-f]{32}$/', $i)) {
+                throw new ErreurHttp(422, 'Identifiant de fiche invalide.');
+            }
+            $propres[$i] = $i;
+        }
+        return $this->inviter($compte, array_values($propres), $c);
+    }
+
+    /** @param list<string> $ids @param array<string,mixed> $c @return array<string,mixed> */
+    private function inviter(string $compte, array $ids, array $c): array
+    {
+        $id = $ids[0];
+        foreach ($ids as $i) {
+            $this->exiger($compte, $i, 'proprietaire');
+        }
         $email = $c['email'] ?? null;
         $role = $c['role'] ?? null;
         if (!is_string($email) || strlen($email) > 255 || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
@@ -503,7 +533,10 @@ final class Application
             . "VALUES (?, ?, ?, ?, ?, ?, 'en_attente', ?, ?)",
             [$inv, hash('sha256', $jeton), $id, $email, $role, $compte, $t, $expire],
         );
-        $this->base->journal($t, $compte, 'invitation', "$id $role");
+        foreach (array_slice($ids, 1) as $autre) {
+            $this->base->requete('INSERT INTO invitation_fiches (invitation_id, fiche_id) VALUES (?, ?)', [$inv, $autre]);
+        }
+        $this->base->journal($t, $compte, 'invitation', "$id $role" . (count($ids) > 1 ? ' (+' . (count($ids) - 1) . ')' : ''));
         return ['id' => $inv, 'url' => rtrim((string) $this->cfg['base_url'], '/') . '/inviter/' . $jeton,
             'expire_le' => self::iso($expire), 'role' => $role];
     }
@@ -553,7 +586,14 @@ final class Application
     private function decrireInvitation(string $jeton, string $ip): array
     {
         $l = $this->invitationValable($jeton, $ip);
-        return ['invite_par' => $l['par'], 'role' => $l['role'], 'expire_le' => self::iso((int) $l['expire_le'])];
+        return ['invite_par' => $l['par'], 'role' => $l['role'], 'expire_le' => self::iso((int) $l['expire_le']),
+            'fiches' => $this->nombreFiches($l)];
+    }
+
+    /** @param array<string,mixed> $inv */
+    private function nombreFiches(array $inv): int
+    {
+        return 1 + (int) $this->base->valeur('SELECT COUNT(*) FROM invitation_fiches WHERE invitation_id = ?', [$inv['id']]);
     }
 
     /** @param array<string,mixed> $c @return array{int,mixed,string,array<string,string>} */
@@ -580,9 +620,18 @@ final class Application
             if ($compte === null) {
                 $this->comptes->creer($nom, $mdp ?? '', (string) $inv['email']);
             }
-            $actuel = $this->base->valeur('SELECT role FROM droits WHERE fiche_id = ? AND compte = ?', [$inv['fiche_id'], $nom]);
-            if ($actuel === null || ($actuel !== 'proprietaire' && self::ROLES[$inv['role']] > self::ROLES[$actuel])) {
-                $this->accorder((string) $inv['fiche_id'], (string) $nom, (string) $inv['role']);
+            $fiches = [(string) $inv['fiche_id']];
+            foreach ($this->base->lignes('SELECT fiche_id FROM invitation_fiches WHERE invitation_id = ?', [$inv['id']]) as $l) {
+                $fiches[] = (string) $l['fiche_id'];
+            }
+            foreach ($fiches as $fiche) {
+                $actuel = $this->base->valeur('SELECT role FROM droits WHERE fiche_id = ? AND compte = ?', [$fiche, $nom]);
+                if ($actuel === null && $this->base->valeur('SELECT 1 FROM fiches WHERE id = ?', [$fiche]) === null) {
+                    continue;                                     // fiche supprimée depuis l'invitation
+                }
+                if ($actuel === null || ($actuel !== 'proprietaire' && self::ROLES[$inv['role']] > self::ROLES[$actuel])) {
+                    $this->accorder($fiche, (string) $nom, (string) $inv['role']);
+                }
             }
         });
         $this->base->journal($this->maintenant(), $nom, 'invitation_acceptee', (string) $inv['fiche_id']);
@@ -599,6 +648,8 @@ final class Application
         $e = static fn (string $s): string => htmlspecialchars($s, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
         $l = $this->invitationValable($jeton, $ip);
         $role = $l['role'] === 'ecriture' ? 'lire et modifier' : 'lire';
+        $n = $this->nombreFiches($l);
+        $objet = $n > 1 ? "$n fiches" : 'une fiche';
         $serveur = rtrim((string) $this->cfg['base_url'], '/');
         $lien = 'scrinium://rejoindre?serveur=' . rawurlencode($serveur) . '&jeton=' . rawurlencode($jeton);
         $html = '<!doctype html><html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">'
@@ -606,8 +657,8 @@ final class Application
             . '<style>body{font:16px/1.5 system-ui,sans-serif;max-width:36rem;margin:3rem auto;padding:0 1rem}'
             . 'a.b{display:inline-block;padding:.6rem 1.2rem;background:#2d6cdf;color:#fff;border-radius:.4rem;text-decoration:none}'
             . 'code{background:#eee;padding:.1rem .3rem;word-break:break-all}</style></head><body>'
-            . '<h1>Invitation à partager une fiche</h1>'
-            . '<p><strong>' . $e((string) $l['par']) . '</strong> vous invite à ' . $role . ' une fiche sur ce serveur Scrinium.</p>'
+            . '<h1>Invitation à partager ' . $objet . '</h1>'
+            . '<p><strong>' . $e((string) $l['par']) . '</strong> vous invite à ' . $role . ' ' . $objet . ' sur ce serveur Scrinium.</p>'
             . '<p>Valable jusqu’au ' . $e(gmdate('d/m/Y à H:i', (int) $l['expire_le'])) . ' (UTC), à usage unique.</p>'
             . '<p><a class="b" href="' . $e($lien) . '">Ouvrir dans Scrinium</a></p>'
             . '<p>Dans Scrinium, vous pouvez aussi choisir <em>Rejoindre un partage…</em> et coller l’adresse de cette page.</p>'

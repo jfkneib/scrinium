@@ -234,3 +234,53 @@ def test_serveur_invitation(php, tmp_path):
     inv3 = jfk.tr.inviter(ident, "dede@example.org", "lecture")
     dede.tr.rejoindre(lg.analyser_invitation(inv3["url"])[1])
     assert "Invitée" in dede.sync().nouvelles
+
+
+# ---------- thème entier ----------
+th_mod = _charger("theme")
+
+
+def test_serveur_theme_entier(php, tmp_path):
+    jfk = Poste(tmp_path, php, "jfk")
+    th = jfk.store.nouveau_theme("Voyage")
+    titres = ["Billets", "Hôtel", "Valise"]
+    for t in titres:
+        f = jfk.store.nouvelle_fiche(th)
+        jfk.store.enregistrer(th, f, t + " Th", "texte " + t)
+    secret = jfk.store.nouvelle_fiche(th)
+    jfk.store.enregistrer(th, secret, "Passeport Th", "n° 123")
+    jfk.store.verrouiller(th, secret, "motdepasse")
+
+    pretes, autres, verrouillees = th_mod.fiches_du_theme(jfk.store, th, jfk.tr)
+    assert len(pretes) == 3 and verrouillees == 1 and autres == []
+
+    # invitation d'une personne qui a déjà un compte : un seul lien pour tout le thème
+    n, inv = th_mod.inviter_theme(jfk.store, jfk.etat, jfk.tr, th, "dede@example.org", "lecture")
+    assert n == len(pretes)
+    _serveur, jeton = lg.analyser_invitation(inv["url"])
+    assert ht.TransportHttp(php, "?", None).decrire_invitation(jeton)["fiches"] == n
+    dede = Poste(tmp_path, php, "dede")
+    dede.tr.rejoindre(jeton)
+    recues = dede.sync().nouvelles
+    assert all(t + " Th" in recues for t in titres)
+    assert "Passeport Th" not in recues
+
+    # droits communs, puis nouvelle fiche du thème suivie : mise en ligne avec les mêmes droits
+    ids = [jfk.store.id_fiche(f) for f, _i in th_mod.fiches_du_theme(jfk.store, th, jfk.tr)[0]]
+    assert th_mod.droits_communs(jfk.tr, ids) == {"dede": "lecture"}
+    th_mod.partager_theme(jfk.store, jfk.etat, jfk.tr, th, "alphonse", "ecriture")
+    assert th_mod.droits_communs(jfk.tr, ids) == {"dede": "lecture", "alphonse": "ecriture"}
+    nouvelle = jfk.store.nouvelle_fiche(th)
+    jfk.store.enregistrer(th, nouvelle, "Taxi Th", "gare")
+    assert th_mod.propager(jfk.store, jfk.etat, jfk.tr, th) == ["Taxi Th"]
+    assert jfk.tr.droits(jfk.store.id_fiche(nouvelle)) == {"jfk": "proprietaire", "dede": "lecture", "alphonse": "ecriture"}
+    assert th_mod.propager(jfk.store, jfk.etat, jfk.tr, th) == []
+    assert "Taxi Th" in dede.sync().nouvelles
+
+    # retirer un compte de tout le thème
+    th_mod.retirer_theme(jfk.store, jfk.tr, th, "alphonse")
+    assert th_mod.droits_communs(jfk.tr, ids) == {"dede": "lecture"}
+    # une fiche reçue d'un autre compte n'est jamais partagée par moi
+    thd = dede.store.theme("Partagées")
+    pretes_d, autres_d, _v = th_mod.fiches_du_theme(dede.store, thd, dede.tr)
+    assert pretes_d == [] and "Billets Th" in autres_d

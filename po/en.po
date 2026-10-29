@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: scrinium 0.2.0\n"
 "Report-Msgid-Bugs-To: \n"
-"PO-Revision-Date: 2026-10-29 12:06+0100\n"
+"PO-Revision-Date: 2026-10-29 12:14+0100\n"
 "Last-Translator: Jean-François Kneib\n"
 "Language-Team: English\n"
 "Language: en\n"
@@ -585,7 +585,7 @@ msgid "Identifiant :"
 msgstr "Username:"
 
 #: plugins/courriel/__init__.py:121
-#: plugins/partage/__init__.py:307
+#: plugins/partage/__init__.py:334
 msgid "Mot de passe :"
 msgstr "Password:"
 
@@ -611,7 +611,8 @@ msgid "Contact"
 msgstr "Contact"
 
 #: plugins/courriel/__init__.py:202
-#: plugins/partage/__init__.py:439
+#: plugins/partage/__init__.py:466
+#: plugins/partage/__init__.py:611
 msgid "Adresse :"
 msgstr "Address:"
 
@@ -624,7 +625,7 @@ msgid "Gérer le carnet…"
 msgstr "Manage the address book…"
 
 #: plugins/courriel/__init__.py:280
-#: plugins/partage/__init__.py:560
+#: plugins/partage/__init__.py:708
 msgid "Envoyer"
 msgstr "Send"
 
@@ -1309,8 +1310,8 @@ msgid "tesseract a échoué (code %d)"
 msgstr "tesseract failed (code %d)"
 
 #: plugins/partage/__init__.py:67
-#: plugins/partage/__init__.py:142
-#: plugins/partage/__init__.py:165
+#: plugins/partage/__init__.py:143
+#: plugins/partage/__init__.py:166
 msgid "Partage"
 msgstr "Sharing"
 
@@ -1323,247 +1324,293 @@ msgid "Partager la fiche…"
 msgstr "Share the note…"
 
 #: plugins/partage/__init__.py:96
+msgid "Partager le thème…"
+msgstr "Share the topic…"
+
+#: plugins/partage/__init__.py:97
 msgid "Rejoindre un partage…"
 msgstr "Join a share…"
 
-#: plugins/partage/__init__.py:97
+#: plugins/partage/__init__.py:98
 msgid "Synchroniser les partages"
 msgstr "Synchronise shares"
 
-#: plugins/partage/__init__.py:98
+#: plugins/partage/__init__.py:99
 msgid "Serveurs de partage…"
 msgstr "Sharing servers…"
 
-#: plugins/partage/__init__.py:208
+#: plugins/partage/__init__.py:209
 msgid "Certificat du serveur"
 msgstr "Server certificate"
 
-#: plugins/partage/__init__.py:296
+#: plugins/partage/__init__.py:323
 msgid "Ajouter un serveur de partage"
 msgstr "Add a sharing server"
 
-#: plugins/partage/__init__.py:304
-#: plugins/partage/__init__.py:642
+#: plugins/partage/__init__.py:331
+#: plugins/partage/__init__.py:792
 msgid "Mémoriser le mot de passe (trousseau du système)"
 msgstr "Remember the password (system keyring)"
 
-#: plugins/partage/__init__.py:305
+#: plugins/partage/__init__.py:332
 msgid "Adresse du serveur :"
 msgstr "Server address:"
 
-#: plugins/partage/__init__.py:306
+#: plugins/partage/__init__.py:333
 msgid "Compte :"
 msgstr "Account:"
 
-#: plugins/partage/__init__.py:344
-#: plugins/partage/__init__.py:390
+#: plugins/partage/__init__.py:371
+#: plugins/partage/__init__.py:417
 msgid "Serveurs de partage"
 msgstr "Sharing servers"
 
-#: plugins/partage/__init__.py:359
+#: plugins/partage/__init__.py:386
 #: plugins/traduction/__init__.py:244
 msgid " min"
 msgstr " min"
 
-#: plugins/partage/__init__.py:426
+#: plugins/partage/__init__.py:453
+#: plugins/partage/__init__.py:598
 msgid "Retirer l'accès"
 msgstr "Remove access"
 
-#: plugins/partage/__init__.py:437
+#: plugins/partage/__init__.py:464
+#: plugins/partage/__init__.py:609
 msgid "Lecture seule"
 msgstr "Read only"
 
-#: plugins/partage/__init__.py:438
+#: plugins/partage/__init__.py:465
+#: plugins/partage/__init__.py:610
 msgid "Lecture et écriture"
 msgstr "Read and write"
 
-#: plugins/partage/__init__.py:440
+#: plugins/partage/__init__.py:467
+#: plugins/partage/__init__.py:612
 msgid "Droits :"
 msgstr "Rights:"
 
-#: plugins/partage/__init__.py:442
+#: plugins/partage/__init__.py:469
+#: plugins/partage/__init__.py:615
 msgid "Inviter…"
 msgstr "Invite…"
 
-#: plugins/partage/__init__.py:451
+#: plugins/partage/__init__.py:478
 msgid "Annuler l'invitation"
 msgstr "Cancel the invitation"
 
-#: plugins/partage/__init__.py:488
+#: plugins/partage/__init__.py:515
 msgid "propriétaire"
 msgstr "owner"
 
-#: plugins/partage/__init__.py:488
+#: plugins/partage/__init__.py:515
+#: plugins/partage/__init__.py:654
 msgid "lecture et écriture"
 msgstr "read and write"
 
-#: plugins/partage/__init__.py:488
+#: plugins/partage/__init__.py:515
+#: plugins/partage/__init__.py:654
 msgid "lecture seule"
 msgstr "read only"
 
-#: plugins/partage/__init__.py:493
+#: plugins/partage/__init__.py:520
 msgid "en attente"
 msgstr "pending"
 
-#: plugins/partage/__init__.py:493
+#: plugins/partage/__init__.py:520
 msgid "acceptée"
 msgstr "accepted"
 
-#: plugins/partage/__init__.py:493
+#: plugins/partage/__init__.py:520
 msgid "expirée"
 msgstr "expired"
 
-#: plugins/partage/__init__.py:493
+#: plugins/partage/__init__.py:520
 msgid "annulée"
 msgstr "cancelled"
 
-#: plugins/partage/__init__.py:548
+#: plugins/partage/__init__.py:575
+msgid "Partager un thème"
+msgstr "Share a topic"
+
+#: plugins/partage/__init__.py:601
+msgid "Mettre aussi en ligne les nouvelles fiches de ce thème, avec les mêmes droits"
+msgstr "Also upload new notes of this topic, with the same permissions"
+
+#: plugins/partage/__init__.py:696
 msgid "Invitation prête"
 msgstr "Invitation ready"
 
-#: plugins/partage/__init__.py:555
+#: plugins/partage/__init__.py:703
 msgid "Copier le message"
 msgstr "Copy the message"
 
-#: plugins/partage/__init__.py:557
+#: plugins/partage/__init__.py:705
 msgid "Ouvrir dans mon logiciel de courriel"
 msgstr "Open in my email program"
 
-#: plugins/partage/__init__.py:588
+#: plugins/partage/__init__.py:736
 msgid "Rejoindre un partage"
 msgstr "Join a share"
 
-#: plugins/partage/__init__.py:596
+#: plugins/partage/__init__.py:744
 msgid "Vérifier l'invitation"
 msgstr "Check the invitation"
 
-#: plugins/partage/__init__.py:604
+#: plugins/partage/__init__.py:752
 msgid "Rejoindre"
 msgstr "Join"
 
-#: plugins/partage/__init__.py:628
+#: plugins/partage/__init__.py:776
 #: plugins/partage/logique.py:46
+#: plugins/partage/logique.py:57
 msgid "lire et modifier"
 msgstr "read and edit"
 
-#: plugins/partage/__init__.py:628
+#: plugins/partage/__init__.py:776
 #: plugins/partage/logique.py:46
+#: plugins/partage/logique.py:57
 msgid "lire"
 msgstr "read"
 
-#: plugins/partage/__init__.py:165
+#: plugins/partage/__init__.py:778
+msgid "une fiche"
+msgstr "a note"
+
+#: plugins/partage/__init__.py:166
 msgid "Compte ou mot de passe refusé par le serveur."
 msgstr "The server refused the account or password."
 
-#: plugins/partage/__init__.py:231
+#: plugins/partage/__init__.py:240
 msgid "Reçues"
 msgstr "Received"
 
-#: plugins/partage/__init__.py:231
+#: plugins/partage/__init__.py:240
 msgid "Mises à jour"
 msgstr "Updated"
 
-#: plugins/partage/__init__.py:231
+#: plugins/partage/__init__.py:240
 msgid "Envoyées"
 msgstr "Sent"
 
-#: plugins/partage/__init__.py:232
+#: plugins/partage/__init__.py:241
 msgid "Identiques des deux côtés"
 msgstr "Identical on both sides"
 
-#: plugins/partage/__init__.py:260
+#: plugins/partage/__init__.py:269
 msgid "Aucun serveur de partage. Utilisez « Rejoindre un partage… » ou « Serveurs de partage… »."
 msgstr "No sharing server. Use \"Join a share…\" or \"Sharing servers…\"."
 
-#: plugins/partage/__init__.py:271
+#: plugins/partage/__init__.py:280
 msgid "Ouvrez d'abord la fiche à partager."
 msgstr "Open the note to share first."
 
-#: plugins/partage/__init__.py:274
+#: plugins/partage/__init__.py:283
 msgid "Une fiche verrouillée ne se partage pas. Déverrouillez-la d'abord, ou copiez son contenu dans une autre fiche."
 msgstr "A locked note cannot be shared. Unlock it first, or copy its content into another note."
 
-#: plugins/partage/__init__.py:309
+#: plugins/partage/__init__.py:336
 msgid "Pas encore de compte ? Demandez une invitation au propriétaire d'une fiche, puis « Rejoindre un partage… »."
 msgstr "No account yet? Ask a note owner for an invitation, then use \"Join a share…\"."
 
-#: plugins/partage/__init__.py:324
+#: plugins/partage/__init__.py:351
 msgid "Mot de passe absent."
 msgstr "Password missing."
 
-#: plugins/partage/__init__.py:350
+#: plugins/partage/__init__.py:377
 msgid "Synchroniser"
 msgstr "Synchronise"
 
-#: plugins/partage/__init__.py:357
+#: plugins/partage/__init__.py:384
 msgid "Synchroniser automatiquement toutes les"
 msgstr "Synchronise automatically every"
 
-#: plugins/partage/__init__.py:358
+#: plugins/partage/__init__.py:385
 msgid "(jamais)"
 msgstr "(never)"
 
-#: plugins/partage/__init__.py:364
+#: plugins/partage/__init__.py:391
 msgid "Pendant un échange, la fenêtre peut se figer quelques secondes si le serveur répond lentement."
 msgstr "During an exchange the window may freeze for a few seconds if the server is slow."
 
-#: plugins/partage/__init__.py:422
+#: plugins/partage/__init__.py:449
 msgid "Personnes ayant accès :"
 msgstr "People with access:"
 
-#: plugins/partage/__init__.py:432
+#: plugins/partage/__init__.py:459
 msgid "Inviter par courriel (le lien est valable 48 h) :"
 msgstr "Invite by email (the link is valid for 48 h):"
 
-#: plugins/partage/__init__.py:446
+#: plugins/partage/__init__.py:473
 msgid "Invitations :"
 msgstr "Invitations:"
 
-#: plugins/partage/__init__.py:481
+#: plugins/partage/__init__.py:508
 msgid "Pas encore partagée : elle sera mise en ligne à la première invitation."
 msgstr "Not shared yet: it will be uploaded with the first invitation."
 
-#: plugins/partage/__init__.py:485
+#: plugins/partage/__init__.py:512
 msgid "(impossible de lire les droits : voir le message d'erreur)"
 msgstr "(cannot read the rights: see the error message)"
 
-#: plugins/partage/__init__.py:520
+#: plugins/partage/__init__.py:547
+#: plugins/partage/__init__.py:671
 msgid "Adresse de courriel invalide."
 msgstr "Invalid email address."
 
-#: plugins/partage/__init__.py:561
+#: plugins/partage/__init__.py:590
+msgid "Thème :"
+msgstr "Topic:"
+
+#: plugins/partage/__init__.py:595
+msgid "Personnes ayant accès à tout le thème :"
+msgstr "People with access to the whole topic:"
+
+#: plugins/partage/__init__.py:604
+msgid "Inviter par courriel (un seul lien pour tout le thème, valable 48 h) :"
+msgstr "Invite by email (a single link for the whole topic, valid for 48 h):"
+
+#: plugins/partage/__init__.py:642
+msgid "(impossible de lire l'état du partage : voir le message d'erreur)"
+msgstr "(cannot read the sharing state: see the error message)"
+
+#: plugins/partage/__init__.py:645
+msgid "{n} fiche(s) partageable(s)"
+msgstr "{n} shareable note(s)"
+
+#: plugins/partage/__init__.py:709
 msgid "Envoie le message avec l'extension Courriel (activez-la dans les extensions)"
 msgstr "Sends the message with the Email extension (enable it in the extensions)"
 
-#: plugins/partage/__init__.py:562
+#: plugins/partage/__init__.py:710
 msgid "Envoie le message depuis votre boîte, via l'extension Courriel"
 msgstr "Sends the message from your mailbox, through the Email extension"
 
-#: plugins/partage/__init__.py:591
+#: plugins/partage/__init__.py:739
 msgid "Collez le lien reçu par courriel :"
 msgstr "Paste the link you received by email:"
 
-#: plugins/partage/__init__.py:637
+#: plugins/partage/__init__.py:787
 msgid "Créer un compte sur ce serveur"
 msgstr "Create an account on this server"
 
-#: plugins/partage/__init__.py:639
+#: plugins/partage/__init__.py:789
 msgid "J'ai déjà un compte sur ce serveur"
 msgstr "I already have an account on this server"
 
-#: plugins/partage/__init__.py:644
+#: plugins/partage/__init__.py:794
 msgid "Nom de compte :"
 msgstr "Account name:"
 
-#: plugins/partage/__init__.py:645
+#: plugins/partage/__init__.py:795
 msgid "Mot de passe (10 caractères minimum pour un nouveau compte) :"
 msgstr "Password (at least 10 characters for a new account):"
 
-#: plugins/partage/__init__.py:142
+#: plugins/partage/__init__.py:143
 msgid "Mot de passe de {compte} sur {url} :"
 msgstr "Password of {compte} on {url}:"
 
-#: plugins/partage/__init__.py:208
+#: plugins/partage/__init__.py:209
 msgid ""
 "Ce serveur utilise un certificat que votre système ne connaît pas (certificat auto-signé).\n"
 "\n"
@@ -1583,7 +1630,7 @@ msgstr ""
 "\n"
 "Trust this certificate?"
 
-#: plugins/partage/__init__.py:237
+#: plugins/partage/__init__.py:246
 msgid ""
 "Conflits (votre version est gardée dans une copie « conflit », la version du serveur est reprise) :\n"
 "  "
@@ -1591,7 +1638,7 @@ msgstr ""
 "Conflicts (your version is kept in a \"conflict\" copy, the server version is taken):\n"
 "  "
 
-#: plugins/partage/__init__.py:240
+#: plugins/partage/__init__.py:249
 msgid ""
 "Modifications refusées (lecture seule), gardées dans une copie :\n"
 "  "
@@ -1599,15 +1646,15 @@ msgstr ""
 "Changes refused (read only), kept in a copy:\n"
 "  "
 
-#: plugins/partage/__init__.py:242
+#: plugins/partage/__init__.py:251
 msgid "N'existent plus sur le serveur (gardées ici, plus partagées) : "
 msgstr "No longer on the server (kept here, no longer shared): "
 
-#: plugins/partage/__init__.py:244
+#: plugins/partage/__init__.py:253
 msgid "Supprimées ici mais toujours sur le serveur (rien n'est supprimé là-bas) : "
 msgstr "Deleted here but still on the server (nothing is deleted there): "
 
-#: plugins/partage/__init__.py:246
+#: plugins/partage/__init__.py:255
 msgid ""
 "Erreurs :\n"
 "  "
@@ -1615,43 +1662,63 @@ msgstr ""
 "Errors:\n"
 "  "
 
-#: plugins/partage/__init__.py:390
+#: plugins/partage/__init__.py:417
 msgid "Oublier le serveur {url} ? Vos fiches reçues restent ici, mais ne seront plus synchronisées. Rien n'est supprimé sur le serveur."
 msgstr "Forget the server {url}? Notes you received stay here but will no longer be synchronised. Nothing is deleted on the server."
 
-#: plugins/partage/__init__.py:413
+#: plugins/partage/__init__.py:440
 msgid "Partager « {titre} »"
 msgstr "Share \"{titre}\""
 
-#: plugins/partage/__init__.py:629
-msgid "{qui} vous invite à {droit} une fiche (valable jusqu'au {fin})."
-msgstr "{qui} invites you to {droit} a note (valid until {fin})."
+#: plugins/partage/__init__.py:778
+msgid "{n} fiches"
+msgstr "{n} notes"
 
-#: plugins/partage/__init__.py:650
+#: plugins/partage/__init__.py:779
+msgid "{qui} vous invite à {droit} {objet} (valable jusqu'au {fin})."
+msgstr "{qui} invites you to {droit} {objet} (valid until {fin})."
+
+#: plugins/partage/__init__.py:800
 msgid "Les fiches partagées sont stockées sur ce serveur : son administrateur peut les lire."
 msgstr "Shared notes are stored on this server: its administrator can read them."
 
-#: plugins/partage/__init__.py:661
+#: plugins/partage/__init__.py:811
 msgid "Nom de compte et mot de passe requis."
 msgstr "Account name and password required."
 
-#: plugins/partage/__init__.py:248
+#: plugins/partage/__init__.py:257
 msgid "Partage — {nom}"
 msgstr "Sharing — {nom}"
 
-#: plugins/partage/__init__.py:253
+#: plugins/partage/__init__.py:262
 msgid "Tout est à jour."
 msgstr "Everything is up to date."
 
-#: plugins/partage/__init__.py:505
+#: plugins/partage/__init__.py:532
 msgid "Retirer l'accès de {c} ? Sa copie reste chez lui, mais ne sera plus mise à jour."
 msgstr "Remove {c}'s access? Their copy stays with them but will no longer be updated."
 
-#: plugins/partage/__init__.py:551
+#: plugins/partage/__init__.py:647
+msgid "{n} verrouillée(s), jamais partagée(s)"
+msgstr "{n} locked, never shared"
+
+#: plugins/partage/__init__.py:649
+msgid "{n} reçue(s) d'un autre compte, non partagée(s)"
+msgstr "{n} received from another account, not shared"
+
+#: plugins/partage/__init__.py:662
+msgid "Retirer l'accès de « {c} » à toutes les fiches du thème ?"
+msgstr "Remove « {c} »'s access to all notes of the topic?"
+
+#: plugins/partage/__init__.py:678
+msgid "Rien à partager : %s"
+msgstr "Nothing to share: %s"
+
+#: plugins/partage/__init__.py:699
 msgid "Envoyez ce message à {e}. Le lien ne marche qu'une fois, pendant 48 h."
 msgstr "Send this message to {e}. The link works only once, for 48 h."
 
-#: plugins/partage/__init__.py:167
+#: plugins/partage/__init__.py:168
 msgid ""
 "Le certificat du serveur n'est pas reconnu ou a changé :\n"
 "{m}\n"
@@ -1663,15 +1730,15 @@ msgstr ""
 "\n"
 "To be safe, nothing was sent. Check with the administrator, then add the server again."
 
-#: plugins/partage/__init__.py:626
+#: plugins/partage/__init__.py:774
 msgid "Invitation introuvable, expirée ou déjà utilisée."
 msgstr "Invitation not found, expired or already used."
 
-#: plugins/partage/__init__.py:635
+#: plugins/partage/__init__.py:785
 msgid "Vous serez ajouté avec votre compte « {c} » sur ce serveur."
 msgstr "You will be added with your account \"{c}\" on this server."
 
-#: plugins/partage/__init__.py:170
+#: plugins/partage/__init__.py:171
 msgid ""
 "Serveur injoignable. Rien n'est perdu : réessayez plus tard.\n"
 "{m}"
@@ -1679,11 +1746,11 @@ msgstr ""
 "Server unreachable. Nothing is lost: try again later.\n"
 "{m}"
 
-#: plugins/partage/__init__.py:174
+#: plugins/partage/__init__.py:175
 msgid "Introuvable (lien expiré, déjà utilisé, ou fiche plus partagée avec vous)."
 msgstr "Not found (link expired, already used, or note no longer shared with you)."
 
-#: plugins/partage/__init__.py:172
+#: plugins/partage/__init__.py:173
 msgid ""
 "Ce serveur n'est pas compatible avec cette version de Scrinium.\n"
 "{m}"
@@ -1691,17 +1758,21 @@ msgstr ""
 "This server is not compatible with this version of Scrinium.\n"
 "{m}"
 
-#: plugins/partage/__init__.py:176
+#: plugins/partage/__init__.py:177
 msgid "Refusé par le serveur : {m}"
 msgstr "Refused by the server: {m}"
 
-#: plugins/partage/__init__.py:176
+#: plugins/partage/__init__.py:177
 msgid "droits insuffisants"
 msgstr "insufficient rights"
 
 #: plugins/partage/logique.py:45
 msgid "Invitation à partager une fiche Scrinium"
 msgstr "Invitation to share a Scrinium note"
+
+#: plugins/partage/logique.py:56
+msgid "Invitation à partager des fiches Scrinium"
+msgstr "Invitation to share Scrinium notes"
 
 #: plugins/partage/logique.py:47
 msgid ""
@@ -1719,6 +1790,30 @@ msgstr ""
 "Hello,\n"
 "\n"
 "I invite you to {droit} the note \"{titre}\" with Scrinium.\n"
+"\n"
+"To accept, open this link (valid until {expire}, single use):\n"
+"{url}\n"
+"\n"
+"If you do not have Scrinium, the page behind the link explains how to get it.\n"
+"\n"
+"Best regards"
+
+#: plugins/partage/logique.py:58
+msgid ""
+"Bonjour,\n"
+"\n"
+"Je vous invite à {droit} les {nombre} fiches du thème « {theme} » avec Scrinium.\n"
+"\n"
+"Pour accepter, ouvrez ce lien (valable jusqu'au {expire}, à usage unique) :\n"
+"{url}\n"
+"\n"
+"Si vous n'avez pas Scrinium, la page du lien vous explique comment l'obtenir.\n"
+"\n"
+"Cordialement"
+msgstr ""
+"Hello,\n"
+"\n"
+"I invite you to {droit} the {nombre} notes of the topic « {theme} » with Scrinium.\n"
 "\n"
 "To accept, open this link (valid until {expire}, single use):\n"
 "{url}\n"

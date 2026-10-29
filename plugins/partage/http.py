@@ -211,6 +211,10 @@ class TransportHttp(Transport):
         """{id, url, expire_le, role}"""
         return self._json("POST", f"/fiches/{ident}/invitations", {"email": email, "role": role})
 
+    def inviter_groupe(self, idents: list, email: str, role: str) -> dict:
+        """Une invitation pour plusieurs fiches (thème entier). {id, url, expire_le, role}"""
+        return self._json("POST", "/invitations", {"email": email, "role": role, "fiches": list(idents)})
+
     def invitations(self, ident: str) -> list:
         return self._json("GET", f"/fiches/{ident}/invitations")
 
@@ -218,7 +222,7 @@ class TransportHttp(Transport):
         self._json("DELETE", f"/invitations/{invitation}")
 
     def decrire_invitation(self, jeton: str) -> dict:
-        """{invite_par, role, expire_le} ; Introuvable si expirée, utilisée ou inconnue."""
+        """{invite_par, role, expire_le, fiches} ; Introuvable si expirée, utilisée ou inconnue."""
         return self._json("GET", f"/invitations/{jeton}", jeton=False)
 
     def rejoindre(self, jeton: str, compte: str | None = None, mot_de_passe: str | None = None) -> None:

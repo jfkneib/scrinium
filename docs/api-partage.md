@@ -60,13 +60,14 @@ depuis sa propre boîte : le serveur n'a besoin d'aucun réglage de messagerie).
 |---|---|---|
 | `POST /fiches/{id}/invitations` | propriétaire | corps `{"email":"dede@…","role":"ecriture"}` → `201 {"id","url","expire_le","role"}` |
 | `GET /fiches/{id}/invitations` | propriétaire | `200 [{"id","email","role","expire_le","etat":"en_attente"|"acceptee"|"expiree"|"annulee"}]` |
+| `POST /invitations` | propriétaire de **toutes** les fiches | corps `{"email","role","fiches":[id,…]}` (1 à 500) → `201 {"id","url","expire_le","role"}` : **un seul lien pour plusieurs fiches** (partage d'un thème entier) |
 | `DELETE /invitations/{id}` | propriétaire | `204` (annulée : le lien ne marche plus) |
-| `GET /invitations/{jeton}` | **public** | `200 {"invite_par","role","expire_le"}` : de quoi afficher « X vous invite… » (jamais le contenu) |
+| `GET /invitations/{jeton}` | **public** | `200 {"invite_par","role","expire_le","fiches"}` (`fiches` = nombre de fiches visées) : de quoi afficher « X vous invite… » (jamais le contenu) |
 | `POST /invitations/{jeton}/accepter` | public ou connecté | connecté : `204` (le droit est ajouté à mon compte) ; non connecté : corps `{"compte","mot_de_passe"}` → crée le compte, ajoute le droit, `201 {"jeton": session}` |
 
 - **Lien** : `https://serveur/inviter/<jeton>` (page HTML d'explication, avec un bouton qui ouvre `scrinium://rejoindre?serveur=…&jeton=…`) ;
   le jeton fait 256 bits, est **stocké haché**, à **usage unique**, valable **48 h**, limité à **une fiche et un rôle**, **annulable**.
-- **L'invitation n'ouvre que ce qu'elle dit** : un seul droit sur une seule fiche. Elle ne donne jamais plus qu'un rôle `ecriture`.
+- **L'invitation n'ouvre que ce qu'elle dit** : un seul rôle sur la ou les fiches nommées (une seule pour `/fiches/{id}/invitations`, la liste pour `POST /invitations`). Elle ne donne jamais plus qu'un rôle `ecriture`.
 - **Vie privée** : `GET /invitations/{jeton}` ne dit pas si l'adresse a un compte ailleurs, et un jeton inconnu, expiré ou déjà utilisé donne
   la même réponse (`404`) ; limitation des essais (`429`).
 - **Qui peut créer des comptes ?** Accepter une invitation sans compte en crée un. Réglage du serveur : `invitations_creent_des_comptes`
@@ -108,7 +109,7 @@ journal des actions (qui, quoi, quand) ; **configuration et données hors du dos
 non verrouillées : à dire clairement aux invités dans la page d'invitation.
 
 ## 10. Questions ouvertes
-- Partage d'un **thème entier** (toutes les fiches d'un thème) : même mécanisme sur un « ensemble » de fiches, ou une notion de dossier côté serveur ?
+- ✔ Partage d'un **thème entier** : décidé côté client — le serveur ne connaît que des fiches ; le plugin partage chaque fiche non verrouillée du thème, avec une invitation groupée (`POST /invitations`). Reste : le thème d'origine n'est pas transmis (les fiches arrivent dans « Partagées »).
 - **Suppressions** : fiche supprimée par le propriétaire = les autres la perdent-ils tout de suite, ou la gardent-ils comme fiche locale ?
 - **Renommages simultanés** et fiche déplacée dans un autre thème chez l'un.
 - Notifications, historique et corbeille côté serveur : plus tard (étape 4).
