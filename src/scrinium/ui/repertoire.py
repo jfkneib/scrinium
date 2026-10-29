@@ -117,11 +117,14 @@ class VueRepertoire(QWidget):
         self._groupes: dict = {}
         self._champs: list = []
         self._remplissage = False
+        self._pendante = None           # numéro d'une entrée tout juste ajoutée et encore vide : reste dans la lettre où on l'a créée
+        self._lettre_pendante = "#"
         lay = QVBoxLayout(self)
         lay.setContentsMargins(0, 0, 0, 0)
         barre = QHBoxLayout()
         self.b_ajouter = QPushButton(icone("list-add"), _("Ajouter"))
         self.b_ajouter.clicked.connect(self.ajouter)
+        self.b_ajouter.setToolTip(_("Ajoute une entrée dans la lettre affichée : tapez son nom, elle se range toute seule"))
         self.b_supprimer = QPushButton(icone("edit-delete"), _("Supprimer"))
         self.b_supprimer.clicked.connect(self.supprimer)
         self.b_colonnes = QPushButton(icone("view-pim-notes"), _("Colonnes…"))
@@ -148,7 +151,7 @@ class VueRepertoire(QWidget):
             it = QListWidgetItem(l)
             it.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
             self.lettres.addItem(it)
-        self.lettres.currentRowChanged.connect(lambda *_a: self._rafraichir())
+        self.lettres.currentRowChanged.connect(self._sur_lettre)
         self.entrees = QListWidget()
         self.entrees.setMaximumWidth(220)
         self.entrees.currentRowChanged.connect(self._choisir)
@@ -165,6 +168,7 @@ class VueRepertoire(QWidget):
     # ---------- chargement ----------
     def charger(self, texte: str):
         self.tableau = Tableau.depuis_texte(texte)
+        self._pendante = None
         self._courante = -1
         self.filtre.clear()
         self._construire_formulaire()
@@ -187,10 +191,29 @@ class VueRepertoire(QWidget):
             self._champs.append(e)
 
     # ---------- listes ----------
+    def _nettoyer_pendante(self):
+        """Une entrée ajoutée mais restée vide (on a changé de lettre sans la remplir) n'est pas gardée."""
+        i = self._pendante
+        self._pendante = None
+        if i is not None and 0 <= i < len(self.tableau.lignes) and not any(self.tableau.lignes[i]):
+            del self.tableau.lignes[i]
+            self._courante = -1
+
+    def _sur_lettre(self, *_a):
+        if self._pendante is not None and LETTRES[max(0, self.lettres.currentRow())] != self._lettre_pendante:
+            self._nettoyer_pendante()
+        self._rafraichir()
+
     def _rafraichir(self, garder: int | None = None):
         """Relit les lettres et les entrées. `garder` : numéro de la ligne à resélectionner (même si elle a changé de lettre)."""
         t = self.tableau
-        groupes = t.par_lettre()
+        p = self._pendante
+        if p is not None and (p >= len(t.lignes) or any(t.lignes[p])):
+            p = self._pendante = None                                   # remplie : elle prend sa vraie place
+        groupes = {l: [i for i in nums if i != p] for l, nums in t.par_lettre().items()}
+        groupes = {l: nums for l, nums in groupes.items() if nums}
+        if p is not None:
+            groupes.setdefault(self._lettre_pendante, []).append(p)     # ...sinon elle reste dans la lettre affichée
         self._groupes = groupes
         texte = self.filtre.text().strip().lower()
         gras = QFont()
@@ -201,7 +224,7 @@ class VueRepertoire(QWidget):
             it.setFont(gras if l in groupes else QFont())
             it.setForeground(self.palette().text() if l in groupes else self.palette().placeholderText())
         if garder is not None and 0 <= garder < len(t.lignes) and not texte:
-            self.lettres.setCurrentRow(LETTRES.index(t.lettre(garder)))
+            self.lettres.setCurrentRow(LETTRES.index(self._lettre_pendante if garder == p else t.lettre(garder)))
         self.lettres.blockSignals(False)
         if texte:
             numeros = [i for i in sorted(range(len(t.lignes)), key=t.cle) if texte in " ".join(t.lignes[i]).lower()]
@@ -212,7 +235,7 @@ class VueRepertoire(QWidget):
         self._numeros = numeros
         sel = numeros.index(garder) if garder in numeros else (numeros.index(self._courante) if self._courante in numeros else -1)
         for i in numeros:
-            self.entrees.addItem(t.libelle(i))
+            self.entrees.addItem(_("(nouvelle entrée)") if i == self._pendante else t.libelle(i))
         self.entrees.setCurrentRow(sel)
         self.entrees.blockSignals(False)
         if sel >= 0:
@@ -251,8 +274,11 @@ class VueRepertoire(QWidget):
 
     def ajouter(self):
         self.filtre.clear()
+        self._nettoyer_pendante()
+        self._lettre_pendante = LETTRES[max(0, self.lettres.currentRow())]       # la nouvelle entrée reste dans la lettre affichée
         self.tableau.lignes.append(self.tableau.ligne_vide())
         i = len(self.tableau.lignes) - 1
+        self._pendante = i
         self._signaler()
         self._rafraichir(garder=i)
         self._champs[self.tableau.index].setFocus()
@@ -266,11 +292,13 @@ class VueRepertoire(QWidget):
         ) != QMessageBox.StandardButton.Yes:
             return
         del self.tableau.lignes[i]
+        self._pendante = None
         self._courante = -1
         self._signaler()
         self._rafraichir()
 
     def colonnes(self):
+        self._nettoyer_pendante()
         d = DialogueColonnes(self.tableau, self)
         if not d.exec():
             return

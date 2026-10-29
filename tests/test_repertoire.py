@@ -138,7 +138,8 @@ def test_vue_ajouter_supprimer_filtrer(monkeypatch):
     recus = []
     v.modifie.connect(recus.append)
     v.ajouter()
-    assert len(v.tableau.lignes) == 4 and v.lettres.currentRow() == LETTRES.index("#")      # (une ligne encore vide n'est pas relue du texte)
+    assert len(v.tableau.lignes) == 4 and v.lettres.currentRow() == LETTRES.index("D")      # reste dans la lettre affichée
+    assert v.entrees.item(v.entrees.currentRow()).text() == "(nouvelle entrée)"
     v._champs[0].setPlainText("Aubert")
     assert len(Tableau.depuis_texte(recus[-1]).lignes) == 4
     assert v.lettres.currentRow() == LETTRES.index("A") and v.entrees.currentRow() == 0
@@ -203,3 +204,32 @@ def test_fenetre_pdf_d_un_repertoire(fen, tmp_path, monkeypatch):  # noqa: F811
     monkeypatch.setattr(QFileDialog, "getSaveFileName", staticmethod(lambda *a, **k: (str(tmp_path / "livres.pdf"), "")))
     fen.exporter_pdf()
     assert (tmp_path / "livres.pdf").read_bytes().startswith(b"%PDF-")
+
+
+def test_deux_personnes_dans_la_meme_lettre():
+    v = VueRepertoire()
+    v.charger(contacts().en_texte())
+    recus = []
+    v.modifie.connect(recus.append)
+    _lettre(v, "A")
+    for nom, prenom in (("Alphonse", "dede"), ("Aubert", "Léa")):
+        v.ajouter()
+        assert v.lettres.currentRow() == LETTRES.index("A") and v.entrees.currentRow() >= 0
+        v._champs[0].setPlainText(nom)
+        v._champs[1].setPlainText(prenom)
+    assert v.lettres.currentRow() == LETTRES.index("A")
+    assert [v.entrees.item(i).text() for i in range(v.entrees.count())] == ["Alphonse · dede", "Aubert · Léa"]
+    assert [l[0] for l in Tableau.depuis_texte(recus[-1]).lignes] == ["Alphonse", "Aubert"]
+
+
+def test_entree_ajoutee_puis_abandonnee_n_est_pas_gardee():
+    v = _vue()
+    n = len(v.tableau.lignes)
+    _lettre(v, "Z")
+    v.ajouter()
+    assert len(v.tableau.lignes) == n + 1
+    _lettre(v, "D")                                                      # on change de lettre sans rien saisir
+    assert len(v.tableau.lignes) == n and v.entrees.count() == 2
+    v.ajouter()
+    v._champs[0].setPlainText("Martin")                                  # nommée : elle va sous M, la vue la suit
+    assert v.lettres.currentRow() == LETTRES.index("M") and len(v.tableau.lignes) == n + 1
