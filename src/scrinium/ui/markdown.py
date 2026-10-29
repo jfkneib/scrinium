@@ -237,6 +237,15 @@ class Apercu(QTextBrowser):
         self.setOpenLinks(False)
         self.anchorClicked.connect(self._lien)
 
+    pdf_demande = pyqtSignal()
+
+    def contextMenuEvent(self, ev):
+        m = self.createStandardContextMenu()
+        m.addSeparator()
+        m.addAction(_("Exporter la fiche en PDF…"), self.pdf_demande.emit)
+        m.exec(ev.globalPos())
+        m.deleteLater()
+
     def _lien(self, url: QUrl) -> None:
         if url.scheme().lower() not in LIENS_AUTORISES:
             return

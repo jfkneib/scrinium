@@ -243,6 +243,12 @@ class Store:
             self.a_la_corbeille(pj, stamp=stamp)
         th.fiches.remove(f)
 
+    def refermer(self, f: Fiche) -> None:
+        """Referme une fiche verrouillée ouverte : le mot de passe sera redemandé. Le texte doit avoir été enregistré avant."""
+        if f.verrou:
+            f.texte = f.cle = f.salt = f.ocr_cache = None
+            f.wrap = b""
+
     def jeter_si_vide(self, th: Theme, f: Fiche) -> bool:
         """Une fiche restée entièrement vide est supprimée sans passer par la corbeille."""
         if not f.verrou and not f.titre and not (f.texte or "").strip() and not self._numeros(self.dossier_pj(f)):

@@ -184,6 +184,7 @@ class OcrPlugin(Plugin):
         self.pont.resultat.connect(self._resultat)
         ctx.ui.ajouter_action(_("Extraire le texte des images de la fiche"), self.extraire_fiche, "edit-find")
         ctx.ui.ajouter_action(_("Texte extrait des images…"), self.voir, "view-pim-notes")
+        ctx.ui.ajouter_action_image(_("Extraire le texte de l'image (OCR)"), self.extraire_image, "edit-find")
         ctx.ui.ajouter_action(_("Réglages de l'OCR…"), self.reglages, "configure")
         ctx.on("piece_jointe_ajoutee", self._ajoutee)
 
@@ -221,6 +222,13 @@ class OcrPlugin(Plugin):
             self.ctx.ui.notifier(_("OCR"), _("Cette fiche n'a pas d'image."))
             return
         self.extraire(vue, pieces)
+
+    def extraire_image(self, vue, piece):
+        """Clic droit sur une image jointe."""
+        if vue.fermee:
+            QMessageBox.warning(_parent(), _("OCR"), _("Fiche verrouillée : déverrouillez-la d'abord."))
+            return
+        self.extraire(vue, [piece])
 
     def extraire(self, vue, pieces, silencieux=False):
         """Lance la reconnaissance des `pieces` (en arrière-plan, une par une)."""

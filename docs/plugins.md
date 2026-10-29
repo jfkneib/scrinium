@@ -77,7 +77,7 @@ Handlers receive keyword arguments; accept `**kw` to stay compatible with future
 ## `ctx.ui`
 
 `ajouter_action(text, fn, icon=None)` (Extensions menu) · `ajouter_bouton(text, fn, icon=None)` (toolbar) ·
-`ajouter_panneau(title, widget)` (dock, any `QWidget`) · `notifier(title, message)` (desktop notification) ·
+`ajouter_panneau(title, widget)` (dock, any `QWidget`) · `ajouter_action_image(text, fn, icon=None)` (right-click menu of an attached image; `fn(fiche, piece)`) · `notifier(title, message)` (desktop notification) ·
 `planifier(seconds, fn, repeter=False)` (timer) · `afficher_fiche(vue)` ·
 `inserer_texte(text)` (insert at the cursor of the open note, replacing the selection; `False` if it cannot be edited) · `texte_selectionne()` · `texte_complet()` (whole text as shown in the editor) · `remplacer_tout(text)` · `ajouter_a_la_fin(text)` (undoable with Ctrl+Z).
 Everything added is removed automatically when the extension is disabled.

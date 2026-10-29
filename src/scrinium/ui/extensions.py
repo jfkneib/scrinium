@@ -37,6 +37,10 @@ class UiPlugin:
         self._actions.append((self._f.barre, a))
         return a
 
+    def ajouter_action_image(self, texte: str, fn, icone_nom: str | None = None) -> None:
+        """Entrée dans le clic droit d'une image jointe. `fn(fiche, piece)` reçoit la `FicheVue` et la `PieceVue` visées."""
+        self._f.actions_image.append((self._nom, texte, fn, icone_nom))
+
     def ajouter_panneau(self, titre: str, widget) -> QDockWidget:
         """Panneau ancré sur le côté droit de la fenêtre (widget Qt fourni par l'extension)."""
         d = QDockWidget(titre, self._f)
@@ -117,6 +121,7 @@ class UiPlugin:
             t.stop()
             t.deleteLater()
         self._actions, self._docks, self._timers = [], [], []
+        self._f.actions_image[:] = [e for e in self._f.actions_image if e[0] != self._nom]
 
 
 class DialogueExtensions(QDialog):

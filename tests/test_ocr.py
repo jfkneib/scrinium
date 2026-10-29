@@ -193,3 +193,28 @@ def test_dialogue_correction_marque_manuel(fen, app, faux_moteur):
     d._enregistrer()
     q = fen.store.lister_pieces(fen.fiche)[0]
     assert q.ocr == "Facture 123" and q.ocr_moteur == "tesseract+manuel"
+
+
+def test_clic_droit_sur_une_image_lance_l_ocr(fen, app, faux_moteur, monkeypatch):
+    from PyQt6.QtCore import QPoint
+    from PyQt6.QtWidgets import QMenu
+    ajouter_image(fen)
+    ajouter_image(fen)
+    assert [e[1] for e in fen.actions_image] == ["Extraire le texte de l'image (OCR)"]
+    fen.bande.liste.setCurrentRow(1)
+    actions = {}
+    monkeypatch.setattr(fen.bande.liste, "itemAt", lambda pos: fen.bande.liste.item(1))
+    monkeypatch.setattr(QMenu, "exec", lambda self, *a: actions.update({x.text(): x for x in self.actions() if x.text()}))
+    fen.bande._menu(QPoint(1, 1))
+    assert "Extraire le texte de l'image (OCR)" in actions
+    actions["Extraire le texte de l'image (OCR)"].trigger()
+    pieces = fen.store.lister_pieces(fen.fiche)
+    assert attendre(app, lambda: fen.store.lister_pieces(fen.fiche)[1].ocr != "")
+    pieces = fen.store.lister_pieces(fen.fiche)
+    assert pieces[0].ocr == "" and pieces[1].ocr.startswith("texte lu")           # seulement l'image visée
+
+
+def test_entree_retiree_a_la_desactivation(fen, app):
+    assert fen.actions_image
+    fen.plugins.desactiver("ocr")
+    assert fen.actions_image == []

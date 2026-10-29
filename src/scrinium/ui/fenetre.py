@@ -2,6 +2,7 @@
 # Copyright (C) 2026 Jean-François Kneib
 """Fenêtre principale (PyQt6)."""
 import time
+from pathlib import Path
 
 from PyQt6.QtCore import QEvent, QSize, Qt, QTimer
 from PyQt6.QtGui import QAction, QActionGroup, QKeySequence
@@ -17,6 +18,8 @@ from ..i18n import _
 from .assistant import AssistantCle
 from .capture_rapide import CaptureRapide
 from .extensions import DialogueExtensions, UiPlugin
+from . import export_pdf
+from .choix_icone import DialogueIcone
 from .icons import icone, icone_appli
 from .images import BandePieces, Editeur
 from .markdown import Apercu, BarreFormat, entourer, navigateurs_installes
@@ -42,6 +45,7 @@ class Fenetre(QMainWindow):
         self.setWindowIcon(icone_appli())
         self.resize(900, 540)
         store.charger()
+        self.actions_image: list = []         # (extension, texte, fn, icône) : clic droit sur une image jointe (voir UiPlugin)
         self._ui()
         self._zone_notification()
         self.plugins = Gestionnaire(store, ui_factory=lambda info: UiPlugin(self, info.nom),
@@ -73,10 +77,10 @@ class Fenetre(QMainWindow):
         self.addToolBar(tb)
         self.a_fiche = self._action(_("Fiche"), "document-new", self.nouvelle_fiche, "Ctrl+N")
         self.a_fiche.setToolTip(_("Nouvelle fiche (Ctrl+N)"))
-        self.a_theme = self._action(_("Thème"), "folder-new", self.nouveau_theme)
-        self.a_theme.setToolTip(_("Nouveau thème"))
+        self.a_theme = self._action(_("Thème"), "folder-new", self.nouveau_theme, "Ctrl+Shift+N")
+        self.a_theme.setToolTip(_("Nouveau thème (Ctrl+Maj+N)"))
+        tb.addAction(self.a_theme)          # même ordre que les colonnes : thèmes à gauche, fiches ensuite
         tb.addAction(self.a_fiche)
-        tb.addAction(self.a_theme)
         self.recherche = QLineEdit()
         self.recherche.setPlaceholderText(_("Chercher (Ctrl+F)…"))
         self.recherche.setClearButtonEnabled(True)
@@ -86,8 +90,8 @@ class Fenetre(QMainWindow):
 
         m = self.menuBar()
         mf = m.addMenu(_("&Fichier"))
-        mf.addAction(self.a_fiche)
         mf.addAction(self.a_theme)
+        mf.addAction(self.a_fiche)
         mf.addAction(self._action(_("Capture rapide…"), "document-edit", self.capture_rapide, "Ctrl+Alt+N"))
         mf.addAction(self._action(_("Inviter à installer Scrinium…"), "mail-send", self.inviter))
         mf.addSeparator()
@@ -124,6 +128,7 @@ class Fenetre(QMainWindow):
         self.liste_themes.setIconSize(QSize(20, 20))
         self.liste_themes.currentRowChanged.connect(self._sel_theme)
         self.liste_themes.itemDoubleClicked.connect(lambda *_: self.renommer_theme())
+        self._suppr(self.liste_themes, lambda: self.supprimer_theme())
         self.liste_themes.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
         self.liste_themes.customContextMenuRequested.connect(self._menu_theme)
         bt = QHBoxLayout()
@@ -143,6 +148,7 @@ class Fenetre(QMainWindow):
         self.liste = QListWidget()
         self.liste.setIconSize(QSize(16, 16))
         self.liste.currentRowChanged.connect(self._sel_fiche)
+        self._suppr(self.liste, lambda: self.supprimer_fiche())
         self.liste.itemDoubleClicked.connect(lambda *_: self._double_clic())
         b_sup = QPushButton(icone("edit-delete"), _("Supprimer la fiche"))
         b_sup.clicked.connect(self.supprimer_fiche)
@@ -162,20 +168,26 @@ class Fenetre(QMainWindow):
         self.b_copier.clicked.connect(self.copier_note)
         self.b_verrou = QPushButton(icone("object-locked"), _("Verrouiller…"))
         self.b_verrou.clicked.connect(self.verrou_action)
+        self.b_refermer = QPushButton(icone("object-locked"), _("Refermer"))
+        self.b_refermer.setToolTip(_("Referme la fiche : le mot de passe sera redemandé (Ctrl+Maj+L)"))
+        self.b_refermer.clicked.connect(self.refermer_fiche)
         ligne = QHBoxLayout()
         ligne.addWidget(self.titre, 1)
         ligne.addWidget(self.b_copier)
+        ligne.addWidget(self.b_refermer)
         ligne.addWidget(self.b_verrou)
         self.texte = Editeur()
         self.texte.setPlaceholderText(_("Note"))
         self.bande = BandePieces(self)
         self.texte.images_recues.connect(self.bande.ajouter)
+        self.texte.pdf_demande.connect(self.exporter_pdf)
         self.statut = QLabel("")
         droite = QWidget()
         ld = QVBoxLayout(droite)
         ld.setContentsMargins(0, 0, 0, 0)
         self.apercu = Apercu()
         self.apercu.navigateur = lambda: str(self.store.reglages().get("navigateur", ""))
+        self.apercu.pdf_demande.connect(self.exporter_pdf)
         self.format = BarreFormat(self.texte)
         self.format.apercu_demande.connect(self.basculer_apercu)
         self.pile = QStackedWidget()
@@ -208,7 +220,7 @@ class Fenetre(QMainWindow):
             a.triggered.connect(slot)
             self.texte.addAction(a)
         self.texte.textChanged.connect(self._maj_apercu)
-        for seq, slot in (("Ctrl+S", self._forcer), ("Ctrl+F", lambda: self.recherche.setFocus()),
+        for seq, slot in (("Ctrl+S", self._forcer), ("Ctrl+Shift+L", self.refermer_fiche), ("Ctrl+F", lambda: self.recherche.setFocus()),
                           ("Ctrl+E", lambda: self.format.b_apercu.isEnabled() and self.format.b_apercu.toggle())):
             a = QAction(self)
             a.setShortcut(QKeySequence(seq))
@@ -217,6 +229,15 @@ class Fenetre(QMainWindow):
         self._etat_editeur(False)
 
     # ---------- thèmes ----------
+    @staticmethod
+    def _suppr(liste, slot):
+        """Touche Suppr : supprime ce qui est sélectionné dans CETTE liste seulement (jamais dans l'éditeur ni le titre)."""
+        a = QAction(liste)
+        a.setShortcut(QKeySequence(Qt.Key.Key_Delete))
+        a.setShortcutContext(Qt.ShortcutContext.WidgetShortcut)
+        a.triggered.connect(lambda *_: slot())
+        liste.addAction(a)
+
     def _noms(self):
         return [self.TOUS] + [t.nom for t in self.store.themes]
 
@@ -285,12 +306,9 @@ class Fenetre(QMainWindow):
         t = self._theme_courant()
         if not t:
             return
-        n, ok = QInputDialog.getText(
-            self, _("Icône du thème"),
-            _("Nom d'icône du thème d'icônes du système, ex : folder-documents, phone, network-wired, "
-              "applications-development, view-pim-notes :"), text=t.icone)
-        if ok and n.strip():
-            self.store.icone_theme(t, n)
+        d = DialogueIcone(self, t.nom, t.icone)
+        if d.exec() and d.nom():
+            self.store.icone_theme(t, d.nom())
             self.plugins.emettre("themes_modifies")
             self.maj_themes()
 
@@ -631,8 +649,7 @@ class Fenetre(QMainWindow):
         for t in self.store.themes:
             for f in t.fiches:
                 if f.verrou and not f.fermee:
-                    f.texte = f.cle = f.salt = f.ocr_cache = None
-                    f.wrap = b""
+                    self.store.refermer(f)
         if self.fiche is not None and self.fiche.fermee:
             self._afficher(self.fiche_theme, self.fiche)
         self.hide()
@@ -661,6 +678,7 @@ class Fenetre(QMainWindow):
     def _maj_boutons(self):
         f = self.fiche
         self.b_copier.setEnabled(bool(f and not f.fermee))
+        self.b_refermer.setVisible(bool(f and f.verrou and not f.fermee))
         if not f:
             txt, ic, ok = _("Verrouiller…"), "object-locked", False
         elif f.fermee:
@@ -673,6 +691,37 @@ class Fenetre(QMainWindow):
         self.b_verrou.setIcon(icone(ic))
         self.b_verrou.setEnabled(ok)
 
+    def exporter_pdf(self):
+        """Clic droit sur le contenu : écrit la fiche (titre, texte, images) dans un fichier PDF choisi par l'utilisateur."""
+        f = self.fiche
+        if not f or f.fermee:
+            return
+        if f.verrou and QMessageBox.question(
+                self, _("Exporter en PDF"),
+                _("Cette fiche est verrouillée : le PDF contiendra son texte et ses images EN CLAIR. Continuer ?")
+        ) != QMessageBox.StandardButton.Yes:
+            return
+        self.sauver()
+        base = propre(f.titre or _("fiche"), "fiche")
+        chemin, _filtre = QFileDialog.getSaveFileName(self, _("Exporter en PDF"), str(Path.home() / f"{base}.pdf"),
+                                                      _("Documents PDF (*.pdf)"))
+        if not chemin:
+            return
+        if not chemin.lower().endswith(".pdf"):
+            chemin += ".pdf"
+        images = []
+        for p in self.store.lister_pieces(f):
+            try:
+                images.append((p.nom, self.store.lire_piece(f, p)))
+            except (ValueError, OSError):
+                continue
+        try:
+            export_pdf.ecrire_pdf(chemin, self.titre.text(), self.texte.toPlainText(), images)
+        except OSError as ex:
+            QMessageBox.critical(self, _("Exporter en PDF"), _("Écriture impossible : %s") % ex)
+            return
+        self._statut(_("✔ PDF écrit : %s") % chemin, VERT)
+
     def copier_note(self):
         f = self.fiche
         if not f or f.fermee:
@@ -683,6 +732,16 @@ class Fenetre(QMainWindow):
     def _double_clic(self):
         if self.fiche and self.fiche.fermee:
             self.deverrouiller()
+
+    def refermer_fiche(self):
+        """Verrouille de nouveau, tout de suite, une fiche verrouillée restée ouverte (sans retaper le mot de passe)."""
+        f, t = self.fiche, self.fiche_theme
+        if not f or not f.verrou or f.fermee:
+            return
+        self.sauver()
+        self.store.refermer(f)
+        self._afficher(t, f)
+        self.maj_fiches()
 
     def verrou_action(self):
         f = self.fiche

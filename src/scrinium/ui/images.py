@@ -114,6 +114,14 @@ def miniature(donnees: bytes) -> QPixmap:
 # ---------- éditeur : le collage et le glisser-déposer d'images deviennent des pièces jointes ----------
 class Editeur(QPlainTextEdit):
     images_recues = pyqtSignal(list)      # liste de QImage et/ou de chemins
+    pdf_demande = pyqtSignal()            # entrée « Exporter en PDF… » du clic droit
+
+    def contextMenuEvent(self, ev):
+        m = self.createStandardContextMenu()
+        m.addSeparator()
+        m.addAction(icone("document-save"), _("Exporter la fiche en PDF…"), self.pdf_demande.emit)
+        m.exec(ev.globalPos())
+        m.deleteLater()
 
     @staticmethod
     def _sources(src) -> list:
@@ -422,9 +430,20 @@ class BandePieces(QWidget):
         m.addAction(icone("view-pim-notes"), _("Ouvrir"), lambda: self.ouvrir(i))
         m.addAction(icone("document-save"), _("Enregistrer sous…"), lambda: self.enregistrer_sous(i))
         m.addAction(icone("edit-copy"), _("Copier l'image"), lambda: self.copier(i))
+        extensions = list(self.fen.actions_image)
+        if extensions:
+            m.addSeparator()
+        for nom, texte, fn, ic in extensions:                    # entrées ajoutées par les extensions (ex. OCR)
+            m.addAction(icone(ic) if ic else QIcon(), texte, lambda *_a, n=nom, f=fn: self._extension(n, f, i))
         m.addSeparator()
         m.addAction(icone("edit-delete"), _("Supprimer"), lambda: self.supprimer(i))
         m.exec(self.liste.mapToGlobal(pos))
+
+    def _extension(self, nom, fn, i):
+        fen = self.fen
+        if fen.fiche is None or not 0 <= i < len(self.pieces):
+            return
+        fen.plugins.appeler(nom, fn, FicheVue(fen.fiche_theme, fen.fiche), PieceVue(self.pieces[i]))
 
     def copier(self, i):
         QApplication.clipboard().setImage(QImage.fromData(self.fen.store.lire_piece(self.fen.fiche, self.pieces[i])))
