@@ -140,3 +140,83 @@ def test_menu_clic_droit_propose_le_pdf(fen):  # noqa: F811
     finally:
         QMenu.exec = original
     assert len(vus) == 2 and all("Exporter la fiche en PDF…" in v for v in vus)
+
+
+# ---------- sélection multiple ----------
+def _fiches_pour_supprimer(fen, theme="Lot", n=4):  # noqa: F811
+    th = fen.store.theme(theme) or fen.store.nouveau_theme(theme)
+    for i in range(n):
+        f = fen.store.nouvelle_fiche(th)
+        fen.store.enregistrer(th, f, f"fiche {i}", "x")
+    fen.theme = theme
+    fen.maj_themes()
+    fen.maj_fiches()
+    return th
+
+
+def _reponse(monkeypatch, oui=True):
+    vus = []
+    monkeypatch.setattr(QMessageBox, "question", staticmethod(
+        lambda parent, titre, texte, *a, **k: vus.append((titre, texte)) or
+        (QMessageBox.StandardButton.Yes if oui else QMessageBox.StandardButton.No)))
+    return vus
+
+
+def test_supprimer_plusieurs_fiches(fen, monkeypatch):  # noqa: F811
+    th = _fiches_pour_supprimer(fen)
+    vus = _reponse(monkeypatch)
+    for i in (0, 2):
+        fen.liste.item(i).setSelected(True)
+    assert [f.titre for _t, f in fen._fiches_selectionnees()] == ["fiche 0", "fiche 2"]
+    fen.supprimer_fiche()
+    assert "ces 2 fiches" in vus[0][1] and "fiche 0" in vus[0][1] and "fiche 2" in vus[0][1]
+    assert sorted(f.titre for f in th.fiches) == ["fiche 1", "fiche 3"]
+    assert len(list(fen.store.paths.corbeille.iterdir())) >= 2
+
+
+def test_refus_ne_supprime_rien(fen, monkeypatch):  # noqa: F811
+    th = _fiches_pour_supprimer(fen)
+    _reponse(monkeypatch, oui=False)
+    fen.liste.selectAll()
+    fen.supprimer_fiche()
+    assert len(th.fiches) == 4
+
+
+def test_supprimer_une_seule_fiche_garde_le_message_habituel(fen, monkeypatch):  # noqa: F811
+    th = _fiches_pour_supprimer(fen)
+    vus = _reponse(monkeypatch)
+    fen.liste.clearSelection()
+    fen.liste.setCurrentRow(1)
+    fen.supprimer_fiche()
+    assert vus[0][1].startswith("Mettre la fiche « fiche 1 »") and len(th.fiches) == 3
+
+
+def test_supprimer_plusieurs_themes_sans_toutes_les_fiches(fen, monkeypatch):  # noqa: F811
+    for nom in ("T1", "T2", "T3"):
+        _fiches_pour_supprimer(fen, nom, 2)
+    vus = _reponse(monkeypatch)
+    fen.liste_themes.clearSelection()
+    for nom in ("T1", "T3"):
+        fen.liste_themes.item(fen._noms().index(nom)).setSelected(True)
+    fen.liste_themes.item(0).setSelected(True)                      # « Toutes les fiches » n'est jamais supprimée
+    assert [t.nom for t in fen._themes_selectionnes()] == ["T1", "T3"]
+    fen.supprimer_theme()
+    assert "ces 2 thèmes" in vus[0][1] and "4 fiche(s)" in vus[0][1] and "· T1" in vus[0][1]
+    assert fen.store.theme("T1") is None and fen.store.theme("T3") is None and fen.store.theme("T2") is not None
+    assert fen.theme == fen.TOUS
+
+
+def test_menus_groupes_seulement_suppression(fen, monkeypatch):  # noqa: F811
+    from PyQt6.QtCore import QPoint
+    from PyQt6.QtWidgets import QMenu
+    _fiches_pour_supprimer(fen)
+    vus = []
+    monkeypatch.setattr(QMenu, "exec", lambda self, *a: vus.append([x.text() for x in self.actions()]))
+    monkeypatch.setattr(fen.liste, "itemAt", lambda pos: fen.liste.item(0))
+    fen.liste.selectAll()
+    fen._menu_fiche(QPoint(1, 1))
+    assert vus[-1] == ["Supprimer les 4 fiches…"]
+    fen.liste.clearSelection()
+    fen.liste.setCurrentRow(0)
+    fen._menu_fiche(QPoint(1, 1))
+    assert vus[-1][0] == "Épingler" and vus[-1][-1] == "Supprimer…"

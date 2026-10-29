@@ -6,7 +6,7 @@ from pathlib import Path
 
 from PyQt6.QtCore import QEvent, QSize, Qt, QTimer
 from PyQt6.QtGui import QAction, QActionGroup, QKeySequence
-from PyQt6.QtWidgets import (QApplication, QFileDialog, QHBoxLayout, QInputDialog, QLabel, QLineEdit, QListWidget,
+from PyQt6.QtWidgets import (QAbstractItemView, QApplication, QFileDialog, QHBoxLayout, QInputDialog, QLabel, QLineEdit, QListWidget,
                              QListWidgetItem, QMainWindow, QMenu, QMessageBox, QPushButton, QSplitter,
                              QStackedWidget, QSystemTrayIcon, QToolBar, QVBoxLayout, QWidget)
 
@@ -126,6 +126,7 @@ class Fenetre(QMainWindow):
 
         self.liste_themes = QListWidget()
         self.liste_themes.setIconSize(QSize(20, 20))
+        self.liste_themes.setSelectionMode(QAbstractItemView.SelectionMode.ExtendedSelection)   # Ctrl / Maj + clic
         self.liste_themes.currentRowChanged.connect(self._sel_theme)
         self.liste_themes.itemDoubleClicked.connect(lambda *_: self.renommer_theme())
         self._suppr(self.liste_themes, lambda: self.supprimer_theme())
@@ -152,6 +153,7 @@ class Fenetre(QMainWindow):
 
         self.liste = QListWidget()
         self.liste.setIconSize(QSize(16, 16))
+        self.liste.setSelectionMode(QAbstractItemView.SelectionMode.ExtendedSelection)
         self.liste.currentRowChanged.connect(self._sel_fiche)
         self._suppr(self.liste, lambda: self.supprimer_fiche())
         self.liste.itemDoubleClicked.connect(lambda *_: self._double_clic())
@@ -304,9 +306,11 @@ class Fenetre(QMainWindow):
             return
         t, f = self.rows[self.liste.row(it)]
         m = QMenu(self)
-        m.addAction(avec_epingle(""), _("Désépingler") if self.store.fiche_epinglee(t, f) else _("Épingler"),
-                    lambda: self.epingler_fiche(t, f))
-        m.addAction(icone("edit-delete"), _("Supprimer…"), self.supprimer_fiche)
+        n = len(self._fiches_selectionnees())
+        if n == 1:                                       # plusieurs sélectionnées : seule la suppression est groupée
+            m.addAction(avec_epingle(""), _("Désépingler") if self.store.fiche_epinglee(t, f) else _("Épingler"),
+                        lambda: self.epingler_fiche(t, f))
+        m.addAction(icone("edit-delete"), _("Supprimer les %d fiches…") % n if n > 1 else _("Supprimer…"), self.supprimer_fiche)
         m.exec(self.liste.mapToGlobal(pos))
 
     def _theme_courant(self):
@@ -324,11 +328,13 @@ class Fenetre(QMainWindow):
         if not self._theme_courant():
             return
         m = QMenu(self)
-        m.addAction(avec_epingle(""), _("Désépingler") if self.store.theme_epingle(self._theme_courant()) else _("Épingler"),
-                    self.epingler_theme)
-        m.addAction(icone("edit-rename"), _("Renommer…"), self.renommer_theme)
-        m.addAction(icone("view-pim-notes"), _("Icône…"), self.icone_theme)
-        m.addAction(icone("edit-delete"), _("Supprimer…"), self.supprimer_theme)
+        n = len(self._themes_selectionnes())
+        if n == 1:                                       # plusieurs sélectionnés : seule la suppression est groupée
+            m.addAction(avec_epingle(""), _("Désépingler") if self.store.theme_epingle(self._theme_courant()) else _("Épingler"),
+                        self.epingler_theme)
+            m.addAction(icone("edit-rename"), _("Renommer…"), self.renommer_theme)
+            m.addAction(icone("view-pim-notes"), _("Icône…"), self.icone_theme)
+        m.addAction(icone("edit-delete"), _("Supprimer les %d thèmes…") % n if n > 1 else _("Supprimer…"), self.supprimer_theme)
         m.exec(self.liste_themes.mapToGlobal(pos))
 
     def nouveau_theme(self):
@@ -371,17 +377,38 @@ class Fenetre(QMainWindow):
             self.plugins.emettre("themes_modifies")
             self.maj_themes()
 
+    def _themes_selectionnes(self) -> list:
+        """Thèmes sélectionnés dans la liste de gauche (Ctrl / Maj + clic), sans « Toutes les fiches » ; à défaut, le thème courant."""
+        ordonnes = self._themes_ordonnes()
+        lignes = sorted({self.liste_themes.row(i) for i in self.liste_themes.selectedItems()})
+        choisis = [ordonnes[r - 1] for r in lignes if 1 <= r <= len(ordonnes)]
+        courant = self._theme_courant()
+        return choisis or ([courant] if courant else [])
+
+    def _fiches_selectionnees(self) -> list:
+        """[(thème, fiche)] sélectionnées dans la liste du milieu ; à défaut, la fiche affichée."""
+        lignes = sorted({self.liste.row(i) for i in self.liste.selectedItems()})
+        choisies = [self.rows[r] for r in lignes if 0 <= r < len(self.rows)]
+        return choisies or ([(self.fiche_theme, self.fiche)] if self.fiche else [])
+
     def supprimer_theme(self):
-        t = self._theme_courant()
-        if not t:
+        ts = self._themes_selectionnes()
+        if not ts:
             return
-        if QMessageBox.question(
-                self, _("Supprimer le thème"),
-                _("Mettre « %(nom)s » et ses %(n)d fiche(s) à la corbeille ?\n(%(dossier)s)")
-                % {"nom": t.nom, "n": len(t.fiches), "dossier": self.store.paths.corbeille}
-        ) == QMessageBox.StandardButton.Yes:
+        if len(ts) == 1:
+            t = ts[0]
+            question = (_("Supprimer le thème"),
+                        _("Mettre « %(nom)s » et ses %(n)d fiche(s) à la corbeille ?\n(%(dossier)s)")
+                        % {"nom": t.nom, "n": len(t.fiches), "dossier": self.store.paths.corbeille})
+        else:
+            question = (_("Supprimer les thèmes"),
+                        _("Mettre ces %(t)d thèmes et leurs %(n)d fiche(s) à la corbeille ?\n\n%(liste)s\n\n(%(dossier)s)")
+                        % {"t": len(ts), "n": sum(len(t.fiches) for t in ts), "liste": "\n".join("· " + t.nom for t in ts),
+                           "dossier": self.store.paths.corbeille})
+        if QMessageBox.question(self, *question) == QMessageBox.StandardButton.Yes:
             self.fiche = None
-            self.store.supprimer_theme(t)
+            for t in ts:
+                self.store.supprimer_theme(t)
             self.plugins.emettre("themes_modifies")
             self.theme = self.TOUS
             self.maj_themes()
@@ -588,14 +615,19 @@ class Fenetre(QMainWindow):
         self.titre.setFocus()
 
     def supprimer_fiche(self):
-        f, t = self.fiche, self.fiche_theme
-        if not f:
+        choisies = self._fiches_selectionnees()
+        if not choisies:
             return
-        if QMessageBox.question(self, _("Supprimer"),
-                                _("Mettre la fiche « %s » à la corbeille ?") % (f.titre or _("(sans titre)"))
-                                ) == QMessageBox.StandardButton.Yes:
+        if len(choisies) == 1:
+            f = choisies[0][1]
+            texte = _("Mettre la fiche « %s » à la corbeille ?") % (f.titre or _("(sans titre)"))
+        else:
+            texte = _("Mettre ces %d fiches à la corbeille ?") % len(choisies) + "\n\n" + "\n".join(
+                "· " + (f.titre or _("(sans titre)")) + (" " + _("(verrouillée)") if f.verrou else "") for _t, f in choisies)
+        if QMessageBox.question(self, _("Supprimer"), texte) == QMessageBox.StandardButton.Yes:
             self.fiche = None
-            self.store.supprimer_fiche(t, f)
+            for t, f in choisies:
+                self.store.supprimer_fiche(t, f)
             self.maj_themes()
             self.maj_fiches()
 
