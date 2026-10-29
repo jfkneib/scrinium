@@ -2,6 +2,7 @@
 # Copyright (C) 2026 Jean-François Kneib
 """Thèmes et fiches proposés au premier lancement : de quoi comprendre l'outil en l'utilisant."""
 from ..i18n import _
+from . import doc_extensions
 
 MOT_DE_PASSE_DEMO = "scrinium"
 
@@ -79,6 +80,7 @@ def themes(dossier_fiches) -> list:
                 "Notez ici OÙ se trouvent vos comptes, pas leurs mots de passe en clair. "
                 "Pour un mot de passe, verrouillez la fiche.")),
         ]),
+        (doc_extensions.nom_theme(), doc_extensions.icone(), doc_extensions.fiches(dossier_fiches.parent / "plugins")),
         (_("Voyages"), "applications-internet", [
             (_("Check-list valise"), _(
                 "☐ Papiers d'identité / passeport\n☐ Billets, réservations\n☐ Carte bancaire, un peu d'espèces\n"
