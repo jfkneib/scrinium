@@ -140,6 +140,10 @@ I am not aware of any conflict, but **if you believe the name or the icon infrin
 [open an issue](https://github.com/jfkneib/scrinium/issues) or write to me: I will change it in good faith.**
 If you distribute a modified version, please make it clear that it is not the original (for example by renaming it).
 
+## Project principles
+
+Scrinium is free software for anyone: a core with no dependency on third-party services, optional integrations, safe by default, nothing personal in the repository. See [`docs/principes.md`](docs/principes.md).
+
 ## License
 
 GPL-3.0-or-later (see [`LICENSE`](LICENSE)). Icons: Breeze theme (KDE), LGPL-3.0-or-later (see `src/scrinium/icons/NOTICE`).

@@ -124,6 +124,10 @@ Je n'ai connaissance d'aucun conflit, mais **si vous pensez que le nom ou l'icô
 confusion, [ouvrez un ticket](https://github.com/jfkneib/scrinium/issues) ou écrivez-moi : je les changerai de bonne foi.**
 Si vous distribuez une version modifiée, merci d'indiquer clairement qu'il ne s'agit pas de l'original (par exemple en la renommant).
 
+## Principes du projet
+
+Scrinium est un logiciel libre pour n'importe qui : cœur sans dépendance à un service tiers, intégrations facultatives, sécurité par défaut, rien de personnel dans le dépôt. Voir [`docs/principes.md`](docs/principes.md).
+
 ## Licence
 
 GPL-3.0-or-later (voir [`LICENSE`](LICENSE)). Icônes : thème Breeze (KDE), LGPL-3.0-or-later (voir `src/scrinium/icons/NOTICE`).
