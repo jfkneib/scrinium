@@ -7,7 +7,7 @@ return [
 
     // Derrière un proxy inverse (Caddy, nginx…) : adresses des proxys dont on croit l'en-tête X-Forwarded-For. Sans cela, tous les
     // clients ont l'adresse du proxy et la limitation des essais de connexion les compte ensemble. Vide = pas de proxy.
-    // 'proxies_de_confiance' => ['192.0.2.10'],
+    // 'proxies_de_confiance' => ['192.0.2.10'],           // (exemple : l'adresse de votre proxy, vue du serveur)
 
     // Dossier des données (images). Hors du dossier web, inscriptible par Apache.
     'donnees' => '/srv/scrinium/donnees',

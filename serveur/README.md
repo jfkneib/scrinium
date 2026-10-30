@@ -46,14 +46,26 @@ Après l'installation d'une extension PHP, **redémarrer** Apache (`restart`, pa
 
 Le serveur peut être publié sous un sous-dossier d'un site existant, par exemple `https://exemple.org/scrinium` :
 
-1. Le proxy retire le préfixe `/scrinium` avant de passer la requête au serveur (voir [`caddy/Caddyfile.exemple`](caddy/Caddyfile.exemple)).
+1. Le proxy retire le préfixe `/scrinium` avant de passer la requête au serveur. Exemple Caddy (à adapter) :
+
+   ```
+   exemple.org {
+       handle_path /scrinium/* {
+           reverse_proxy https://192.0.2.20:8443 {
+               transport http { tls_insecure_skip_verify }   # seulement si le serveur a un certificat auto-signé
+           }
+       }
+       handle {
+           # … le reste de votre site …
+       }
+   }
+   ```
 2. `config.php` : `'base_url' => 'https://exemple.org/scrinium'` (les liens d'invitation portent le préfixe) et
    `'proxies_de_confiance' => ['<adresse du proxy>']`. **Cette dernière ligne est importante** : sans elle, tous les clients
    ont l'adresse du proxy et la limitation des essais de connexion les compte ensemble (un seul attaquant bloquerait tout le monde).
    Le serveur ne croit `X-Forwarded-For` que si la connexion vient d'un proxy déclaré.
 3. Dans Scrinium, l'adresse du serveur est celle avec le préfixe.
-4. Le proxy ne doit pas demander d'authentification supplémentaire (Authelia…) sur ce chemin : le serveur gère ses comptes.
-
+4. Le proxy ne doit pas demander d'authentification supplémentaire sur ce chemin : le serveur gère ses comptes.
 
 ## Déposer une fiche depuis n'importe quel programme
 

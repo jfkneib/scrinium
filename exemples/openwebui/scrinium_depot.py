@@ -21,8 +21,8 @@ def _normaliser(empreinte: str) -> str:
 
 class Tools:
     class Valves(BaseModel):
-        serveur: str = Field(default="https://192.0.2.20:8443",
-                             description="Adresse du serveur de partage Scrinium (depuis Docker, utiliser l'adresse IP plutôt qu'un nom .local)")
+        serveur: str = Field(default="https://scrinium.exemple.org",
+                             description="Adresse de votre serveur de partage Scrinium (depuis Docker, préférer l'adresse IP à un nom en .local, non résolu dans un conteneur)")
         jeton: str = Field(default="", description="Jeton de dépôt (commande « creer-jeton » du serveur) : il ne permet que d'ajouter des fiches")
         empreinte: str = Field(default="",
                                description="Empreinte SHA-256 du certificat du serveur, s'il est auto-signé (vide : certificat vérifié normalement)")

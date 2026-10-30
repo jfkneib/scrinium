@@ -55,7 +55,7 @@ def test_analyser_invitation():
 
 
 def test_nom_depot_et_texte():
-    assert lg.nom_depot("https://exemple.org:8443") == "exemple.org-8443"
+    assert lg.nom_depot("https://scrinium.exemple.org:8443") == "scrinium.exemple.org-8443"
     assert lg.nom_depot("https://a.fr", ["a.fr", "a.fr-2"]) == "a.fr-3"
     objet, msg = lg.texte_invitation("Courses", "ecriture", "https://s/inviter/x", "31/10/2026 10:00")
     assert "Courses" in msg and "https://s/inviter/x" in msg and "31/10/2026" in msg and objet

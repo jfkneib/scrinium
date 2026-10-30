@@ -13,17 +13,18 @@ from PyQt6.QtWidgets import (QAbstractItemView, QApplication, QFileDialog, QHBox
 from .. import __version__
 from ..core import autostart, capture, crypto, invitation
 from ..core.plugins import FicheVue, Gestionnaire
-from ..core import doc_extensions, repertoire
+from ..core import doc_extensions, lien as lien_mod, repertoire
 from ..core.store import ICONE_DEFAUT, Store, propre
 from ..i18n import _
 from .assistant import AssistantCle
-from .capture_rapide import CaptureRapide
+from .capture_rapide import THEME_DEFAUT, CaptureRapide
 from .extensions import DialogueExtensions, UiPlugin
 from . import export_pdf
 from .choix_icone import DialogueIcone
 from .icons import avec_epingle, icone, icone_appli
 from .images import BandePieces, Editeur
 from .markdown import Apercu, BarreFormat, entourer, navigateurs_installes
+from .lien_ajout import DialogueAjoutLien
 from .repertoire import VueRepertoire
 
 ORANGE, VERT, GRIS = "#c77700", "#2e8b3a", "gray"
@@ -739,6 +740,14 @@ class Fenetre(QMainWindow):
         """Lien `scrinium://…` reçu du système : confié à l'extension qui sait le traiter (Partage). Rien n'est fait sans
         un clic de l'utilisateur dans la fenêtre qu'elle ouvre."""
         self.montrer()
+        try:
+            demande = lien_mod.analyser(url)
+        except ValueError as ex:
+            QMessageBox.warning(self, _("Lien Scrinium"), str(ex))
+            return
+        if demande["action"] == "ajouter":
+            self._ajout_par_lien(demande)
+            return
         partage = self.plugins.actifs.get("partage")
         ouvrir = getattr(partage[0], "rejoindre_lien", None) if partage else None
         if ouvrir is None:
@@ -746,6 +755,33 @@ class Fenetre(QMainWindow):
                            "utiliser."), ORANGE)
             return
         self.plugins.appeler("partage", ouvrir, url)
+
+    def _ajout_par_lien(self, demande: dict):
+        """`scrinium://ajouter` : montre ce qui serait ajouté ; seule la validation de l'utilisateur crée une NOUVELLE fiche
+        (une fiche existante n'est jamais modifiée, une fiche verrouillée jamais touchée)."""
+        if getattr(self, "_lien_ouvert", False):                 # un lien qui en enverrait mille ne fait pas mille fenêtres
+            return
+        self._lien_ouvert = True
+        try:
+            pref = self.store.reglages().get("capture_rapide", {})
+            noms = [t.nom for t in self.store.themes]
+            defaut = demande["theme"] if demande["theme"] in noms else (pref.get("theme") if pref.get("theme") in noms
+                                                                          else _(THEME_DEFAUT))
+            d = DialogueAjoutLien(self, demande, noms, defaut)
+            if not d.exec():
+                return
+            theme, titre, texte = d.resultat()
+        finally:
+            self._lien_ouvert = False
+        self.quitter_fiche()
+        nom = propre(theme or _(THEME_DEFAUT), "thème")
+        th = self.store.theme(nom) or self.store.nouveau_theme(nom)
+        f = self.store.nouvelle_fiche(th)
+        self.store.enregistrer(th, f, lien_mod.titre_par_defaut(titre, texte, time.strftime("%Y-%m-%d %H:%M")), texte)
+        self.maj_themes()
+        self.montrer(theme=th.nom)
+        self.selectionner_fiche(FicheVue(th, f))
+        self._statut(_("✔ Fiche ajoutée depuis un lien") + f"  ·  {th.nom}/{f.path.name}", VERT)
 
     def capture_rapide(self):
         """Petite fenêtre de note rapide, au premier plan (la fenêtre principale n'est pas affichée)."""
