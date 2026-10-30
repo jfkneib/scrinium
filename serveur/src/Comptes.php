@@ -88,6 +88,51 @@ final class Comptes
         return $c === null ? null : (string) $c;
     }
 
+    // --- Jetons de dépôt (ajouter des fiches, rien d'autre) ---
+
+    /** @return array{id:string, jeton:string} le jeton n'est montré qu'ici : seul son haché est conservé */
+    public function creerJetonDepot(string $compte, string $etiquette): array
+    {
+        if (!$this->existe($compte)) {
+            throw new ErreurHttp(422, 'Compte inconnu.');
+        }
+        $etiquette = trim($etiquette);
+        if ($etiquette === '' || mb_strlen($etiquette) > 100) {
+            throw new ErreurHttp(422, 'Étiquette requise (100 caractères au plus) : à quoi servira ce jeton ?');
+        }
+        $jeton = bin2hex(random_bytes(32));
+        $id = bin2hex(random_bytes(16));
+        $this->base->requete(
+            'INSERT INTO jetons_depot (id, jeton_hash, compte, etiquette, cree_le, revoque) VALUES (?, ?, ?, ?, ?, 0)',
+            [$id, hash('sha256', $jeton), $compte, $etiquette, $this->maintenant()],
+        );
+        return ['id' => $id, 'jeton' => $jeton];
+    }
+
+    /** @return array{id:string, compte:string}|null */
+    public function jetonDepot(string $jeton): ?array
+    {
+        $l = $this->base->ligne('SELECT id, compte FROM jetons_depot WHERE jeton_hash = ? AND revoque = 0', [hash('sha256', $jeton)]);
+        if ($l === null) {
+            return null;
+        }
+        $this->base->requete('UPDATE jetons_depot SET dernier_usage = ? WHERE id = ?', [$this->maintenant(), $l['id']]);
+        return ['id' => (string) $l['id'], 'compte' => (string) $l['compte']];
+    }
+
+    /** @return list<array<string,mixed>> */
+    public function jetonsDepot(?string $compte = null): array
+    {
+        return $compte === null
+            ? $this->base->lignes('SELECT id, compte, etiquette, cree_le, dernier_usage, revoque FROM jetons_depot ORDER BY cree_le')
+            : $this->base->lignes('SELECT id, compte, etiquette, cree_le, dernier_usage, revoque FROM jetons_depot WHERE compte = ? ORDER BY cree_le', [$compte]);
+    }
+
+    public function revoquerJetonDepot(string $id): bool
+    {
+        return $this->base->requete('UPDATE jetons_depot SET revoque = 1 WHERE id = ? AND revoque = 0', [$id])->rowCount() === 1;
+    }
+
     public function fermerSession(string $jeton): void
     {
         $this->base->requete('DELETE FROM sessions WHERE hash = ?', [hash('sha256', $jeton)]);

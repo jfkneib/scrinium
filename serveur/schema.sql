@@ -15,6 +15,17 @@ CREATE TABLE IF NOT EXISTS sessions (
     expire_le INTEGER NOT NULL
 );
 
+-- Jetons de dépôt : ne servent qu'à AJOUTER des fiches (POST /depot), jamais à lire ni modifier. Stockés hachés.
+CREATE TABLE IF NOT EXISTS jetons_depot (
+    id VARCHAR(32) NOT NULL PRIMARY KEY,
+    jeton_hash VARCHAR(64) NOT NULL UNIQUE,
+    compte VARCHAR(64) NOT NULL,
+    etiquette VARCHAR(100) NOT NULL,
+    cree_le INTEGER NOT NULL,
+    dernier_usage INTEGER NULL,
+    revoque INTEGER NOT NULL DEFAULT 0
+);
+
 CREATE TABLE IF NOT EXISTS fiches (
     id VARCHAR(32) NOT NULL PRIMARY KEY,
     version INTEGER NOT NULL,

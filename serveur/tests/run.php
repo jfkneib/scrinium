@@ -33,7 +33,7 @@ final class Ctx
         $base = $db ? Base::depuisConfig(json_decode($db, true)) : Base::memoire();
         $base->initialiser();
         if ($db) {
-            foreach (['comptes', 'sessions', 'fiches', 'droits', 'blobs', 'fiche_blobs', 'invitations', 'invitation_fiches', 'essais', 'journal'] as $t) {
+            foreach (['comptes', 'sessions', 'fiches', 'droits', 'blobs', 'fiche_blobs', 'invitations', 'invitation_fiches', 'jetons_depot', 'essais', 'journal'] as $t) {
                 $base->pdo->exec("DELETE FROM $t");
             }
         }
@@ -92,6 +92,77 @@ test('adresse du client derrière un proxy de confiance', function () {
     verifie(Application::adresseClient($s('192.0.2.10', 'pas-une-adresse'), $proxy), '192.0.2.10');   // illisible
     verifie(Application::adresseClient($s('192.0.2.10', null), $proxy), '192.0.2.10');
     verifie(Application::adresseClient($s('2001:db8::1', null), []), '2001:db8::1');
+});
+
+test('dépôt : un jeton de dépôt ajoute des fiches, rien d\'autre', function () {
+    $c = new Ctx();
+    $jfk = $c->compte('jfk');
+    $jd = $c->app->comptes()->creerJetonDepot('jfk', 'téléphone');
+    $depot = fn (string $corps, array $plus = [], ?string $jeton = null) => $c->app->traiter(
+        'POST', '/api/v1/depot', ['Authorization' => 'Bearer ' . ($jeton ?? $jd['jeton'])] + $plus, $corps, '9.9.9.9');
+    $decode = fn (array $r) => json_decode($r['corps'], true);
+
+    $r = $depot(json_encode(['titre' => 'Idée', 'texte' => 'Renouveler le certificat']), ['Content-Type' => 'application/json']);
+    verifie($r['statut'], 201);
+    $id = $decode($r)['id'];
+    verifie(strlen($id), 32);
+    $fiche = $c->appel('GET', "/api/v1/fiches/$id", null, $jfk);                                  // le propriétaire la lit avec sa session
+    verifie($fiche['json']['titre'], 'Idée');
+    verifie($fiche['json']['texte'], 'Renouveler le certificat');
+    verifie($fiche['json']['version'], 1);
+    verifie($c->appel('GET', "/api/v1/fiches/$id/droits", null, $jfk)['json'], ['jfk' => 'proprietaire']);
+
+    // texte brut : titre = en-tête X-Titre, sinon première ligne
+    verifie($decode($depot("# Courses\nlait, pain"))['titre'], 'Courses');
+    verifie($decode($depot('juste un texte', ['X-Titre' => 'Mon titre']))['titre'], 'Mon titre');
+    verifie($decode($depot(json_encode(['texte' => "\n\nPremière ligne utile\nsuite"])))['titre'], 'Première ligne utile');
+    verifie(mb_strlen($decode($depot(str_repeat('é', 200)))['titre']), 80);
+
+    // le jeton de dépôt ne sert à rien d'autre
+    foreach ([['GET', '/api/v1/fiches'], ['GET', "/api/v1/fiches/$id"], ['PUT', "/api/v1/fiches/$id"], ['DELETE', "/api/v1/fiches/$id"],
+              ['POST', '/api/v1/session'], ['GET', "/api/v1/fiches/$id/droits"]] as [$m, $chemin]) {
+        verifie($c->app->traiter($m, $chemin, ['Authorization' => 'Bearer ' . $jd['jeton']], '{}', '9.9.9.9')['statut'] === 200, false, "$m $chemin");
+    }
+    verifie($c->app->traiter('GET', '/api/v1/fiches', ['Authorization' => 'Bearer ' . $jd['jeton']], '', '9.9.9.9')['statut'], 401);
+
+    // pas de jeton, mauvais jeton : refusé ; une session du compte peut aussi déposer
+    verifie($c->app->traiter('POST', '/api/v1/depot', [], 'x', '9.9.9.9')['statut'], 401);
+    verifie($depot('x', [], str_repeat('a', 64))['statut'], 401);
+    verifie($depot('depuis la session', [], $jfk)['statut'], 201);
+
+    // entrées refusées
+    verifie($depot('')['statut'], 422);
+    verifie($depot(json_encode(['texte' => ['pas', 'du texte']]), ['Content-Type' => 'application/json'])['statut'], 422);
+    verifie($depot("\xff\xfe pas de l'utf-8")['statut'], 422);
+    verifie($depot(str_repeat('x', 256 * 1024 + 1))['statut'], 413);
+
+    // le jeton est stocké haché, listé, puis révoqué
+    $brut = $c->app->comptes();
+    verifie(count($brut->jetonsDepot('jfk')), 1);
+    verifie($brut->revoquerJetonDepot($jd['id']), true);
+    verifie($brut->revoquerJetonDepot($jd['id']), false);
+    verifie($depot('après révocation')['statut'], 401);
+    $c->nettoyer();
+});
+
+test('dépôt : limite par heure et jetons indépendants', function () {
+    $c = new Ctx(['depot_max_par_heure' => 3]);
+    $c->compte('jfk');
+    $c->compte('dede');
+    $a = $c->app->comptes()->creerJetonDepot('jfk', 'a')['jeton'];
+    $b = $c->app->comptes()->creerJetonDepot('dede', 'b')['jeton'];
+    $depot = fn (string $jeton) => $c->app->traiter('POST', '/api/v1/depot', ['Authorization' => "Bearer $jeton"], 'x', '9.9.9.9')['statut'];
+    verifie([$depot($a), $depot($a), $depot($a), $depot($a)], [201, 201, 201, 429]);
+    verifie($depot($b), 201);                                                                      // un autre jeton a sa propre limite
+    $c->t += 3601;
+    verifie($depot($a), 201);                                                                      // la fenêtre est glissante
+    // la fiche déposée par un jeton appartient à SON compte, pas à un autre
+    $j = $c->connecter('dede');
+    $mes = $c->appel('GET', '/api/v1/fiches', null, $j)['json'];
+    verifie(count($mes), 1);
+    verifie($mes[0]['proprietaire'], 'dede');
+    verifie($c->app->traiter('POST', '/api/v1/depot', ['Authorization' => 'Bearer ' . $a], 'x', '9.9.9.9')['statut'], 201);
+    $c->nettoyer();
 });
 
 test('découverte et en-têtes', function () {

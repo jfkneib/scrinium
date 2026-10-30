@@ -53,3 +53,25 @@ Le serveur peut être publié sous un sous-dossier d'un site existant, par exemp
    Le serveur ne croit `X-Forwarded-For` que si la connexion vient d'un proxy déclaré.
 3. Dans Scrinium, l'adresse du serveur est celle avec le préfixe.
 4. Le proxy ne doit pas demander d'authentification supplémentaire (Authelia…) sur ce chemin : le serveur gère ses comptes.
+
+
+## Déposer une fiche depuis n'importe quel programme
+
+Un **jeton de dépôt** permet d'ajouter des fiches à un compte, **sans rien pouvoir lire ni modifier** : on peut le mettre dans un script,
+un raccourci de téléphone ou un outil d'automatisation sans exposer le mot de passe. Un jeton par usage, révocable.
+
+```bash
+# sur le serveur : créer un jeton (il n'est montré qu'une fois), lister, révoquer
+sudo -u www-data php bin/scrinium-serveur creer-jeton jfk "raccourci du téléphone"
+sudo -u www-data php bin/scrinium-serveur jetons
+sudo -u www-data php bin/scrinium-serveur revoquer-jeton <id>
+
+# depuis n'importe où : créer une fiche
+curl -X POST https://serveur/api/v1/depot -H "Authorization: Bearer <jeton>" \
+     -H "Content-Type: application/json" -d '{"titre": "Idée", "texte": "Penser au certificat"}'
+# ou du texte brut (titre = première ligne, ou en-tête X-Titre)
+df -h | curl -X POST https://serveur/api/v1/depot -H "Authorization: Bearer <jeton>" -H "X-Titre: Disque" --data-binary @-
+```
+
+La fiche arrive dans Scrinium à la prochaine synchronisation (*Extensions → Synchroniser les partages*). Limites : 256 Kio de texte,
+60 dépôts par heure et par jeton. Les textes déposés ne sont **pas chiffrés** pour le serveur : rien de secret.

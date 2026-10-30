@@ -314,3 +314,17 @@ def test_prefixe_de_chemin_dans_l_adresse_du_serveur():
         srv.shutdown()
     lien = "https://exemple.org:8443/scrinium/inviter/" + JETON
     assert lg.analyser_invitation(lien) == ("https://exemple.org:8443/scrinium", JETON)
+
+
+# ---------- dépôt : une requête POST crée une fiche qui arrive à la synchronisation ----------
+def test_serveur_depot_arrive_a_la_synchronisation(php, tmp_path):
+    jfk = Poste(tmp_path, php, "jfk")
+    r = jfk.tr._json("POST", "/depot", {"titre": "Dépôt é", "texte": "reçu par POST"})
+    assert r["version"] == 1 and len(r["id"]) == 32
+    b = jfk.sync()
+    assert "Dépôt é" in b.nouvelles
+    th, f = jfk.recue("Dépôt é")
+    assert f.texte.strip().endswith("reçu par POST")
+    assert jfk.store.id_fiche(f) == r["id"]
+    with pytest.raises(Refuse):                                           # texte vide : refusé (422)
+        jfk.tr._json("POST", "/depot", {"texte": ""})

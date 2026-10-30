@@ -158,6 +158,8 @@ Partager des fiches entre machines et/ou personnes : dépôt sur le réseau loca
 - ☐ Flatpak (en dernier : le sandbox complique le fichier de secours et l'accès à Ollama)
 - ☐ Android : réécriture à part, lecture du même format ; nécessite la synchronisation (Syncthing/Nextcloud), voir plus bas
 
+- ✔ **Dépôt de fiches par requête POST** (2026-10-30, serveur 0.3.0) : `POST /api/v1/depot` avec un **jeton de dépôt** (ajout seulement, haché, révocable : `creer-jeton`, `jetons`, `revoquer-jeton`), JSON ou texte brut, 256 Kio, 60 par heure ; la fiche arrive à la synchronisation. 2 tests PHP + 1 de bout en bout. **À redéployer sur SERVEUR-TEST** (copie de `serveur/` puis `initialiser`, qui crée la table `jetons_depot`). Reste : thème visé (indication de thème côté serveur), ajouter à une fiche existante (journal), dépôt d'images, raccourci iPhone/Android documenté.
+
 ## 4 bis. Intégration au système : créer et ouvrir des fiches depuis l'extérieur (idée de jfk, 2026-10-30)
 **Déjà là, sur les 3 systèmes** : `scrinium ajouter` (tube), `scrinium --rapide`, liens `scrinium://rejoindre`, et surtout **une socket locale** (`ui/instance.py`, `QLocalServer`) qui sert de point d'entrée commun (named pipe sous Windows, socket Unix sous Linux/macOS). Le thème doit exister pour `ajouter` (la capture rapide, elle, le crée).
 **D-Bus** = le mécanisme Linux (KDE, GNOME) pour parler à une application déjà lancée. Il ne remplace pas la socket : il en serait la **façade Linux** (même code derrière), via `QtDBus` (déjà dans PyQt6). Rien d'équivalent à installer sous Windows/macOS : chaque système a sa porte d'entrée, toutes mènent à la même socket.

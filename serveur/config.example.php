@@ -19,4 +19,8 @@ return [
     // Accepter une invitation sans compte en crée un (false : l'administrateur crée d'abord les comptes).
     'invitations_creent_des_comptes' => true,
     'max_invitations_en_attente' => 20,
+
+    // Dépôt de fiches par une simple requête POST (voir README) : taille maximale du texte et nombre de dépôts par heure et par jeton.
+    // 'depot_taille_max' => 262144,
+    // 'depot_max_par_heure' => 60,
 ];

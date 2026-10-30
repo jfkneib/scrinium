@@ -1,6 +1,6 @@
 # API de partage de Scrinium (version 1)
 
-Statut : **contrat implémenté par `serveur/` (v0.2.0)** (étape 2 du plan, `TODO.md` section « 3 quater-a »). C'est la **source de vérité** entre le serveur
+Statut : **contrat implémenté par `serveur/` (v0.3.0)** (étape 2 du plan, `TODO.md` section « 3 quater-a »). C'est la **source de vérité** entre le serveur
 (`serveur/`, PHP) et le plugin « Partage » (client). Le serveur de référence en mémoire (`core/transport.py`, `ServeurMemoire`) en est la
 version exécutable : tout ce qui est écrit ici y est déjà testé (rôles, version de départ, droits).
 
@@ -74,8 +74,18 @@ depuis sa propre boîte : le serveur n'a besoin d'aucun réglage de messagerie).
   (oui par défaut ; non = l'administrateur doit d'abord créer le compte) et quota d'invitations en attente par propriétaire.
 - Le droit **reste acquis** après les 48 h (l'expiration ne concerne que le lien) ; le propriétaire le retire via § 4.
 
+## 5 bis. Dépôt (créer une fiche depuis n'importe quel programme)
+| Requête | Authentification | Réponse |
+|---|---|---|
+| `POST /dépôt` → **`POST /api/v1/depot`** | `Authorization: Bearer <jeton de dépôt>` (ou une session du compte) | corps JSON `{"titre"?: "…", "texte": "…"}` **ou** texte brut (titre = en-tête `X-Titre`, sinon première ligne) → `201 {"id","titre","version":1}` |
+
+- Une **fiche neuve** est créée dans le compte du jeton (rôle `proprietaire`, version 1, sans pièces). Le client Scrinium la reçoit à sa **prochaine synchronisation** (thème d'arrivée du dépôt, « Partagées » par défaut).
+- Un **jeton de dépôt** (64 caractères hexadécimaux, stocké **haché**) ne sert **qu'à cette route** : il ne lit rien, ne modifie rien, ne supprime rien (`401` partout ailleurs). Il se crée et se révoque en ligne de commande sur le serveur (`creer-jeton COMPTE ÉTIQUETTE`, `jetons`, `revoquer-jeton ID` ; montré une seule fois), un par usage.
+- Limites : texte ≤ 256 Kio (`depot_taille_max`), UTF-8, titre tronqué à 80 caractères, **60 dépôts par heure et par jeton** (`depot_max_par_heure`, fenêtre glissante, `429` au-delà). Titre et texte vides : `422`. Trop long : `413`.
+- **Pas de chiffrement de bout en bout** : le serveur voit ce qu'on lui envoie, comme pour toute fiche partagée ; une fiche verrouillée ne peut pas être déposée.
+
 ## 6. Découverte et compatibilité
-`GET /api` (public) : `{"api": 1, "serveur": "0.2.0", "inscription": "invitation", "limites": {"image": 8388608, "pieces": 50}}`.
+`GET /api` (public) : `{"api": 1, "serveur": "0.3.0", "inscription": "invitation", "limites": {"image": 8388608, "pieces": 50}}`.
 Le client refuse un serveur d'une autre version majeure d'API et le dit à l'utilisateur ; les ajouts compatibles ne changent pas le numéro.
 
 ## 7. Erreurs

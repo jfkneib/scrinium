@@ -2,7 +2,7 @@
 <?php
 declare(strict_types=1);
 
-// Administration en ligne de commande : initialiser, creer-compte, mot-de-passe, comptes.
+// Administration en ligne de commande : initialiser, creer-compte, mot-de-passe, comptes, creer-jeton, jetons, revoquer-jeton.
 require __DIR__ . '/../src/autoload.php';
 
 use Scrinium\Serveur\Application;
@@ -50,13 +50,29 @@ try {
             $app->comptes()->changerMotDePasse($nom, saisir("Nouveau mot de passe pour « $nom » : "));
             echo "Mot de passe changé, sessions fermées.\n";
             break;
+        case 'creer-jeton':
+            $nom = $argv[2] ?? '';
+            $jd = $app->comptes()->creerJetonDepot($nom, implode(' ', array_slice($argv, 3)));
+            echo "Jeton de dépôt créé pour « $nom » (id {$jd['id']}). Il n'est montré QU'UNE FOIS :\n\n{$jd['jeton']}\n\n";
+            echo "Il ne peut qu'ajouter des fiches (POST /api/v1/depot). Pour le révoquer : revoquer-jeton {$jd['id']}\n";
+            break;
+        case 'jetons':
+            foreach ($app->comptes()->jetonsDepot($argv[2] ?? null) as $j) {
+                echo $j['id'] . '  ' . $j['compte'] . '  « ' . $j['etiquette'] . ' »  créé ' . gmdate('Y-m-d', (int) $j['cree_le'])
+                    . '  dernier usage ' . ($j['dernier_usage'] ? gmdate('Y-m-d H:i', (int) $j['dernier_usage']) : 'jamais')
+                    . ($j['revoque'] ? '  [RÉVOQUÉ]' : '') . "\n";
+            }
+            break;
+        case 'revoquer-jeton':
+            echo $app->comptes()->revoquerJetonDepot($argv[2] ?? '') ? "Jeton révoqué.\n" : "Jeton introuvable ou déjà révoqué.\n";
+            break;
         case 'comptes':
             foreach ($base->lignes('SELECT nom, admin, email FROM comptes ORDER BY nom') as $c) {
                 echo $c['nom'] . ($c['admin'] ? ' (admin)' : '') . ($c['email'] ? '  ' . $c['email'] : '') . "\n";
             }
             break;
         default:
-            fwrite(STDERR, "Usage : scrinium-serveur initialiser | creer-compte NOM [--admin] | mot-de-passe NOM | comptes\n");
+            fwrite(STDERR, "Usage : scrinium-serveur initialiser | creer-compte NOM [--admin] | mot-de-passe NOM | comptes | creer-jeton COMPTE ÉTIQUETTE | jetons [COMPTE] | revoquer-jeton ID\n");
             exit(2);
     }
 } catch (ErreurHttp $e) {

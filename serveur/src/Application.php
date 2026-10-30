@@ -9,7 +9,7 @@ namespace Scrinium\Serveur;
  */
 final class Application
 {
-    public const VERSION = '0.2.0';
+    public const VERSION = '0.3.0';
 
     /**
      * Adresse du client. Derrière un proxy inverse (Caddy, nginx…), REMOTE_ADDR est celle du proxy : on lit alors l'en-tête
@@ -62,6 +62,8 @@ final class Application
             'limite_pieces' => 50,
             'limite_fiche' => 100 * 1024 * 1024,
             'limite_texte' => 1024 * 1024,
+            'depot_taille_max' => 256 * 1024,        // octets de texte par dépôt
+            'depot_max_par_heure' => 60,             // dépôts par heure et par jeton (ou compte)
         ];
         $this->comptes = new Comptes($base, $this->cfg, $this->horloge);
         $this->limiteur = new Limiteur($base, $this->horloge);
@@ -166,6 +168,14 @@ final class Application
         }
         if (preg_match('#^/invitations/([0-9a-f]{64})/accepter$#', $chemin, $r) && $m === 'POST') {
             return $this->accepterInvitation($r[1], $compte, $this->corpsJson($corps, true), $ip);
+        }
+        // Dépôt : un jeton de dépôt (ajout seulement) ou une session de ce compte
+        if ($chemin === '/depot' && $m === 'POST') {
+            $jd = $jeton !== null ? $this->comptes->jetonDepot($jeton) : null;
+            if ($jd === null && $compte === null) {
+                throw new ErreurHttp(401, 'Jeton de dépôt ou connexion requis.');
+            }
+            return $this->deposer($jd['compte'] ?? (string) $compte, $jd['id'] ?? 'session:' . $compte, $e, $corps);
         }
         // Reste : connecté
         if ($chemin === '/fiches' && $m === 'GET') {
@@ -457,6 +467,67 @@ final class Application
         });
         $this->base->journal($this->maintenant(), $compte, 'fiche_supprimee', $id);
         return [204, null, 'application/json; charset=utf-8', []];
+    }
+
+    // --- Dépôt (boîte de réception) ----------------------------------------------------------------------------
+
+    /**
+     * POST /depot : crée une fiche dans le compte, sans rien lire ni modifier d'autre. Corps JSON {"titre"?, "texte"} ou texte brut
+     * (titre = en-tête X-Titre, sinon première ligne). Le client Scrinium la reçoit à sa prochaine synchronisation.
+     *
+     * @param array<string,string> $e @return array{int,mixed,string,array<string,string>}
+     */
+    private function deposer(string $compte, string $cleLimite, array $e, string $corps): array
+    {
+        $this->limiteur->verifier('depot:' . $cleLimite, (int) $this->cfg['depot_max_par_heure'], 3600);
+        $type = strtolower((string) ($e['content-type'] ?? ''));
+        if (str_contains($type, 'json') || str_starts_with(ltrim($corps), '{')) {
+            $c = $this->corpsJson($corps);
+            $texte = $c['texte'] ?? '';
+            $titre = $c['titre'] ?? '';
+            if (!is_string($texte) || !is_string($titre)) {
+                throw new ErreurHttp(422, 'titre et texte doivent être du texte.');
+            }
+        } else {
+            $texte = $corps;
+            $titre = (string) ($e['x-titre'] ?? '');
+        }
+        $texte = str_replace("\0", '', $texte);
+        $titre = trim(str_replace(["\0", "\r", "\n"], ' ', $titre));
+        if (strlen($texte) > (int) $this->cfg['depot_taille_max']) {
+            throw new ErreurHttp(413, 'Texte trop long pour un dépôt.');
+        }
+        if (!mb_check_encoding($texte, 'UTF-8') || !mb_check_encoding($titre, 'UTF-8')) {
+            throw new ErreurHttp(422, 'Texte en UTF-8 attendu.');
+        }
+        if (trim($texte) === '' && $titre === '') {
+            throw new ErreurHttp(422, 'Rien à déposer : titre ou texte requis.');
+        }
+        if ($titre === '') {                                                    // titre déduit : première ligne non vide du texte
+            foreach (preg_split('/\R/u', $texte) ?: [] as $ligne) {
+                $ligne = trim(ltrim(trim($ligne), '#'));
+                if ($ligne !== '') {
+                    $titre = $ligne;
+                    break;
+                }
+            }
+        }
+        $titre = mb_substr($titre, 0, 80);
+        if ($titre === '') {
+            $titre = 'Dépôt du ' . gmdate('Y-m-d H:i', $this->maintenant());
+        }
+        $id = bin2hex(random_bytes(16));
+        $t = $this->maintenant();
+        $this->base->transaction(function () use ($id, $titre, $texte, $compte, $t): void {
+            $this->base->requete(
+                'INSERT INTO fiches (id, version, titre, texte, pieces, proprietaire, modifie_le) VALUES (?, 1, ?, ?, ?, ?, ?)',
+                [$id, $titre, $texte, '[]', $compte, $t],
+            );
+            $this->base->requete('INSERT INTO droits (fiche_id, compte, role) VALUES (?, ?, ?)', [$id, $compte, 'proprietaire']);
+        });
+        $this->limiteur->echec('depot:' . $cleLimite);                          // (le limiteur compte simplement les événements)
+        $this->base->journal($t, $compte, 'depot', $id);
+        return [201, ['id' => $id, 'titre' => $titre, 'version' => 1], 'application/json; charset=utf-8', []];
     }
 
     // --- Pièces jointes ----------------------------------------------------------------------------------------
