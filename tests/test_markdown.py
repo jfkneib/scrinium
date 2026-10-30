@@ -140,7 +140,7 @@ def test_second_clic_retire_les_marques_autour_de_la_selection(app):
 
 
 def test_lien_sur_une_adresse_selectionnee(app):
-    u = "https://spo.medulla-tech.io/mmc/index.php?sessionexpired=1"
+    u = "https://exemple.org/app/index.php?sessionexpired=1"
     e = editeur("ouvrir " + u + " ici", 7, 7 + len(u))
     md.lien(e)
     assert e.toPlainText() == "ouvrir <" + u + "> ici"
