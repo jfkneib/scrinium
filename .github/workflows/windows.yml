@@ -40,9 +40,10 @@ jobs:
         shell: pwsh
         run: |
           $d = "dist\scrinium"
-          # 1. Les fichiers indispensables sont là (huit extensions, traduction anglaise, icônes)
+          # 1. Les fichiers indispensables sont là (extensions officielles, traduction anglaise, icônes)
           $ext = (Get-ChildItem "$d\_internal\scrinium\plugins_officiels" -Directory).Count
-          if ($ext -ne 8) { throw "Extensions embarquées : $ext (8 attendues)" }
+          $attendues = (Get-ChildItem "plugins" -Directory | Where-Object { $_.Name -ne "hello" }).Count    # tout `plugins/` sauf l'exemple
+          if ($ext -ne $attendues) { throw "Extensions embarquées : $ext ($attendues attendues)" }
           if (-not (Test-Path "$d\_internal\scrinium\locale\en\LC_MESSAGES\scrinium.mo")) { throw "Traduction anglaise absente" }
           if (-not (Test-Path "$d\_internal\scrinium\icons\help-about.svg")) { throw "Icônes absentes" }
           # 2. Le programme en console démarre et lit/écrit des fiches (chiffrement compris) dans un dossier de test
