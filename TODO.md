@@ -175,6 +175,13 @@ Pistes, par ordre de rapport utilité/effort :
 5. ☐ `scrinium ajouter` : option de **création du thème s'il n'existe pas** (`--creer-theme`) ; lecture d'un fichier (`--fichier`) ; sortie JSON pour les scripts.
 Fait le 2026-10-30 : fiche d'aide « Créer des fiches depuis l'extérieur » dans le Scrinium de l'XPS (thème « Scrinium dev »), à reprendre dans le README et dans le thème « Doc ».
 
+## 4 ter. « Tout est fiche » (idée de jfk, 2026-11-02 ; principe 9 de `docs/principes.md`)
+Mécanisme commun dans le cœur : marque `#scrinium-<type>` en première ligne (le répertoire le fait déjà), registre de types, par type un analyseur, un exporteur et une vue (formulaire + texte brut en secours).
+1. ☐ Cœur : registre de types ; le répertoire en est le premier.
+2. ☐ **Applications** (le panneau d'icônes, aujourd'hui dans `settings.json`) : en premier, car c'est le cas sensible. Règle : une fiche exécutable reçue de l'extérieur reste **inerte** tant que l'utilisateur ne l'a pas validée ; elle ne se lance que depuis un thème local de confiance.
+3. ☐ Actions CLI (plugin capture), puis agenda (conflits de synchro à traiter). Fiches verrouillées : un type ne peut pas être verrouillé comme du texte.
+4. ☐ Migration : les réglages actuels sont lus un temps, convertis en fiches au premier lancement, avec une copie.
+
 ## 5. Améliorations diverses
 - ✔ Plugin `lecture` (2026-10-21, `dev`, v0.3) : lecture à voix haute d'une fiche, de la sélection ou d'un thème entier (fr/en, langue détectée), Piper (paquet pip + voix téléchargée après accord, SHA-256 vérifiés) ou espeak-ng ; pause / suivante / arrêt ; fiches verrouillées jamais lues. **Pas encore essayé avec un vrai Piper ni un vrai espeak-ng** (tests avec de faux moteurs). Reste : Windows (SAPI) et macOS (`say`), voix supplémentaires, surlignage de la phrase lue
 - ✔ Plugin `applications` (2026-10-21, `dev`, v0.3, essayé par l'utilisateur) : panneau d'icônes qui lance des applications (choix parmi les .desktop installés ou commande libre), `{selection}`/`{fiche}` facultatifs passés en arguments sans shell, refusés pour une fiche verrouillée ; séparé des Actions CLI. Reste : Windows/macOS (liste des applications installées), icônes depuis un fichier .desktop propre à l'utilisateur

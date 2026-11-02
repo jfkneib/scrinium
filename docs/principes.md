@@ -59,6 +59,11 @@ jamais présentée comme générale. Une fonction qui ne marche que sur une infr
 
 ---
 
+### 9. Tout est fiche
+Ce que Scrinium gère (répertoire, puis applications, actions, agenda…) vit dans des **fiches typées** : une marque en première ligne (`#scrinium-<type>`),
+du texte lisible, une vue dédiée. Partage, synchronisation, verrouillage, recherche, corbeille et dépôt de l'extérieur marchent alors pour tout, sans code en plus.
+**Une fiche qui lance une commande n'est jamais active si elle vient de l'extérieur** (partage, dépôt, lien) sans validation visible de l'utilisateur.
+
 ## English
 
 Scrinium is **free software** (GPL-3.0-or-later) made **for anyone** who wants to keep small notes — not for one particular
@@ -86,3 +91,6 @@ installation. These rules guide every addition; when in doubt, they come before 
 8. **Test, translate, explain**: every feature has tests (`python3 -m pytest`, offscreen); the interface exists in French and English
    with **no missing string** (`python3 outils/i18n.py verifier`); changes visible to users are documented and limits are stated plainly;
    work happens on `dev`, then `main` when stable, and a release is an explicit decision.
+9. **Everything is a note**: what Scrinium manages (directory, then applications, actions, agenda…) lives in **typed notes**: a mark on the
+   first line (`#scrinium-<type>`), readable text, a dedicated view. Sharing, sync, locking, search, trash and deposit from outside then work for
+   everything at no extra cost. **A note that runs a command is never active when it comes from outside** (share, deposit, link) without a visible confirmation.
