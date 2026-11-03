@@ -1,3 +1,30 @@
+scrinium (0.5.0) unstable; urgency=medium
+
+  * « Tout est fiche » : ce que Scrinium gère vit dans des fiches typées (marque
+    #scrinium-<type> en première ligne), qui se partagent, se synchronisent et se
+    sauvegardent comme les autres. Répertoire, Applications, Actions CLI et Agenda
+    en sont. Une fiche qui lance des commandes (Applications, Actions CLI) reste
+    inerte tant que vous ne l'avez pas validée (bandeau « Valider cette fiche »),
+    quelle que soit son origine. Vos réglages actuels sont convertis en fiches au
+    premier lancement et gardés comme copie.
+  * Extension Partage : partage de fiches et de thèmes entiers par un serveur
+    (serveur PHP fourni dans serveur/ : API v1, invitations, dépôt de fiches par
+    jetons à ajout seulement, révocables), synchronisation avec gestion des
+    conflits, liens scrinium://, outil Open WebUI « créer une fiche ».
+  * Répertoire : fiche-tableau rangée de A à Z, colonnes libres (modèles contacts,
+    livres, vocabulaire), actions rapides (appeler, écrire, ouvrir un lien) ;
+    import et export CSV.
+  * Clic droit dans une fiche : menu propre à chaque type (copier, envoyer par
+    courriel, partager, lire, traduire, export PDF) ; les extensions peuvent y
+    ajouter des entrées (ajouter_action_fiche).
+  * Thèmes et fiches : tri manuel par glisser-déposer, sélection multiple,
+    favoris épinglés, bouton pour refermer une fiche ouverte.
+  * Thème « Doc » : sept fiches sur l'écriture d'une extension.
+  * Correction : la frappe dans un champ du répertoire renvoyait le curseur au
+    début à chaque touche.
+
+ -- Jean-François Kneib <kneib.jean-francois@cegetel.net>  Tue, 03 Nov 2026 18:00:00 +0100
+
 scrinium (0.4.1) unstable; urgency=medium
 
   * Correction importante : avec un PyQt6 récent (programme Windows, installation
