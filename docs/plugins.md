@@ -80,7 +80,7 @@ Handlers receive keyword arguments; accept `**kw` to stay compatible with future
 `ajouter_panneau(title, widget)` (dock, any `QWidget`) · `ajouter_action_image(text, fn, icon=None)` (right-click menu of an attached image; `fn(fiche, piece)`) · `notifier(title, message)` (desktop notification) ·
 `planifier(seconds, fn, repeter=False)` (timer) · `afficher_fiche(vue)` ·
 `inserer_texte(text)` (insert at the cursor of the open note, replacing the selection; `False` if it cannot be edited) · `texte_selectionne()` · `texte_complet()` (whole text as shown in the editor) · `remplacer_tout(text)` · `ajouter_a_la_fin(text)` (undoable with Ctrl+Z).
-`enregistrer_type(type_fiche, vue)` (typed notes, see below).
+`enregistrer_type(type_fiche, vue)` (typed notes, see below) · `actualiser()` (reload topics and notes after the extension created some).
 Everything added is removed automatically when the extension is disabled.
 
 ## Typed notes (« everything is a note »)
@@ -95,6 +95,11 @@ first type is the directory (`repertoire`). An extension registers its own with 
 (share, deposit, link, a file dropped by hand): `actif` is `False` and the window shows a *Validate this note* banner. The validation is tied to the
 **hash of the text** (`Store.fiche_validee`): if the text changes afterwards (an update received from elsewhere), the note is inert again. Text typed
 in the application through the type's own view is validated as written. A view must do **nothing** while `actif` is false.
+
+`ctx.fiche_active(vue)` tells an extension whether a note may act; `ctx.creer_fiche(theme, titre, texte)` creates a note (an executable one is created **inert**:
+an extension cannot validate itself). The `fiche_validee` event fires when the user validates a note. The built-in example is the **Applications** extension: its
+panel is fed by the validated notes of type `applications` (`#scrinium-applications`, one `## Name` section per application with `commande:`, `icone:`,
+`description:` lines); settings from before are migrated into such a note once, and kept as a copy.
 
 ## Robustness
 

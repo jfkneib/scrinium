@@ -50,6 +50,10 @@ class UiPlugin:
         self._docks.append(d)
         return d
 
+    def actualiser(self) -> None:
+        """Relit les thèmes et les fiches affichés (après qu'une extension en a créé ou modifié)."""
+        self._f.maj_themes()
+
     def enregistrer_type(self, type_fiche, vue) -> None:
         """« Tout est fiche » : déclare un type de fiche (`core.types_fiche.TypeFiche`, marque `#scrinium-<nom>` en première ligne) et sa vue.
         La vue est un widget avec `charger(texte)`, le signal `modifie(str)` et l'attribut `actif` ; si le type est `executable`, la vue ne

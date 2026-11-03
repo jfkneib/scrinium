@@ -11,6 +11,7 @@ import subprocess
 import sys
 from pathlib import Path
 
+from scrinium.core.types_fiche import TypeFiche
 from scrinium.i18n import N_, _, langue
 
 MAX_APPLICATIONS = 100
@@ -41,6 +42,49 @@ def normaliser_liste(liste) -> list:
     if not isinstance(liste, list):
         return []
     return [a for a in (normaliser(x) for x in liste) if a][:MAX_APPLICATIONS]
+
+
+# ---------- la fiche « applications » (« tout est fiche ») ----------
+# Texte d'une fiche de ce type : la marque, puis une section par application. Lisible et modifiable à la main ; ce qui précède la première
+# section (notes libres) est ignoré, comme les clés inconnues.
+#
+#     #scrinium-applications
+#     ## Thunderbird
+#     commande: thunderbird
+#     icone: thunderbird
+#     description: Courrier électronique.
+#
+# Le type est EXÉCUTABLE : une telle fiche reçue de l'extérieur ne lance rien tant que l'utilisateur ne l'a pas validée (core/types_fiche.py).
+MARQUE = "#scrinium-applications"
+TYPE = TypeFiche("applications", N_("Applications"), "view-list-icons", executable=True)
+_CLES = ("commande", "icone", "description")
+
+
+def depuis_texte(texte: str | None) -> list:
+    """Applications lues dans le texte d'une fiche « applications » (valides seulement, au plus MAX_APPLICATIONS)."""
+    apps, courante = [], None
+    lignes = (texte or "").lstrip("\ufeff").splitlines()
+    for ligne in lignes[1:] if lignes and lignes[0].startswith(MARQUE) else lignes:
+        if ligne.startswith("## "):
+            courante = {"nom": ligne[3:]}
+            apps.append(courante)
+        elif courante is not None and ":" in ligne:
+            cle, _sep, valeur = ligne.partition(":")
+            if cle.strip().lower() in _CLES:
+                courante[cle.strip().lower()] = valeur.strip()
+    return normaliser_liste(apps)
+
+
+def en_texte(applications: list) -> str:
+    """Texte d'une fiche « applications » pour cette liste."""
+    sortie = [MARQUE]
+    for a in normaliser_liste(applications):
+        sortie += ["", "## " + a["nom"], "commande: " + a["commande"]]
+        if a["icone"]:
+            sortie.append("icone: " + a["icone"])
+        if a["description"]:
+            sortie.append("description: " + a["description"])
+    return "\n".join(sortie) + "\n"
 
 
 def premier_mot(commande: str) -> str:

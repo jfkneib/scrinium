@@ -7,15 +7,18 @@
 - Facultatif : `{selection}` (texte sélectionné) et `{fiche}` (titre) dans la commande sont passés comme ARGUMENTS
   (jamais via un shell). `{selection}` est refusé pour une fiche verrouillée, dont le texte ne doit pas apparaître
   dans la liste des processus.
-- Les applications sont enregistrées en clair dans les réglages : n'y mettez aucun mot de passe."""
+- « Tout est fiche » : les applications sont une FICHE de type `applications` (`#scrinium-applications`, voir `logique.py`) : elle se partage,
+  se synchronise, se sauvegarde comme les autres. C'est un type EXÉCUTABLE : une fiche reçue de l'extérieur ne lance rien tant que
+  l'utilisateur ne l'a pas validée (bandeau « Valider cette fiche »). Les applications sont en clair : n'y mettez aucun mot de passe."""
 import html
 from pathlib import Path
 
-from PyQt6.QtCore import QSize, Qt
+from PyQt6.QtCore import QSize, Qt, pyqtSignal
 from PyQt6.QtGui import QIcon
 from PyQt6.QtWidgets import (QApplication, QDialog, QDialogButtonBox, QFileDialog, QFormLayout, QHBoxLayout, QLabel, QLineEdit,
                              QListView, QListWidget, QListWidgetItem, QMessageBox, QPushButton, QVBoxLayout, QWidget)
 
+from scrinium.core import types_fiche
 from scrinium.core.plugins import Plugin
 from scrinium.i18n import _
 from scrinium.ui.icons import icone
@@ -66,12 +69,20 @@ class PanneauApplications(QWidget):
         self.liste.setUniformItemSizes(True)
         self.liste.itemClicked.connect(self._clic)
         lay.addWidget(self.liste, 1)
+        self.avis = QLabel()
+        self.avis.setWordWrap(True)
+        self.avis.setStyleSheet("background: #fdebd0; color: #5b3a00; padding: 3px;")
+        lay.addWidget(self.avis)
         b = QPushButton(icone("configure"), _("Modifier les applications…"))
         b.clicked.connect(plugin.modifier)
         lay.addWidget(b)
         self.rafraichir()
 
     def rafraichir(self):
+        n = self.p.a_valider()
+        self.avis.setVisible(n > 0)
+        if n:
+            self.avis.setText(_("%d fiche d'applications attend votre validation : « Modifier les applications… » l'ouvre.") % n)
         self.liste.clear()
         for a in self.p.applications():
             it = QListWidgetItem(icone_app(a["icone"]), a["nom"])
@@ -82,7 +93,11 @@ class PanneauApplications(QWidget):
 
     def _clic(self, it):
         self.liste.clearSelection()
-        self.p.lancer(it.data(Qt.ItemDataRole.UserRole))
+        a = it.data(Qt.ItemDataRole.UserRole)
+        if a not in self.p.applications():          # la fiche a changé ou n'est plus validée depuis l'affichage : on ne lance rien
+            self.rafraichir()
+            return
+        self.p.lancer(a)
 
 
 class DialogueChoix(QDialog):
@@ -184,32 +199,46 @@ class DialogueApplication(QDialog):
                                    "description": self.description.text()})
 
 
-class DialogueApplications(QDialog):
-    """Liste des applications : ajouter, modifier, supprimer, réordonner, exemples, export/import."""
+class EditeurApplications(QWidget):
+    """Liste des applications : ajouter, modifier, supprimer, réordonner, exemples, export/import. Signale chaque changement."""
+    changement = pyqtSignal(list)
 
-    def __init__(self, plugin, parent=None):
+    def __init__(self, parent=None):
         super().__init__(parent)
-        self.p = plugin
-        self.setWindowTitle(_("Applications"))
-        self.resize(560, 420)
         lay = QHBoxLayout(self)
+        lay.setContentsMargins(0, 0, 0, 0)
         self.liste = QListWidget()
         self.liste.setIconSize(QSize(24, 24))
         self.liste.itemDoubleClicked.connect(lambda *_a: self._modifier())
         lay.addWidget(self.liste, 1)
         col = QVBoxLayout()
+        self.boutons = []
         for texte, fn in ((_("Ajouter…"), self._ajouter), (_("Modifier…"), self._modifier), (_("Supprimer"), self._supprimer),
                           (_("Monter"), lambda: self._deplacer(-1)), (_("Descendre"), lambda: self._deplacer(1)),
                           (_("Exemples…"), self._exemples), (_("Exporter…"), self._exporter), (_("Importer…"), self._importer)):
             b = QPushButton(texte)
             b.clicked.connect(fn)
             col.addWidget(b)
+            self.boutons.append(b)
         col.addStretch()
-        f = QPushButton(_("Fermer"))
-        f.clicked.connect(self.accept)
-        col.addWidget(f)
         lay.addLayout(col)
-        self.apps = plugin.applications()
+        self.apps: list = []
+        self._actif = True
+
+    @property
+    def actif(self) -> bool:
+        return self._actif
+
+    @actif.setter
+    def actif(self, oui: bool) -> None:
+        """Faux : fiche non validée. La liste se lit (pour relire les commandes avant de valider) mais ne se modifie pas."""
+        self._actif = bool(oui)
+        for b in self.boutons:
+            b.setEnabled(self._actif)
+        self.liste.setToolTip("" if self._actif else _("Fiche non validée : relisez les commandes, puis validez-la pour la modifier."))
+
+    def definir(self, apps: list):
+        self.apps = logique.normaliser_liste(apps)
         self._remplir()
 
     def _remplir(self, ligne=None):
@@ -220,7 +249,7 @@ class DialogueApplications(QDialog):
             self.liste.setCurrentRow(min(ligne if ligne is not None else 0, len(self.apps) - 1))
 
     def _enregistrer(self, ligne=None):
-        self.p.sauver(self.apps)
+        self.changement.emit(list(self.apps))
         self._remplir(ligne)
 
     def _ajouter(self):
@@ -231,7 +260,7 @@ class DialogueApplications(QDialog):
 
     def _modifier(self):
         i = self.liste.currentRow()
-        if 0 <= i < len(self.apps):
+        if self._actif and 0 <= i < len(self.apps):
             d = DialogueApplication(self.apps[i], self)
             if d.exec() and d.resultat():
                 self.apps[i] = d.resultat()
@@ -281,6 +310,18 @@ class DialogueApplications(QDialog):
             self._enregistrer(len(self.apps) - 1)
 
 
+class VueApplications(EditeurApplications):
+    """Vue du type « applications » dans la fenêtre : la fiche s'affiche comme cette liste (le texte reste dans la fiche)."""
+    modifie = pyqtSignal(str)
+
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.changement.connect(lambda apps: self.modifie.emit(logique.en_texte(apps)))
+
+    def charger(self, texte: str):
+        self.definir(logique.depuis_texte(texte))
+
+
 class ApplicationsPlugin(Plugin):
     api = 1
 
@@ -288,6 +329,7 @@ class ApplicationsPlugin(Plugin):
         self.ctx = ctx
         if ctx.ui is None:
             return
+        ctx.ui.enregistrer_type(logique.TYPE, VueApplications())
         self.panneau = PanneauApplications(self)
         self.dock = ctx.ui.ajouter_panneau(_("Applications"), self.panneau)
         self.interrupteurs = (ctx.ui.ajouter_action(_("Panneau des applications"), self.basculer_panneau, "view-list-icons"),
@@ -298,6 +340,9 @@ class ApplicationsPlugin(Plugin):
             a.setToolTip(_("Afficher ou masquer le panneau des applications"))
         self.dock.visibilityChanged.connect(self._etat_panneau)
         ctx.ui.ajouter_action(_("Modifier les applications…"), self.modifier, "configure")
+        for evenement in ("fiche_enregistree", "themes_modifies", "fiche_validee"):
+            ctx.on(evenement, lambda **_kw: self.panneau.rafraichir())
+        self._migrer()
 
     def basculer_panneau(self):
         self.dock.setVisible(self.dock.isHidden())
@@ -307,18 +352,60 @@ class ApplicationsPlugin(Plugin):
             a.setChecked(not self.dock.isHidden())
 
     # ---------- liste ----------
+    THEME = "Outils"                           # thème de la fiche créée à la migration ou par « Modifier les applications… »
+
+    def _fiches(self) -> list:
+        """[(fiche, validée ?)] des fiches de type « applications », par thème puis titre."""
+        res = []
+        for v in self.ctx.fiches():
+            t = types_fiche.type_de(v.texte)
+            if t is not None and t.nom == logique.TYPE.nom:
+                res.append((v, self.ctx.fiche_active(v)))
+        return sorted(res, key=lambda x: (x[0].theme.lower(), x[0].titre.lower()))
+
     def applications(self) -> list:
-        """Applications enregistrées ; les exemples installés tant que l'utilisateur n'a rien enregistré."""
+        """Applications du panneau : celles des fiches « applications » VALIDÉES (sans doublon) ; tant qu'il n'y en a aucune, les réglages
+        d'avant « tout est fiche », puis, sans réglage, les exemples installés."""
+        actives = [v for v, ok in self._fiches() if ok]
+        if actives:
+            vus, res = set(), []
+            for v in actives:
+                for a in logique.depuis_texte(v.texte):
+                    if (a["nom"], a["commande"]) not in vus:
+                        vus.add((a["nom"], a["commande"]))
+                        res.append(a)
+            return res[:logique.MAX_APPLICATIONS]
         brut = self.ctx.reglages.get("applications")
         return logique.exemples_installes() if brut is None else logique.normaliser_liste(brut)
 
-    def sauver(self, applications: list):
-        self.ctx.reglages.set("applications", logique.normaliser_liste(applications))
-        self.panneau.rafraichir()
+    def a_valider(self) -> int:
+        """Nombre de fiches « applications » en attente de validation (reçues, ou modifiées ailleurs)."""
+        return sum(1 for _v, ok in self._fiches() if not ok)
+
+    def _migrer(self):
+        """Les applications d'avant « tout est fiche » (réglages) deviennent une fiche, une seule fois ; les réglages restent comme copie.
+        La fiche créée est inerte : l'utilisateur la valide (bandeau), en attendant le panneau garde l'ancienne liste."""
+        brut = self.ctx.reglages.get("applications")
+        if self.ctx.reglages.get("migrees") or not isinstance(brut, list):
+            return
+        self.ctx.reglages.set("migrees", True)
+        apps = logique.normaliser_liste(brut)
+        if apps and not self._fiches():
+            self.ctx.creer_fiche(self.THEME, _("Applications"), logique.en_texte(apps))
+            self.ctx.ui.actualiser()
+            self.ctx.ui.notifier(_("Applications"), _("Vos applications sont maintenant une fiche « Applications » (thème « %s ») : ouvrez-la "
+                                                      "et validez-la.") % self.THEME)
 
     def modifier(self):
-        DialogueApplications(self, _parent()).exec()
-        self.panneau.rafraichir()
+        """Ouvre la fiche des applications ; sans fiche, la crée à partir de la liste actuelle (à valider ensuite)."""
+        fiches = self._fiches()
+        if fiches:
+            vue = next((v for v, ok in fiches if ok), fiches[0][0])
+        else:
+            vue = self.ctx.creer_fiche(self.THEME, _("Applications"), logique.en_texte(self.applications()))
+            self.ctx.ui.actualiser()
+            self.ctx.ui.notifier(_("Applications"), _("Fiche « Applications » créée : validez-la pour qu'elle serve au panneau."))
+        self.ctx.ui.afficher_fiche(vue)
 
     # ---------- lancement ----------
     def lancer(self, a: dict):

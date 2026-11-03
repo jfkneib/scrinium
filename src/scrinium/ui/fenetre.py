@@ -685,6 +685,7 @@ class Fenetre(QMainWindow):
         self.store.valider_fiche(t, f)
         self._mode_vue(self.vues_types.get((types_fiche.type_de(f.texte) or repertoire.TYPE).nom))
         self._statut(_("✔ Fiche validée : elle peut maintenant agir") + f"  ·  {t.nom}/{f.path.name}", VERT)
+        self.plugins.emettre("fiche_validee", fiche=FicheVue(t, f))
 
     def nouveau_repertoire(self):
         """Crée une fiche répertoire dans le thème courant, à partir d'un modèle de colonnes (modifiables ensuite)."""
@@ -911,6 +912,7 @@ class Fenetre(QMainWindow):
             ty = types_fiche.type_de(f.texte)
             if ty is not None and ty.executable:
                 self.store.valider_fiche(t, f)       # texte écrit dans l'application par l'utilisateur : validé tel quel
+                self.plugins.emettre("fiche_validee", fiche=FicheVue(t, f))
 
     def quitter_fiche(self):
         self.sauver()

@@ -26,7 +26,7 @@ API_VERSION = 1
 MAX_ERREURS = 5     # au-delà, l'extension est désactivée automatiquement
 EVENEMENTS = ("demarrage", "arret", "fiche_ouverte", "fiche_enregistree", "fiche_fermee", "themes_modifies",
               "fenetre_cachee", "fenetre_montree", "piece_jointe_ajoutee", "piece_jointe_supprimee",
-              "piece_jointe_modifiee")
+              "piece_jointe_modifiee", "fiche_validee")
 _NOM = re.compile(r"^[a-z0-9][a-z0-9_-]{0,40}$")
 
 
@@ -169,6 +169,23 @@ class Contexte:
 
     def fiches(self, theme: str | None = None) -> list:
         return [FicheVue(t, f) for t in self._g.store.themes if theme in (None, t.nom) for f in t.fiches]
+
+    def fiche_active(self, vue: FicheVue) -> bool:
+        """Faux pour une fiche d'un type exécutable que l'utilisateur n'a pas (ou plus) validée : l'extension ne doit alors RIEN lancer
+        d'après son contenu (voir core/types_fiche.py). Vrai pour un texte libre et pour un type non exécutable."""
+        t, f = self._trouver(vue)
+        return self._g.store.fiche_active(t, f)
+
+    def creer_fiche(self, theme: str, titre: str, texte: str) -> FicheVue:
+        """Crée une fiche (et le thème s'il n'existe pas). Une fiche d'un type exécutable ainsi créée reste INERTE tant que l'utilisateur
+        ne l'a pas validée : une extension ne peut pas se valider elle-même."""
+        s = self._g.store
+        t = s.theme(theme) or s.nouveau_theme(theme)
+        f = s.nouvelle_fiche(t)
+        s.enregistrer(t, f, titre, texte)
+        self._g.emettre("themes_modifies")
+        self._g.emettre("fiche_enregistree", fiche=FicheVue(t, f), origine=self.info.nom)
+        return FicheVue(t, f)
 
     def fiche_courante(self):
         return self._g.fiche_courante() if self._g.fiche_courante else None
