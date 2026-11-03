@@ -296,3 +296,21 @@ def test_agir_ouvre_le_bon_schema_et_copie_en_repli(monkeypatch):
     v.navigateur = lambda: "firefox"
     v.agir("https://exemple.fr", "https://exemple.fr")                                    # les liens passent par le navigateur choisi
     assert appels == [("https://exemple.fr", "firefox")]
+
+
+def test_frappe_au_clavier_garde_le_curseur_et_l_ordre(fen, monkeypatch):  # noqa: F811
+    """Chaque touche relit la liste : le texte tapé ne doit pas se retourner (curseur renvoyé au début) ; un espace final est toléré."""
+    from PyQt6.QtTest import QTest
+    from PyQt6.QtWidgets import QInputDialog
+    monkeypatch.setattr(QInputDialog, "getItem", staticmethod(lambda *a, **k: ("Contacts (nom, téléphones, adresse, courriel)", True)))
+    monkeypatch.setattr(QInputDialog, "getText", staticmethod(lambda *a, **k: ("Famille", True)))
+    fen.show()
+    fen.nouveau_repertoire()
+    r = fen.repertoire
+    r.ajouter()
+    for c in "Jean Martin":
+        QTest.keyClick(r._champs[0], c)
+    assert r._champs[0].toPlainText() == "Jean Martin" and r.tableau.lignes[0][0] == "Jean Martin"
+    r.entrees.setCurrentRow(0)
+    QTest.keyClick(r._champs[0], "x")                          # éditer une entrée existante
+    assert r._champs[0].toPlainText().replace("x", "") == "Jean Martin" and r.tableau.lignes[0][0].replace("x", "") == "Jean Martin"

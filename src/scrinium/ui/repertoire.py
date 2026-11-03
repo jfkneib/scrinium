@@ -258,10 +258,13 @@ class VueRepertoire(QWidget):
         self._afficher(self._numeros[row] if 0 <= row < len(self._numeros) else -1)
 
     def _afficher(self, i: int):
+        meme = i == self._courante                       # même entrée (relue après une frappe) : ne pas toucher au champ en cours de saisie
         self._courante = i
         self._remplissage = True
         for k, e in enumerate(self._champs):
-            e.setPlainText(self.tableau.lignes[i][k] if 0 <= i < len(self.tableau.lignes) else "")
+            valeur = self.tableau.lignes[i][k] if 0 <= i < len(self.tableau.lignes) else ""
+            if not (meme and e.toPlainText().strip() == valeur):      # sinon le curseur reviendrait au début à chaque touche
+                e.setPlainText(valeur)
             e.setEnabled(0 <= i < len(self.tableau.lignes))
         self._remplissage = False
         self.b_supprimer.setEnabled(0 <= i < len(self.tableau.lignes))
