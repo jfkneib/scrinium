@@ -18,7 +18,7 @@ from PyQt6.QtGui import QIcon
 from PyQt6.QtWidgets import (QApplication, QDialog, QDialogButtonBox, QFileDialog, QFormLayout, QHBoxLayout, QLabel, QLineEdit,
                              QListView, QListWidget, QListWidgetItem, QMessageBox, QPushButton, QVBoxLayout, QWidget)
 
-from scrinium.core import types_fiche
+from scrinium.core.liste_fiches import ListeDeFiches
 from scrinium.core.plugins import Plugin
 from scrinium.i18n import _
 from scrinium.ui.icons import icone
@@ -354,55 +354,31 @@ class ApplicationsPlugin(Plugin):
     # ---------- liste ----------
     THEME = "Outils"                           # thème de la fiche créée à la migration ou par « Modifier les applications… »
 
-    def _fiches(self) -> list:
-        """[(fiche, validée ?)] des fiches de type « applications », par thème puis titre."""
-        res = []
-        for v in self.ctx.fiches():
-            t = types_fiche.type_de(v.texte)
-            if t is not None and t.nom == logique.TYPE.nom:
-                res.append((v, self.ctx.fiche_active(v)))
-        return sorted(res, key=lambda x: (x[0].theme.lower(), x[0].titre.lower()))
+    def _liste(self) -> ListeDeFiches:
+        return ListeDeFiches(self.ctx, logique.TYPE, logique.normaliser_liste, logique.depuis_texte, logique.en_texte, "applications",
+                             logique.exemples_installes, _("Applications"), self.THEME, logique.MAX_APPLICATIONS)
 
     def applications(self) -> list:
         """Applications du panneau : celles des fiches « applications » VALIDÉES (sans doublon) ; tant qu'il n'y en a aucune, les réglages
         d'avant « tout est fiche », puis, sans réglage, les exemples installés."""
-        actives = [v for v, ok in self._fiches() if ok]
-        if actives:
-            vus, res = set(), []
-            for v in actives:
-                for a in logique.depuis_texte(v.texte):
-                    if (a["nom"], a["commande"]) not in vus:
-                        vus.add((a["nom"], a["commande"]))
-                        res.append(a)
-            return res[:logique.MAX_APPLICATIONS]
-        brut = self.ctx.reglages.get("applications")
-        return logique.exemples_installes() if brut is None else logique.normaliser_liste(brut)
+        return self._liste().elements()
 
     def a_valider(self) -> int:
         """Nombre de fiches « applications » en attente de validation (reçues, ou modifiées ailleurs)."""
-        return sum(1 for _v, ok in self._fiches() if not ok)
+        return self._liste().a_valider()
 
     def _migrer(self):
         """Les applications d'avant « tout est fiche » (réglages) deviennent une fiche, une seule fois ; les réglages restent comme copie.
         La fiche créée est inerte : l'utilisateur la valide (bandeau), en attendant le panneau garde l'ancienne liste."""
-        brut = self.ctx.reglages.get("applications")
-        if self.ctx.reglages.get("migrees") or not isinstance(brut, list):
-            return
-        self.ctx.reglages.set("migrees", True)
-        apps = logique.normaliser_liste(brut)
-        if apps and not self._fiches():
-            self.ctx.creer_fiche(self.THEME, _("Applications"), logique.en_texte(apps))
+        if self._liste().migrer() is not None:
             self.ctx.ui.actualiser()
             self.ctx.ui.notifier(_("Applications"), _("Vos applications sont maintenant une fiche « Applications » (thème « %s ») : ouvrez-la "
                                                       "et validez-la.") % self.THEME)
 
     def modifier(self):
         """Ouvre la fiche des applications ; sans fiche, la crée à partir de la liste actuelle (à valider ensuite)."""
-        fiches = self._fiches()
-        if fiches:
-            vue = next((v for v, ok in fiches if ok), fiches[0][0])
-        else:
-            vue = self.ctx.creer_fiche(self.THEME, _("Applications"), logique.en_texte(self.applications()))
+        vue, creee = self._liste().a_ouvrir()
+        if creee:
             self.ctx.ui.actualiser()
             self.ctx.ui.notifier(_("Applications"), _("Fiche « Applications » créée : validez-la pour qu'elle serve au panneau."))
         self.ctx.ui.afficher_fiche(vue)

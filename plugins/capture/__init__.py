@@ -26,6 +26,7 @@ from PyQt6.QtWidgets import (QApplication, QCheckBox, QComboBox, QDialog, QDialo
                              QMessageBox, QPlainTextEdit, QPushButton, QVBoxLayout, QWidget)
 
 from scrinium.core import capture
+from scrinium.core.liste_fiches import ListeDeFiches
 from scrinium.core.plugins import Plugin
 from scrinium.i18n import _
 from scrinium.ui.icons import icone
@@ -149,12 +150,20 @@ class PanneauActions(QWidget):
         self.liste.setUniformItemSizes(True)
         self.liste.itemClicked.connect(self._clic)
         lay.addWidget(self.liste, 1)
+        self.avis = QLabel()
+        self.avis.setWordWrap(True)
+        self.avis.setStyleSheet("background: #fdebd0; color: #5b3a00; padding: 3px;")
+        lay.addWidget(self.avis)
         b = QPushButton(icone("configure"), _("Modifier les actions CLI…"))
         b.clicked.connect(plugin.modifier_actions)
         lay.addWidget(b)
         self.rafraichir()
 
     def rafraichir(self):
+        n = self.p.a_valider()
+        self.avis.setVisible(n > 0)
+        if n:
+            self.avis.setText(_("%d fiche d'actions CLI attend votre validation : « Modifier les actions CLI… » l'ouvre.") % n)
         self.liste.clear()
         for a in self.p.actions():
             it = QListWidgetItem(icone_action(a["icone"]), a["nom"])
@@ -165,7 +174,11 @@ class PanneauActions(QWidget):
 
     def _clic(self, it):
         self.liste.clearSelection()
-        self.p.lancer_action(it.data(Qt.ItemDataRole.UserRole))
+        a = it.data(Qt.ItemDataRole.UserRole)
+        if a not in self.p.actions():               # la fiche a changé ou n'est plus validée depuis l'affichage : on ne lance rien
+            self.rafraichir()
+            return
+        self.p.lancer_action(a)
 
 
 class DialogueAction(QDialog):
@@ -224,31 +237,45 @@ class DialogueAction(QDialog):
                                           "commande": self.commande.toPlainText(), "description": self.description.text()})
 
 
-class DialogueActions(QDialog):
-    """Liste des actions : ajouter, modifier, supprimer, réordonner, exemples, export/import."""
+class EditeurActions(QWidget):
+    """Liste des actions : ajouter, modifier, supprimer, réordonner, exemples, export/import. Signale chaque changement."""
+    changement = pyqtSignal(list)
 
-    def __init__(self, plugin, parent=None):
+    def __init__(self, parent=None):
         super().__init__(parent)
-        self.p = plugin
-        self.setWindowTitle(_("Actions CLI préparées"))
-        self.resize(560, 420)
         lay = QHBoxLayout(self)
+        lay.setContentsMargins(0, 0, 0, 0)
         self.liste = QListWidget()
         self.liste.itemDoubleClicked.connect(lambda *_a: self._modifier())
         lay.addWidget(self.liste, 1)
         col = QVBoxLayout()
+        self.boutons = []
         for texte, fn in ((_("Ajouter…"), self._ajouter), (_("Modifier…"), self._modifier), (_("Supprimer"), self._supprimer),
                           (_("Monter"), lambda: self._deplacer(-1)), (_("Descendre"), lambda: self._deplacer(1)),
                           (_("Exemples…"), self._exemples), (_("Exporter…"), self._exporter), (_("Importer…"), self._importer)):
             b = QPushButton(texte)
             b.clicked.connect(fn)
             col.addWidget(b)
+            self.boutons.append(b)
         col.addStretch()
-        f = QPushButton(_("Fermer"))
-        f.clicked.connect(self.accept)
-        col.addWidget(f)
         lay.addLayout(col)
-        self.actions = plugin.actions()
+        self.actions: list = []
+        self._actif = True
+
+    @property
+    def actif(self) -> bool:
+        return self._actif
+
+    @actif.setter
+    def actif(self, oui: bool) -> None:
+        """Faux : fiche non validée. La liste se lit (pour relire les commandes avant de valider) mais ne se modifie pas."""
+        self._actif = bool(oui)
+        for b in self.boutons:
+            b.setEnabled(self._actif)
+        self.liste.setToolTip("" if self._actif else _("Fiche non validée : relisez les commandes, puis validez-la pour la modifier."))
+
+    def definir(self, actions: list):
+        self.actions = logique.normaliser_liste(actions)
         self._remplir()
 
     def _remplir(self, ligne=None):
@@ -259,7 +286,7 @@ class DialogueActions(QDialog):
             self.liste.setCurrentRow(min(ligne if ligne is not None else 0, len(self.actions) - 1))
 
     def _enregistrer(self, ligne=None):
-        self.p.sauver_actions(self.actions)
+        self.changement.emit(list(self.actions))
         self._remplir(ligne)
 
     def _ajouter(self):
@@ -270,7 +297,7 @@ class DialogueActions(QDialog):
 
     def _modifier(self):
         i = self.liste.currentRow()
-        if 0 <= i < len(self.actions):
+        if self._actif and 0 <= i < len(self.actions):
             d = DialogueAction(self.actions[i], self)
             if d.exec() and d.resultat():
                 self.actions[i] = d.resultat()
@@ -319,6 +346,18 @@ class DialogueActions(QDialog):
             self._enregistrer(len(self.actions) - 1)
 
 
+class VueActions(EditeurActions):
+    """Vue du type « actions CLI » dans la fenêtre : la fiche s'affiche comme cette liste (le texte reste dans la fiche)."""
+    modifie = pyqtSignal(str)
+
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.changement.connect(lambda actions: self.modifie.emit(logique.en_texte(actions)))
+
+    def charger(self, texte: str):
+        self.definir(logique.depuis_texte(texte))
+
+
 class DialogueReglages(QDialog):
     def __init__(self, plugin, parent=None):
         super().__init__(parent)
@@ -356,6 +395,7 @@ class CapturePlugin(Plugin):
         self.refus_vu = False      # Konsole a refusé l'envoi : on n'ouvre plus de console pour rien (remis à zéro par les réglages)
         if ctx.ui is None:
             return
+        ctx.ui.enregistrer_type(logique.TYPE, VueActions())
         # le panneau d'abord : son interrupteur (menu et barre d'outils) doit être facile à retrouver s'il est fermé
         self.panneau = PanneauActions(self)
         self.dock = ctx.ui.ajouter_panneau(_("Actions CLI"), self.panneau)
@@ -373,6 +413,9 @@ class CapturePlugin(Plugin):
         ctx.ui.ajouter_action(_("Exécuter une commande et insérer la sortie…"), self.commande, "system-run")
         ctx.ui.ajouter_action(_("Modifier les actions CLI préparées…"), self.modifier_actions, "configure")
         ctx.ui.ajouter_action(_("Réglages de la capture…"), self.reglages, "configure")
+        for evenement in ("fiche_enregistree", "themes_modifies", "fiche_validee"):
+            ctx.on(evenement, lambda **_kw: self.panneau.rafraichir())
+        self._migrer()
 
     def basculer_panneau(self):
         self.dock.setVisible(self.dock.isHidden())      # « masqué » = fermé par l'utilisateur (≠ fenêtre réduite)
@@ -382,18 +425,36 @@ class CapturePlugin(Plugin):
             a.setChecked(not self.dock.isHidden())
 
     # ---------- actions préparées ----------
-    def actions(self) -> list:
-        """Actions enregistrées ; les exemples tant que l'utilisateur n'a rien enregistré."""
-        brut = self.ctx.reglages.get("actions")
-        return [dict(a) for a in logique.EXEMPLES] if brut is None else logique.normaliser_liste(brut)
+    THEME = "Outils"                           # thème de la fiche créée à la migration ou par « Modifier les actions CLI… »
 
-    def sauver_actions(self, actions: list):
-        self.ctx.reglages.set("actions", logique.normaliser_liste(actions))
-        self.panneau.rafraichir()
+    def _liste(self) -> ListeDeFiches:
+        return ListeDeFiches(self.ctx, logique.TYPE, logique.normaliser_liste, logique.depuis_texte, logique.en_texte, "actions",
+                             lambda: [dict(a) for a in logique.EXEMPLES], _("Actions CLI"), self.THEME, logique.MAX_ACTIONS)
+
+    def actions(self) -> list:
+        """Actions du panneau : celles des fiches « actions CLI » VALIDÉES (sans doublon) ; tant qu'il n'y en a aucune, les réglages d'avant
+        « tout est fiche », puis, sans réglage, les exemples."""
+        return self._liste().elements()
+
+    def a_valider(self) -> int:
+        """Nombre de fiches « actions CLI » en attente de validation (reçues, ou modifiées ailleurs)."""
+        return self._liste().a_valider()
+
+    def _migrer(self):
+        """Les actions d'avant « tout est fiche » (réglages) deviennent une fiche, une seule fois ; les réglages restent comme copie.
+        La fiche créée est inerte : l'utilisateur la valide (bandeau), en attendant le panneau garde l'ancienne liste."""
+        if self._liste().migrer() is not None:
+            self.ctx.ui.actualiser()
+            self.ctx.ui.notifier(_("Actions CLI"), _("Vos actions CLI sont maintenant une fiche « Actions CLI » (thème « %s ») : ouvrez-la "
+                                                    "et validez-la.") % self.THEME)
 
     def modifier_actions(self):
-        DialogueActions(self, _parent()).exec()
-        self.panneau.rafraichir()
+        """Ouvre la fiche des actions ; sans fiche, la crée à partir de la liste actuelle (à valider ensuite)."""
+        vue, creee = self._liste().a_ouvrir()
+        if creee:
+            self.ctx.ui.actualiser()
+            self.ctx.ui.notifier(_("Actions CLI"), _("Fiche « Actions CLI » créée : validez-la pour qu'elle serve au panneau."))
+        self.ctx.ui.afficher_fiche(vue)
 
     def lancer_action(self, a: dict):
         """Clic sur un bouton : selon le mode, tape (sans valider), propose d'exécuter, ou copie."""

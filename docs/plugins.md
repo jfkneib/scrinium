@@ -100,6 +100,9 @@ in the application through the type's own view is validated as written. A view m
 an extension cannot validate itself). The `fiche_validee` event fires when the user validates a note. The built-in example is the **Applications** extension: its
 panel is fed by the validated notes of type `applications` (`#scrinium-applications`, one `## Name` section per application with `commande:`, `icone:`,
 `description:` lines); settings from before are migrated into such a note once, and kept as a copy.
+The **CLI actions** (`capture` extension) work the same way with `#scrinium-actions-cli` (`mode:` `taper`/`executer`/`copier`, `icone:`, `commande:` — continuation
+lines indented by two spaces — and `description:`). The shared logic (validated notes only, fallback to the old settings, one-time migration, the note to open)
+is `scrinium.core.liste_fiches.ListeDeFiches`: reuse it for any list kept in executable notes.
 
 ## Robustness
 

@@ -10,6 +10,7 @@ import subprocess
 import tempfile
 import time
 
+from scrinium.core.types_fiche import TypeFiche
 from scrinium.i18n import N_, _
 
 DELAI_COMMANDE = 30          # secondes
@@ -190,6 +191,58 @@ def normaliser_liste(liste) -> list:
     if not isinstance(liste, list):
         return []
     return [a for a in (normaliser_action(x) for x in liste) if a][:MAX_ACTIONS]
+
+
+# ---------- la fiche « actions CLI » (« tout est fiche ») ----------
+# Texte d'une fiche de ce type : la marque, puis une section par action. Lisible et modifiable à la main ; ce qui précède la première
+# section (notes libres) est ignoré, comme les clés inconnues. Une commande sur plusieurs lignes : les lignes suivantes sont décalées
+# de deux espaces.
+#
+#     #scrinium-actions-cli
+#     ## Réseau
+#     mode: executer            (taper, executer ou copier)
+#     icone: network-wired
+#     commande: ip -br a
+#       | grep UP
+#     description: Adresses des interfaces réseau.
+#
+# Le type est EXÉCUTABLE : une telle fiche reçue de l'extérieur ne lance rien tant que l'utilisateur ne l'a pas validée (core/types_fiche.py).
+MARQUE = "#scrinium-actions-cli"
+TYPE = TypeFiche("actions-cli", N_("Actions CLI"), "utilities-terminal", executable=True)
+_CLES = ("mode", "icone", "commande", "description")
+
+
+def depuis_texte(texte: str | None) -> list:
+    """Actions lues dans le texte d'une fiche « actions CLI » (valides seulement, au plus MAX_ACTIONS)."""
+    actions, courante, cle = [], None, None
+    lignes = (texte or "").lstrip("\ufeff").splitlines()
+    for ligne in lignes[1:] if lignes and lignes[0].startswith(MARQUE) else lignes:
+        if ligne.startswith("## "):
+            courante, cle = {"nom": ligne[3:].strip()}, None
+            actions.append(courante)
+        elif courante is None:
+            continue
+        elif ligne[:1] in (" ", "\t") and cle == "commande":                  # suite d'une commande sur plusieurs lignes
+            courante["commande"] += "\n" + (ligne[2:] if ligne.startswith("  ") else ligne[1:])
+        elif ":" in ligne and ligne.partition(":")[0].strip().lower() in _CLES:
+            nom_cle, _sep, valeur = ligne.partition(":")
+            cle = nom_cle.strip().lower()
+            courante[cle] = valeur.strip()
+        else:
+            cle = None
+    return normaliser_liste(actions)
+
+
+def en_texte(actions: list) -> str:
+    """Texte d'une fiche « actions CLI » pour cette liste."""
+    sortie = [MARQUE]
+    for a in normaliser_liste(actions):
+        lignes = a["commande"].split("\n")
+        sortie += ["", "## " + a["nom"], "mode: " + a["mode"], "icone: " + a["icone"], "commande: " + lignes[0]]
+        sortie += ["  " + l for l in lignes[1:]]
+        if a["description"]:
+            sortie.append("description: " + a["description"])
+    return "\n".join(sortie) + "\n"
 
 
 def exporter_actions(actions: list) -> str:

