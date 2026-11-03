@@ -103,6 +103,10 @@ panel is fed by the validated notes of type `applications` (`#scrinium-applicati
 The **CLI actions** (`capture` extension) work the same way with `#scrinium-actions-cli` (`mode:` `taper`/`executer`/`copier`, `icone:`, `commande:` — continuation
 lines indented by two spaces — and `description:`). The shared logic (validated notes only, fallback to the old settings, one-time migration, the note to open)
 is `scrinium.core.liste_fiches.ListeDeFiches`: reuse it for any list kept in executable notes.
+The **Agenda** extension uses a *non-executable* type, `#scrinium-agenda` (one `## Title` section per event with `id:`, `quand:`, and optionally `repete:`,
+`son:`, `fait:`, `fiche-theme:`/`fiche-titre:`). The note only holds the **definition** of each event; "already announced" and the next occurrence of a series
+stay local to each machine (plugin settings, key `etat`), so a synchronised note is not rewritten at every alert and each PC announces for itself.
+The stable `id` lets two machines' edits be merged event by event.
 
 ## Robustness
 

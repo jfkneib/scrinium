@@ -4,21 +4,43 @@
 
 Un événement : {"id", "titre", "quand" ("AAAA-MM-JJ HH:MM", heure locale), "fiche" ({"theme", "titre"} ou None), "notifie" (bool),
 "fait" (bool), "son" (bool), "repete" ("", "jour", "semaine", "mois" ou "annee"), "ancre" (date de départ de la série ; "quand" est
-alors la prochaine occurrence)}."""
+alors la prochaine occurrence)}.
+
+« Tout est fiche » : les événements sont décrits dans des fiches `#scrinium-agenda` (type NON exécutable : rien n'y lance de commande) :
+
+    #scrinium-agenda
+
+    ## Appeler le notaire
+    id: 3f9a1c0b7d2e
+    quand: 2026-10-21 09:00
+    repete: semaine            (facultatif : jour, semaine, mois, annee ; « quand » est alors la date de départ)
+    son: non                   (facultatif)
+    fait: oui                  (facultatif, événement unique)
+    fiche-theme: Perso         (facultatif : fiche liée, jamais une fiche verrouillée)
+    fiche-titre: Dossier notaire
+
+La fiche ne porte que la DÉFINITION. L'état « déjà annoncé » et la prochaine occurrence d'une série restent propres à chaque machine
+(réglages de l'extension, clé « etat ») : une fiche synchronisée n'est pas réécrite à chaque alerte, et chaque PC annonce pour lui.
+Le champ `id` rend la fusion événement par événement possible quand deux machines modifient la fiche."""
 import os
 import shutil
 import subprocess
 import sys
 import calendar
+import hashlib
 import uuid
 from datetime import datetime, timedelta
 
+from scrinium.core.types_fiche import TypeFiche
 from scrinium.i18n import N_
 
 FORMAT = "%Y-%m-%d %H:%M"
 REPETITIONS = {"": N_("Jamais"), "jour": N_("Chaque jour"), "semaine": N_("Chaque semaine"), "mois": N_("Chaque mois"),
                "annee": N_("Chaque année")}
 MAX_EVENEMENTS = 2000
+MARQUE = "#scrinium-agenda"
+TYPE = TypeFiche("agenda", N_("Agenda"), "view-calendar")
+_CLES = ("id", "quand", "repete", "son", "fait", "fiche-theme", "fiche-titre")
 
 
 def en_date(texte: str) -> datetime | None:
@@ -50,6 +72,88 @@ def normaliser(e) -> dict | None:
     return {"id": str(e.get("id") or uuid.uuid4().hex[:12]), "titre": titre[:200], "quand": en_texte(quand), "fiche": fiche,
             "notifie": bool(e.get("notifie")), "fait": bool(e.get("fait")), "son": e.get("son", True) is not False,
             "repete": repete, "ancre": en_texte(ancre if repete else quand)}
+
+
+def definition(e: dict) -> dict:
+    """La définition d'un événement (ce qui va dans la fiche) : « quand » est la date de départ, sans état d'annonce."""
+    depart = e["ancre"] if e.get("repete") else e["quand"]
+    return dict(e, quand=depart, ancre=depart, notifie=False)
+
+
+def _non(valeur) -> bool:
+    return str(valeur).lower() in ("non", "no", "false", "0")
+
+
+def fiche_depuis_texte(texte: str | None) -> list:
+    """Définitions lues dans le texte d'une fiche « agenda » (valides seulement ; un événement sans id en reçoit un, stable)."""
+    bruts, courant = [], None
+    lignes = (texte or "").lstrip("\ufeff").splitlines()
+    for ligne in lignes[1:] if lignes and lignes[0].startswith(MARQUE) else lignes:
+        if ligne.startswith("## "):
+            courant = {"titre": ligne[3:]}
+            bruts.append(courant)
+        elif courant is not None and ":" in ligne:
+            cle, _sep, valeur = ligne.partition(":")
+            if cle.strip().lower() in _CLES:
+                courant[cle.strip().lower()] = valeur.strip()
+    res = []
+    for b in bruts:
+        ident = b.get("id") or hashlib.sha1(f"{b.get('titre')}|{b.get('quand')}".encode()).hexdigest()[:12]
+        e = normaliser({"id": ident, "titre": b["titre"], "quand": b.get("quand", ""), "ancre": b.get("quand", ""),
+                        "repete": b.get("repete", ""), "son": not _non(b.get("son", "oui")),
+                        "fait": str(b.get("fait", "")).lower() in ("oui", "yes", "true", "1"),
+                        "fiche": {"theme": b.get("fiche-theme"), "titre": b.get("fiche-titre")}})
+        if e is not None:
+            res.append(e)
+    return res
+
+
+def fiche_en_texte(definitions: list) -> str:
+    """Texte d'une fiche « agenda » pour ces définitions."""
+    sortie = [MARQUE]
+    for e in sorted((x for x in map(normaliser, definitions) if x), key=lambda x: x["ancre"]):
+        sortie += ["", "## " + e["titre"], "id: " + e["id"], "quand: " + e["ancre"]]
+        if e["repete"]:
+            sortie.append("repete: " + e["repete"])
+        if not e["son"]:
+            sortie.append("son: non")
+        if e["fait"] and not e["repete"]:
+            sortie.append("fait: oui")
+        if e["fiche"]:
+            sortie += ["fiche-theme: " + e["fiche"]["theme"], "fiche-titre: " + e["fiche"]["titre"]]
+    return "\n".join(sortie) + "\n"
+
+
+def signature(d: dict) -> str:
+    """Ce qui, dans la définition, remet l'état d'annonce à zéro quand l'utilisateur le change (date de départ, répétition, fait)."""
+    return f"{d['ancre']}|{d['repete']}|{int(d['fait'])}"
+
+
+def evenements_depuis(definitions: list, etat, maintenant: datetime, premier: bool = False) -> list:
+    """Événements (définition + état de CETTE machine), triés par date. Sans état connu : une série passée reçoit sa prochaine occurrence
+    sans alerte ; `premier` (aucun état encore sur cette machine) tient pour déjà annoncés les événements uniques passés, pour ne pas
+    rejouer tout l'historique d'une fiche reçue."""
+    vus, res = set(), []
+    for d in definitions:
+        if d["id"] in vus:
+            continue
+        vus.add(d["id"])
+        e = dict(d)
+        st = etat.get(d["id"]) if isinstance(etat, dict) else None
+        if isinstance(st, dict) and st.get("sig") == signature(d) and en_date(st.get("quand", "")):
+            e["quand"], e["notifie"] = st["quand"], bool(st.get("notifie"))
+        else:
+            depart = en_date(d["ancre"])
+            if d["repete"] and depart <= maintenant:
+                e["quand"] = en_texte(prochaine(depart, d["repete"], maintenant))
+            e["notifie"] = bool(premier and not d["repete"] and depart <= maintenant)
+        res.append(e)
+    return sorted(res, key=lambda x: x["quand"])[:MAX_EVENEMENTS]
+
+
+def etat_de(evenements: list) -> dict:
+    """L'état à garder sur cette machine : {id: {sig, quand, notifie}}."""
+    return {e["id"]: {"sig": signature(definition(e)), "quand": e["quand"], "notifie": e["notifie"]} for e in evenements}
 
 
 def charger(brut) -> list:

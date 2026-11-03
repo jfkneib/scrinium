@@ -74,17 +74,35 @@ def silence(monkeypatch):
             w.close()
 
 
+@pytest.fixture(autouse=True)
+def type_agenda():
+    from scrinium.core import types_fiche
+    types_fiche.enregistrer(lg.TYPE)
+    yield
+    types_fiche.desenregistrer(lg.TYPE.nom)
+
+
 def faux_ctx(fiches=(), courante=None):
-    notes, ouvertes = [], []
+    notes, ouvertes, toutes = [], [], list(fiches)
+
+    def creer(theme, titre, texte):
+        f = SimpleNamespace(theme=theme, titre=titre, verrou=False, texte=texte)
+        toutes.append(f)
+        return f
+
+    def modifier(f, titre=None, texte=None):
+        f.texte = f.texte if texte is None else texte
+
     ui = SimpleNamespace(ajouter_action=lambda *a: None, ajouter_bouton=lambda *a: None, planifier=lambda *a, **k: None,
-                         notifier=lambda t, m: notes.append((t, m)), afficher_fiche=ouvertes.append)
-    ctx = SimpleNamespace(reglages=Reglages(), ui=ui, fiche_courante=lambda: courante,
-                          fiches=lambda theme=None: [f for f in fiches if theme in (None, f.theme)])
+                         notifier=lambda t, m: notes.append((t, m)), afficher_fiche=ouvertes.append,
+                         enregistrer_type=lambda *a: None, actualiser=lambda: None)
+    ctx = SimpleNamespace(reglages=Reglages(), ui=ui, fiche_courante=lambda: courante, creer_fiche=creer, modifier=modifier,
+                          fiches=lambda theme=None: [f for f in toutes if theme in (None, f.theme)])
     return ctx, notes, ouvertes
 
 
 def fiche(titre, verrou=False):
-    return SimpleNamespace(theme="T", titre=titre, verrou=verrou)
+    return SimpleNamespace(theme="T", titre=titre, verrou=verrou, texte=None)
 
 
 def test_son_facultatif(silence):
@@ -285,3 +303,101 @@ def test_dialogue_repetition_et_liste(silence):
     edition = mod.DialogueEvenement(None, e)
     assert edition.date.date().year() == 1990 and edition.repete.currentData() == "annee"      # on édite la date de départ de la série
     assert "↻" in mod.DialogueAgenda(p).liste.item(0).text()
+
+
+# ---------- « tout est fiche » : #scrinium-agenda ----------
+def test_format_de_la_fiche_aller_retour():
+    evs = []
+    lg.ajouter(evs, "Anniv", dt("1990-05-04 09:00"), {"theme": "Perso", "titre": "Cadeaux"}, son=False, repete="annee")
+    lg.ajouter(evs, "Notaire", dt("2030-01-02 14:30"))
+    defs = [lg.definition(e) for e in evs]
+    texte = lg.fiche_en_texte(defs)
+    assert texte.startswith("#scrinium-agenda\n") and "repete: annee" in texte and "son: non" in texte
+    assert lg.fiche_depuis_texte(texte) == sorted(defs, key=lambda d: d["ancre"])
+    assert lg.fiche_depuis_texte(None) == [] and lg.fiche_depuis_texte("## Sans date\nid: x\n") == []
+
+
+def test_texte_ecrit_a_la_main_a_un_id_stable():
+    a = lg.fiche_depuis_texte("#scrinium-agenda\n\n## Dentiste\nquand: 2030-03-01 10:00\n")
+    b = lg.fiche_depuis_texte("#scrinium-agenda\n\n## Dentiste\nquand: 2030-03-01 10:00\n")
+    assert len(a) == 1 and a[0]["id"] == b[0]["id"] and a[0]["son"] is True and a[0]["fiche"] is None
+
+
+def test_creation_de_la_fiche_et_etat_local():
+    ctx, notes, _o = faux_ctx()
+    p = mod.AgendaPlugin()
+    p.activer(ctx)
+    p.ajouter("Appeler", datetime.now() - timedelta(seconds=5))
+    fiches = ctx.fiches()
+    assert len(fiches) == 1 and fiches[0].theme == "Agenda" and fiches[0].texte.startswith("#scrinium-agenda")
+    avant = fiches[0].texte
+    p.verifier()
+    assert notes and fiches[0].texte == avant                      # l'alerte ne réécrit pas la fiche (rien à synchroniser)
+    assert list(ctx.reglages["etat"].values())[0]["notifie"] is True
+    p.verifier()
+    assert len(notes) == 1
+
+
+def test_fiche_recue_les_evenements_passes_ne_sont_pas_rejoues():
+    ctx, notes, _o = faux_ctx()
+    recu = lg.fiche_en_texte([lg.normaliser({"titre": "Vieux", "quand": "2020-01-01 09:00"}),
+                              lg.normaliser({"titre": "Futur", "quand": "2099-01-01 09:00"})])
+    ctx.creer_fiche("Partagées", "Agenda reçu", recu)
+    p = mod.AgendaPlugin()
+    p.activer(ctx)
+    p.verifier()
+    assert notes == []                                             # première fois sur cette machine : pas d'historique rejoué
+    ctx.creer_fiche("Partagées", "Autre", lg.fiche_en_texte([lg.normaliser({"titre": "Nouveau retard", "quand": "2020-02-02 09:00"})]))
+    p.verifier()
+    assert len(notes) == 1 and "Nouveau retard" in notes[0][1]    # ensuite, un événement arrivé en retard est annoncé
+
+
+def test_modification_dans_la_bonne_fiche_et_doublons():
+    ctx, _n, _o = faux_ctx()
+    e = lg.normaliser({"id": "aaa", "titre": "Même", "quand": "2099-01-01 09:00"})
+    f1 = ctx.creer_fiche("A", "un", lg.fiche_en_texte([e]))
+    f2 = ctx.creer_fiche("B", "deux", lg.fiche_en_texte([e, lg.normaliser({"id": "bbb", "titre": "Autre", "quand": "2099-02-01 09:00"})]))
+    p = mod.AgendaPlugin()
+    p.activer(ctx)
+    assert sorted(x["id"] for x in p.evenements()) == ["aaa", "bbb"]              # « aaa » compté une seule fois
+    p.remplacer("bbb", "Autre bis", dt("2099-03-01 09:00"))
+    assert "Autre bis" in f2.texte and "Autre bis" not in f1.texte
+    p.supprimer("aaa")
+    assert "Même" not in f1.texte and "Même" not in f2.texte
+
+
+def test_fiche_verrouillee_ou_texte_libre_ignores():
+    ctx, _n, _o = faux_ctx([fiche("Verrouillée", verrou=True)])
+    ctx.creer_fiche("T", "Libre", "## Pas un agenda\nquand: 2099-01-01 09:00\n")
+    p = mod.AgendaPlugin()
+    p.activer(ctx)
+    assert p.evenements() == []
+
+
+def test_migration_des_reglages_en_fiche_garde_l_etat():
+    ctx, notes, _o = faux_ctx()
+    ctx.reglages["evenements"] = [
+        {"id": "x1", "titre": "Déjà annoncé", "quand": "2020-01-01 09:00", "notifie": True},
+        {"id": "x2", "titre": "À venir", "quand": "2099-01-01 09:00", "repete": "mois", "son": False}]
+    p = mod.AgendaPlugin()
+    p.activer(ctx)
+    assert len(ctx.fiches()) == 1 and ctx.reglages["migrees"] and "evenements" in ctx.reglages
+    assert [e["titre"] for e in p.evenements()] == ["Déjà annoncé", "À venir"] and p.evenements()[1]["son"] is False
+    p.verifier()
+    assert not [n for n in notes if n[0] == "Rappel"]              # déjà annoncé avant la migration : pas annoncé de nouveau
+    p2 = mod.AgendaPlugin()
+    p2.activer(ctx)
+    assert len(ctx.fiches()) == 1                                  # une seule migration
+
+
+def test_vue_du_type_agenda():
+    app = QApplication.instance() or QApplication([])
+    assert app
+    vue = mod.VueAgenda()
+    recus = []
+    vue.modifie.connect(recus.append)
+    vue.charger(lg.fiche_en_texte([lg.normaliser({"titre": "Réunion", "quand": "2099-01-01 09:00"})]))
+    assert vue.liste.count() == 1 and "Réunion" in vue.liste.item(0).text()
+    vue.liste.setCurrentRow(0)
+    vue._supprimer()
+    assert vue.liste.count() == 0 and recus and lg.fiche_depuis_texte(recus[-1]) == []

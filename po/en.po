@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: scrinium 0.2.0\n"
 "Report-Msgid-Bugs-To: \n"
-"PO-Revision-Date: 2026-11-03 09:42+0100\n"
+"PO-Revision-Date: 2026-11-03 09:52+0100\n"
 "Last-Translator: Jean-François Kneib\n"
 "Language-Team: English\n"
 "Language: en\n"
@@ -14,157 +14,161 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: plugins/agenda/__init__.py:31
+#: plugins/agenda/__init__.py:35
 msgid "Événement"
 msgstr "Event"
 
-#: plugins/agenda/__init__.py:42
+#: plugins/agenda/__init__.py:46
 #: src/scrinium/ui/fenetre.py:207
 msgid "Titre"
 msgstr "Title"
 
-#: plugins/agenda/__init__.py:43
+#: plugins/agenda/__init__.py:47
 msgid "Date"
 msgstr "Date"
 
-#: plugins/agenda/__init__.py:44
+#: plugins/agenda/__init__.py:48
 msgid "Heure (24 h, ex. 14:30)"
 msgstr "Time (24 h, e.g. 14:30)"
 
-#: plugins/agenda/__init__.py:56
+#: plugins/agenda/__init__.py:60
 msgid "La date ci-dessus est celle de départ ; Scrinium annonce ensuite chaque occurrence."
 msgstr "The date above is the start date; Scrinium then announces each occurrence."
 
-#: plugins/agenda/__init__.py:57
+#: plugins/agenda/__init__.py:61
 msgid "Répéter"
 msgstr "Repeat"
 
-#: plugins/agenda/__init__.py:58
+#: plugins/agenda/__init__.py:62
 msgid "Jouer un son au rappel"
 msgstr "Play a sound at the reminder"
 
-#: plugins/agenda/__init__.py:105
-#: plugins/agenda/__init__.py:293
+#: plugins/agenda/__init__.py:109
+#: plugins/agenda/__init__.py:416
 msgid "Rappel"
 msgstr "Reminder"
 
-#: plugins/agenda/__init__.py:144
-#: plugins/agenda/__init__.py:219
-#: plugins/agenda/__init__.py:124
+#: plugins/agenda/__init__.py:148
+#: plugins/agenda/__init__.py:297
+#: plugins/agenda/__init__.py:128
 msgid "Agenda"
 msgstr "Agenda"
 
-#: plugins/agenda/__init__.py:150
+#: plugins/agenda/__init__.py:154
 msgid "Aucun événement. « Ajouter » en crée un ; la fiche affichée peut y être liée."
 msgstr "No events. \"Add\" creates one; the displayed note can be linked to it."
 
-#: plugins/agenda/__init__.py:160
+#: plugins/agenda/__init__.py:164
 #: plugins/courriel/__init__.py:185
 #: plugins/ocr/__init__.py:114
 msgid "Fermer"
 msgstr "Close"
 
-#: plugins/agenda/__init__.py:218
+#: plugins/agenda/__init__.py:296
 msgid "Agenda…"
 msgstr "Agenda…"
 
-#: plugins/agenda/__init__.py:46
+#: plugins/agenda/__init__.py:50
 msgid "+10 min"
 msgstr "+10 min"
 
-#: plugins/agenda/__init__.py:46
+#: plugins/agenda/__init__.py:50
 msgid "+1 h"
 msgstr "+1 h"
 
-#: plugins/agenda/__init__.py:47
+#: plugins/agenda/__init__.py:51
 msgid "Demain 9:00"
 msgstr "Tomorrow 9:00"
 
-#: plugins/agenda/__init__.py:113
-#: plugins/agenda/__init__.py:155
+#: plugins/agenda/__init__.py:117
+#: plugins/agenda/__init__.py:159
 msgid "Ouvrir la fiche"
 msgstr "Open the note"
 
-#: plugins/agenda/__init__.py:116
+#: plugins/agenda/__init__.py:120
 msgid "Repousser de 10 min"
 msgstr "Snooze 10 min"
 
-#: plugins/agenda/__init__.py:116
+#: plugins/agenda/__init__.py:120
 msgid "Fait"
 msgstr "Done"
 
-#: plugins/agenda/__init__.py:124
-#: plugins/agenda/__init__.py:208
+#: plugins/agenda/__init__.py:128
+#: plugins/agenda/__init__.py:212
 msgid "Cette fiche n'existe plus ou est verrouillée."
 msgstr "This note no longer exists or is locked."
 
-#: plugins/agenda/__init__.py:154
+#: plugins/agenda/__init__.py:158
+#: plugins/agenda/__init__.py:227
 #: plugins/applications/__init__.py:216
-#: plugins/capture/__init__.py:253
 msgid "Ajouter…"
 msgstr "Add…"
 
-#: plugins/agenda/__init__.py:154
+#: plugins/agenda/__init__.py:158
+#: plugins/agenda/__init__.py:227
 #: plugins/applications/__init__.py:216
-#: plugins/capture/__init__.py:253
 msgid "Modifier…"
 msgstr "Edit…"
 
-#: plugins/agenda/__init__.py:154
-#: plugins/agenda/__init__.py:200
-#: plugins/applications/__init__.py:216
+#: plugins/agenda/__init__.py:158
+#: plugins/agenda/__init__.py:227
+#: plugins/agenda/__init__.py:204
 msgid "Supprimer"
 msgstr "Delete"
 
-#: plugins/agenda/__init__.py:64
+#: plugins/agenda/__init__.py:68
 msgid "Lier à la fiche « %(theme)s / %(titre)s »"
 msgstr "Link to the note \"%(theme)s / %(titre)s\""
 
-#: plugins/agenda/__init__.py:200
+#: plugins/agenda/__init__.py:204
 msgid "Supprimer « %s » ?"
 msgstr "Delete \"%s\"?"
 
-#: plugins/agenda/logique.py:19
+#: plugins/agenda/__init__.py:352
+msgid "Vos événements sont maintenant une fiche « Agenda » (thème « %s »)."
+msgstr "Your events are now an \"Agenda\" note (theme \"%s\")."
+
+#: plugins/agenda/logique.py:38
 msgid "Jamais"
 msgstr "Never"
 
-#: plugins/agenda/logique.py:19
+#: plugins/agenda/logique.py:38
 msgid "Chaque jour"
 msgstr "Every day"
 
-#: plugins/agenda/logique.py:19
+#: plugins/agenda/logique.py:38
 msgid "Chaque semaine"
 msgstr "Every week"
 
-#: plugins/agenda/logique.py:19
+#: plugins/agenda/logique.py:38
 msgid "Chaque mois"
 msgstr "Every month"
 
-#: plugins/agenda/logique.py:20
+#: plugins/agenda/logique.py:39
 msgid "Chaque année"
 msgstr "Every year"
 
-#: plugins/agenda/logique.py:173
+#: plugins/agenda/logique.py:277
 msgid "dans %d j"
 msgstr "in %d d"
 
-#: plugins/agenda/logique.py:168
+#: plugins/agenda/logique.py:272
 msgid "en retard de %d j"
 msgstr "%d d overdue"
 
-#: plugins/agenda/logique.py:170
+#: plugins/agenda/logique.py:274
 msgid "dans %d min"
 msgstr "in %d min"
 
-#: plugins/agenda/logique.py:172
+#: plugins/agenda/logique.py:276
 msgid "dans %d h"
 msgstr "in %d h"
 
-#: plugins/agenda/logique.py:165
+#: plugins/agenda/logique.py:269
 msgid "en retard de %d min"
 msgstr "%d min overdue"
 
-#: plugins/agenda/logique.py:167
+#: plugins/agenda/logique.py:271
 msgid "en retard de %d h"
 msgstr "%d h overdue"
 

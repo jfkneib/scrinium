@@ -6,13 +6,17 @@
 - Vérification toutes les 30 secondes : une notification par événement (les événements manqués pendant que Scrinium
   était fermé sont annoncés au démarrage, marqués « en retard »).
 - Aucun lien vers une fiche verrouillée (son titre resterait lisible dans les réglages).
-- Les événements sont dans les réglages de l'extension (settings.json)."""
+- « Tout est fiche » : les événements sont décrits dans une FICHE de type `agenda` (`#scrinium-agenda`, voir `logique.py`), thème « Agenda » :
+  elle se partage, se synchronise et se sauvegarde comme les autres. Type non exécutable : une fiche reçue n'agit qu'en annonçant des
+  rappels. L'état « déjà annoncé » reste local à chaque machine (réglages, clé « etat »)."""
 from datetime import datetime, timedelta
 
-from PyQt6.QtCore import QDate, QTime, Qt
+from PyQt6.QtCore import QDate, QTime, Qt, pyqtSignal
 from PyQt6.QtWidgets import (QApplication, QCheckBox, QComboBox, QDateEdit, QDialog, QDialogButtonBox, QFormLayout, QHBoxLayout,
-                             QLabel, QLineEdit, QListWidget, QListWidgetItem, QMessageBox, QPushButton, QTimeEdit, QVBoxLayout)
+                             QLabel, QLineEdit, QListWidget, QListWidgetItem, QMessageBox, QPushButton, QTimeEdit, QVBoxLayout,
+                             QWidget)
 
+from scrinium.core import types_fiche
 from scrinium.core.plugins import Plugin
 from scrinium.i18n import _
 
@@ -208,25 +212,144 @@ class DialogueAgenda(QDialog):
             QMessageBox.information(self, _("Agenda"), _("Cette fiche n'existe plus ou est verrouillée."))
 
 
+class VueAgenda(QWidget):
+    """Vue du type « agenda » dans la fenêtre : la fiche s'affiche comme la liste de ses événements (le texte reste dans la fiche)."""
+    modifie = pyqtSignal(str)
+
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        lay = QHBoxLayout(self)
+        lay.setContentsMargins(0, 0, 0, 0)
+        self.liste = QListWidget()
+        self.liste.itemDoubleClicked.connect(lambda *_a: self._modifier())
+        lay.addWidget(self.liste, 1)
+        col = QVBoxLayout()
+        for texte, fn in ((_("Ajouter…"), self._ajouter), (_("Modifier…"), self._modifier), (_("Supprimer"), self._supprimer)):
+            b = QPushButton(texte)
+            b.clicked.connect(fn)
+            col.addWidget(b)
+        col.addStretch()
+        lay.addLayout(col)
+        self.defs: list = []
+        self.actif = True
+
+    def charger(self, texte: str):
+        self.defs = logique.fiche_depuis_texte(texte)
+        self._remplir()
+
+    def _remplir(self, ligne=0):
+        self.liste.clear()
+        maintenant = datetime.now()
+        for d in self.defs:
+            depart = logique.en_date(d["ancre"])
+            d_prochaine = logique.prochaine(depart, d["repete"], maintenant) if d["repete"] and depart <= maintenant else depart
+            etat = "✓" if d["fait"] else logique.delai_texte(d_prochaine, maintenant)
+            serie = f"   ↻ {_(logique.REPETITIONS[d['repete']]).lower()}" if d["repete"] else ""
+            lien = f"   ·   {d['fiche']['theme']} / {d['fiche']['titre']}" if d["fiche"] else ""
+            self.liste.addItem(f"{d['ancre']}   ({etat})   {d['titre']}{serie}{lien}")
+        if self.defs:
+            self.liste.setCurrentRow(min(max(ligne, 0), len(self.defs) - 1))
+
+    def _changer(self, ligne=0):
+        self.defs.sort(key=lambda d: d["ancre"])
+        self.modifie.emit(logique.fiche_en_texte(self.defs))
+        self._remplir(ligne)
+
+    def _ajouter(self):
+        d = DialogueEvenement(self)
+        if d.exec():
+            evs = []
+            titre, quand, fiche, son, repete = d.resultat()
+            logique.ajouter(evs, titre, quand, fiche, None, son, repete)
+            self.defs.append(logique.definition(evs[0]))
+            self._changer(len(self.defs) - 1)
+
+    def _modifier(self):
+        i = self.liste.currentRow()
+        if 0 <= i < len(self.defs):
+            d = DialogueEvenement(self, self.defs[i])
+            if d.exec():
+                evs = []
+                titre, quand, fiche, son, repete = d.resultat()
+                logique.ajouter(evs, titre, quand, fiche, self.defs[i]["id"], son, repete)
+                self.defs[i] = logique.definition(evs[0])
+                self._changer(i)
+
+    def _supprimer(self):
+        i = self.liste.currentRow()
+        if 0 <= i < len(self.defs):
+            del self.defs[i]
+            self._changer(i)
+
+
 class AgendaPlugin(Plugin):
     api = 1
+    THEME = "Agenda"                           # thème de la fiche créée à la première utilisation ou à la migration
 
     def activer(self, ctx):
         self.ctx = ctx
+        self.popups = []
+        self._migrer()
         if ctx.ui is None:
             return
+        ctx.ui.enregistrer_type(logique.TYPE, VueAgenda())
         ctx.ui.ajouter_action(_("Agenda…"), self.afficher, "view-calendar")
         ctx.ui.ajouter_bouton(_("Agenda"), self.afficher, "view-calendar")
-        self.popups = []
         ctx.ui.planifier(INTERVALLE, self.verifier, repeter=True)
         ctx.ui.planifier(2, self.verifier)           # événements manqués pendant que Scrinium était fermé
 
     # ---------- données ----------
+    def _fiches(self) -> list:
+        """[(fiche, définitions)] des fiches « agenda » lisibles, par thème puis titre."""
+        res = []
+        for v in self.ctx.fiches():
+            texte = getattr(v, "texte", None)
+            t = types_fiche.type_de(texte)
+            if t is not None and t.nom == logique.TYPE.nom:
+                res.append((v, logique.fiche_depuis_texte(texte)))
+        return sorted(res, key=lambda x: (x[0].theme.lower(), x[0].titre.lower()))
+
     def evenements(self) -> list:
-        return logique.charger(self.ctx.reglages.get("evenements", []))
+        """Événements des fiches « agenda » (sans doublon d'identifiant), avec l'état d'annonce de cette machine."""
+        etat = self.ctx.reglages.get("etat")
+        defs = [d for _v, ds in self._fiches() for d in ds]
+        return logique.evenements_depuis(defs, etat, datetime.now(), premier=etat is None)
+
+    def _sauver_etat(self, evenements: list):
+        self.ctx.reglages.set("etat", logique.etat_de(evenements))
 
     def _sauver(self, evenements: list):
-        self.ctx.reglages.set("evenements", evenements)
+        """Ces événements remplacent ceux des fiches (chacun reste dans sa fiche ; les nouveaux vont dans la première, créée au besoin)."""
+        fiches = self._fiches()
+        cible = {}
+        for i, (_v, ds) in enumerate(fiches):
+            for d in ds:
+                cible.setdefault(d["id"], i)
+        groupes, nouveaux = [[] for _ in fiches], []
+        for e in evenements:
+            i = cible.get(e["id"])
+            (nouveaux if i is None else groupes[i]).append(logique.definition(e))
+        if nouveaux and fiches:
+            groupes[0] += nouveaux
+        elif nouveaux:
+            self.ctx.creer_fiche(self.THEME, _("Agenda"), logique.fiche_en_texte(nouveaux))
+        for (v, ds), groupe in zip(fiches, groupes):
+            if sorted(groupe, key=lambda d: d["id"]) != sorted(ds, key=lambda d: d["id"]):
+                self.ctx.modifier(v, texte=logique.fiche_en_texte(groupe))
+        self._sauver_etat(evenements)
+
+    def _migrer(self):
+        """Les événements d'avant « tout est fiche » (réglages) deviennent une fiche, une seule fois ; les réglages restent comme copie."""
+        brut = self.ctx.reglages.get("evenements")
+        if self.ctx.reglages.get("migrees") or not isinstance(brut, list):
+            return
+        self.ctx.reglages.set("migrees", True)
+        anciens = logique.charger(brut)
+        if anciens and not self._fiches():
+            self._sauver(anciens)               # crée la fiche et conserve l'état « déjà annoncé »
+            if self.ctx.ui is not None:
+                self.ctx.ui.actualiser()
+                self.ctx.ui.notifier(_("Agenda"), _("Vos événements sont maintenant une fiche « Agenda » (thème « %s »).") % self.THEME)
 
     def ajouter(self, titre, quand, fiche=None, son=True, repete=""):
         evs = self.evenements()
@@ -298,5 +421,5 @@ class AgendaPlugin(Plugin):
                 logique.avancer(e, maintenant)       # prochaine occurrence ; une série manquée longtemps = une seule alerte
             else:
                 e["notifie"] = True
-        if dus:
-            self._sauver(evs)
+        if dus or self.ctx.reglages.get("etat") is None:       # le premier passage fixe l'état de cette machine
+            self._sauver_etat(evs)
