@@ -80,7 +80,21 @@ Handlers receive keyword arguments; accept `**kw` to stay compatible with future
 `ajouter_panneau(title, widget)` (dock, any `QWidget`) · `ajouter_action_image(text, fn, icon=None)` (right-click menu of an attached image; `fn(fiche, piece)`) · `notifier(title, message)` (desktop notification) ·
 `planifier(seconds, fn, repeter=False)` (timer) · `afficher_fiche(vue)` ·
 `inserer_texte(text)` (insert at the cursor of the open note, replacing the selection; `False` if it cannot be edited) · `texte_selectionne()` · `texte_complet()` (whole text as shown in the editor) · `remplacer_tout(text)` · `ajouter_a_la_fin(text)` (undoable with Ctrl+Z).
+`enregistrer_type(type_fiche, vue)` (typed notes, see below).
 Everything added is removed automatically when the extension is disabled.
+
+## Typed notes (« everything is a note »)
+
+A typed note is an ordinary note whose first line is a **mark**, `#scrinium-<type>` (optionally followed by parameters). The mark is in the text, so it survives
+sharing, sync, backup and copy; locking, search, trash and deposit from outside work for every type. `scrinium.core.types_fiche` is the registry
+(no Qt): `TypeFiche(nom, libelle, icone="", executable=False, en_markdown=None)`, `enregistrer`, `type_de(texte)`, `marque(texte)`. The built-in
+first type is the directory (`repertoire`). An extension registers its own with `ctx.ui.enregistrer_type(TypeFiche(...), vue)`; the view is a
+`QWidget` with `charger(texte)`, a `modifie(str)` signal (the new text, saved like a keystroke) and an `actif` attribute.
+
+**Security rule.** A type with `executable=True` (its notes launch commands) is **inert until the user validates the note**, whatever its origin
+(share, deposit, link, a file dropped by hand): `actif` is `False` and the window shows a *Validate this note* banner. The validation is tied to the
+**hash of the text** (`Store.fiche_validee`): if the text changes afterwards (an update received from elsewhere), the note is inert again. Text typed
+in the application through the type's own view is validated as written. A view must do **nothing** while `actif` is false.
 
 ## Robustness
 

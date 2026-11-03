@@ -17,7 +17,7 @@ import uuid
 from dataclasses import dataclass
 from pathlib import Path
 
-from . import crypto, exemples
+from . import crypto, exemples, types_fiche
 from ..i18n import _
 from .paths import Paths
 
@@ -665,6 +665,50 @@ class Store:
         les favoris et l'ordre manuel le suivent."""
         self._favoris_suivre(ancien, nouveau, theme)
         self._ordre_suivre(ancien, nouveau, theme)
+        self._validees_suivre(ancien, nouveau, theme)
+
+    # ---------- fiches exécutables : validation par l'utilisateur ----------
+    # Une fiche dont le type est `executable` (voir types_fiche.py) ne fait rien tant que l'utilisateur ne l'a pas validée. La validation
+    # est liée à l'EMPREINTE du texte : {« thème/fichier » : empreinte}. Un texte modifié ailleurs (partage, dépôt, édition à la main)
+    # n'a plus la même empreinte : la fiche redevient inerte. Réglage de l'utilisateur, comme les favoris ; jamais partagé.
+    def _validees(self) -> dict:
+        brut = self.reglages().get("fiches_validees", {})
+        return {k: v for k, v in brut.items() if isinstance(k, str) and isinstance(v, str)} if isinstance(brut, dict) else {}
+
+    def fiche_validee(self, th: Theme, f: Fiche) -> bool:
+        """Vrai si le texte actuel de la fiche est celui que l'utilisateur a validé (faux pour une fiche verrouillée fermée)."""
+        if f.texte is None:
+            return False
+        return self._validees().get(self._cle_fiche(th, f)) == types_fiche.empreinte(f.texte)
+
+    def valider_fiche(self, th: Theme, f: Fiche) -> None:
+        """L'utilisateur valide le texte actuel de la fiche (ou vient de l'écrire lui-même dans l'application)."""
+        if f.texte is None:
+            return
+        v = self._validees()
+        v[self._cle_fiche(th, f)] = types_fiche.empreinte(f.texte)
+        self.sauver_reglages(fiches_validees=v)
+
+    def invalider_fiche(self, th: Theme, f: Fiche) -> None:
+        v = self._validees()
+        if v.pop(self._cle_fiche(th, f), None) is not None:
+            self.sauver_reglages(fiches_validees=v)
+
+    def fiche_active(self, th: Theme, f: Fiche) -> bool:
+        """Vrai si la fiche peut agir : un texte libre ou un type non exécutable agit toujours ; un type exécutable seulement s'il est validé."""
+        t = types_fiche.type_de(f.texte)
+        return t is None or not t.executable or self.fiche_validee(th, f)
+
+    def _validees_suivre(self, ancien: str, nouveau: str | None, theme: bool = False) -> None:
+        v = self._validees()
+        avant = dict(v)
+        if theme:
+            v = {((nouveau + k[len(ancien):]) if nouveau else None) if k.startswith(ancien + "/") else k: h for k, h in v.items()}
+            v.pop(None, None)
+        else:
+            v = {(nouveau if k == ancien else k): h for k, h in v.items() if nouveau or k != ancien}
+        if v != avant:
+            self.sauver_reglages(fiches_validees=v)
 
     # ---------- ordre manuel (glisser-déposer) ----------
     # Réglage de l'utilisateur comme les favoris : {"themes": [noms], "fiches": {thème: [fichiers]}}. Ce qui est listé vient

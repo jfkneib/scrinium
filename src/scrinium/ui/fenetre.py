@@ -13,7 +13,7 @@ from PyQt6.QtWidgets import (QAbstractItemView, QApplication, QFileDialog, QHBox
 from .. import __version__
 from ..core import autostart, capture, crypto, invitation
 from ..core.plugins import FicheVue, Gestionnaire
-from ..core import doc_extensions, lien as lien_mod, repertoire
+from ..core import doc_extensions, lien as lien_mod, repertoire, types_fiche
 from ..core.store import ICONE_DEFAUT, Store, propre
 from ..i18n import _
 from .assistant import AssistantCle
@@ -238,12 +238,26 @@ class Fenetre(QMainWindow):
         self.pile = QStackedWidget()
         self.pile.addWidget(self.texte)
         self.pile.addWidget(self.apercu)
+        self.vues_types: dict = {}                             # « tout est fiche » : nom du type -> vue (voir ajouter_vue_type)
+        self._validation_en_attente = False                    # la vue d'un type vient d'être modifiée par l'utilisateur
         self.repertoire = VueRepertoire()                      # page des fiches « répertoire » (tableau rangé par lettre)
-        self.repertoire.modifie.connect(self._repertoire_modifie)
         self.repertoire.navigateur = lambda: str(self.store.reglages().get("navigateur", ""))
-        self.pile.addWidget(self.repertoire)
+        self.ajouter_vue_type(repertoire.TYPE.nom, self.repertoire)
+        self.bandeau_validation = QWidget()                    # fiche d'un type exécutable reçue de l'extérieur : inerte jusqu'à validation
+        lv = QHBoxLayout(self.bandeau_validation)
+        lv.setContentsMargins(4, 2, 4, 2)
+        self.etiquette_validation = QLabel(_("Cette fiche peut lancer des commandes. Elle est inerte tant que vous ne l'avez pas validée "
+                                             "(elle n'a pas été créée ici, ou son contenu a changé)."))
+        self.etiquette_validation.setWordWrap(True)
+        lv.addWidget(self.etiquette_validation, 1)
+        self.b_valider = QPushButton(icone("dialog-ok-apply"), _("Valider cette fiche"))
+        self.b_valider.clicked.connect(self.valider_fiche_courante)
+        lv.addWidget(self.b_valider)
+        self.bandeau_validation.setStyleSheet("background: #fdebd0; color: #5b3a00;")
+        self.bandeau_validation.setVisible(False)
         ld.addLayout(ligne)
         ld.addWidget(self.format)
+        ld.addWidget(self.bandeau_validation)
         ld.addWidget(self.pile, 1)
         ld.addWidget(self.bande)
         ld.addWidget(self.statut)
@@ -536,7 +550,7 @@ class Fenetre(QMainWindow):
                 trouvees.append((t, f))
         trouvees.sort(key=lambda tf: not self.store.fiche_epinglee(*tf))          # fiches épinglées d'abord (tri stable)
         for t, f in trouvees:
-            nom_icone = "object-locked" if f.verrou else ("x-office-address-book" if repertoire.est_repertoire(f.texte) else "")
+            nom_icone = "object-locked" if f.verrou else types_fiche.icone_de(f.texte)
             ic = avec_epingle(nom_icone) if self.store.fiche_epinglee(t, f) else (icone(nom_icone) if nom_icone else QIcon_vide())
             it = QListWidgetItem(ic, self._libelle(t, f, self.theme == self.TOUS or q))
             it.setData(Qt.ItemDataRole.UserRole, f.path.name)
@@ -616,30 +630,61 @@ class Fenetre(QMainWindow):
             self._statut(_("Aucune fiche : « Fiche » (Ctrl+N)"))
         self._etat_editeur(f is not None and not ferme)
         self.bande.charger(t, f)
-        self._mode_repertoire(bool(f and not ferme and repertoire.est_repertoire(f.texte)))
+        ty = types_fiche.type_de(f.texte) if f and not ferme else None
+        self._mode_vue(self.vues_types.get(ty.nom) if ty else None)
         self.texte.document().clearUndoRedoStacks()
         self.chargement = False
         self._maj_boutons()
         if f is not None:
             self.plugins.emettre("fiche_ouverte", fiche=FicheVue(t, f))
 
-    def _mode_repertoire(self, actif: bool):
-        """Une fiche répertoire montre sa barre de lettres à la place de l'éditeur de texte (le CSV reste dans `self.texte`)."""
-        if actif:
+    def ajouter_vue_type(self, nom: str, vue) -> None:
+        """Enregistre la vue d'un type de fiche (voir core/types_fiche.py). Une vue est un widget qui a :
+        `charger(texte)`, le signal `modifie(str)` (le nouveau texte de la fiche, enregistré comme une frappe) et l'attribut `actif`
+        (faux : la fiche est d'un type exécutable et n'est pas validée ; la vue ne doit alors RIEN lancer)."""
+        vue.actif = True
+        self.vues_types[nom] = vue
+        vue.modifie.connect(self._vue_type_modifiee)
+        self.pile.addWidget(vue)
+
+    def retirer_vue_type(self, nom: str) -> None:
+        vue = self.vues_types.pop(nom, None)
+        if vue is None:
+            return
+        if self.pile.currentWidget() is vue:
+            self._mode_vue(None)
+        self.pile.removeWidget(vue)
+        vue.deleteLater()
+
+    def _mode_vue(self, vue):
+        """Une fiche typée montre la vue de son type à la place de l'éditeur de texte (le texte reste dans `self.texte`)."""
+        if vue is not None:
             if self.format.b_apercu.isChecked():
                 self.format.b_apercu.setChecked(False)
-            self.repertoire.charger(self.texte.toPlainText())
-            self.pile.setCurrentWidget(self.repertoire)
-        elif self.pile.currentWidget() is self.repertoire:
+            vue.actif = self.store.fiche_active(self.fiche_theme, self.fiche)
+            vue.charger(self.texte.toPlainText())
+            self.pile.setCurrentWidget(vue)
+        elif self.pile.currentWidget() in self.vues_types.values():
             self.pile.setCurrentWidget(self.texte)
-        self.format.setVisible(not actif)
-        self.format.b_apercu.setEnabled(not actif)
-        if actif:
+        self.format.setVisible(vue is None)
+        self.format.b_apercu.setEnabled(vue is None)
+        self.bandeau_validation.setVisible(vue is not None and not vue.actif)
+        if vue is not None:
             self.bande.setVisible(False)             # (sinon la bande se montre ou se cache selon les images, voir `bande.charger`)
 
-    def _repertoire_modifie(self, texte: str):
+    def _vue_type_modifiee(self, texte: str):
         if self.fiche is not None and not self.fiche.fermee:
+            self._validation_en_attente = True       # modifiée ICI par l'utilisateur : elle sera validée une fois enregistrée
             self.texte.setPlainText(texte)           # déclenche l'enregistrement automatique comme une frappe
+
+    def valider_fiche_courante(self):
+        f, t = self.fiche, self.fiche_theme
+        if f is None or f.fermee:
+            return
+        self.sauver()
+        self.store.valider_fiche(t, f)
+        self._mode_vue(self.vues_types.get((types_fiche.type_de(f.texte) or repertoire.TYPE).nom))
+        self._statut(_("✔ Fiche validée : elle peut maintenant agir") + f"  ·  {t.nom}/{f.path.name}", VERT)
 
     def nouveau_repertoire(self):
         """Crée une fiche répertoire dans le thème courant, à partir d'un modèle de colonnes (modifiables ensuite)."""
@@ -861,6 +906,11 @@ class Fenetre(QMainWindow):
                 self.liste.item(row).setText(self._libelle(t, f, self.theme == self.TOUS or self.recherche.text().strip()))
         else:
             self._statut(f"{_('✔ Enregistré')}  ·  {t.nom}/{f.path.name}", VERT)
+        if self._validation_en_attente:
+            self._validation_en_attente = False
+            ty = types_fiche.type_de(f.texte)
+            if ty is not None and ty.executable:
+                self.store.valider_fiche(t, f)       # texte écrit dans l'application par l'utilisateur : validé tel quel
 
     def quitter_fiche(self):
         self.sauver()
@@ -1018,8 +1068,7 @@ class Fenetre(QMainWindow):
                 continue
         try:
             texte = self.texte.toPlainText()
-            if repertoire.est_repertoire(texte):            # un répertoire s'imprime en tableaux, une section par lettre
-                texte = repertoire.Tableau.depuis_texte(texte).en_markdown()
+            texte = types_fiche.en_markdown(texte)          # un répertoire s'imprime en tableaux, une section par lettre
             export_pdf.ecrire_pdf(chemin, self.titre.text(), texte, images)
         except OSError as ex:
             QMessageBox.critical(self, _("Exporter en PDF"), _("Écriture impossible : %s") % ex)

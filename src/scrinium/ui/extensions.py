@@ -6,6 +6,7 @@ from PyQt6.QtGui import QAction, QDesktopServices, QTextCursor
 from PyQt6.QtWidgets import (QDialog, QDockWidget, QHBoxLayout, QLabel, QListWidget, QListWidgetItem, QMessageBox,
                              QPushButton, QSystemTrayIcon, QVBoxLayout)
 
+from ..core import types_fiche
 from ..i18n import _
 from .icons import icone
 
@@ -15,7 +16,7 @@ class UiPlugin:
 
     def __init__(self, fenetre, nom: str):
         self._f, self._nom = fenetre, nom
-        self._actions, self._docks, self._timers = [], [], []
+        self._actions, self._docks, self._timers, self._types = [], [], [], []
 
     def _appeler(self, fn):
         return lambda *_a: self._f.plugins.appeler(self._nom, fn)
@@ -48,6 +49,14 @@ class UiPlugin:
         self._f.addDockWidget(Qt.DockWidgetArea.RightDockWidgetArea, d)
         self._docks.append(d)
         return d
+
+    def enregistrer_type(self, type_fiche, vue) -> None:
+        """« Tout est fiche » : déclare un type de fiche (`core.types_fiche.TypeFiche`, marque `#scrinium-<nom>` en première ligne) et sa vue.
+        La vue est un widget avec `charger(texte)`, le signal `modifie(str)` et l'attribut `actif` ; si le type est `executable`, la vue ne
+        doit RIEN lancer tant que `actif` est faux (fiche reçue de l'extérieur et pas encore validée). Retiré à la désactivation."""
+        types_fiche.enregistrer(type_fiche)
+        self._f.ajouter_vue_type(type_fiche.nom, vue)
+        self._types.append(type_fiche.nom)
 
     def notifier(self, titre: str, message: str) -> None:
         """Notification du bureau (zone de notification) ; sinon message dans la barre d'état de la fenêtre."""
@@ -120,7 +129,10 @@ class UiPlugin:
         for t in self._timers:
             t.stop()
             t.deleteLater()
-        self._actions, self._docks, self._timers = [], [], []
+        for nom in self._types:
+            self._f.retirer_vue_type(nom)
+            types_fiche.desenregistrer(nom)
+        self._actions, self._docks, self._timers, self._types = [], [], [], []
         self._f.actions_image[:] = [e for e in self._f.actions_image if e[0] != self._nom]
 
 

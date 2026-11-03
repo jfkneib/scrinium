@@ -16,6 +16,7 @@ import re
 import unicodedata
 
 from ..i18n import N_
+from .types_fiche import TypeFiche, enregistrer
 
 MARQUE = "#scrinium-repertoire"
 _MARQUE = re.compile(r"\A﻿?#scrinium-repertoire(?: +index=(\d+))?[ \t]*(?:\r?\n|\Z)")
@@ -84,6 +85,11 @@ def normaliser(nom: str) -> str:
 
 def est_repertoire(texte: str | None) -> bool:
     return bool(texte) and _MARQUE.match(texte) is not None
+
+
+TYPE = TypeFiche("repertoire", N_("Répertoire"), "x-office-address-book",
+                 en_markdown=lambda texte: Tableau.depuis_texte(texte).en_markdown())
+enregistrer(TYPE)             # « tout est fiche » : le répertoire est le premier type de fiche (voir types_fiche.py)
 
 
 class Tableau:

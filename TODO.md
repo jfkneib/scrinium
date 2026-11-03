@@ -177,7 +177,7 @@ Fait le 2026-10-30 : fiche d'aide « Créer des fiches depuis l'extérieur » da
 
 ## 4 ter. « Tout est fiche » (idée de jfk, 2026-11-02 ; principe 9 de `docs/principes.md`)
 Mécanisme commun dans le cœur : marque `#scrinium-<type>` en première ligne (le répertoire le fait déjà), registre de types, par type un analyseur, un exporteur et une vue (formulaire + texte brut en secours).
-1. ☐ Cœur : registre de types ; le répertoire en est le premier.
+1. ☑ Cœur : registre de types (`core/types_fiche.py`) ; le répertoire en est le premier ; vue par type dans la fenêtre (`ajouter_vue_type`), `UiPlugin.enregistrer_type`, validation des fiches exécutables liée à l'empreinte du texte (`Store.fiche_validee`), bandeau « Valider cette fiche » (2026-11-03).
 2. ☐ **Applications** (le panneau d'icônes, aujourd'hui dans `settings.json`) : en premier, car c'est le cas sensible. Règle : une fiche exécutable reçue de l'extérieur reste **inerte** tant que l'utilisateur ne l'a pas validée ; elle ne se lance que depuis un thème local de confiance.
 3. ☐ Actions CLI (plugin capture), puis agenda (conflits de synchro à traiter). Fiches verrouillées : un type ne peut pas être verrouillé comme du texte.
 4. ☐ Migration : les réglages actuels sont lus un temps, convertis en fiches au premier lancement, avec une copie.
