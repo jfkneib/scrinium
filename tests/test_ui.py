@@ -240,3 +240,20 @@ def test_dialogue_extensions_grise_celles_d_un_autre_systeme(fen, monkeypatch):
     assert not (it.flags() & Qt.ItemFlag.ItemIsUserCheckable) and "Windows" in it.text() and "Windows" in it.toolTip()
     dlg.liste.setCurrentItem(it)
     assert "Windows" in dlg.detail.text()
+
+
+def test_clic_droit_fiche_entrees_des_extensions(fen):  # noqa: F811
+    """Une extension ajoute des entrées au clic droit du texte d'une fiche ; retirées avec l'extension."""
+    from scrinium.ui.extensions import UiPlugin
+    appels = []
+    ui = UiPlugin(fen, "essai")
+    ui.ajouter_action_fiche("Faire un essai", lambda: appels.append(1), "mail-send")
+    entrees = fen.texte.complements()
+    assert entrees[0][0] == "Copier la note" and fen._entrees_clic_droit("agenda") == []
+    ui.ajouter_action_fiche("Pour agenda", lambda: None, None, types=("agenda",))
+    assert [t for t, _f, _i in fen._entrees_clic_droit("agenda")] == ["Pour agenda"] and "Pour agenda" not in [t for t, _f, _i in fen.texte.complements()] and ("Faire un essai", "mail-send") in [(t, ic) for t, _fn, ic in entrees]
+    next(fn for t, fn, _ic in entrees if t == "Faire un essai")()
+    assert appels == [1]
+    assert fen.apercu.complements() == entrees or len(fen.apercu.complements()) == len(entrees)
+    ui.retirer_tout()
+    assert [t for t, _fn, _ic in fen.texte.complements()] == ["Copier la note"]

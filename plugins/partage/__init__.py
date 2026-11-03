@@ -93,6 +93,9 @@ class PartagePlugin(Plugin):
         if ctx.ui is None:
             return
         ctx.ui.ajouter_action(_("Partager la fiche…"), self.partager_fiche, "document-share")
+        ctx.ui.ajouter_action_fiche(_("Partager la fiche…"), self.partager_fiche, "document-share")
+        ctx.ui.ajouter_action_fiche(_("Partager la fiche…"), self.partager_fiche, "document-share",
+                                    types=("repertoire", "agenda", "applications", "actions-cli"))
         ctx.ui.ajouter_action(_("Partager le thème…"), self.partager_theme, "folder-share")
         ctx.ui.ajouter_action(_("Rejoindre un partage…"), self.rejoindre, "list-add-user")
         ctx.ui.ajouter_action(_("Synchroniser les partages"), self.synchroniser_tout, "view-refresh")

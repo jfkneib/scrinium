@@ -215,6 +215,7 @@ class LecturePlugin(Plugin):
         a = ctx.ui.ajouter_action(_("Lire la fiche à voix haute"), self.lire_fiche, "media-playback-start")
         a.setShortcut("Ctrl+Alt+L")
         ctx.ui.ajouter_bouton(_("Lire"), self.lire_fiche, "media-playback-start")
+        ctx.ui.ajouter_action_fiche(_("Lire à voix haute"), self.lire_selection_ou_fiche, "media-playback-start")
         ctx.ui.ajouter_action(_("Lire la sélection à voix haute"), self.lire_selection, "media-playback-start")
         ctx.ui.ajouter_action(_("Lire un thème à voix haute…"), self.lire_theme, "media-playback-start")
         ctx.ui.ajouter_action(_("Arrêter la lecture"), lambda: self.arreter(ferme=True), "media-playback-stop")
@@ -288,6 +289,13 @@ class LecturePlugin(Plugin):
             self.ctx.ui.notifier(_("Lecture"), _("Une fiche verrouillée n'est jamais lue à voix haute."))
         else:
             self.lire([(vue.titre, self.ctx.ui.texte_complet())])
+
+    def lire_selection_ou_fiche(self):
+        """Clic droit dans la fiche : la sélection s'il y en a une, sinon toute la fiche."""
+        if self.ctx.ui.texte_selectionne().strip():
+            self.lire_selection()
+        else:
+            self.lire_fiche()
 
     def lire_selection(self):
         vue = self.ctx.fiche_courante()

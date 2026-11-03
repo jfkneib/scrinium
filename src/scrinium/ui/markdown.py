@@ -14,6 +14,7 @@ from PyQt6.QtGui import QDesktopServices, QTextCursor
 from PyQt6.QtWidgets import QHBoxLayout, QPlainTextEdit, QTextBrowser, QToolButton, QWidget
 
 from ..i18n import _
+from .icons import icone
 
 LIENS_AUTORISES = ("http", "https", "mailto")
 NAVIGATEURS = ("firefox", "google-chrome", "chromium", "chromium-browser", "brave-browser", "opera", "vivaldi", "microsoft-edge")
@@ -238,10 +239,13 @@ class Apercu(QTextBrowser):
         self.anchorClicked.connect(self._lien)
 
     pdf_demande = pyqtSignal()
+    complements = staticmethod(lambda: [])       # voir images.Editeur
 
     def contextMenuEvent(self, ev):
         m = self.createStandardContextMenu()
         m.addSeparator()
+        for texte, fn, ic in self.complements():
+            m.addAction(icone(ic) if ic else icone("view-pim-notes"), texte, fn)
         m.addAction(_("Exporter la fiche en PDF…"), self.pdf_demande.emit)
         m.exec(ev.globalPos())
         m.deleteLater()

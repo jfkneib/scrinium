@@ -65,6 +65,7 @@ class Fenetre(QMainWindow):
         self.setWindowIcon(icone_appli())
         self.resize(900, 540)
         store.charger()
+        self.actions_fiche: list = []         # (extension, texte, fn, icône) : clic droit dans le texte d'une fiche (voir UiPlugin)
         self.actions_image: list = []         # (extension, texte, fn, icône) : clic droit sur une image jointe (voir UiPlugin)
         self._ui()
         self._zone_notification()
@@ -226,6 +227,7 @@ class Fenetre(QMainWindow):
         self.bande = BandePieces(self)
         self.texte.images_recues.connect(self.bande.ajouter)
         self.texte.pdf_demande.connect(self.exporter_pdf)
+        self.texte.complements = self._entrees_clic_droit
         self.statut = QLabel("")
         droite = QWidget()
         ld = QVBoxLayout(droite)
@@ -233,6 +235,7 @@ class Fenetre(QMainWindow):
         self.apercu = Apercu()
         self.apercu.navigateur = lambda: str(self.store.reglages().get("navigateur", ""))
         self.apercu.pdf_demande.connect(self.exporter_pdf)
+        self.apercu.complements = self._entrees_clic_droit
         self.format = BarreFormat(self.texte)
         self.format.apercu_demande.connect(self.basculer_apercu)
         self.pile = QStackedWidget()
@@ -645,6 +648,8 @@ class Fenetre(QMainWindow):
         vue.actif = True
         self.vues_types[nom] = vue
         vue.modifie.connect(self._vue_type_modifiee)
+        vue.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)         # clic droit hors des listes : menu propre au type
+        vue.customContextMenuRequested.connect(lambda pos, n=nom: self._menu_vue_type(n, pos))
         self.pile.addWidget(vue)
 
     def retirer_vue_type(self, nom: str) -> None:
@@ -1043,6 +1048,27 @@ class Fenetre(QMainWindow):
         self.b_verrou.setIcon(icone(ic))
         self.b_verrou.setEnabled(ok)
         self._maj_pins()
+
+    def _entrees_clic_droit(self, type_nom: str | None = None) -> list:
+        """Entrées du clic droit dans une fiche, selon son type : pour un texte ordinaire, copier la note puis les entrées des extensions
+        (envoyer, partager, lire, traduire…) ; pour une fiche typée, celles des extensions déclarées pour ce type."""
+        propres = [(t, fn, ic) for _n, t, fn, ic, types in self.actions_fiche if (types is None and type_nom is None) or
+                   (types is not None and type_nom in types)]
+        return ([(_("Copier la note"), self.copier_note, "edit-copy")] if type_nom is None else []) + propres
+
+    def _menu_vue_type(self, nom: str, pos):
+        """Clic droit sur la vue d'un type de fiche : les actions de ce type, puis l'export PDF."""
+        vue = self.vues_types.get(nom)
+        if vue is None or not self.fiche or self.fiche.fermee:
+            return
+        m = QMenu(self)
+        for texte, fn, ic in self._entrees_clic_droit(nom):
+            m.addAction(icone(ic) if ic else icone("view-pim-notes"), texte, fn)
+        if not m.isEmpty():
+            m.addSeparator()
+        m.addAction(icone("document-save"), _("Exporter la fiche en PDF…"), self.exporter_pdf)
+        m.exec(vue.mapToGlobal(pos))
+        m.deleteLater()
 
     def exporter_pdf(self):
         """Clic droit sur le contenu : écrit la fiche (titre, texte, images) dans un fichier PDF choisi par l'utilisateur."""

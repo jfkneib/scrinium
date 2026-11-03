@@ -329,6 +329,8 @@ class CourrielPlugin(Plugin):
         self.pont.fini.connect(self._fini)
         ctx.ui.ajouter_action(_("Envoyer la fiche par courriel…"), self.envoyer, "mail-send")
         ctx.ui.ajouter_bouton(_("Envoyer par courriel"), self.envoyer, "mail-send")
+        ctx.ui.ajouter_action_fiche(_("Envoyer par courriel…"), self.envoyer, "mail-send")
+        ctx.ui.ajouter_action_fiche(_("Envoyer par courriel…"), self.envoyer, "mail-send", types=("repertoire", "agenda"))
         ctx.ui.ajouter_action(_("Carnet d'adresses…"), self.carnet_dialogue, "x-office-address-book")
         ctx.ui.ajouter_action(_("Serveur d'envoi…"), self.serveur_dialogue, "network-wired")
 

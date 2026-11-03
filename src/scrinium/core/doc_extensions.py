@@ -106,6 +106,7 @@ def fiches(dossier_extensions) -> list:
                 "\n"
                 "• ajouter_action(texte, fonction, icone=None) : entrée du menu Extensions.\n"
                 "• ajouter_bouton(texte, fonction, icone=None) : bouton de la barre d'outils.\n"
+                "• ajouter_action_fiche(texte, fonction, icone=None, types=None) : entrée du clic droit dans le texte d'une fiche (édition et aperçu) ; avec types=(\"agenda\",), dans le clic droit de la vue de ces types de fiche à la place ; fonction() sans argument : ctx.fiche_courante() donne la fiche, ctx.ui.texte_selectionne() la sélection.\n"
                 "• ajouter_action_image(texte, fonction, icone=None) : entrée du clic droit sur une image jointe ; fonction(fiche, piece) reçoit la fiche et l'image visées.\n"
                 "• ajouter_panneau(titre, widget) : panneau sur le côté, avec n'importe quel QWidget de PyQt6.\n"
                 "• notifier(titre, message) : notification du bureau.\n"

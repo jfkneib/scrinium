@@ -115,10 +115,13 @@ def miniature(donnees: bytes) -> QPixmap:
 class Editeur(QPlainTextEdit):
     images_recues = pyqtSignal(list)      # liste de QImage et/ou de chemins
     pdf_demande = pyqtSignal()            # entrée « Exporter en PDF… » du clic droit
+    complements = staticmethod(lambda: [])   # [(texte, fn, icône)] : entrées ajoutées au clic droit (par la fenêtre, pour les extensions)
 
     def contextMenuEvent(self, ev):
         m = self.createStandardContextMenu()
         m.addSeparator()
+        for texte, fn, ic in self.complements():
+            m.addAction(icone(ic) if ic else icone("view-pim-notes"), texte, fn)
         m.addAction(icone("document-save"), _("Exporter la fiche en PDF…"), self.pdf_demande.emit)
         m.exec(ev.globalPos())
         m.deleteLater()

@@ -38,6 +38,12 @@ class UiPlugin:
         self._actions.append((self._f.barre, a))
         return a
 
+    def ajouter_action_fiche(self, texte: str, fn, icone_nom: str | None = None, types: tuple | None = None) -> None:
+        """Entrée dans le clic droit d'une fiche. `types=None` : le texte des fiches ordinaires (édition et aperçu) ; sinon les noms des
+        types de fiche concernés (`("agenda",)`) : l'entrée est dans le clic droit de la vue de ces types, et seulement là. `fn()` est
+        appelée sans argument : `ctx.fiche_courante()` donne la fiche, `ctx.ui.texte_selectionne()` la sélection. Retirée à la désactivation."""
+        self._f.actions_fiche.append((self._nom, texte, self._appeler(fn), icone_nom, tuple(types) if types else None))
+
     def ajouter_action_image(self, texte: str, fn, icone_nom: str | None = None) -> None:
         """Entrée dans le clic droit d'une image jointe. `fn(fiche, piece)` reçoit la `FicheVue` et la `PieceVue` visées."""
         self._f.actions_image.append((self._nom, texte, fn, icone_nom))
@@ -138,6 +144,7 @@ class UiPlugin:
             types_fiche.desenregistrer(nom)
         self._actions, self._docks, self._timers, self._types = [], [], [], []
         self._f.actions_image[:] = [e for e in self._f.actions_image if e[0] != self._nom]
+        self._f.actions_fiche[:] = [e for e in self._f.actions_fiche if e[0] != self._nom]
 
 
 class DialogueExtensions(QDialog):

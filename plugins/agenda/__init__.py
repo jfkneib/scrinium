@@ -295,6 +295,7 @@ class AgendaPlugin(Plugin):
         ctx.ui.enregistrer_type(logique.TYPE, VueAgenda())
         ctx.ui.ajouter_action(_("Agenda…"), self.afficher, "view-calendar")
         ctx.ui.ajouter_bouton(_("Agenda"), self.afficher, "view-calendar")
+        ctx.ui.ajouter_action_fiche(_("Ouvrir la fenêtre Agenda…"), self.afficher, "view-calendar", types=("agenda",))
         ctx.ui.planifier(INTERVALLE, self.verifier, repeter=True)
         ctx.ui.planifier(2, self.verifier)           # événements manqués pendant que Scrinium était fermé
 

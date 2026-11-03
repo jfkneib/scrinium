@@ -495,6 +495,7 @@ class TraductionPlugin(Plugin):
             return
         ctx.ui.ajouter_bouton(_("Traduire"), self.traduire, "preferences-desktop-locale")
         ctx.ui.ajouter_action(_("Traduire la sélection ou la fiche…"), self.traduire, "preferences-desktop-locale")
+        ctx.ui.ajouter_action_fiche(_("Traduire…"), self.traduire, "preferences-desktop-locale")
         ctx.ui.ajouter_action(_("Réglages de la traduction…"), self.reglages, "configure")
         ctx.ui.planifier(60, self._surveiller, repeter=True)
         if self.modele_choisi() is None and not ctx.reglages.get("url", "").strip():
