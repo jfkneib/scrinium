@@ -6,7 +6,8 @@ from pathlib import Path
 
 from PyQt6.QtCore import QEvent, QSize, Qt, QTimer, pyqtSignal
 from PyQt6.QtGui import QAction, QActionGroup, QKeySequence
-from PyQt6.QtWidgets import (QAbstractItemView, QApplication, QFileDialog, QHBoxLayout, QInputDialog, QLabel, QLineEdit, QListWidget,
+from PyQt6.QtPrintSupport import QPrintDialog, QPrinter
+from PyQt6.QtWidgets import (QAbstractItemView, QApplication, QDialog, QFileDialog, QHBoxLayout, QInputDialog, QLabel, QLineEdit, QListWidget,
                              QListWidgetItem, QMainWindow, QMenu, QMessageBox, QPushButton, QSplitter,
                              QStackedWidget, QSystemTrayIcon, QToolBar, QVBoxLayout, QWidget)
 
@@ -114,6 +115,7 @@ class Fenetre(QMainWindow):
         mf.addAction(self.a_theme)
         mf.addAction(self.a_fiche)
         mf.addAction(self._action(_("Nouveau répertoire…"), "x-office-address-book", self.nouveau_repertoire, "Ctrl+Alt+R"))
+        mf.addAction(self._action(_("Imprimer la fiche…"), "document-print", self.imprimer_fiche, "Ctrl+P"))
         mf.addAction(self._action(_("Capture rapide…"), "document-edit", self.capture_rapide, "Ctrl+Alt+N"))
         mf.addAction(self._action(_("Inviter à installer Scrinium…"), "mail-send", self.inviter))
         mf.addSeparator()
@@ -227,6 +229,7 @@ class Fenetre(QMainWindow):
         self.bande = BandePieces(self)
         self.texte.images_recues.connect(self.bande.ajouter)
         self.texte.pdf_demande.connect(self.exporter_pdf)
+        self.texte.impression_demandee.connect(self.imprimer_fiche)
         self.texte.complements = self._entrees_clic_droit
         self.statut = QLabel("")
         droite = QWidget()
@@ -235,6 +238,7 @@ class Fenetre(QMainWindow):
         self.apercu = Apercu()
         self.apercu.navigateur = lambda: str(self.store.reglages().get("navigateur", ""))
         self.apercu.pdf_demande.connect(self.exporter_pdf)
+        self.apercu.impression_demandee.connect(self.imprimer_fiche)
         self.apercu.complements = self._entrees_clic_droit
         self.format = BarreFormat(self.texte)
         self.format.apercu_demande.connect(self.basculer_apercu)
@@ -1066,21 +1070,54 @@ class Fenetre(QMainWindow):
             m.addAction(icone(ic) if ic else icone("view-pim-notes"), texte, fn)
         if not m.isEmpty():
             m.addSeparator()
+        m.addAction(icone("document-print"), _("Imprimer…"), self.imprimer_fiche)
         m.addAction(icone("document-save"), _("Exporter la fiche en PDF…"), self.exporter_pdf)
         m.exec(vue.mapToGlobal(pos))
         m.deleteLater()
+
+    def _contenu_a_sortir(self, titre_dialogue: str, support: str):
+        """(fiche, titre, texte, images) de la fiche affichée, prêts pour un PDF ou une impression ; None si rien à sortir ou si
+        l'utilisateur renonce (fiche verrouillée : le support contiendra son contenu EN CLAIR)."""
+        f = self.fiche
+        if not f or f.fermee:
+            return None
+        if f.verrou and QMessageBox.question(
+                self, titre_dialogue,
+                _("Cette fiche est verrouillée : %s contiendra son texte et ses images EN CLAIR. Continuer ?") % support
+        ) != QMessageBox.StandardButton.Yes:
+            return None
+        self.sauver()
+        images = []
+        for p in self.store.lister_pieces(f):
+            try:
+                images.append((p.nom, self.store.lire_piece(f, p)))
+            except (ValueError, OSError):
+                continue
+        texte = types_fiche.en_markdown(self.texte.toPlainText())      # un répertoire s'imprime en tableaux, une section par lettre
+        return f, self.titre.text(), texte, images
+
+    def imprimer_fiche(self, imprimante=None):
+        """Imprime la fiche affichée (boîte d'impression du système). `imprimante` : un QPrinter déjà réglé (tests, PDF)."""
+        sortie = self._contenu_a_sortir(_("Imprimer"), _("l'impression"))
+        if sortie is None:
+            return
+        _f, titre, texte, images = sortie
+        if imprimante is None:
+            imprimante = QPrinter(QPrinter.PrinterMode.HighResolution)
+            if QPrintDialog(imprimante, self).exec() != QDialog.DialogCode.Accepted:
+                return
+        export_pdf.imprimer(imprimante, titre, texte, images)
+        self._statut(_("✔ Fiche envoyée à l'impression"), VERT)
 
     def exporter_pdf(self):
         """Clic droit sur le contenu : écrit la fiche (titre, texte, images) dans un fichier PDF choisi par l'utilisateur."""
         f = self.fiche
         if not f or f.fermee:
             return
-        if f.verrou and QMessageBox.question(
-                self, _("Exporter en PDF"),
-                _("Cette fiche est verrouillée : le PDF contiendra son texte et ses images EN CLAIR. Continuer ?")
-        ) != QMessageBox.StandardButton.Yes:
+        sortie = self._contenu_a_sortir(_("Exporter en PDF"), _("le PDF"))
+        if sortie is None:
             return
-        self.sauver()
+        _f, titre, texte, images = sortie
         base = propre(f.titre or _("fiche"), "fiche")
         chemin, _filtre = QFileDialog.getSaveFileName(self, _("Exporter en PDF"), str(Path.home() / f"{base}.pdf"),
                                                       _("Documents PDF (*.pdf)"))
@@ -1088,16 +1125,8 @@ class Fenetre(QMainWindow):
             return
         if not chemin.lower().endswith(".pdf"):
             chemin += ".pdf"
-        images = []
-        for p in self.store.lister_pieces(f):
-            try:
-                images.append((p.nom, self.store.lire_piece(f, p)))
-            except (ValueError, OSError):
-                continue
         try:
-            texte = self.texte.toPlainText()
-            texte = types_fiche.en_markdown(texte)          # un répertoire s'imprime en tableaux, une section par lettre
-            export_pdf.ecrire_pdf(chemin, self.titre.text(), texte, images)
+            export_pdf.ecrire_pdf(chemin, titre, texte, images)
         except OSError as ex:
             QMessageBox.critical(self, _("Exporter en PDF"), _("Écriture impossible : %s") % ex)
             return

@@ -220,3 +220,16 @@ def test_menus_groupes_seulement_suppression(fen, monkeypatch):  # noqa: F811
     fen.liste.setCurrentRow(0)
     fen._menu_fiche(QPoint(1, 1))
     assert vus[-1][0] == "Épingler" and vus[-1][-1] == "Supprimer…"
+
+
+def test_imprimer_la_fiche_vers_un_fichier(fen, tmp_path):  # noqa: F811
+    """L'impression passe par la même mise en page que le PDF ; ici, une « imprimante » qui écrit un fichier PDF."""
+    from PyQt6.QtPrintSupport import QPrinter
+    t = fen.store.themes[0]
+    f = fen.store.nouvelle_fiche(t)
+    fen.store.enregistrer(t, f, "À imprimer", "# Partie\n\n* un\n* deux")
+    fen._afficher(t, f)
+    p = QPrinter(QPrinter.PrinterMode.HighResolution)
+    p.setOutputFileName(str(tmp_path / "imprime.pdf"))
+    fen.imprimer_fiche(p)
+    assert (tmp_path / "imprime.pdf").read_bytes().startswith(b"%PDF-")

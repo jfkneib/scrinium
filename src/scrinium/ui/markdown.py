@@ -239,6 +239,7 @@ class Apercu(QTextBrowser):
         self.anchorClicked.connect(self._lien)
 
     pdf_demande = pyqtSignal()
+    impression_demandee = pyqtSignal()
     complements = staticmethod(lambda: [])       # voir images.Editeur
 
     def contextMenuEvent(self, ev):
@@ -246,6 +247,7 @@ class Apercu(QTextBrowser):
         m.addSeparator()
         for texte, fn, ic in self.complements():
             m.addAction(icone(ic) if ic else icone("view-pim-notes"), texte, fn)
+        m.addAction(icone("document-print"), _("Imprimer…"), self.impression_demandee.emit)
         m.addAction(_("Exporter la fiche en PDF…"), self.pdf_demande.emit)
         m.exec(ev.globalPos())
         m.deleteLater()

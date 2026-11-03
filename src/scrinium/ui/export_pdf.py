@@ -30,6 +30,15 @@ def document(titre: str, texte: str, images=()) -> QTextDocument:
     return doc
 
 
+def imprimer(imprimante, titre: str, texte: str, images=()) -> None:
+    """Imprime sur un QPrinter (A4 par défaut, marges 15 mm), la mise en page étant celle du PDF."""
+    imprimante.setPageMargins(QMarginsF(15, 15, 15, 15), QPageLayout.Unit.Millimeter)
+    imprimante.setDocName(titre or "Scrinium")
+    doc = document(titre, texte, images)
+    doc.setPageSize(QSizeF(imprimante.width(), imprimante.height()))
+    doc.print(imprimante)
+
+
 def ecrire_pdf(chemin: str, titre: str, texte: str, images=()) -> None:
     """Écrit le PDF ; lève OSError si le fichier ne peut pas être écrit."""
     w = QPdfWriter(chemin)
