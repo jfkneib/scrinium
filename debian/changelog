@@ -1,3 +1,28 @@
+scrinium (0.6.0) unstable; urgency=medium
+
+  * Applications et Actions CLI sans panneau : la fiche est l'écran. Applications :
+    grille d'icônes, un clic lance. Actions CLI : liste configurable. Tout se règle
+    par le clic droit (ajouter, modifier, déplacer, importer, exporter). Les lancer
+    sur la sélection d'une fiche : clic droit « Ouvrir avec » et « Actions CLI »
+    dans toute fiche ordinaire. La fiche est créée au premier lancement à partir
+    de vos réglages d'avant, ou des exemples (inerte tant que vous ne l'avez pas
+    validée).
+  * Nouvelle fiche par type : la flèche du bouton « Fiche » (et Fichier → Nouvelle
+    fiche) propose ordinaire, répertoire, agenda, applications, actions CLI, photos…
+    selon les extensions actives.
+  * Nouvelle extension Photos : une fiche garde le chemin d'un dossier d'images et le
+    montre en vignettes (chargées par lots, lecture seule ; double-clic : visionneuse).
+    Avec l'extension OCR, clic droit sur une image : son texte devient une nouvelle fiche.
+  * Ranger une fiche dans un autre thème : glisser-déposer sur la liste des thèmes, ou
+    clic droit « Déplacer vers le thème » (images, favoris et validation suivent).
+  * Imprimer une fiche (Ctrl+P), même mise en page que l'export PDF.
+  * Extensions : sous-menus de clic droit (ajouter_sous_menu_fiche), entrées de clic
+    droit propres à une vue (entrees_menu), services entre extensions
+    (ctx.proposer_service / ctx.service) ; ctx.ui.actualiser relit aussi la liste des
+    fiches.
+
+ -- Jean-François Kneib <kneib.jean-francois@cegetel.net>  Thu, 05 Nov 2026 14:30:00 +0100
+
 scrinium (0.5.0) unstable; urgency=medium
 
   * « Tout est fiche » : ce que Scrinium gère vit dans des fiches typées (marque

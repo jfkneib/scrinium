@@ -14,21 +14,21 @@ Interface Qt (PyQt6) : Linux, Windows, macOS (paquets Windows/macOS : à venir).
 
 ## Installation
 
-**Debian / Ubuntu** : téléchargez `scrinium_0.5.0_all.deb` sur la [**page des versions (Releases)**](https://github.com/jfkneib/scrinium/releases/latest) (section *Assets*, tout en bas), ou directement :
+**Debian / Ubuntu** : téléchargez `scrinium_0.6.0_all.deb` sur la [**page des versions (Releases)**](https://github.com/jfkneib/scrinium/releases/latest) (section *Assets*, tout en bas), ou directement :
 
 ```bash
-wget https://github.com/jfkneib/scrinium/releases/download/v0.5.0/scrinium_0.5.0_all.deb
+wget https://github.com/jfkneib/scrinium/releases/download/v0.6.0/scrinium_0.6.0_all.deb
 ```
 
 puis installez-le :
 
 ```bash
-sudo apt install ./scrinium_0.5.0_all.deb
+sudo apt install ./scrinium_0.6.0_all.deb
 ```
 
 Pour vérifier le téléchargement, récupérez aussi `SHA256SUMS` sur la même page et lancez `sha256sum -c SHA256SUMS`.
 
-**Windows** : téléchargez `Scrinium-0.5.0-setup.exe` sur la [page des versions](https://github.com/jfkneib/scrinium/releases/latest) (*Assets*) et double-cliquez dessus. Aucun droit administrateur n'est nécessaire (installation pour votre utilisateur, dans `%LOCALAPPDATA%\Programs\Scrinium`, avec un raccourci du menu Démarrer et une entrée dans *Paramètres → Applications* pour le désinstaller). Le programme d'installation n'est **pas signé** : Windows affiche « Windows a protégé votre ordinateur » au premier lancement ; cliquez sur *Informations complémentaires*, puis *Exécuter quand même*. Vos fiches (`%APPDATA%\scrinium`) ne sont jamais supprimées. Les extensions qui demandent des outils Linux (dictée, lecture à voix haute, capture et console) sont grisées sous Windows.
+**Windows** : téléchargez `Scrinium-0.6.0-setup.exe` sur la [page des versions](https://github.com/jfkneib/scrinium/releases/latest) (*Assets*) et double-cliquez dessus. Aucun droit administrateur n'est nécessaire (installation pour votre utilisateur, dans `%LOCALAPPDATA%\Programs\Scrinium`, avec un raccourci du menu Démarrer et une entrée dans *Paramètres → Applications* pour le désinstaller). Le programme d'installation n'est **pas signé** : Windows affiche « Windows a protégé votre ordinateur » au premier lancement ; cliquez sur *Informations complémentaires*, puis *Exécuter quand même*. Vos fiches (`%APPDATA%\scrinium`) ne sont jamais supprimées. Les extensions qui demandent des outils Linux (dictée, lecture à voix haute, capture et console) sont grisées sous Windows.
 
 **Autres distributions** (sans root, depuis ce dépôt) :
 
@@ -91,7 +91,7 @@ scrinium secours deverrouiller "titre" --cle ~/cle-de-secours.pem
 
 ## Extensions
 
-Scrinium peut être étendu par des plugins. Neuf sont livrés avec lui (et avec le `.deb`) : **lecture à voix haute** (une fiche, la sélection ou tout un thème, en français ou en anglais : voix Piper ou espeak-ng ; une fiche verrouillée n'est jamais lue), **agenda** (rappels datés, liés ou non à une fiche), **applications** (panneau d'icônes pour lancer Thunderbird, KWrite, LibreOffice…), **OCR** (Tesseract, texte des images jointes), **dictée** (faster-whisper local), **courriel** (envoi d'une fiche par SMTP), **capture et console** (sortie d'une commande dans la fiche, sélection envoyée à Konsole) **traduction** (TranslateGemma via llama.cpp, sans Ollama) et **partage** (partager des fiches par un petit serveur Scrinium que l'on héberge soi-même, dossier `serveur/`). Ils sont
+Scrinium peut être étendu par des plugins. Dix sont livrés avec lui (et avec le `.deb`) : **lecture à voix haute** (une fiche, la sélection ou tout un thème, en français ou en anglais : voix Piper ou espeak-ng ; une fiche verrouillée n'est jamais lue), **agenda** (rappels datés, liés ou non à une fiche), **applications** (fiche d'icônes pour lancer Thunderbird, KWrite, LibreOffice…), **photos** (une fiche qui garde le chemin d'un dossier et en montre les images en vignettes ; clic droit sur une image : son texte devient une nouvelle fiche), **OCR** (Tesseract, texte des images jointes), **dictée** (faster-whisper local), **courriel** (envoi d'une fiche par SMTP), **capture et console** (sortie d'une commande dans la fiche, sélection envoyée à Konsole) **traduction** (TranslateGemma via llama.cpp, sans Ollama) et **partage** (partager des fiches par un petit serveur Scrinium que l'on héberge soi-même, dossier `serveur/`). Ils sont
 **désactivés par défaut** : *Extensions → Gérer les extensions…* les liste et les active un par un, après un
 avertissement (une extension est du code Python qui s'exécute avec les mêmes droits que Scrinium : n'activez que celles
 que vous connaissez). Déposez le dossier d'une extension dans `<dossier de données>/plugins/`, ou installez un paquet qui
