@@ -16,6 +16,7 @@ Légende : ☐ à faire · ◐ en cours · ✔ fait. Ordre = priorité proposée
 
 ## À faire ensuite (2026-11-05)
 - ☐ **Action de menu « Recharger »** (Fichier) : relire les thèmes et fiches depuis le disque. Aujourd'hui, une fiche écrite hors de l'application (outil externe, synchronisation de fichiers, `scrinium ajouter` direct sans instance ouverte) n'apparaît qu'au redémarrage : il n'y a ni « Recharger » ni surveillance des dossiers (`QFileSystemWatcher`). La synchronisation de l'extension Partage ne le fait pas non plus : elle ne gère que les fiches partagées. À étudier : surveillance automatique, ou seulement l'action manuelle (plus simple, sans risque d'écraser une fiche en cours d'édition).
+- ☐ **OCR : trois entrées au clic droit d'une image, dont la 1re n'est pas comprise** (2026-11-05) : « Extraire le texte de l'image (OCR) » garde le texte avec l'image sans rien montrer (il se lit par Extensions → « Texte extrait des images… » ou par la recherche). À clarifier ou fusionner avec les deux autres (→ nouvelle fiche, → au curseur) : renommer (« Lire le texte (le garder avec l'image) »), ou la retirer.
 - ☐ Texte du générateur d'invitation (`core/invitation.py`) : « panneau d'icônes » obsolète pour Applications, ajouter Photos.
 - ☐ Test instable sous Python 3.13 à l'intégration continue : `tests/test_traduction.py::test_fenetre_de_progression_reelle_avec_un_modele_de_plus_de_2_go` (objet Qt supprimé).
 
