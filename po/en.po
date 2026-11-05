@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: scrinium 0.2.0\n"
 "Report-Msgid-Bugs-To: \n"
-"PO-Revision-Date: 2026-11-05 17:25+0100\n"
+"PO-Revision-Date: 2026-11-05 17:30+0100\n"
 "Last-Translator: Jean-François Kneib\n"
 "Language-Team: English\n"
 "Language: en\n"
@@ -1290,16 +1290,20 @@ msgid "Texte de l'image → nouvelle fiche"
 msgstr "Text of the image → new fiche"
 
 #: plugins/ocr/__init__.py:192
+msgid "Texte de l'image → dans la fiche, au curseur"
+msgstr "Text of the image → into the fiche, at the cursor"
+
+#: plugins/ocr/__init__.py:193
 msgid "Réglages de l'OCR…"
 msgstr "OCR settings…"
 
-#: plugins/ocr/__init__.py:254
-#: plugins/ocr/__init__.py:272
-#: plugins/ocr/__init__.py:311
+#: plugins/ocr/__init__.py:255
+#: plugins/ocr/__init__.py:273
+#: plugins/ocr/__init__.py:330
 msgid "OCR"
 msgstr "OCR"
 
-#: plugins/ocr/__init__.py:272
+#: plugins/ocr/__init__.py:273
 msgid "Extraction du texte…"
 msgstr "Extracting text…"
 
@@ -1307,36 +1311,40 @@ msgstr "Extracting text…"
 msgid "(tesseract introuvable)"
 msgstr "(tesseract not found)"
 
-#: plugins/ocr/__init__.py:222
-#: plugins/ocr/__init__.py:233
-#: plugins/ocr/__init__.py:285
+#: plugins/ocr/__init__.py:223
+#: plugins/ocr/__init__.py:234
+#: plugins/ocr/__init__.py:286
 msgid "Fiche verrouillée : déverrouillez-la d'abord."
 msgstr "Locked note: unlock it first."
 
-#: plugins/ocr/__init__.py:226
+#: plugins/ocr/__init__.py:227
 msgid "Cette fiche n'a pas d'image."
 msgstr "This note has no images."
 
-#: plugins/ocr/__init__.py:254
+#: plugins/ocr/__init__.py:255
 msgid "Extraction du texte de %d image(s)…"
 msgstr "Extracting the text of %d image(s)…"
 
-#: plugins/ocr/__init__.py:309
-#: plugins/ocr/__init__.py:311
+#: plugins/ocr/__init__.py:320
+msgid "La fiche n'est plus affichée : texte non inséré."
+msgstr "The fiche is no longer displayed: text not inserted."
+
+#: plugins/ocr/__init__.py:328
+#: plugins/ocr/__init__.py:330
 #: plugins/photos/__init__.py:162
 msgid "Texte de %s"
 msgstr "Text of %s"
 
-#: plugins/ocr/__init__.py:311
+#: plugins/ocr/__init__.py:330
 #: plugins/photos/__init__.py:164
 msgid "Fiche créée : %s"
 msgstr "Fiche created: %s"
 
-#: plugins/ocr/__init__.py:336
+#: plugins/ocr/__init__.py:355
 msgid "Texte extrait."
 msgstr "Text extracted."
 
-#: plugins/ocr/__init__.py:348
+#: plugins/ocr/__init__.py:367
 msgid "Ouvrez d'abord une fiche (déverrouillée)."
 msgstr "Open a note (unlocked) first."
 
@@ -1344,28 +1352,36 @@ msgstr "Open a note (unlocked) first."
 msgid "✔ Tesseract trouvé : %s"
 msgstr "✔ Tesseract found: %s"
 
-#: plugins/ocr/__init__.py:308
+#: plugins/ocr/__init__.py:322
+msgid "Aucun texte reconnu."
+msgstr "No text recognised."
+
+#: plugins/ocr/__init__.py:327
 #: plugins/photos/__init__.py:161
 msgid "(aucun texte reconnu)"
 msgstr "(no text recognised)"
 
-#: plugins/ocr/__init__.py:328
-#: plugins/ocr/__init__.py:298
+#: plugins/ocr/__init__.py:347
+#: plugins/ocr/__init__.py:299
 #: plugins/photos/__init__.py:158
 msgid "Échec : %s"
 msgstr "Failed: %s"
 
-#: plugins/ocr/__init__.py:202
+#: plugins/ocr/__init__.py:203
 msgid "Tesseract est introuvable."
 msgstr "Tesseract not found."
 
-#: plugins/ocr/__init__.py:308
+#: plugins/ocr/__init__.py:324
+msgid "La fiche n'est pas modifiable."
+msgstr "The fiche cannot be edited."
+
+#: plugins/ocr/__init__.py:327
 #: src/scrinium/ui/capture_rapide.py:41
 #: src/scrinium/ui/fenetre.py:147
 msgid "Fiche"
 msgstr "Note"
 
-#: plugins/ocr/__init__.py:308
+#: plugins/ocr/__init__.py:327
 #: plugins/photos/__init__.py:161
 #: src/scrinium/ui/images.py:408
 msgid "Image"
@@ -1375,7 +1391,7 @@ msgstr "Image"
 msgid "Tesseract introuvable."
 msgstr "Tesseract not found."
 
-#: plugins/ocr/__init__.py:210
+#: plugins/ocr/__init__.py:211
 #: plugins/ocr/__init__.py:82
 msgid "Langue(s) non installée(s) : %s"
 msgstr "Language(s) not installed: %s"

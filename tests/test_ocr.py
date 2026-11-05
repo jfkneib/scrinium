@@ -200,7 +200,8 @@ def test_clic_droit_sur_une_image_lance_l_ocr(fen, app, faux_moteur, monkeypatch
     from PyQt6.QtWidgets import QMenu
     ajouter_image(fen)
     ajouter_image(fen)
-    assert [e[1] for e in fen.actions_image] == ["Extraire le texte de l'image (OCR)", "Texte de l'image → nouvelle fiche"]
+    assert [e[1] for e in fen.actions_image] == ["Extraire le texte de l'image (OCR)", "Texte de l'image → nouvelle fiche",
+                                                   "Texte de l'image → dans la fiche, au curseur"]
     fen.bande.liste.setCurrentRow(1)
     actions = {}
     monkeypatch.setattr(fen.bande.liste, "itemAt", lambda pos: fen.bande.liste.item(1))
@@ -229,6 +230,19 @@ def test_clic_droit_image_vers_fiche_dans_le_meme_theme(fen, app, faux_moteur, m
     assert fen.store.lister_pieces(fen.fiche)[-1].ocr.startswith("texte lu")               # le texte est aussi gardé avec l'image
     entree(vue, piece())                                                                   # déjà lu : fiche créée tout de suite, sans relire
     assert len(theme.fiches) == avant + 2
+
+
+def test_clic_droit_image_vers_le_curseur_de_la_fiche(fen, app, faux_moteur):
+    from scrinium.core.plugins import PieceVue
+    ajouter_image(fen)
+    fen.texte.setPlainText("Avant APRES")
+    c = fen.texte.textCursor()
+    c.setPosition(len("Avant "))
+    fen.texte.setTextCursor(c)
+    entree = next(e[2] for e in fen.actions_image if "au curseur" in e[1])
+    entree(fen.plugins.fiche_courante(), PieceVue(fen.store.lister_pieces(fen.fiche)[-1]))
+    assert attendre(app, lambda: "texte lu" in fen.texte.toPlainText())
+    assert fen.texte.toPlainText().startswith("Avant texte lu") and fen.texte.toPlainText().endswith("APRES")   # inséré au curseur
 
 
 def test_entree_retiree_a_la_desactivation(fen, app):

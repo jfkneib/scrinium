@@ -189,6 +189,7 @@ class OcrPlugin(Plugin):
         ctx.ui.ajouter_action(_("Texte extrait des images…"), self.voir, "view-pim-notes")
         ctx.ui.ajouter_action_image(_("Extraire le texte de l'image (OCR)"), self.extraire_image, "edit-find")
         ctx.ui.ajouter_action_image(_("Texte de l'image → nouvelle fiche"), self.image_vers_fiche, "document-new")
+        ctx.ui.ajouter_action_image(_("Texte de l'image → dans la fiche, au curseur"), self.image_vers_curseur, "insert-text")
         ctx.ui.ajouter_action(_("Réglages de l'OCR…"), self.reglages, "configure")
         ctx.on("piece_jointe_ajoutee", self._ajoutee)
 
@@ -278,14 +279,14 @@ class OcrPlugin(Plugin):
                 self.pont.fichier.emit(rappel, "", f"{type(ex).__name__}: {ex}")
         threading.Thread(target=travail, daemon=True).start()
 
-    def image_vers_fiche(self, vue, piece):
-        """Clic droit sur une image jointe : son texte devient une nouvelle fiche, dans le thème de la fiche d'origine (le texte déjà
-        extrait est repris ; sinon l'image est lue d'abord et le texte gardé aussi avec l'image)."""
+    def _avec_texte(self, vue, piece, suite):
+        """Appelle `suite(texte)` avec le texte de l'image : celui déjà extrait, sinon l'image est lue d'abord (en arrière-plan) et le
+        texte est gardé aussi avec l'image."""
         if vue.fermee:
             QMessageBox.warning(_parent(), _("OCR"), _("Fiche verrouillée : déverrouillez-la d'abord."))
             return
         if piece.ocr.strip():
-            self._fiche_de_texte(vue, piece, piece.ocr)
+            suite(piece.ocr)
             return
         try:
             donnees = self.ctx.lire_piece(vue, piece)
@@ -300,9 +301,27 @@ class OcrPlugin(Plugin):
             try:
                 self.ctx.maj_piece(vue, piece, ocr=texte, ocr_moteur=MOTEUR)
             except ValueError:
-                pass                                       # fiche refermée entre-temps : la nouvelle fiche est créée quand même
-            self._fiche_de_texte(vue, piece, texte)
+                pass                                       # fiche refermée entre-temps
+            suite(texte)
         self._lire_donnees(donnees, fini)
+
+    def image_vers_fiche(self, vue, piece):
+        """Clic droit sur une image jointe : son texte devient une nouvelle fiche, dans le thème de la fiche d'origine."""
+        self._avec_texte(vue, piece, lambda texte: self._fiche_de_texte(vue, piece, texte))
+
+    def image_vers_curseur(self, vue, piece):
+        """Clic droit sur une image jointe : son texte est inséré dans la fiche, à la position du curseur."""
+        self._avec_texte(vue, piece, lambda texte: self._inserer(vue, texte))
+
+    def _inserer(self, vue, texte):
+        texte = texte.strip()
+        courante = self.ctx.fiche_courante()
+        if courante is None or courante.id != vue.id:       # on a changé de fiche pendant la lecture : on n'écrit pas ailleurs
+            self.ctx.ui.notifier(_("OCR"), _("La fiche n'est plus affichée : texte non inséré."))
+        elif not texte:
+            self.ctx.ui.notifier(_("OCR"), _("Aucun texte reconnu."))
+        elif not self.ctx.ui.inserer_texte(texte):
+            self.ctx.ui.notifier(_("OCR"), _("La fiche n'est pas modifiable."))
 
     def _fiche_de_texte(self, vue, piece, texte):
         corps = f"{_('Fiche')} : {vue.titre}\n{_('Image')} : {piece.nom}\n\n" + (texte.strip() or _("(aucun texte reconnu)")) + "\n"
