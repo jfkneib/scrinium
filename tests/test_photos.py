@@ -156,3 +156,30 @@ def test_desactiver_retire_le_type(fen):
     assert types_fiche.type_de("#scrinium-photos\n") is not None and "photos" in fen.vues_types
     fen.plugins.desactiver("photos")
     assert types_fiche.type_de("#scrinium-photos\n") is None and "photos" not in fen.vues_types
+
+
+def test_clic_droit_ocr_cree_une_fiche_avec_le_texte(fen, app, tmp_path, monkeypatch):
+    import sys
+    import time
+    vue = fen.vues_types["photos"]
+    (tmp_path / "p").mkdir()
+    _image(tmp_path / "p" / "scan.png")
+    vue.charger(lg.en_texte(str(tmp_path / "p")))
+    noms = lambda: [t for t, _f, _i in vue.entrees_menu(vue.liste.visualItemRect(vue.liste.item(0)).center())]   # noqa: E731
+    assert not any("OCR" in t for t in noms())                                       # extension OCR absente : pas d'entrée
+    shutil.copytree(RACINE.parent / "ocr", fen.store.paths.base / "plugins" / "ocr")
+    fen.plugins.decouvrir()
+    assert fen.plugins.activer("ocr"), fen.plugins.infos["ocr"].erreur
+    mod = sys.modules["scrinium_plugin_ocr.logique"]
+    monkeypatch.setattr(mod, "trouver", lambda chemin="": "/faux/tesseract")
+    monkeypatch.setattr(mod, "langues_manquantes", lambda exe, langue: [])
+    monkeypatch.setattr(mod, "reconnaitre", lambda exe, donnees, langue="fra": "Total 42 €")
+    entree = next(fn for t, fn, _i in vue.entrees_menu(vue.liste.visualItemRect(vue.liste.item(0)).center()) if "OCR" in t)
+    avant = sum(len(t.fiches) for t in fen.store.themes)
+    entree()
+    fin = time.time() + 8
+    while time.time() < fin and sum(len(t.fiches) for t in fen.store.themes) == avant:
+        app.processEvents()
+        time.sleep(0.01)
+    nouvelles = [f for t in fen.store.themes for f in t.fiches if f.titre == "Texte de scan.png"]
+    assert len(nouvelles) == 1 and "Total 42 €" in nouvelles[0].texte and "scan.png" in nouvelles[0].texte

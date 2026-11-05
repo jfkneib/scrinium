@@ -60,7 +60,7 @@ msgstr ""
 
 #: plugins/agenda/__init__.py:164
 #: plugins/courriel/__init__.py:185
-#: plugins/ocr/__init__.py:114
+#: plugins/ocr/__init__.py:115
 msgid "Fermer"
 msgstr ""
 
@@ -1192,128 +1192,133 @@ msgstr ""
 msgid "fichier téléchargé incorrect (taille ou somme de contrôle) : supprimé"
 msgstr ""
 
-#: plugins/ocr/__init__.py:40
+#: plugins/ocr/__init__.py:41
 msgid "Réglages de l'OCR"
 msgstr ""
 
-#: plugins/ocr/__init__.py:44
+#: plugins/ocr/__init__.py:45
 #: plugins/traduction/__init__.py:217
 #: plugins/traduction/__init__.py:229
 msgid "Parcourir…"
 msgstr ""
 
-#: plugins/ocr/__init__.py:49
+#: plugins/ocr/__init__.py:50
 msgid "Programme tesseract :"
 msgstr ""
 
-#: plugins/ocr/__init__.py:51
+#: plugins/ocr/__init__.py:52
 msgid "Code(s) de langue installés, séparés par « + » : fra, fra+eng…"
 msgstr ""
 
-#: plugins/ocr/__init__.py:52
+#: plugins/ocr/__init__.py:53
 msgid "Langue(s) :"
 msgstr ""
 
-#: plugins/ocr/__init__.py:53
+#: plugins/ocr/__init__.py:54
 msgid "Extraire automatiquement le texte à l'ajout d'une image"
 msgstr ""
 
-#: plugins/ocr/__init__.py:60
+#: plugins/ocr/__init__.py:61
 #: plugins/traduction/__init__.py:248
 msgid "Tester"
 msgstr ""
 
-#: plugins/ocr/__init__.py:67
+#: plugins/ocr/__init__.py:68
 msgid "Programme tesseract"
 msgstr ""
 
-#: plugins/ocr/__init__.py:98
+#: plugins/ocr/__init__.py:99
 msgid "Texte extrait des images"
 msgstr ""
 
-#: plugins/ocr/__init__.py:108
+#: plugins/ocr/__init__.py:109
 msgid "(aucun texte extrait : « Extraire »)"
 msgstr ""
 
-#: plugins/ocr/__init__.py:111
+#: plugins/ocr/__init__.py:112
 msgid "Extraire"
 msgstr ""
 
-#: plugins/ocr/__init__.py:112
+#: plugins/ocr/__init__.py:113
 msgid "Enregistrer la correction"
 msgstr ""
 
-#: plugins/ocr/__init__.py:113
+#: plugins/ocr/__init__.py:114
 #: plugins/traduction/__init__.py:372
 #: src/scrinium/ui/repertoire.py:315
 msgid "Copier"
 msgstr ""
 
-#: plugins/ocr/__init__.py:185
+#: plugins/ocr/__init__.py:188
 msgid "Extraire le texte des images de la fiche"
 msgstr ""
 
-#: plugins/ocr/__init__.py:186
+#: plugins/ocr/__init__.py:189
 msgid "Texte extrait des images…"
 msgstr ""
 
-#: plugins/ocr/__init__.py:187
+#: plugins/ocr/__init__.py:190
 msgid "Extraire le texte de l'image (OCR)"
 msgstr ""
 
-#: plugins/ocr/__init__.py:188
+#: plugins/ocr/__init__.py:191
 msgid "Réglages de l'OCR…"
 msgstr ""
 
-#: plugins/ocr/__init__.py:250
-#: plugins/ocr/__init__.py:198
-#: plugins/ocr/__init__.py:206
+#: plugins/ocr/__init__.py:253
+#: plugins/ocr/__init__.py:268
+#: plugins/ocr/__init__.py:201
 msgid "OCR"
 msgstr ""
 
-#: plugins/ocr/__init__.py:43
+#: plugins/ocr/__init__.py:268
+msgid "Extraction du texte…"
+msgstr ""
+
+#: plugins/ocr/__init__.py:44
 msgid "(tesseract introuvable)"
 msgstr ""
 
-#: plugins/ocr/__init__.py:218
-#: plugins/ocr/__init__.py:229
+#: plugins/ocr/__init__.py:221
+#: plugins/ocr/__init__.py:232
 msgid "Fiche verrouillée : déverrouillez-la d'abord."
 msgstr ""
 
-#: plugins/ocr/__init__.py:222
+#: plugins/ocr/__init__.py:225
 msgid "Cette fiche n'a pas d'image."
 msgstr ""
 
-#: plugins/ocr/__init__.py:250
+#: plugins/ocr/__init__.py:253
 msgid "Extraction du texte de %d image(s)…"
 msgstr ""
 
-#: plugins/ocr/__init__.py:276
+#: plugins/ocr/__init__.py:300
 msgid "Texte extrait."
 msgstr ""
 
-#: plugins/ocr/__init__.py:288
+#: plugins/ocr/__init__.py:312
 msgid "Ouvrez d'abord une fiche (déverrouillée)."
 msgstr ""
 
-#: plugins/ocr/__init__.py:82
+#: plugins/ocr/__init__.py:83
 msgid "✔ Tesseract trouvé : %s"
 msgstr ""
 
-#: plugins/ocr/__init__.py:268
+#: plugins/ocr/__init__.py:292
+#: plugins/photos/__init__.py:158
 msgid "Échec : %s"
 msgstr ""
 
-#: plugins/ocr/__init__.py:198
+#: plugins/ocr/__init__.py:201
 msgid "Tesseract est introuvable."
 msgstr ""
 
-#: plugins/ocr/__init__.py:74
+#: plugins/ocr/__init__.py:75
 msgid "Tesseract introuvable."
 msgstr ""
 
-#: plugins/ocr/__init__.py:206
-#: plugins/ocr/__init__.py:81
+#: plugins/ocr/__init__.py:209
+#: plugins/ocr/__init__.py:82
 msgid "Langue(s) non installée(s) : %s"
 msgstr ""
 
@@ -1807,45 +1812,67 @@ msgid ""
 "Cordialement"
 msgstr ""
 
-#: plugins/photos/__init__.py:56
+#: plugins/photos/__init__.py:57
 msgid "Choisir un dossier…"
 msgstr ""
 
-#: plugins/photos/__init__.py:93
+#: plugins/photos/__init__.py:94
 msgid "%(dossier)s — %(n)d image(s)"
 msgstr ""
 
-#: plugins/photos/__init__.py:147
+#: plugins/photos/__init__.py:168
 msgid "Dossier d'images"
 msgstr ""
 
-#: plugins/photos/__init__.py:87
+#: plugins/photos/__init__.py:88
 msgid "Aucun dossier : « Choisir un dossier… » (ou clic droit)."
 msgstr ""
 
-#: plugins/photos/__init__.py:159
+#: plugins/photos/__init__.py:182
 #: src/scrinium/ui/assistant.py:119
 msgid "Ouvrir le dossier"
 msgstr ""
 
-#: plugins/photos/__init__.py:160
+#: plugins/photos/__init__.py:183
 msgid "Choisir un autre dossier…"
 msgstr ""
 
-#: plugins/photos/__init__.py:161
+#: plugins/photos/__init__.py:184
 msgid "Actualiser"
 msgstr ""
 
-#: plugins/photos/__init__.py:90
+#: plugins/photos/__init__.py:91
 msgid "Dossier introuvable sur cette machine : %s"
 msgstr ""
 
-#: plugins/photos/__init__.py:95
+#: plugins/photos/__init__.py:96
 msgid "(les %d premières sont montrées)"
 msgstr ""
 
-#: plugins/photos/__init__.py:158
+#: plugins/photos/__init__.py:161
+msgid "(aucun texte reconnu)"
+msgstr ""
+
+#: plugins/photos/__init__.py:162
+msgid "Texte de %s"
+msgstr ""
+
+#: plugins/photos/__init__.py:163
+msgid "Fiche créée : %s"
+msgstr ""
+
+#: plugins/photos/__init__.py:179
 msgid "Ouvrir l'image"
+msgstr ""
+
+#: plugins/photos/__init__.py:161
+#: src/scrinium/ui/images.py:408
+#: src/scrinium/ui/images.py:469
+msgid "Image"
+msgstr ""
+
+#: plugins/photos/__init__.py:181
+msgid "Lire le texte (OCR) → nouvelle fiche"
 msgstr ""
 
 #: plugins/photos/logique.py:21
@@ -4068,11 +4095,6 @@ msgstr ""
 
 #: src/scrinium/ui/images.py:460
 msgid "La fiche est verrouillée : la copie sera enregistrée EN CLAIR. Continuer ?"
-msgstr ""
-
-#: src/scrinium/ui/images.py:408
-#: src/scrinium/ui/images.py:469
-msgid "Image"
 msgstr ""
 
 #: src/scrinium/ui/images.py:325

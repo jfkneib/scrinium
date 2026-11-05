@@ -40,8 +40,9 @@ class VuePhotos(QWidget):
     """Vue du type « photos » : la fiche s'affiche comme une grille de vignettes (le texte reste dans la fiche, seule la ligne « dossier: » change)."""
     modifie = pyqtSignal(str)
 
-    def __init__(self, parent=None):
+    def __init__(self, ctx=None, parent=None):
         super().__init__(parent)
+        self.ctx = ctx
         self.texte = ""
         self.actif = True                       # type non exécutable : toujours utilisable
         self._cache: dict = {}                  # (chemin, date de modification) -> QIcon
@@ -142,6 +143,26 @@ class VuePhotos(QWidget):
         if d is not None:
             QDesktopServices.openUrl(QUrl.fromLocalFile(str(d)))
 
+    def lire_texte(self, it):
+        """Clic droit « Lire le texte » : l'extension OCR (si elle est active) lit l'image, le résultat devient une nouvelle fiche
+        (dans le thème de la fiche Photos), avec le nom et le dossier de l'image en tête."""
+        ocr = self.ctx.service("ocr.fichier") if self.ctx else None
+        chemin = it.data(Qt.ItemDataRole.UserRole)
+        if ocr is None or not chemin:
+            return
+        courante = self.ctx.fiche_courante()
+        theme = courante.theme if courante is not None else "Photos"
+
+        def fini(texte, erreur):
+            if erreur:
+                self.ctx.ui.notifier(_("OCR"), _("Échec : %s") % erreur)
+                return
+            nom = Path(chemin).name
+            corps = f"{_('Image')} : {logique.raccourcir(chemin)}\n\n" + (texte or _("(aucun texte reconnu)"))
+            self.ctx.creer_fiche(theme, _("Texte de %s") % nom, corps)
+            self.ctx.ui.notifier(_("OCR"), _("Fiche créée : %s") % nom)
+        ocr(chemin, fini)
+
     def choisir(self):
         depart = logique.dossier(self.chemin()) or Path.home()
         choisi = QFileDialog.getExistingDirectory(self, _("Dossier d'images"), str(depart))
@@ -156,6 +177,8 @@ class VuePhotos(QWidget):
         e = []
         if it is not None:
             e.append((_("Ouvrir l'image"), lambda *_a, it=it: self._ouvrir(it), "document-open"))
+            if self.ctx and self.ctx.service("ocr.fichier"):
+                e.append((_("Lire le texte (OCR) → nouvelle fiche"), lambda *_a, it=it: self.lire_texte(it), "edit-find"))
         e += [(_("Ouvrir le dossier"), lambda *_a: self.ouvrir_dossier(), "folder-open"),
               (_("Choisir un autre dossier…"), lambda *_a: self.choisir(), "folder-pictures"),
               (_("Actualiser"), lambda *_a: self.recharger(), "view-refresh")]
@@ -169,4 +192,4 @@ class PhotosPlugin(Plugin):
         self.ctx = ctx
         if ctx.ui is None:
             return
-        ctx.ui.enregistrer_type(logique.TYPE, VuePhotos())
+        ctx.ui.enregistrer_type(logique.TYPE, VuePhotos(ctx))

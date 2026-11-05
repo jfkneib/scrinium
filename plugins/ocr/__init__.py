@@ -30,6 +30,7 @@ def _parent():
 class _Pont(QObject):
     """Ramène dans le fil de l'interface le résultat d'une reconnaissance (le magasin de fiches n'est pas thread-safe)."""
     resultat = pyqtSignal(object, int, str, str)      # (vue de la fiche, id de la pièce, texte, erreur)
+    fichier = pyqtSignal(object, str, str)            # (rappel, texte, erreur) : lecture d'un fichier image du disque
 
 
 class DialogueReglages(QDialog):
@@ -182,6 +183,8 @@ class OcrPlugin(Plugin):
             return
         self.pont = _Pont()
         self.pont.resultat.connect(self._resultat)
+        self.pont.fichier.connect(lambda rappel, texte, erreur: rappel(texte, erreur))
+        ctx.proposer_service("ocr.fichier", self.lire_fichier)
         ctx.ui.ajouter_action(_("Extraire le texte des images de la fiche"), self.extraire_fiche, "edit-find")
         ctx.ui.ajouter_action(_("Texte extrait des images…"), self.voir, "view-pim-notes")
         ctx.ui.ajouter_action_image(_("Extraire le texte de l'image (OCR)"), self.extraire_image, "edit-find")
@@ -249,6 +252,27 @@ class OcrPlugin(Plugin):
             self.en_cours.add((vue.id, p.id))
         self.ctx.ui.notifier(_("OCR"), _("Extraction du texte de %d image(s)…") % len(lots))
         threading.Thread(target=self._travailler, args=(vue, exe, langue, lots), daemon=True).start()
+
+    def lire_fichier(self, chemin, rappel):
+        """Service « ocr.fichier » : lit le texte d'une image du disque, en arrière-plan ; `rappel(texte, erreur)` est ensuite appelé
+        dans le fil de l'interface (erreur vide si tout va bien). Rien n'est écrit dans une fiche."""
+        moteur = self._moteur()
+        if moteur is None:
+            return
+        exe, langue = moteur
+        try:
+            donnees = open(chemin, "rb").read()
+        except OSError as ex:
+            self.ctx.ui.notifier(_("OCR"), str(ex))
+            return
+        self.ctx.ui.notifier(_("OCR"), _("Extraction du texte…"))
+
+        def travail():
+            try:
+                self.pont.fichier.emit(rappel, logique.reconnaitre(exe, donnees, langue), "")
+            except Exception as ex:
+                self.pont.fichier.emit(rappel, "", f"{type(ex).__name__}: {ex}")
+        threading.Thread(target=travail, daemon=True).start()
 
     def _moteur_silencieux(self):
         r = self.ctx.reglages

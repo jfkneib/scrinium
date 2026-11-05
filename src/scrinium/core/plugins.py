@@ -164,6 +164,15 @@ class Contexte:
             raise ValueError(f"événement inconnu : {evenement}")
         self._g._abonner(self.info.nom, evenement, fn)
 
+    def proposer_service(self, nom: str, fn: Callable) -> None:
+        """Met `fn` à la disposition des autres extensions sous le nom `nom` (ex. « ocr.fichier »). Retiré à la désactivation."""
+        self._g._services[nom] = (self.info.nom, fn)
+
+    def service(self, nom: str):
+        """Fonction proposée par une extension active sous ce nom, sinon None (l'extension n'est pas là : on s'en passe)."""
+        v = self._g._services.get(nom)
+        return None if v is None else (lambda *a, **kw: self._g.appeler(v[0], v[1], *a, **kw))
+
     def themes(self) -> list:
         return [t.nom for t in self._g.store.themes]
 
@@ -262,6 +271,7 @@ class Gestionnaire:
         self.infos: dict[str, InfoPlugin] = {}
         self.actifs: dict[str, tuple] = {}              # nom -> (instance, contexte)
         self._abonnements: dict[str, list] = {}         # événement -> [(nom, fn)]
+        self._services: dict[str, tuple] = {}           # service -> (extension, fn)
         self.erreurs: dict[str, int] = {}
 
     # ---------- découverte (sans exécuter le code des extensions) ----------
@@ -365,6 +375,7 @@ class Gestionnaire:
         pair = self.actifs.pop(nom, None)
         for evt in list(self._abonnements):
             self._abonnements[evt] = [(n, f) for n, f in self._abonnements[evt] if n != nom]
+        self._services = {k: v for k, v in self._services.items() if v[0] != nom}
         if pair:
             instance, ctx = pair
             try:
