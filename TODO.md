@@ -14,6 +14,11 @@ Légende : ☐ à faire · ◐ en cours · ✔ fait. Ordre = priorité proposée
 - ☐ Tester sur Ubuntu 24.04 LTS et Debian 12 · ☐ capture d'écran dans le README
 - ☐ Revue de sécurité (chiffrement, fichier de secours, plugins qui lancent des commandes, liens de l'aperçu) · ☐ essai avec un parc de ~5 000 fiches (démarrage, recherche, liste)
 
+## À faire ensuite (2026-11-05)
+- ☐ **Action de menu « Recharger »** (Fichier) : relire les thèmes et fiches depuis le disque. Aujourd'hui, une fiche écrite hors de l'application (outil externe, synchronisation de fichiers, `scrinium ajouter` direct sans instance ouverte) n'apparaît qu'au redémarrage : il n'y a ni « Recharger » ni surveillance des dossiers (`QFileSystemWatcher`). La synchronisation de l'extension Partage ne le fait pas non plus : elle ne gère que les fiches partagées. À étudier : surveillance automatique, ou seulement l'action manuelle (plus simple, sans risque d'écraser une fiche en cours d'édition).
+- ☐ Texte du générateur d'invitation (`core/invitation.py`) : « panneau d'icônes » obsolète pour Applications, ajouter Photos.
+- ☐ Test instable sous Python 3.13 à l'intégration continue : `tests/test_traduction.py::test_fenetre_de_progression_reelle_avec_un_modele_de_plus_de_2_go` (objet Qt supprimé).
+
 ## Inviter à installer Scrinium (idée du 2026-10-21)
 - ✔ Brouillon de la fiche personnelle : `doc_jfk/invitation-scrinium.md` (dossier local non publié) : présentation, installation Debian/Ubuntu avec vérification de la somme de contrôle, autres Linux (`install.sh`), message provisoire Windows/macOS, premier lancement, extensions ; à coller dans une fiche puis à envoyer avec le plugin courriel
 - ✔ Fiche livrée dans Scrinium (2026-10-22, `dev`, v0.4) : `core/invitation.py` (texte FR/EN via gettext, liens vers la version qui crée la fiche) ; *Fichier → Inviter à installer Scrinium…* crée la fiche dans un thème « Invitations » (icône courrier), la rouvre sans l'écraser si elle existe, ouvre l'envoi de l'extension Courriel si elle est active (sinon explique) ; 6e fiche « Inviter quelqu'un » dans « Bienvenue » ; 6 tests. Pas encore essayé à l'écran
