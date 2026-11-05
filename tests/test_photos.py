@@ -183,3 +183,4 @@ def test_clic_droit_ocr_cree_une_fiche_avec_le_texte(fen, app, tmp_path, monkeyp
         time.sleep(0.01)
     nouvelles = [f for t in fen.store.themes for f in t.fiches if f.titre == "Texte de scan.png"]
     assert len(nouvelles) == 1 and "Total 42 €" in nouvelles[0].texte and "scan.png" in nouvelles[0].texte
+    assert any(fen.liste.item(i).text().endswith("Texte de scan.png") for i in range(fen.liste.count()))    # visible dans la liste

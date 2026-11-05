@@ -160,6 +160,7 @@ class VuePhotos(QWidget):
             nom = Path(chemin).name
             corps = f"{_('Image')} : {logique.raccourcir(chemin)}\n\n" + (texte or _("(aucun texte reconnu)"))
             self.ctx.creer_fiche(theme, _("Texte de %s") % nom, corps)
+            self.ctx.ui.actualiser()                       # la liste des fiches affiche la nouvelle
             self.ctx.ui.notifier(_("OCR"), _("Fiche créée : %s") % nom)
         ocr(chemin, fini)
 

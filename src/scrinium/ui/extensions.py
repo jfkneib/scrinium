@@ -67,6 +67,7 @@ class UiPlugin:
     def actualiser(self) -> None:
         """Relit les thèmes et les fiches affichés (après qu'une extension en a créé ou modifié)."""
         self._f.maj_themes()
+        self._f.maj_fiches()
 
     def enregistrer_type(self, type_fiche, vue) -> None:
         """« Tout est fiche » : déclare un type de fiche (`core.types_fiche.TypeFiche`, marque `#scrinium-<nom>` en première ligne) et sa vue.
