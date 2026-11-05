@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: scrinium 0.2.0\n"
 "Report-Msgid-Bugs-To: \n"
-"PO-Revision-Date: 2026-11-05 09:40+0100\n"
+"PO-Revision-Date: 2026-11-05 09:50+0100\n"
 "Last-Translator: Jean-François Kneib\n"
 "Language-Team: English\n"
 "Language: en\n"
@@ -104,7 +104,7 @@ msgstr "This note no longer exists or is locked."
 
 #: plugins/agenda/__init__.py:158
 #: plugins/agenda/__init__.py:227
-#: plugins/capture/__init__.py:253
+#: plugins/courriel/__init__.py:180
 msgid "Ajouter…"
 msgstr "Add…"
 
@@ -199,18 +199,18 @@ msgid "Nom d'une icône du thème d'icônes du système (ex. thunderbird, kwrite
 msgstr "Name of an icon from the system icon theme (e.g. thunderbird, kwrite, system-run), or the path of an image file."
 
 #: plugins/applications/__init__.py:116
-#: plugins/capture/__init__.py:209
+#: plugins/capture/__init__.py:159
 #: plugins/courriel/__init__.py:201
 msgid "Nom :"
 msgstr "Name:"
 
 #: plugins/applications/__init__.py:117
-#: plugins/capture/__init__.py:210
+#: plugins/capture/__init__.py:160
 msgid "Icône :"
 msgstr "Icon:"
 
 #: plugins/applications/__init__.py:118
-#: plugins/capture/__init__.py:212
+#: plugins/capture/__init__.py:162
 msgid "Commande :"
 msgstr "Command:"
 
@@ -219,7 +219,7 @@ msgid "Facultatif : {selection} = texte sélectionné dans la fiche, {fiche} = s
 msgstr "Optional: {selection} = text selected in the note, {fiche} = its title (passed as arguments, no shell). Applications are stored in clear text: do not put any password in them."
 
 #: plugins/applications/__init__.py:123
-#: plugins/capture/__init__.py:217
+#: plugins/capture/__init__.py:167
 msgid "Description :"
 msgstr "Description:"
 
@@ -246,7 +246,7 @@ msgid "Ouvrir avec"
 msgstr "Open with"
 
 #: plugins/applications/__init__.py:145
-#: plugins/capture/__init__.py:231
+#: plugins/capture/__init__.py:181
 msgid "Le nom et la commande sont obligatoires."
 msgstr "Name and command are required."
 
@@ -263,7 +263,7 @@ msgid "Ajouter une application…"
 msgstr "Add an application…"
 
 #: plugins/applications/__init__.py:268
-#: plugins/capture/__init__.py:319
+#: plugins/capture/__init__.py:288
 msgid "Exemples"
 msgstr "Examples"
 
@@ -272,7 +272,7 @@ msgid "Aucun exemple de plus : ils sont déjà dans la liste, ou ne sont pas ins
 msgstr "No more examples: they are already in the list, or not installed."
 
 #: plugins/applications/__init__.py:290
-#: plugins/capture/__init__.py:343
+#: plugins/capture/__init__.py:312
 msgid "Importer"
 msgstr "Import"
 
@@ -281,13 +281,13 @@ msgid "Fiche « Applications » créée : validez-la pour qu'elle serve à « Ou
 msgstr "“Applications” note created: validate it so “Open with” can use it."
 
 #: plugins/applications/__init__.py:234
-#: plugins/capture/__init__.py:254
+#: plugins/capture/__init__.py:257
 #: src/scrinium/ui/repertoire.py:37
 msgid "Monter"
 msgstr "Move up"
 
 #: plugins/applications/__init__.py:235
-#: plugins/capture/__init__.py:254
+#: plugins/capture/__init__.py:258
 #: src/scrinium/ui/repertoire.py:37
 msgid "Descendre"
 msgstr "Move down"
@@ -297,12 +297,12 @@ msgid "Ajouter les exemples installés"
 msgstr "Add the installed examples"
 
 #: plugins/applications/__init__.py:237
-#: plugins/capture/__init__.py:255
+#: plugins/capture/__init__.py:260
 msgid "Exporter…"
 msgstr "Export…"
 
 #: plugins/applications/__init__.py:238
-#: plugins/capture/__init__.py:255
+#: plugins/capture/__init__.py:261
 msgid "Importer…"
 msgstr "Import…"
 
@@ -319,7 +319,7 @@ msgid "« %s » demande la sélection : refusé pour une fiche verrouillée."
 msgstr "\"%s\" needs the selection: refused for a locked note."
 
 #: plugins/applications/__init__.py:360
-#: plugins/capture/__init__.py:464
+#: plugins/capture/__init__.py:412
 msgid "Sélectionnez d'abord du texte dans la fiche : « %s » en a besoin."
 msgstr "Select some text in the note first: “%s” needs it."
 
@@ -379,96 +379,92 @@ msgstr "Insert into the note"
 msgid "Exécution…"
 msgstr "Running…"
 
-#: plugins/capture/__init__.py:157
-msgid "Modifier les actions CLI…"
-msgstr "Edit CLI actions…"
-
-#: plugins/capture/__init__.py:190
-#: plugins/capture/__init__.py:231
+#: plugins/capture/__init__.py:140
+#: plugins/capture/__init__.py:181
 msgid "Action CLI"
 msgstr "CLI action"
 
-#: plugins/capture/__init__.py:195
+#: plugins/capture/__init__.py:145
 msgid "Nom d'une icône du thème d'icônes du système (ex. network-wired, drive-harddisk, utilities-terminal, system-run, edit-find)."
 msgstr "Name of an icon from the system icon theme (e.g. network-wired, drive-harddisk, utilities-terminal, system-run, edit-find)."
 
-#: plugins/capture/__init__.py:211
+#: plugins/capture/__init__.py:161
 msgid "Au clic :"
 msgstr "On click:"
 
-#: plugins/capture/__init__.py:213
+#: plugins/capture/__init__.py:163
 msgid "{selection} = texte sélectionné dans la fiche ; {fiche} = son titre. En mode « Exécuter », ils sont protégés pour le shell. Les actions sont enregistrées en clair : n'y mettez aucun mot de passe."
 msgstr "{selection} = text selected in the note; {fiche} = its title. In “Run” mode they are protected for the shell. Actions are stored in clear text: do not put any password in them."
 
-#: plugins/capture/__init__.py:319
+#: plugins/capture/__init__.py:288
 msgid "Ajouter les actions CLI d'exemple à la fin de la liste ? (Aucune n'est lancée.)"
 msgstr "Add the example CLI actions to the end of the list? (None of them is run.)"
 
-#: plugins/capture/__init__.py:327
+#: plugins/capture/__init__.py:296
 msgid "Exporter les actions CLI"
 msgstr "Export the CLI actions"
 
-#: plugins/capture/__init__.py:335
+#: plugins/capture/__init__.py:304
 msgid "Importer des actions CLI"
 msgstr "Import CLI actions"
 
-#: plugins/capture/__init__.py:365
+#: plugins/capture/__init__.py:322
 msgid "Réglages de la capture"
 msgstr "Capture settings"
 
-#: plugins/capture/__init__.py:367
+#: plugins/capture/__init__.py:324
 msgid "Essayer d'abord de taper directement dans Konsole (sans valider)"
 msgstr "Try to type directly into Konsole first (without pressing Enter)"
 
-#: plugins/capture/__init__.py:370
+#: plugins/capture/__init__.py:327
 msgid "Mettre la console au premier plan après l'envoi (KDE)"
 msgstr "Bring the console to the front after sending (KDE)"
 
-#: plugins/capture/__init__.py:401
-#: plugins/capture/__init__.py:432
-#: plugins/capture/__init__.py:403
+#: plugins/capture/__init__.py:356
+#: plugins/capture/__init__.py:380
+#: plugins/capture/__init__.py:396
 msgid "Actions CLI"
 msgstr "CLI actions"
 
-#: plugins/capture/__init__.py:409
-#: plugins/capture/__init__.py:490
-#: plugins/capture/__init__.py:519
+#: plugins/capture/__init__.py:357
+#: plugins/capture/__init__.py:438
+#: plugins/capture/__init__.py:467
 msgid "Console"
 msgstr "Console"
 
-#: plugins/capture/__init__.py:410
+#: plugins/capture/__init__.py:358
 msgid "Envoyer la sélection vers une console"
 msgstr "Send the selection to a console"
 
-#: plugins/capture/__init__.py:411
+#: plugins/capture/__init__.py:359
 msgid "Choisir la console cible…"
 msgstr "Choose the target console…"
 
-#: plugins/capture/__init__.py:412
+#: plugins/capture/__init__.py:360
 msgid "Revenir à la console de l'extension"
 msgstr "Back to the extension's console"
 
-#: plugins/capture/__init__.py:413
+#: plugins/capture/__init__.py:361
 msgid "Exécuter une commande et insérer la sortie…"
 msgstr "Run a command and insert its output…"
 
-#: plugins/capture/__init__.py:414
-msgid "Modifier les actions CLI préparées…"
-msgstr "Edit prepared CLI actions…"
+#: plugins/capture/__init__.py:362
+msgid "Fiche des actions CLI…"
+msgstr "CLI actions note…"
 
-#: plugins/capture/__init__.py:415
+#: plugins/capture/__init__.py:363
 msgid "Réglages de la capture…"
 msgstr "Capture settings…"
 
-#: plugins/capture/__init__.py:490
+#: plugins/capture/__init__.py:438
 msgid "Le texte ira dans la console de l'extension (ouverte au besoin)."
 msgstr "The text will go to the extension's console (opened if needed)."
 
-#: plugins/capture/__init__.py:519
+#: plugins/capture/__init__.py:467
 msgid "Copié dans le presse-papiers : collez dans votre console (Ctrl+Maj+V). Rien n'est validé."
 msgstr "Copied to the clipboard: paste into your console (Ctrl+Shift+V). Nothing is executed."
 
-#: plugins/capture/__init__.py:590
+#: plugins/capture/__init__.py:538
 msgid "Envoyer vers quelle console ?"
 msgstr "Send to which console?"
 
@@ -485,7 +481,7 @@ msgid "Terminé."
 msgstr "Done."
 
 #: plugins/capture/__init__.py:118
-#: plugins/capture/__init__.py:480
+#: plugins/capture/__init__.py:428
 msgid "Capture"
 msgstr "Capture"
 
@@ -494,41 +490,37 @@ msgstr "Capture"
 msgid "La fiche n'est pas modifiable (aucune fiche ouverte, ou verrouillée fermée)."
 msgstr "The note cannot be edited (no note open, or locked and closed)."
 
-#: plugins/capture/__init__.py:227
+#: plugins/capture/__init__.py:177
 msgid "Icône introuvable : l'icône par défaut sera utilisée."
 msgstr "Icon not found: the default icon will be used."
 
-#: plugins/capture/__init__.py:255
-msgid "Exemples…"
-msgstr "Examples…"
+#: plugins/capture/__init__.py:222
+msgid "Clic droit : ajouter, modifier, déplacer… Pour lancer une action : clic droit dans une fiche → « Actions CLI »."
+msgstr "Right-click: add, edit, move… To run an action: right-click in a note → “CLI actions”."
 
-#: plugins/capture/__init__.py:275
-msgid "Fiche non validée : relisez les commandes, puis validez-la pour la modifier."
-msgstr "Note not validated: read the commands, then validate it to edit it."
+#: plugins/capture/__init__.py:224
+msgid "Fiche non validée : relisez les commandes (infobulles), puis validez-la pour pouvoir l'utiliser et la modifier."
+msgstr "Note not validated: review the commands (tooltips), then validate it to use and edit it."
 
-#: plugins/capture/__init__.py:402
-msgid "Panneau des actions CLI"
-msgstr "CLI actions panel"
+#: plugins/capture/__init__.py:253
+msgid "Ajouter une action…"
+msgstr "Add an action…"
 
-#: plugins/capture/__init__.py:407
-msgid "Afficher ou masquer le panneau des actions CLI préparées"
-msgstr "Show or hide the prepared CLI actions panel"
+#: plugins/capture/__init__.py:404
+msgid "Fiche « Actions CLI » créée : validez-la pour qu'elle serve au menu « Actions CLI »."
+msgstr "“CLI actions” note created: validate it so the “CLI actions” menu can use it."
 
-#: plugins/capture/__init__.py:456
-msgid "Fiche « Actions CLI » créée : validez-la pour qu'elle serve au panneau."
-msgstr "“CLI actions” note created: validate it so the panel uses it."
-
-#: plugins/capture/__init__.py:480
+#: plugins/capture/__init__.py:428
 #: plugins/courriel/__init__.py:357
 #: plugins/lecture/__init__.py:287
 msgid "Ouvrez d'abord une fiche."
 msgstr "Open a note first."
 
-#: plugins/capture/__init__.py:497
+#: plugins/capture/__init__.py:445
 msgid "Aucune console Konsole ouverte : celle de l'extension s'ouvrira au premier envoi."
 msgstr "No Konsole console is open: the extension's one will open on first send."
 
-#: plugins/capture/__init__.py:507
+#: plugins/capture/__init__.py:455
 #: plugins/lecture/__init__.py:307
 msgid "Sélectionnez d'abord du texte dans la fiche."
 msgstr "Select some text in the note first."
@@ -537,35 +529,35 @@ msgstr "Select some text in the note first."
 msgid "La commande est lancée par votre shell, uniquement quand vous cliquez sur « Exécuter » (délai maximal : %d s)."
 msgstr "The command is run by your shell, only when you click “Run” (maximum time: %d s)."
 
-#: plugins/capture/__init__.py:166
-msgid "%d fiche d'actions CLI attend votre validation : « Modifier les actions CLI… » l'ouvre."
-msgstr "%d CLI actions note is waiting for your validation: “Edit CLI actions…” opens it."
+#: plugins/capture/__init__.py:259
+msgid "Ajouter les exemples…"
+msgstr "Add the examples…"
 
-#: plugins/capture/__init__.py:343
+#: plugins/capture/__init__.py:312
 msgid "Ajouter %d action(s) CLI à la liste ? Relisez leurs commandes avant de les utiliser."
 msgstr "Add %d CLI action(s) to the list? Review their commands before using them."
 
-#: plugins/capture/__init__.py:448
+#: plugins/capture/__init__.py:396
 msgid "Vos actions CLI sont maintenant une fiche « Actions CLI » (thème « %s ») : ouvrez-la et validez-la."
 msgstr "Your CLI actions are now a “CLI actions” note (topic “%s”): open it and validate it."
 
-#: plugins/capture/__init__.py:469
+#: plugins/capture/__init__.py:417
 msgid "Ouvrez d'abord une fiche : la sortie y sera insérée."
 msgstr "Open a note first: the output will be inserted into it."
 
-#: plugins/capture/__init__.py:502
+#: plugins/capture/__init__.py:450
 msgid "Console cible : %s"
 msgstr "Target console: %s"
 
-#: plugins/capture/__init__.py:571
+#: plugins/capture/__init__.py:519
 msgid "Konsole refuse l'envoi direct : texte copié dans le presse-papiers."
 msgstr "Konsole refuses direct sending: text copied to the clipboard."
 
-#: plugins/capture/__init__.py:581
+#: plugins/capture/__init__.py:529
 msgid "Console ouverte : "
 msgstr "Console opened: "
 
-#: plugins/capture/__init__.py:582
+#: plugins/capture/__init__.py:530
 msgid "texte tapé dans « %s » (non validé : relisez, puis Entrée)."
 msgstr "text typed into “%s” (not executed: review it, then press Enter)."
 
@@ -573,11 +565,11 @@ msgstr "text typed into “%s” (not executed: review it, then press Enter)."
 msgid "code de retour %d"
 msgstr "return code %d"
 
-#: plugins/capture/__init__.py:474
+#: plugins/capture/__init__.py:422
 msgid "Copié dans le presse-papiers : « %s »."
 msgstr "Copied to the clipboard: “%s”."
 
-#: plugins/capture/__init__.py:577
+#: plugins/capture/__init__.py:525
 msgid "Konsole : %s"
 msgstr "Konsole: %s"
 
