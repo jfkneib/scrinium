@@ -30,10 +30,15 @@ class TypeFiche:
     icone: str = ""                                   # nom d'icône du thème, pour la liste des fiches
     executable: bool = False                          # la fiche déclenche des commandes : inerte tant qu'elle n'est pas validée
     en_markdown: Callable[[str], str] | None = None   # rendu texte pour l'impression et l'export PDF (sinon : le texte tel quel)
+    modele: Callable[[], str] | None = None           # texte d'une fiche neuve de ce type (sinon : la marque seule) ; menu « Nouvelle fiche »
 
     @property
     def marque(self) -> str:
         return "#scrinium-" + self.nom
+
+    def texte_neuf(self) -> str:
+        """Texte d'une fiche neuve de ce type."""
+        return self.modele() if self.modele else self.marque + "\n"
 
 
 _types: dict = {}

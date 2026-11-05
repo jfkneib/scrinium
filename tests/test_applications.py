@@ -340,3 +340,16 @@ def test_sous_menu_se_remplit_dans_un_vrai_menu(app):
     assert sous.menu().actions()[0].text() == "Deux" and sous.isEnabled() and not vide.isEnabled()
     sous.menu().actions()[0].trigger()
     assert appels == ["deux"]
+
+
+def test_menu_nouvelle_fiche_propose_les_types(fen):
+    m = fen.menu_nouvelle
+    m.aboutToShow.emit()
+    textes = [a.text() for a in m.actions() if not a.isSeparator()]
+    assert textes[0] == "Fiche ordinaire" and "Applications" in textes and "Répertoire…" in textes
+    next(a for a in m.actions() if a.text() == "Applications").trigger()
+    assert fen.fiche.texte.startswith("#scrinium-applications") and fen.fiche.titre == "Applications"
+    assert fen.pile.currentWidget() is fen.vues_types["applications"] and fen.vues_types["applications"].actif   # créée par l'utilisateur : validée
+    assert fen.bandeau_validation.isHidden()
+    next(a for a in m.actions() if a.text() == "Fiche ordinaire").trigger()
+    assert fen.pile.currentWidget() is not fen.vues_types["applications"] and not fen.fiche.texte

@@ -8,7 +8,7 @@ from PyQt6.QtCore import QEvent, QSize, Qt, QTimer, pyqtSignal
 from PyQt6.QtGui import QAction, QActionGroup, QKeySequence
 from PyQt6.QtPrintSupport import QPrintDialog, QPrinter
 from PyQt6.QtWidgets import (QAbstractItemView, QApplication, QDialog, QFileDialog, QHBoxLayout, QInputDialog, QLabel, QLineEdit, QListWidget,
-                             QListWidgetItem, QMainWindow, QMenu, QMessageBox, QPushButton, QSplitter,
+                             QListWidgetItem, QMainWindow, QMenu, QMessageBox, QPushButton, QSplitter, QToolButton,
                              QStackedWidget, QSystemTrayIcon, QToolBar, QVBoxLayout, QWidget)
 
 from .. import __version__
@@ -104,6 +104,11 @@ class Fenetre(QMainWindow):
         self.a_theme.setToolTip(_("Nouveau thème (Ctrl+Maj+N)"))
         tb.addAction(self.a_theme)          # même ordre que les colonnes : thèmes à gauche, fiches ensuite
         tb.addAction(self.a_fiche)
+        self.menu_nouvelle = QMenu(_("Nouvelle fiche d'un type…"), self)       # flèche du bouton « Fiche » et menu Fichier : fiche ordinaire ou typée
+        self.menu_nouvelle.aboutToShow.connect(self._remplir_menu_nouvelle)
+        bouton = tb.widgetForAction(self.a_fiche)
+        bouton.setMenu(self.menu_nouvelle)
+        bouton.setPopupMode(QToolButton.ToolButtonPopupMode.MenuButtonPopup)    # clic = fiche ordinaire (comme Ctrl+N), flèche = choix du type
         self.recherche = QLineEdit()
         self.recherche.setPlaceholderText(_("Chercher (Ctrl+F)…"))
         self.recherche.setClearButtonEnabled(True)
@@ -115,6 +120,7 @@ class Fenetre(QMainWindow):
         mf = m.addMenu(_("&Fichier"))
         mf.addAction(self.a_theme)
         mf.addAction(self.a_fiche)
+        mf.addMenu(self.menu_nouvelle)
         mf.addAction(self._action(_("Nouveau répertoire…"), "x-office-address-book", self.nouveau_repertoire, "Ctrl+Alt+R"))
         mf.addAction(self._action(_("Imprimer la fiche…"), "document-print", self.imprimer_fiche, "Ctrl+P"))
         mf.addAction(self._action(_("Capture rapide…"), "document-edit", self.capture_rapide, "Ctrl+Alt+N"))
@@ -854,7 +860,10 @@ class Fenetre(QMainWindow):
         if f is not None:
             self._statut(f"{_('✔ Images mises à jour')} ({time.strftime('%H:%M:%S')})  ·  {t.nom}/{f.path.name}", VERT)
 
-    def nouvelle_fiche(self):
+    def nouvelle_fiche(self, type_nom: str | None = None):
+        """Crée une fiche dans le thème courant : ordinaire, ou d'un type enregistré (`type_nom`, voir core/types_fiche.py). Une fiche
+        neuve d'un type exécutable est vide : l'utilisateur vient de la créer, elle est validée d'emblée."""
+        type_fiche = next((t for t in types_fiche.types() if t.nom == type_nom), None) if type_nom else None
         self.quitter_fiche()
         t = self._theme_courant() or (self.store.themes[0] if self.store.themes else None)
         if t is None:
@@ -863,6 +872,10 @@ class Fenetre(QMainWindow):
             if t is None:
                 return
         f = self.store.nouvelle_fiche(t)
+        if type_fiche is not None:
+            self.store.enregistrer(t, f, _(type_fiche.libelle), type_fiche.texte_neuf())
+            if type_fiche.executable:
+                self.store.valider_fiche(t, f)
         self.recherche.blockSignals(True)
         self.recherche.clear()
         self.recherche.blockSignals(False)
@@ -873,6 +886,18 @@ class Fenetre(QMainWindow):
         self.maj_fiches()
         self._afficher(t, f)
         self.titre.setFocus()
+
+    def _remplir_menu_nouvelle(self):
+        """Fiche ordinaire, puis un type de fiche par entrée (répertoire, agenda, applications, actions CLI… selon les extensions actives)."""
+        m = self.menu_nouvelle
+        m.clear()
+        m.addAction(icone("document-new"), _("Fiche ordinaire"), lambda *_a: self.nouvelle_fiche())
+        m.addSeparator()
+        for t in types_fiche.types():
+            if t.nom == repertoire.TYPE.nom:
+                m.addAction(icone(t.icone or "view-pim-notes"), _(t.libelle) + "…", self.nouveau_repertoire)     # il demande son modèle de colonnes
+            else:
+                m.addAction(icone(t.icone or "view-pim-notes"), _(t.libelle), lambda *_a, n=t.nom: self.nouvelle_fiche(n))
 
     def supprimer_fiche(self):
         choisies = self._fiches_selectionnees()
