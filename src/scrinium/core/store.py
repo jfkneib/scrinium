@@ -247,6 +247,28 @@ class Store:
             self.a_la_corbeille(pj, stamp=stamp)
         th.fiches.remove(f)
 
+    def deplacer_fiche(self, src: Theme, f: Fiche, dst: Theme) -> bool:
+        """Range la fiche (et ses images) dans un autre thème. Marche aussi pour une fiche verrouillée fermée (le fichier n'est pas ouvert).
+        Les favoris et la validation suivent la fiche ; son rang manuel est oublié (elle arrive en fin de liste). False si rien à faire."""
+        if src is dst or f not in src.fiches:
+            return False
+        ancien = f.path
+        nouveau = self.libre(dst.path, f.titre or ancien.stem, None, ancien.suffix)
+        os.rename(ancien, nouveau)
+        try:
+            self._deplacer_pj(ancien, nouveau)
+        except OSError:
+            os.rename(nouveau, ancien)                    # on remet tout en place plutôt que de séparer la fiche de ses images
+            raise
+        cle_a, cle_n = self._cle_fiche(src, f), f"{dst.path.name}/{nouveau.name}"
+        self._favoris_suivre(cle_a, cle_n, False)
+        self._validees_suivre(cle_a, cle_n, False)
+        self._ordre_suivre(cle_a, None, False)
+        src.fiches.remove(f)
+        dst.fiches.append(f)
+        f.path = nouveau
+        return True
+
     def refermer(self, f: Fiche) -> None:
         """Referme une fiche verrouillée ouverte : le mot de passe sera redemandé. Le texte doit avoir été enregistré avant."""
         if f.verrou:

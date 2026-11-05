@@ -45,8 +45,54 @@ class ListeOrdonnable(QListWidget):
             self.blockSignals(False)
         QTimer.singleShot(0, self.reordonnee.emit)            # une fois le glisser-déposer terminé (la liste est alors définitive)
 
+    def startDrag(self, actions):
+        """La liste des fiches propose aussi la copie : déposée sur un thème (action Copy), Qt n'en retire pas les lignes."""
+        if getattr(self, "fiches_glissables", False):
+            actions = actions | Qt.DropAction.CopyAction
+        super().startDrag(actions)
+
     def cles(self) -> list:
         return [self.item(i).data(Qt.ItemDataRole.UserRole) for i in range(self.count())]
+
+
+class ListeThemes(ListeOrdonnable):
+    """Liste des thèmes : on peut aussi y déposer des fiches (glissées depuis la liste du milieu) pour les ranger dans le thème visé."""
+    fiches_deposees = pyqtSignal(str)          # nom du dossier du thème visé
+
+    def _cible(self, ev):
+        src = ev.source()
+        if src is None or src is self or not getattr(src, "fiches_glissables", False):
+            return None
+        it = self.itemAt(ev.position().toPoint())
+        return it.data(Qt.ItemDataRole.UserRole) if it is not None else None       # None : « Toutes les fiches » ou vide
+
+    def dragEnterEvent(self, ev):
+        if ev.source() is not self and getattr(ev.source(), "fiches_glissables", False):
+            ev.acceptProposedAction()
+        else:
+            super().dragEnterEvent(ev)
+
+    def dragMoveEvent(self, ev):
+        if ev.source() is not self and getattr(ev.source(), "fiches_glissables", False):
+            if self._cible(ev):
+                ev.setDropAction(Qt.DropAction.CopyAction)       # jamais MoveAction : Qt retirerait les lignes de la liste source
+                ev.accept()
+            else:
+                ev.ignore()
+        else:
+            super().dragMoveEvent(ev)
+
+    def dropEvent(self, ev):
+        if ev.source() is not self and getattr(ev.source(), "fiches_glissables", False):
+            cible = self._cible(ev)
+            if cible:
+                ev.setDropAction(Qt.DropAction.CopyAction)
+                ev.accept()
+                QTimer.singleShot(0, lambda: self.fiches_deposees.emit(cible))
+            else:
+                ev.ignore()
+            return
+        super().dropEvent(ev)
 
 
 class Fenetre(QMainWindow):
@@ -156,7 +202,8 @@ class Fenetre(QMainWindow):
         mh.addAction(self._action(_("Documentation des extensions"), "preferences-plugin", self.doc_extensions))
         mh.addAction(self._action(_("À propos"), "help-about", self.a_propos))
 
-        self.liste_themes = ListeOrdonnable()
+        self.liste_themes = ListeThemes()
+        self.liste_themes.fiches_deposees.connect(self.deplacer_fiches_vers)
         self.liste_themes.setDragDropMode(QAbstractItemView.DragDropMode.InternalMove)
         self.liste_themes.setDefaultDropAction(Qt.DropAction.MoveAction)
         self.liste_themes.reordonnee.connect(self._ordre_themes_change)
@@ -189,6 +236,7 @@ class Fenetre(QMainWindow):
 
         self.liste = ListeOrdonnable()
         self.liste.setDefaultDropAction(Qt.DropAction.MoveAction)
+        self.liste.fiches_glissables = True            # on peut les déposer sur un thème (voir ListeThemes)
         self.liste.reordonnee.connect(self._ordre_fiches_change)
         self.liste.setIconSize(QSize(16, 16))
         self.liste.setSelectionMode(QAbstractItemView.SelectionMode.ExtendedSelection)
@@ -417,13 +465,42 @@ class Fenetre(QMainWindow):
         t, f = self.rows[self.liste.row(it)]
         m = QMenu(self)
         n = len(self._fiches_selectionnees())
-        if n == 1:                                       # plusieurs sélectionnées : seule la suppression est groupée
+        if n == 1:                                       # plusieurs sélectionnées : seuls déplacer et supprimer sont groupés
             m.addAction(avec_epingle(""), _("Désépingler") if self.store.fiche_epinglee(t, f) else _("Épingler"),
                         lambda: self.epingler_fiche(t, f))
         if self._ordre_fiches_possible() and self.store.ordre()["fiches"].get(t.path.name):
             m.addAction(_("Remettre les fiches dans l'ordre alphabétique"), self._ordre_alphabetique_fiches)
+        autres = [th for th in self._themes_ordonnes() if not all(x is th for x, _f in self._fiches_selectionnees())]
+        if autres:
+            sous = m.addMenu(icone("folder"), _("Déplacer vers le thème"))
+            for th in autres:
+                sous.addAction(icone(th.icone) if not icone(th.icone).isNull() else icone(ICONE_DEFAUT), th.nom,
+                               lambda *_a, cle=th.path.name: self.deplacer_fiches_vers(cle))
         m.addAction(icone("edit-delete"), _("Supprimer les %d fiches…") % n if n > 1 else _("Supprimer…"), self.supprimer_fiche)
         m.exec(self.liste.mapToGlobal(pos))
+
+    def deplacer_fiches_vers(self, cle_theme: str):
+        """Range les fiches sélectionnées dans le thème dont le dossier s'appelle `cle_theme` (glisser-déposer ou clic droit)."""
+        dst = next((t for t in self.store.themes if t.path.name == cle_theme), None)
+        if dst is None:
+            return
+        self.sauver()                                    # ce qui est en cours de frappe est écrit avant de bouger le fichier
+        courante = self.fiche
+        fait = 0
+        for t, f in list(self._fiches_selectionnees()):
+            try:
+                if self.store.deplacer_fiche(t, f, dst):
+                    fait += 1
+                    if f is courante:
+                        self.fiche_theme = dst
+            except OSError as ex:
+                QMessageBox.warning(self, _("Scrinium"), _("Déplacement impossible : %s") % ex)
+                break
+        if fait:
+            self.maj_themes()
+            self.maj_fiches()
+            self.plugins.emettre("themes_modifies")
+            self._statut(_("✔ %(n)d fiche(s) déplacée(s) vers « %(theme)s »") % {"n": fait, "theme": dst.nom}, VERT)
 
     def _theme_courant(self):
         return self.store.theme(self.theme)
@@ -575,7 +652,7 @@ class Fenetre(QMainWindow):
         self.liste.blockSignals(False)
         # glisser-déposer : seulement dans la vue d'un thème (l'ordre est propre à chaque thème), jamais pendant une recherche
         self.liste.setDragDropMode(QAbstractItemView.DragDropMode.InternalMove if self._ordre_fiches_possible()
-                                   else QAbstractItemView.DragDropMode.NoDragDrop)
+                                   else QAbstractItemView.DragDropMode.DragOnly)       # déposer sur un thème reste possible
         if self.rows:
             self.liste.setCurrentRow(sel if sel is not None else 0)
             if sel is None:

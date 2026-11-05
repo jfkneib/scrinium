@@ -215,7 +215,7 @@ def test_menus_groupes_seulement_suppression(fen, monkeypatch):  # noqa: F811
     monkeypatch.setattr(fen.liste, "itemAt", lambda pos: fen.liste.item(0))
     fen.liste.selectAll()
     fen._menu_fiche(QPoint(1, 1))
-    assert vus[-1] == ["Supprimer les 4 fiches…"]
+    assert vus[-1] == ["Déplacer vers le thème", "Supprimer les 4 fiches…"]          # groupé : déplacer et supprimer
     fen.liste.clearSelection()
     fen.liste.setCurrentRow(0)
     fen._menu_fiche(QPoint(1, 1))

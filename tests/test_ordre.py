@@ -149,7 +149,7 @@ def test_glisser_deposer_des_fiches_seulement_dans_un_theme(fen):  # noqa: F811
     from PyQt6.QtWidgets import QAbstractItemView
     _depot(fen)
     fen.liste_themes.setCurrentRow(0)
-    assert fen.liste.dragDropMode() == QAbstractItemView.DragDropMode.NoDragDrop        # « Toutes les fiches »
+    assert fen.liste.dragDropMode() == QAbstractItemView.DragDropMode.DragOnly        # « Toutes les fiches » : pas de tri, mais on peut glisser sur un thème
     fen.liste_themes.setCurrentRow(fen._noms().index("Beta"))
     assert fen.liste.dragDropMode() == QAbstractItemView.DragDropMode.InternalMove
     it = fen.liste.takeItem(2)                                                          # c-Beta tout en haut
@@ -157,7 +157,7 @@ def test_glisser_deposer_des_fiches_seulement_dans_un_theme(fen):  # noqa: F811
     fen.liste.reordonnee.emit()
     assert [f.titre for _t, f in fen.rows] == ["c-Beta", "a-Beta", "b-Beta"]
     fen.recherche.setText("Beta")                                                       # pendant une recherche : pas de déplacement
-    assert fen.liste.dragDropMode() == QAbstractItemView.DragDropMode.NoDragDrop
+    assert fen.liste.dragDropMode() == QAbstractItemView.DragDropMode.DragOnly
     avant = fen.store.ordre()
     fen.deplacer(fen.liste, 1)
     assert fen.store.ordre() == avant
