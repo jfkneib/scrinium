@@ -1262,16 +1262,20 @@ msgid "Extraire le texte de l'image (OCR)"
 msgstr ""
 
 #: plugins/ocr/__init__.py:191
+msgid "Texte de l'image → nouvelle fiche"
+msgstr ""
+
+#: plugins/ocr/__init__.py:192
 msgid "Réglages de l'OCR…"
 msgstr ""
 
-#: plugins/ocr/__init__.py:253
-#: plugins/ocr/__init__.py:268
-#: plugins/ocr/__init__.py:201
+#: plugins/ocr/__init__.py:254
+#: plugins/ocr/__init__.py:272
+#: plugins/ocr/__init__.py:311
 msgid "OCR"
 msgstr ""
 
-#: plugins/ocr/__init__.py:268
+#: plugins/ocr/__init__.py:272
 msgid "Extraction du texte…"
 msgstr ""
 
@@ -1279,24 +1283,36 @@ msgstr ""
 msgid "(tesseract introuvable)"
 msgstr ""
 
-#: plugins/ocr/__init__.py:221
-#: plugins/ocr/__init__.py:232
+#: plugins/ocr/__init__.py:222
+#: plugins/ocr/__init__.py:233
+#: plugins/ocr/__init__.py:285
 msgid "Fiche verrouillée : déverrouillez-la d'abord."
 msgstr ""
 
-#: plugins/ocr/__init__.py:225
+#: plugins/ocr/__init__.py:226
 msgid "Cette fiche n'a pas d'image."
 msgstr ""
 
-#: plugins/ocr/__init__.py:253
+#: plugins/ocr/__init__.py:254
 msgid "Extraction du texte de %d image(s)…"
 msgstr ""
 
-#: plugins/ocr/__init__.py:300
+#: plugins/ocr/__init__.py:309
+#: plugins/ocr/__init__.py:311
+#: plugins/photos/__init__.py:162
+msgid "Texte de %s"
+msgstr ""
+
+#: plugins/ocr/__init__.py:311
+#: plugins/photos/__init__.py:164
+msgid "Fiche créée : %s"
+msgstr ""
+
+#: plugins/ocr/__init__.py:336
 msgid "Texte extrait."
 msgstr ""
 
-#: plugins/ocr/__init__.py:312
+#: plugins/ocr/__init__.py:348
 msgid "Ouvrez d'abord une fiche (déverrouillée)."
 msgstr ""
 
@@ -1304,20 +1320,38 @@ msgstr ""
 msgid "✔ Tesseract trouvé : %s"
 msgstr ""
 
-#: plugins/ocr/__init__.py:292
+#: plugins/ocr/__init__.py:308
+#: plugins/photos/__init__.py:161
+msgid "(aucun texte reconnu)"
+msgstr ""
+
+#: plugins/ocr/__init__.py:328
+#: plugins/ocr/__init__.py:298
 #: plugins/photos/__init__.py:158
 msgid "Échec : %s"
 msgstr ""
 
-#: plugins/ocr/__init__.py:201
+#: plugins/ocr/__init__.py:202
 msgid "Tesseract est introuvable."
+msgstr ""
+
+#: plugins/ocr/__init__.py:308
+#: src/scrinium/ui/capture_rapide.py:41
+#: src/scrinium/ui/fenetre.py:147
+msgid "Fiche"
+msgstr ""
+
+#: plugins/ocr/__init__.py:308
+#: plugins/photos/__init__.py:161
+#: src/scrinium/ui/images.py:408
+msgid "Image"
 msgstr ""
 
 #: plugins/ocr/__init__.py:75
 msgid "Tesseract introuvable."
 msgstr ""
 
-#: plugins/ocr/__init__.py:209
+#: plugins/ocr/__init__.py:210
 #: plugins/ocr/__init__.py:82
 msgid "Langue(s) non installée(s) : %s"
 msgstr ""
@@ -1849,26 +1883,8 @@ msgstr ""
 msgid "(les %d premières sont montrées)"
 msgstr ""
 
-#: plugins/photos/__init__.py:161
-msgid "(aucun texte reconnu)"
-msgstr ""
-
-#: plugins/photos/__init__.py:162
-msgid "Texte de %s"
-msgstr ""
-
-#: plugins/photos/__init__.py:164
-msgid "Fiche créée : %s"
-msgstr ""
-
 #: plugins/photos/__init__.py:180
 msgid "Ouvrir l'image"
-msgstr ""
-
-#: plugins/photos/__init__.py:161
-#: src/scrinium/ui/images.py:408
-#: src/scrinium/ui/images.py:469
-msgid "Image"
 msgstr ""
 
 #: plugins/photos/__init__.py:182
@@ -3336,11 +3352,6 @@ msgstr ""
 #: src/scrinium/ui/fenetre.py:149
 #: src/scrinium/ui/fenetre.py:547
 msgid "Thème"
-msgstr ""
-
-#: src/scrinium/ui/capture_rapide.py:41
-#: src/scrinium/ui/fenetre.py:147
-msgid "Fiche"
 msgstr ""
 
 #: src/scrinium/ui/capture_rapide.py:43

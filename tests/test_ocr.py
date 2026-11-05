@@ -200,7 +200,7 @@ def test_clic_droit_sur_une_image_lance_l_ocr(fen, app, faux_moteur, monkeypatch
     from PyQt6.QtWidgets import QMenu
     ajouter_image(fen)
     ajouter_image(fen)
-    assert [e[1] for e in fen.actions_image] == ["Extraire le texte de l'image (OCR)"]
+    assert [e[1] for e in fen.actions_image] == ["Extraire le texte de l'image (OCR)", "Texte de l'image → nouvelle fiche"]
     fen.bande.liste.setCurrentRow(1)
     actions = {}
     monkeypatch.setattr(fen.bande.liste, "itemAt", lambda pos: fen.bande.liste.item(1))
@@ -212,6 +212,23 @@ def test_clic_droit_sur_une_image_lance_l_ocr(fen, app, faux_moteur, monkeypatch
     assert attendre(app, lambda: fen.store.lister_pieces(fen.fiche)[1].ocr != "")
     pieces = fen.store.lister_pieces(fen.fiche)
     assert pieces[0].ocr == "" and pieces[1].ocr.startswith("texte lu")           # seulement l'image visée
+
+
+def test_clic_droit_image_vers_fiche_dans_le_meme_theme(fen, app, faux_moteur, monkeypatch):
+    ajouter_image(fen)
+    theme = fen.fiche_theme
+    entree = next(e[2] for e in fen.actions_image if e[1] == "Texte de l'image → nouvelle fiche")
+    avant = len(theme.fiches)
+    vue = fen.plugins.fiche_courante()
+    from scrinium.core.plugins import PieceVue
+    piece = lambda: PieceVue(fen.store.lister_pieces(fen.fiche)[-1])                                        # noqa: E731
+    entree(vue, piece())                                                                                  # image jamais lue : lecture puis fiche
+    assert attendre(app, lambda: len(theme.fiches) == avant + 1)
+    nouvelle = next(f for f in theme.fiches if f.titre.startswith("Texte de "))
+    assert "texte lu" in nouvelle.texte and "Facture" in nouvelle.texte                  # le titre de la fiche d'origine est rappelé
+    assert fen.store.lister_pieces(fen.fiche)[-1].ocr.startswith("texte lu")               # le texte est aussi gardé avec l'image
+    entree(vue, piece())                                                                   # déjà lu : fiche créée tout de suite, sans relire
+    assert len(theme.fiches) == avant + 2
 
 
 def test_entree_retiree_a_la_desactivation(fen, app):

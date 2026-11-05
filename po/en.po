@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: scrinium 0.2.0\n"
 "Report-Msgid-Bugs-To: \n"
-"PO-Revision-Date: 2026-11-05 14:21+0100\n"
+"PO-Revision-Date: 2026-11-05 17:25+0100\n"
 "Last-Translator: Jean-François Kneib\n"
 "Language-Team: English\n"
 "Language: en\n"
@@ -1286,16 +1286,20 @@ msgid "Extraire le texte de l'image (OCR)"
 msgstr "Extract the text from the image (OCR)"
 
 #: plugins/ocr/__init__.py:191
+msgid "Texte de l'image → nouvelle fiche"
+msgstr "Text of the image → new fiche"
+
+#: plugins/ocr/__init__.py:192
 msgid "Réglages de l'OCR…"
 msgstr "OCR settings…"
 
-#: plugins/ocr/__init__.py:253
-#: plugins/ocr/__init__.py:268
-#: plugins/ocr/__init__.py:201
+#: plugins/ocr/__init__.py:254
+#: plugins/ocr/__init__.py:272
+#: plugins/ocr/__init__.py:311
 msgid "OCR"
 msgstr "OCR"
 
-#: plugins/ocr/__init__.py:268
+#: plugins/ocr/__init__.py:272
 msgid "Extraction du texte…"
 msgstr "Extracting text…"
 
@@ -1303,24 +1307,36 @@ msgstr "Extracting text…"
 msgid "(tesseract introuvable)"
 msgstr "(tesseract not found)"
 
-#: plugins/ocr/__init__.py:221
-#: plugins/ocr/__init__.py:232
+#: plugins/ocr/__init__.py:222
+#: plugins/ocr/__init__.py:233
+#: plugins/ocr/__init__.py:285
 msgid "Fiche verrouillée : déverrouillez-la d'abord."
 msgstr "Locked note: unlock it first."
 
-#: plugins/ocr/__init__.py:225
+#: plugins/ocr/__init__.py:226
 msgid "Cette fiche n'a pas d'image."
 msgstr "This note has no images."
 
-#: plugins/ocr/__init__.py:253
+#: plugins/ocr/__init__.py:254
 msgid "Extraction du texte de %d image(s)…"
 msgstr "Extracting the text of %d image(s)…"
 
-#: plugins/ocr/__init__.py:300
+#: plugins/ocr/__init__.py:309
+#: plugins/ocr/__init__.py:311
+#: plugins/photos/__init__.py:162
+msgid "Texte de %s"
+msgstr "Text of %s"
+
+#: plugins/ocr/__init__.py:311
+#: plugins/photos/__init__.py:164
+msgid "Fiche créée : %s"
+msgstr "Fiche created: %s"
+
+#: plugins/ocr/__init__.py:336
 msgid "Texte extrait."
 msgstr "Text extracted."
 
-#: plugins/ocr/__init__.py:312
+#: plugins/ocr/__init__.py:348
 msgid "Ouvrez d'abord une fiche (déverrouillée)."
 msgstr "Open a note (unlocked) first."
 
@@ -1328,20 +1344,38 @@ msgstr "Open a note (unlocked) first."
 msgid "✔ Tesseract trouvé : %s"
 msgstr "✔ Tesseract found: %s"
 
-#: plugins/ocr/__init__.py:292
+#: plugins/ocr/__init__.py:308
+#: plugins/photos/__init__.py:161
+msgid "(aucun texte reconnu)"
+msgstr "(no text recognised)"
+
+#: plugins/ocr/__init__.py:328
+#: plugins/ocr/__init__.py:298
 #: plugins/photos/__init__.py:158
 msgid "Échec : %s"
 msgstr "Failed: %s"
 
-#: plugins/ocr/__init__.py:201
+#: plugins/ocr/__init__.py:202
 msgid "Tesseract est introuvable."
 msgstr "Tesseract not found."
+
+#: plugins/ocr/__init__.py:308
+#: src/scrinium/ui/capture_rapide.py:41
+#: src/scrinium/ui/fenetre.py:147
+msgid "Fiche"
+msgstr "Note"
+
+#: plugins/ocr/__init__.py:308
+#: plugins/photos/__init__.py:161
+#: src/scrinium/ui/images.py:408
+msgid "Image"
+msgstr "Image"
 
 #: plugins/ocr/__init__.py:75
 msgid "Tesseract introuvable."
 msgstr "Tesseract not found."
 
-#: plugins/ocr/__init__.py:209
+#: plugins/ocr/__init__.py:210
 #: plugins/ocr/__init__.py:82
 msgid "Langue(s) non installée(s) : %s"
 msgstr "Language(s) not installed: %s"
@@ -1915,27 +1949,9 @@ msgstr "Folder not found on this machine: %s"
 msgid "(les %d premières sont montrées)"
 msgstr "(the first %d are shown)"
 
-#: plugins/photos/__init__.py:161
-msgid "(aucun texte reconnu)"
-msgstr "(no text recognised)"
-
-#: plugins/photos/__init__.py:162
-msgid "Texte de %s"
-msgstr "Text of %s"
-
-#: plugins/photos/__init__.py:164
-msgid "Fiche créée : %s"
-msgstr "Fiche created: %s"
-
 #: plugins/photos/__init__.py:180
 msgid "Ouvrir l'image"
 msgstr "Open the image"
-
-#: plugins/photos/__init__.py:161
-#: src/scrinium/ui/images.py:408
-#: src/scrinium/ui/images.py:469
-msgid "Image"
-msgstr "Image"
 
 #: plugins/photos/__init__.py:182
 msgid "Lire le texte (OCR) → nouvelle fiche"
@@ -3734,11 +3750,6 @@ msgstr "Existing note, or type a title to create one."
 #: src/scrinium/ui/fenetre.py:547
 msgid "Thème"
 msgstr "Topic"
-
-#: src/scrinium/ui/capture_rapide.py:41
-#: src/scrinium/ui/fenetre.py:147
-msgid "Fiche"
-msgstr "Note"
 
 #: src/scrinium/ui/capture_rapide.py:43
 msgid "Ajouter la date et l'heure"

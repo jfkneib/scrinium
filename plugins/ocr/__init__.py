@@ -188,6 +188,7 @@ class OcrPlugin(Plugin):
         ctx.ui.ajouter_action(_("Extraire le texte des images de la fiche"), self.extraire_fiche, "edit-find")
         ctx.ui.ajouter_action(_("Texte extrait des images…"), self.voir, "view-pim-notes")
         ctx.ui.ajouter_action_image(_("Extraire le texte de l'image (OCR)"), self.extraire_image, "edit-find")
+        ctx.ui.ajouter_action_image(_("Texte de l'image → nouvelle fiche"), self.image_vers_fiche, "document-new")
         ctx.ui.ajouter_action(_("Réglages de l'OCR…"), self.reglages, "configure")
         ctx.on("piece_jointe_ajoutee", self._ajoutee)
 
@@ -256,15 +257,18 @@ class OcrPlugin(Plugin):
     def lire_fichier(self, chemin, rappel):
         """Service « ocr.fichier » : lit le texte d'une image du disque, en arrière-plan ; `rappel(texte, erreur)` est ensuite appelé
         dans le fil de l'interface (erreur vide si tout va bien). Rien n'est écrit dans une fiche."""
-        moteur = self._moteur()
-        if moteur is None:
-            return
-        exe, langue = moteur
         try:
             donnees = open(chemin, "rb").read()
         except OSError as ex:
             self.ctx.ui.notifier(_("OCR"), str(ex))
             return
+        self._lire_donnees(donnees, rappel)
+
+    def _lire_donnees(self, donnees, rappel):
+        moteur = self._moteur()
+        if moteur is None:
+            return
+        exe, langue = moteur
         self.ctx.ui.notifier(_("OCR"), _("Extraction du texte…"))
 
         def travail():
@@ -273,6 +277,38 @@ class OcrPlugin(Plugin):
             except Exception as ex:
                 self.pont.fichier.emit(rappel, "", f"{type(ex).__name__}: {ex}")
         threading.Thread(target=travail, daemon=True).start()
+
+    def image_vers_fiche(self, vue, piece):
+        """Clic droit sur une image jointe : son texte devient une nouvelle fiche, dans le thème de la fiche d'origine (le texte déjà
+        extrait est repris ; sinon l'image est lue d'abord et le texte gardé aussi avec l'image)."""
+        if vue.fermee:
+            QMessageBox.warning(_parent(), _("OCR"), _("Fiche verrouillée : déverrouillez-la d'abord."))
+            return
+        if piece.ocr.strip():
+            self._fiche_de_texte(vue, piece, piece.ocr)
+            return
+        try:
+            donnees = self.ctx.lire_piece(vue, piece)
+        except ValueError as ex:
+            self.ctx.ui.notifier(_("OCR"), str(ex))
+            return
+
+        def fini(texte, erreur):
+            if erreur:
+                self.ctx.ui.notifier(_("OCR"), _("Échec : %s") % erreur)
+                return
+            try:
+                self.ctx.maj_piece(vue, piece, ocr=texte, ocr_moteur=MOTEUR)
+            except ValueError:
+                pass                                       # fiche refermée entre-temps : la nouvelle fiche est créée quand même
+            self._fiche_de_texte(vue, piece, texte)
+        self._lire_donnees(donnees, fini)
+
+    def _fiche_de_texte(self, vue, piece, texte):
+        corps = f"{_('Fiche')} : {vue.titre}\n{_('Image')} : {piece.nom}\n\n" + (texte.strip() or _("(aucun texte reconnu)")) + "\n"
+        self.ctx.creer_fiche(vue.theme, _("Texte de %s") % piece.nom, corps)
+        self.ctx.ui.actualiser()
+        self.ctx.ui.notifier(_("OCR"), _("Fiche créée : %s") % (_("Texte de %s") % piece.nom))
 
     def _moteur_silencieux(self):
         r = self.ctx.reglages
