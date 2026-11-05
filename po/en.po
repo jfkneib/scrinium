@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: scrinium 0.2.0\n"
 "Report-Msgid-Bugs-To: \n"
-"PO-Revision-Date: 2026-11-05 10:19+0100\n"
+"PO-Revision-Date: 2026-11-05 11:48+0100\n"
 "Last-Translator: Jean-François Kneib\n"
 "Language-Team: English\n"
 "Language: en\n"
@@ -1873,6 +1873,51 @@ msgstr ""
 "\n"
 "Best regards"
 
+#: plugins/photos/__init__.py:56
+msgid "Choisir un dossier…"
+msgstr "Choose a folder…"
+
+#: plugins/photos/__init__.py:93
+msgid "%(dossier)s — %(n)d image(s)"
+msgstr "%(dossier)s — %(n)d image(s)"
+
+#: plugins/photos/__init__.py:147
+msgid "Dossier d'images"
+msgstr "Image folder"
+
+#: plugins/photos/__init__.py:87
+msgid "Aucun dossier : « Choisir un dossier… » (ou clic droit)."
+msgstr "No folder: “Choose a folder…” (or right-click)."
+
+#: plugins/photos/__init__.py:159
+#: src/scrinium/ui/assistant.py:119
+msgid "Ouvrir le dossier"
+msgstr "Open folder"
+
+#: plugins/photos/__init__.py:160
+msgid "Choisir un autre dossier…"
+msgstr "Choose another folder…"
+
+#: plugins/photos/__init__.py:161
+msgid "Actualiser"
+msgstr "Refresh"
+
+#: plugins/photos/__init__.py:90
+msgid "Dossier introuvable sur cette machine : %s"
+msgstr "Folder not found on this machine: %s"
+
+#: plugins/photos/__init__.py:95
+msgid "(les %d premières sont montrées)"
+msgstr "(the first %d are shown)"
+
+#: plugins/photos/__init__.py:158
+msgid "Ouvrir l'image"
+msgstr "Open the image"
+
+#: plugins/photos/logique.py:21
+msgid "Photos"
+msgstr "Photos"
+
 #: plugins/traduction/__init__.py:132
 msgid "Fichier personnel"
 msgstr "Personal file"
@@ -3604,10 +3649,6 @@ msgstr "Rescue file folder"
 #: src/scrinium/ui/assistant.py:116
 msgid "Fichier de secours créé"
 msgstr "Rescue file created"
-
-#: src/scrinium/ui/assistant.py:119
-msgid "Ouvrir le dossier"
-msgstr "Open folder"
 
 #: src/scrinium/ui/assistant.py:88
 #: src/scrinium/ui/fenetre.py:1235

@@ -1807,6 +1807,51 @@ msgid ""
 "Cordialement"
 msgstr ""
 
+#: plugins/photos/__init__.py:56
+msgid "Choisir un dossier…"
+msgstr ""
+
+#: plugins/photos/__init__.py:93
+msgid "%(dossier)s — %(n)d image(s)"
+msgstr ""
+
+#: plugins/photos/__init__.py:147
+msgid "Dossier d'images"
+msgstr ""
+
+#: plugins/photos/__init__.py:87
+msgid "Aucun dossier : « Choisir un dossier… » (ou clic droit)."
+msgstr ""
+
+#: plugins/photos/__init__.py:159
+#: src/scrinium/ui/assistant.py:119
+msgid "Ouvrir le dossier"
+msgstr ""
+
+#: plugins/photos/__init__.py:160
+msgid "Choisir un autre dossier…"
+msgstr ""
+
+#: plugins/photos/__init__.py:161
+msgid "Actualiser"
+msgstr ""
+
+#: plugins/photos/__init__.py:90
+msgid "Dossier introuvable sur cette machine : %s"
+msgstr ""
+
+#: plugins/photos/__init__.py:95
+msgid "(les %d premières sont montrées)"
+msgstr ""
+
+#: plugins/photos/__init__.py:158
+msgid "Ouvrir l'image"
+msgstr ""
+
+#: plugins/photos/logique.py:21
+msgid "Photos"
+msgstr ""
+
 #: plugins/traduction/__init__.py:132
 msgid "Fichier personnel"
 msgstr ""
@@ -3211,10 +3256,6 @@ msgstr ""
 
 #: src/scrinium/ui/assistant.py:116
 msgid "Fichier de secours créé"
-msgstr ""
-
-#: src/scrinium/ui/assistant.py:119
-msgid "Ouvrir le dossier"
 msgstr ""
 
 #: src/scrinium/ui/assistant.py:88

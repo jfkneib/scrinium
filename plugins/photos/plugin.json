@@ -1,0 +1,8 @@
+{
+  "titre": "Photos",
+  "version": "0.1",
+  "auteur": "Scrinium",
+  "description": "Un type de fiche « Photos » : la fiche garde le chemin d'un dossier d'images et le montre en vignettes (lecture seule ; un double-clic ouvre l'image dans votre visionneuse). Les images restent dans leur dossier : rien n'est copié dans la fiche.",
+  "classe": "PhotosPlugin",
+  "api": 1
+}
