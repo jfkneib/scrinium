@@ -22,6 +22,7 @@ from .capture_rapide import THEME_DEFAUT, CaptureRapide
 from .extensions import DialogueExtensions, UiPlugin
 from . import export_pdf
 from .choix_icone import DialogueIcone
+from .entrees_menu import remplir as remplir_menu
 from .icons import avec_epingle, icone, icone_appli
 from .images import BandePieces, Editeur
 from .markdown import Apercu, BarreFormat, entourer, navigateurs_installes
@@ -1066,8 +1067,12 @@ class Fenetre(QMainWindow):
         if vue is None or not self.fiche or self.fiche.fermee:
             return
         m = QMenu(self)
-        for texte, fn, ic in self._entrees_clic_droit(nom):
-            m.addAction(icone(ic) if ic else icone("view-pim-notes"), texte, fn)
+        propres_vue = getattr(vue, "entrees_menu", None)             # entrées de la vue elle-même (Ajouter, Modifier… selon l'endroit cliqué)
+        if propres_vue is not None:
+            remplir_menu(m, propres_vue(pos))
+            if not m.isEmpty():
+                m.addSeparator()
+        remplir_menu(m, self._entrees_clic_droit(nom))
         if not m.isEmpty():
             m.addSeparator()
         m.addAction(icone("document-print"), _("Imprimer…"), self.imprimer_fiche)

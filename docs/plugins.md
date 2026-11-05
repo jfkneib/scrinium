@@ -77,7 +77,7 @@ Handlers receive keyword arguments; accept `**kw` to stay compatible with future
 ## `ctx.ui`
 
 `ajouter_action(text, fn, icon=None)` (Extensions menu) · `ajouter_bouton(text, fn, icon=None)` (toolbar) ·
-`ajouter_panneau(title, widget)` (dock, any `QWidget`) · `ajouter_action_fiche(text, fn, icon=None, types=None)` (right-click menu in the text of a note, edit and preview; with `types=("agenda",)`, in the right-click menu of the view of those note types instead; `fn()` takes no argument, use `ctx.fiche_courante()` / `ctx.ui.texte_selectionne()`) · `ajouter_action_image(text, fn, icon=None)` (right-click menu of an attached image; `fn(fiche, piece)`) · `notifier(title, message)` (desktop notification) ·
+`ajouter_panneau(title, widget)` (dock, any `QWidget`) · `ajouter_sous_menu_fiche(text, provider, icon=None, types=None)` (same, as a submenu; `provider()` returns `[(text, fn, icon)]`, re-read each time the menu opens) · `ajouter_action_fiche(text, fn, icon=None, types=None)` (right-click menu in the text of a note, edit and preview; with `types=("agenda",)`, in the right-click menu of the view of those note types instead; `fn()` takes no argument, use `ctx.fiche_courante()` / `ctx.ui.texte_selectionne()`) · `ajouter_action_image(text, fn, icon=None)` (right-click menu of an attached image; `fn(fiche, piece)`) · `notifier(title, message)` (desktop notification) ·
 `planifier(seconds, fn, repeter=False)` (timer) · `afficher_fiche(vue)` ·
 `inserer_texte(text)` (insert at the cursor of the open note, replacing the selection; `False` if it cannot be edited) · `texte_selectionne()` · `texte_complet()` (whole text as shown in the editor) · `remplacer_tout(text)` · `ajouter_a_la_fin(text)` (undoable with Ctrl+Z).
 `enregistrer_type(type_fiche, vue)` (typed notes, see below) · `actualiser()` (reload topics and notes after the extension created some).
@@ -98,7 +98,7 @@ in the application through the type's own view is validated as written. A view m
 
 `ctx.fiche_active(vue)` tells an extension whether a note may act; `ctx.creer_fiche(theme, titre, texte)` creates a note (an executable one is created **inert**:
 an extension cannot validate itself). The `fiche_validee` event fires when the user validates a note. The built-in example is the **Applications** extension: its
-panel is fed by the validated notes of type `applications` (`#scrinium-applications`, one `## Name` section per application with `commande:`, `icone:`,
+“Open with” right-click submenu is fed by the validated notes of type `applications` (`#scrinium-applications`, one `## Name` section per application with `commande:`, `icone:`,
 `description:` lines); settings from before are migrated into such a note once, and kept as a copy.
 The **CLI actions** (`capture` extension) work the same way with `#scrinium-actions-cli` (`mode:` `taper`/`executer`/`copier`, `icone:`, `commande:` — continuation
 lines indented by two spaces — and `description:`). The shared logic (validated notes only, fallback to the old settings, one-time migration, the note to open)

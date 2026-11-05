@@ -1,8 +1,10 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 # Copyright (C) 2026 Jean-François Kneib
-"""Extension Scrinium « Applications » : un panneau d'icônes pour lancer vos applications (Thunderbird, KWrite, LibreOffice…).
+"""Extension Scrinium « Applications » : vos applications (Thunderbird, KWrite, LibreOffice…) dans une fiche d'icônes, et dans le clic
+  droit « Ouvrir avec » de toute fiche (avec le texte sélectionné si la commande le demande).
 
-- Un clic lance l'application ; rien ne part sans clic. Séparé des « Actions CLI » (commandes en console).
+- Un clic lance l'application ; rien ne part sans clic. Pas de panneau : la fiche est l'écran, le clic droit la configure.
+  Séparé des « Actions CLI » (commandes en console).
 - On choisit les applications parmi celles du système (menus .desktop) ou on tape une commande ; icône du thème.
 - Facultatif : `{selection}` (texte sélectionné) et `{fiche}` (titre) dans la commande sont passés comme ARGUMENTS
   (jamais via un shell). `{selection}` est refusé pour une fiche verrouillée, dont le texte ne doit pas apparaître
@@ -48,56 +50,6 @@ def info(a: dict) -> str:
     desc = _(a["description"]) if a["description"] else ""
     return (f"<b>{html.escape(a['nom'])}</b>" + (f"<br><i>{html.escape(desc)}</i>" if desc else "")
             + f"<br><br><code>{html.escape(a['commande'])}</code>")
-
-
-class PanneauApplications(QWidget):
-    """Grille de boutons-icônes ; l'infobulle de chacun montre la commande."""
-
-    def __init__(self, plugin):
-        super().__init__()
-        self.p = plugin
-        lay = QVBoxLayout(self)
-        lay.setContentsMargins(4, 4, 4, 4)
-        self.liste = QListWidget()
-        self.liste.setViewMode(QListView.ViewMode.IconMode)
-        self.liste.setResizeMode(QListView.ResizeMode.Adjust)
-        self.liste.setMovement(QListView.Movement.Static)
-        self.liste.setWrapping(True)
-        self.liste.setIconSize(QSize(32, 32))
-        self.liste.setGridSize(QSize(92, 74))
-        self.liste.setWordWrap(True)
-        self.liste.setUniformItemSizes(True)
-        self.liste.itemClicked.connect(self._clic)
-        lay.addWidget(self.liste, 1)
-        self.avis = QLabel()
-        self.avis.setWordWrap(True)
-        self.avis.setStyleSheet("background: #fdebd0; color: #5b3a00; padding: 3px;")
-        lay.addWidget(self.avis)
-        b = QPushButton(icone("configure"), _("Modifier les applications…"))
-        b.clicked.connect(plugin.modifier)
-        lay.addWidget(b)
-        self.rafraichir()
-
-    def rafraichir(self):
-        n = self.p.a_valider()
-        self.avis.setVisible(n > 0)
-        if n:
-            self.avis.setText(_("%d fiche d'applications attend votre validation : « Modifier les applications… » l'ouvre.") % n)
-        self.liste.clear()
-        for a in self.p.applications():
-            it = QListWidgetItem(icone_app(a["icone"]), a["nom"])
-            it.setToolTip(info(a))
-            it.setData(Qt.ItemDataRole.UserRole, a)
-            it.setTextAlignment(Qt.AlignmentFlag.AlignHCenter | Qt.AlignmentFlag.AlignTop)
-            self.liste.addItem(it)
-
-    def _clic(self, it):
-        self.liste.clearSelection()
-        a = it.data(Qt.ItemDataRole.UserRole)
-        if a not in self.p.applications():          # la fiche a changé ou n'est plus validée depuis l'affichage : on ne lance rien
-            self.rafraichir()
-            return
-        self.p.lancer(a)
 
 
 class DialogueChoix(QDialog):
@@ -199,31 +151,33 @@ class DialogueApplication(QDialog):
                                    "description": self.description.text()})
 
 
-class EditeurApplications(QWidget):
-    """Liste des applications : ajouter, modifier, supprimer, réordonner, exemples, export/import. Signale chaque changement."""
-    changement = pyqtSignal(list)
+class VueApplications(QWidget):
+    """Vue du type « applications » : la fiche s'affiche comme une grille d'icônes (le texte reste dans la fiche). Un clic lance l'application ;
+    le clic droit ajoute, modifie, supprime, réordonne, importe, exporte. Fiche non validée : lisible, rien ne se lance ni ne se modifie."""
+    modifie = pyqtSignal(str)
 
-    def __init__(self, parent=None):
+    def __init__(self, plugin=None, parent=None):
         super().__init__(parent)
-        lay = QHBoxLayout(self)
-        lay.setContentsMargins(0, 0, 0, 0)
+        self.p = plugin
+        lay = QVBoxLayout(self)
+        lay.setContentsMargins(4, 4, 4, 4)
         self.liste = QListWidget()
-        self.liste.setIconSize(QSize(24, 24))
-        self.liste.itemDoubleClicked.connect(lambda *_a: self._modifier())
+        self.liste.setViewMode(QListView.ViewMode.IconMode)
+        self.liste.setResizeMode(QListView.ResizeMode.Adjust)
+        self.liste.setMovement(QListView.Movement.Static)
+        self.liste.setWrapping(True)
+        self.liste.setIconSize(QSize(32, 32))
+        self.liste.setGridSize(QSize(92, 74))
+        self.liste.setWordWrap(True)
+        self.liste.setUniformItemSizes(True)
+        self.liste.itemClicked.connect(self._clic)
         lay.addWidget(self.liste, 1)
-        col = QVBoxLayout()
-        self.boutons = []
-        for texte, fn in ((_("Ajouter…"), self._ajouter), (_("Modifier…"), self._modifier), (_("Supprimer"), self._supprimer),
-                          (_("Monter"), lambda: self._deplacer(-1)), (_("Descendre"), lambda: self._deplacer(1)),
-                          (_("Exemples…"), self._exemples), (_("Exporter…"), self._exporter), (_("Importer…"), self._importer)):
-            b = QPushButton(texte)
-            b.clicked.connect(fn)
-            col.addWidget(b)
-            self.boutons.append(b)
-        col.addStretch()
-        lay.addLayout(col)
+        self.aide = QLabel()
+        self.aide.setWordWrap(True)
+        lay.addWidget(self.aide)
         self.apps: list = []
         self._actif = True
+        self._texte_aide()
 
     @property
     def actif(self) -> bool:
@@ -231,11 +185,16 @@ class EditeurApplications(QWidget):
 
     @actif.setter
     def actif(self, oui: bool) -> None:
-        """Faux : fiche non validée. La liste se lit (pour relire les commandes avant de valider) mais ne se modifie pas."""
+        """Faux : fiche non validée. La liste se lit (pour relire les commandes avant de valider) mais ne se lance ni ne se modifie."""
         self._actif = bool(oui)
-        for b in self.boutons:
-            b.setEnabled(self._actif)
-        self.liste.setToolTip("" if self._actif else _("Fiche non validée : relisez les commandes, puis validez-la pour la modifier."))
+        self._texte_aide()
+
+    def _texte_aide(self):
+        self.aide.setText(_("Clic : lancer · clic droit : ajouter, modifier, déplacer…") if self._actif else
+                          _("Fiche non validée : relisez les commandes (infobulles), puis validez-la pour lancer et modifier."))
+
+    def charger(self, texte: str):
+        self.definir(logique.depuis_texte(texte))
 
     def definir(self, apps: list):
         self.apps = logique.normaliser_liste(apps)
@@ -244,13 +203,39 @@ class EditeurApplications(QWidget):
     def _remplir(self, ligne=None):
         self.liste.clear()
         for a in self.apps:
-            self.liste.addItem(QListWidgetItem(icone_app(a["icone"]), f"{a['nom']}   ·   {a['commande']}"))
-        if self.apps:
-            self.liste.setCurrentRow(min(ligne if ligne is not None else 0, len(self.apps) - 1))
+            it = QListWidgetItem(icone_app(a["icone"]), a["nom"])
+            it.setToolTip(info(a))
+            it.setTextAlignment(Qt.AlignmentFlag.AlignHCenter | Qt.AlignmentFlag.AlignTop)
+            self.liste.addItem(it)
+        if ligne is not None and 0 <= ligne < len(self.apps):
+            self.liste.setCurrentRow(ligne)
 
     def _enregistrer(self, ligne=None):
-        self.changement.emit(list(self.apps))
+        self.modifie.emit(logique.en_texte(self.apps))
         self._remplir(ligne)
+
+    def _clic(self, it):
+        i = self.liste.row(it)
+        self.liste.clearSelection()
+        if self._actif and self.p is not None and 0 <= i < len(self.apps):
+            self.p.lancer(self.apps[i])
+
+    # ---------- clic droit ----------
+    def entrees_menu(self, pos) -> list:
+        """Entrées du clic droit (la fenêtre y ajoute celles des extensions) ; `pos` : position dans cette vue."""
+        if not self._actif:
+            return []
+        it = self.liste.itemAt(self.liste.viewport().mapFrom(self, pos))
+        i = self.liste.row(it) if it is not None else -1
+        e = [(_("Ajouter une application…"), lambda *_a: self._ajouter(), "list-add")]
+        if i >= 0:
+            e += [(_("Modifier…"), lambda *_a, i=i: self._modifier(i), "document-edit"),
+                  (_("Supprimer"), lambda *_a, i=i: self._supprimer(i), "edit-delete"),
+                  (_("Monter"), lambda *_a, i=i: self._deplacer(i, -1), "go-up"),
+                  (_("Descendre"), lambda *_a, i=i: self._deplacer(i, 1), "go-down")]
+        return e + [(_("Ajouter les exemples installés"), lambda *_a: self._exemples(), "view-list-icons"),
+                    (_("Exporter…"), lambda *_a: self._exporter(), "document-export"),
+                    (_("Importer…"), lambda *_a: self._importer(), "document-import")]
 
     def _ajouter(self):
         d = DialogueApplication(None, self)
@@ -258,23 +243,21 @@ class EditeurApplications(QWidget):
             self.apps.append(d.resultat())
             self._enregistrer(len(self.apps) - 1)
 
-    def _modifier(self):
-        i = self.liste.currentRow()
+    def _modifier(self, i: int):
         if self._actif and 0 <= i < len(self.apps):
             d = DialogueApplication(self.apps[i], self)
             if d.exec() and d.resultat():
                 self.apps[i] = d.resultat()
                 self._enregistrer(i)
 
-    def _supprimer(self):
-        i = self.liste.currentRow()
-        if 0 <= i < len(self.apps):
+    def _supprimer(self, i: int):
+        if self._actif and 0 <= i < len(self.apps):
             del self.apps[i]
-            self._enregistrer(i)
+            self._enregistrer(min(i, len(self.apps) - 1))
 
-    def _deplacer(self, sens):
-        i, j = self.liste.currentRow(), self.liste.currentRow() + sens
-        if 0 <= i < len(self.apps) and 0 <= j < len(self.apps):
+    def _deplacer(self, i: int, sens: int):
+        j = i + sens
+        if self._actif and 0 <= i < len(self.apps) and 0 <= j < len(self.apps):
             self.apps[i], self.apps[j] = self.apps[j], self.apps[i]
             self._enregistrer(j)
 
@@ -310,18 +293,6 @@ class EditeurApplications(QWidget):
             self._enregistrer(len(self.apps) - 1)
 
 
-class VueApplications(EditeurApplications):
-    """Vue du type « applications » dans la fenêtre : la fiche s'affiche comme cette liste (le texte reste dans la fiche)."""
-    modifie = pyqtSignal(str)
-
-    def __init__(self, parent=None):
-        super().__init__(parent)
-        self.changement.connect(lambda apps: self.modifie.emit(logique.en_texte(apps)))
-
-    def charger(self, texte: str):
-        self.definir(logique.depuis_texte(texte))
-
-
 class ApplicationsPlugin(Plugin):
     api = 1
 
@@ -329,37 +300,30 @@ class ApplicationsPlugin(Plugin):
         self.ctx = ctx
         if ctx.ui is None:
             return
-        ctx.ui.enregistrer_type(logique.TYPE, VueApplications())
-        self.panneau = PanneauApplications(self)
-        self.dock = ctx.ui.ajouter_panneau(_("Applications"), self.panneau)
-        self.interrupteurs = (ctx.ui.ajouter_action(_("Panneau des applications"), self.basculer_panneau, "view-list-icons"),
-                              ctx.ui.ajouter_bouton(_("Applications"), self.basculer_panneau, "view-list-icons"))
-        for a in self.interrupteurs:
-            a.setCheckable(True)
-            a.setChecked(not self.dock.isHidden())
-            a.setToolTip(_("Afficher ou masquer le panneau des applications"))
-        self.dock.visibilityChanged.connect(self._etat_panneau)
-        ctx.ui.ajouter_action(_("Modifier les applications…"), self.modifier, "configure")
-        for evenement in ("fiche_enregistree", "themes_modifies", "fiche_validee"):
-            ctx.on(evenement, lambda **_kw: self.panneau.rafraichir())
+        ctx.ui.enregistrer_type(logique.TYPE, VueApplications(self))
+        ctx.ui.ajouter_bouton(_("Applications"), self.modifier, "view-list-icons")
+        ctx.ui.ajouter_action(_("Fiche des applications…"), self.modifier, "view-list-icons")
+        ctx.ui.ajouter_sous_menu_fiche(_("Ouvrir avec"), self.entrees_ouvrir_avec, "document-open")
         self._migrer()
 
-    def basculer_panneau(self):
-        self.dock.setVisible(self.dock.isHidden())
+    def entrees_ouvrir_avec(self) -> list:
+        """Sous-menu « Ouvrir avec » du clic droit d'une fiche : les applications des fiches validées (lues à chaque ouverture du menu)."""
+        return [(a["nom"], lambda a=a: self._lancer_si_present(a), a["icone"] or "system-run") for a in self.applications()]
 
-    def _etat_panneau(self, _visible: bool = True):
-        for a in self.interrupteurs:
-            a.setChecked(not self.dock.isHidden())
+    def _lancer_si_present(self, a: dict):
+        """Entrée choisie dans le menu : on relit la liste avant de lancer (la fiche a pu changer ou perdre sa validation entre-temps)."""
+        if a in self.applications():
+            self.lancer(a)
 
     # ---------- liste ----------
-    THEME = "Outils"                           # thème de la fiche créée à la migration ou par « Modifier les applications… »
+    THEME = "Outils"                           # thème de la fiche créée à la migration ou par « Fiche des applications… »
 
     def _liste(self) -> ListeDeFiches:
         return ListeDeFiches(self.ctx, logique.TYPE, logique.normaliser_liste, logique.depuis_texte, logique.en_texte, "applications",
                              logique.exemples_installes, _("Applications"), self.THEME, logique.MAX_APPLICATIONS)
 
     def applications(self) -> list:
-        """Applications du panneau : celles des fiches « applications » VALIDÉES (sans doublon) ; tant qu'il n'y en a aucune, les réglages
+        """Applications du menu « Ouvrir avec » : celles des fiches « applications » VALIDÉES (sans doublon) ; tant qu'il n'y en a aucune, les réglages
         d'avant « tout est fiche », puis, sans réglage, les exemples installés."""
         return self._liste().elements()
 
@@ -369,7 +333,7 @@ class ApplicationsPlugin(Plugin):
 
     def _migrer(self):
         """Les applications d'avant « tout est fiche » (réglages) deviennent une fiche, une seule fois ; les réglages restent comme copie.
-        La fiche créée est inerte : l'utilisateur la valide (bandeau), en attendant le panneau garde l'ancienne liste."""
+        La fiche créée est inerte : l'utilisateur la valide (bandeau), en attendant, « Ouvrir avec » garde l'ancienne liste."""
         if self._liste().migrer() is not None:
             self.ctx.ui.actualiser()
             self.ctx.ui.notifier(_("Applications"), _("Vos applications sont maintenant une fiche « Applications » (thème « %s ») : ouvrez-la "
@@ -380,12 +344,12 @@ class ApplicationsPlugin(Plugin):
         vue, creee = self._liste().a_ouvrir()
         if creee:
             self.ctx.ui.actualiser()
-            self.ctx.ui.notifier(_("Applications"), _("Fiche « Applications » créée : validez-la pour qu'elle serve au panneau."))
+            self.ctx.ui.notifier(_("Applications"), _("Fiche « Applications » créée : validez-la pour qu'elle serve à « Ouvrir avec »."))
         self.ctx.ui.afficher_fiche(vue)
 
     # ---------- lancement ----------
     def lancer(self, a: dict):
-        """Clic sur une icône : lance l'application (avec la sélection ou le titre si la commande les demande)."""
+        """Lance l'application (avec la sélection ou le titre si la commande les demande)."""
         vue = self.ctx.fiche_courante()
         selection = self.ctx.ui.texte_selectionne()
         if logique.utilise_selection(a["commande"]):

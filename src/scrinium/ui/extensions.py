@@ -8,6 +8,7 @@ from PyQt6.QtWidgets import (QDialog, QDockWidget, QHBoxLayout, QLabel, QListWid
 
 from ..core import types_fiche
 from ..i18n import _
+from .entrees_menu import SousMenu
 from .icons import icone
 
 
@@ -43,6 +44,13 @@ class UiPlugin:
         types de fiche concernés (`("agenda",)`) : l'entrée est dans le clic droit de la vue de ces types, et seulement là. `fn()` est
         appelée sans argument : `ctx.fiche_courante()` donne la fiche, `ctx.ui.texte_selectionne()` la sélection. Retirée à la désactivation."""
         self._f.actions_fiche.append((self._nom, texte, self._appeler(fn), icone_nom, tuple(types) if types else None))
+
+    def ajouter_sous_menu_fiche(self, texte: str, fournisseur, icone_nom: str | None = None, types: tuple | None = None) -> None:
+        """Comme `ajouter_action_fiche`, mais l'entrée ouvre un sous-menu. `fournisseur()` renvoie `[(texte, fn, icône)]`, relu à chaque
+        ouverture du clic droit (liste qui change) ; sans entrée, le sous-menu est grisé. Retirée à la désactivation."""
+        def entrees():
+            return [(t, self._appeler(fn), ic) for t, fn, ic in self._f.plugins.appeler(self._nom, fournisseur) or []]
+        self._f.actions_fiche.append((self._nom, texte, SousMenu(entrees), icone_nom, tuple(types) if types else None))
 
     def ajouter_action_image(self, texte: str, fn, icone_nom: str | None = None) -> None:
         """Entrée dans le clic droit d'une image jointe. `fn(fiche, piece)` reçoit la `FicheVue` et la `PieceVue` visées."""

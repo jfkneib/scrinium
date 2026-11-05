@@ -16,6 +16,7 @@ from PyQt6.QtWidgets import (QApplication, QDialog, QFileDialog, QHBoxLayout, QL
 from ..core.plugins import FicheVue, PieceVue
 from ..core.store import LIMITES_PIECES
 from ..i18n import _
+from .entrees_menu import remplir
 from .icons import icone
 
 COTE_MAX = 2560                                  # plus grand côté après import (px)
@@ -121,8 +122,7 @@ class Editeur(QPlainTextEdit):
     def contextMenuEvent(self, ev):
         m = self.createStandardContextMenu()
         m.addSeparator()
-        for texte, fn, ic in self.complements():
-            m.addAction(icone(ic) if ic else icone("view-pim-notes"), texte, fn)
+        remplir(m, self.complements())
         m.addAction(icone("document-print"), _("Imprimer…"), self.impression_demandee.emit)
         m.addAction(icone("document-save"), _("Exporter la fiche en PDF…"), self.pdf_demande.emit)
         m.exec(ev.globalPos())
