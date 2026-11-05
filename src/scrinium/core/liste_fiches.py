@@ -5,7 +5,8 @@
 Ce que fait ce module, une fois pour toutes les extensions de ce genre (sans interface) :
 - les éléments sont ceux des fiches du type qui sont **validées** par l'utilisateur (une fiche reçue ou modifiée ailleurs reste inerte) ;
 - tant qu'aucune fiche n'est validée, les réglages d'avant « tout est fiche » servent (puis, à défaut, des exemples) ;
-- migration, une seule fois, des réglages en une fiche (créée inerte : l'utilisateur la valide) ; les réglages restent comme copie ;
+- création, une seule fois, de la fiche : à partir des réglages d'avant (qui restent comme copie) ou, sans réglage, des exemples ; elle est
+  créée inerte (l'utilisateur la valide) et jamais recréée si elle est supprimée ensuite ;
 - la fiche à ouvrir pour modifier la liste (créée à partir de la liste actuelle s'il n'y en a pas)."""
 from . import types_fiche
 
@@ -48,12 +49,13 @@ class ListeDeFiches:
         return sum(1 for _v, ok in self.fiches() if not ok)
 
     def migrer(self):
-        """Les réglages d'avant deviennent une fiche, une seule fois. Retourne la fiche créée (inerte), sinon None."""
+        """Les réglages d'avant (ou, sans réglage, les exemples) deviennent une fiche, une seule fois. Retourne la fiche créée (inerte),
+        sinon None."""
         brut = self.ctx.reglages.get(self.cle_reglage)
-        if self.ctx.reglages.get("migrees") or not isinstance(brut, list):
+        if self.ctx.reglages.get("migrees"):
             return None
         self.ctx.reglages.set("migrees", True)
-        elements = self._norm(brut)
+        elements = self._norm(brut) if isinstance(brut, list) else self._par_defaut()
         if elements and not self.fiches():
             return self.ctx.creer_fiche(self.theme, self.titre, self._ecrire(elements))
         return None

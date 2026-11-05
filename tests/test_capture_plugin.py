@@ -156,7 +156,7 @@ def test_sessions_et_envoi(faux):
 def fen(app, tmp_path, monkeypatch, faux):
     monkeypatch.setenv("XDG_CONFIG_HOME", str(tmp_path / "xdg"))
     s = Store(Paths(tmp_path / "am"))
-    s.sauver_reglages(recovery_asked=True)
+    s.sauver_reglages(recovery_asked=True, plugins={"capture": {"migrees": True}})
     shutil.copytree(RACINE, s.paths.base / "plugins" / "capture")
     w = Fenetre(s)
     w.plugins.decouvrir()
@@ -665,3 +665,19 @@ def test_clic_droit_de_la_vue_actions(fen):
     assert {"Modifier…", "Supprimer", "Monter", "Descendre"} <= set(sur)
     sur["Descendre"](False)                                                                 # PyQt passe `checked` : doit être ignoré
     assert [a["nom"] for a in v.actions] == ["B", "A"]
+
+
+def test_premier_lancement_cree_la_fiche_des_actions_inerte(app, tmp_path, monkeypatch):
+    monkeypatch.setenv("XDG_CONFIG_HOME", str(tmp_path / "xdg"))
+    s = Store(Paths(tmp_path / "am"))
+    s.sauver_reglages(recovery_asked=True)
+    shutil.copytree(RACINE, s.paths.base / "plugins" / "capture")
+    w = Fenetre(s)
+    w.plugins.decouvrir()
+    assert w.plugins.activer("capture"), w.plugins.infos["capture"].erreur
+    th = s.theme("Outils")
+    assert th is not None and len(th.fiches) == 1 and th.fiches[0].titre == "Actions CLI"
+    assert not s.fiche_validee(th, th.fiches[0])                                            # créée inerte : à valider
+    assert [a["nom"] for a in lg.depuis_texte(th.fiches[0].texte)] == [e["nom"] for e in lg.EXEMPLES]
+    w.quitter_vraiment = True
+    w.close()

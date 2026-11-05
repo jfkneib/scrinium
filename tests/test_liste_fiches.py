@@ -63,12 +63,21 @@ def test_seules_les_fiches_validees_comptent_sans_doublon_et_plafonnees(liste):
 
 def test_migration_une_seule_fois_et_creee_inerte(liste):
     l, ctx, s = liste
-    assert l.migrer() is None                                                       # pas de réglage : rien à migrer
     ctx.reglages.set("elements", [{"nom": "Ancien"}])
     v = l.migrer()
     th = s.theme("Outils")
     assert v is not None and len(th.fiches) == 1 and not s.fiche_validee(th, th.fiches[0]) and l.migrer() is None
     assert ctx.reglages.get("elements") == [{"nom": "Ancien"}]                       # les réglages restent comme copie
+
+
+def test_sans_reglage_la_fiche_est_creee_une_fois_depuis_les_exemples(liste):
+    l, ctx, s = liste
+    v = l.migrer()                                                                  # premier lancement : pas de réglage → les exemples
+    th = s.theme("Outils")
+    assert v is not None and len(th.fiches) == 1 and not s.fiche_validee(th, th.fiches[0])
+    assert [e["nom"] for e in _lire(th.fiches[0].texte)] == ["Exemple"]
+    s.supprimer_fiche(th, th.fiches[0])                                             # l'utilisateur la supprime
+    assert l.migrer() is None and l.fiches() == []                                  # jamais recréée
 
 
 def test_migration_sans_ecraser_une_fiche_existante(liste):

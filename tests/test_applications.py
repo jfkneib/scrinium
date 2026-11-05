@@ -101,7 +101,7 @@ def fen(app, tmp_path, monkeypatch):
     monkeypatch.setenv("XDG_CONFIG_HOME", str(tmp_path / "xdg"))
     monkeypatch.setattr("shutil.which", lambda n: "/usr/bin/" + n if n in ("kwrite", "thunderbird") else None)
     s = Store(Paths(tmp_path / "am"))
-    s.sauver_reglages(recovery_asked=True)
+    s.sauver_reglages(recovery_asked=True, plugins={"applications": {"migrees": True}})
     shutil.copytree(RACINE, s.paths.base / "plugins" / "applications")
     w = Fenetre(s)
     w.plugins.decouvrir()
