@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: scrinium 0.2.0\n"
 "Report-Msgid-Bugs-To: \n"
-"PO-Revision-Date: 2026-11-06 15:14+0100\n"
+"PO-Revision-Date: 2026-11-06 15:30+0100\n"
 "Last-Translator: Jean-François Kneib\n"
 "Language-Team: English\n"
 "Language: en\n"
@@ -35,11 +35,13 @@ msgid "Événement"
 msgstr "Event"
 
 #: plugins/agenda/__init__.py:46
+#: plugins/budget/__init__.py:158
 #: src/scrinium/ui/fenetre.py:266
 msgid "Titre"
 msgstr "Title"
 
 #: plugins/agenda/__init__.py:47
+#: plugins/budget/__init__.py:143
 #: plugins/calc/logique.py:82
 msgid "Date"
 msgstr "Date"
@@ -402,6 +404,248 @@ msgstr "this is not a Scrinium applications export"
 msgid "fichier illisible"
 msgstr "unreadable file"
 
+#: plugins/budget/__init__.py:438
+msgid ""
+"De petits comptes, pas de la comptabilité : le budget des courses, l'argent de poche d'un enfant…\n"
+"\n"
+"• Nouvelle fiche > « Budget » : une fiche = un budget (« Courses », « Enfant 1 »…). Un onglet par mois, avec un titre libre (« Rentrée », « Vacances »…) à renseigner en haut de l'onglet, et un onglet « Bilan ».\n"
+"• Saisie rapide : date (celle du jour), libellé, catégorie (celles déjà utilisées sont proposées), montant, puis le bouton « Débit » (une dépense) ou « Crédit » (une entrée d'argent). Entrée dans le montant = Débit. Les cellules du tableau se modifient directement ; clic droit : supprimer la ligne. Le solde est recalculé tout seul.\n"
+"• « Budget mensuel » (facultatif) : l'onglet du mois dit ce qu'il en reste, ou de combien il est dépassé. « Solde de départ » (facultatif).\n"
+"• « Nouveau mois » ajoute l'onglet suivant. Les montants s'écrivent avec une virgule ou un point.\n"
+"• Bilan : mois par mois (débits, crédits, solde) et dépenses par catégorie.\n"
+"• Nouvelle fiche > « Budget — résultat » : une fiche qui totalise TOUS vos budgets, pour un mois au choix ou pour l'ensemble. Elle se met à jour quand on l'ouvre ou qu'on clique sur « Actualiser ». Un budget verrouillé et fermé ne peut pas être lu : ouvrez-le d'abord.\n"
+"• « Exporter en CSV… » : Date, Libellé, Catégorie, Débit, Crédit, Solde (séparateur « ; », que LibreOffice et Excel ouvrent directement).\n"
+"• Un budget est un tableau Markdown : lisible partout, cherchable, partageable (extension Partage) et verrouillable (conseillé pour des comptes). Rien n'est exécuté."
+msgstr ""
+"Small accounts, not accounting: the groceries budget, a child's pocket money…\n"
+"\n"
+"• New note > \"Budget\": one note = one budget (\"Groceries\", \"Child 1\"…). One tab per month, with a free title (\"Back to school\", \"Holidays\"…) to fill in at the top of the tab, and a \"Summary\" tab.\n"
+"• Quick entry: date (today's), label, category (those already used are suggested), amount, then the \"Debit\" button (an expense) or \"Credit\" (money coming in). Enter in the amount = Debit. Cells of the table can be edited directly; right-click: delete the row. The balance is recalculated automatically.\n"
+"• \"Monthly budget\" (optional): the month's tab tells you what is left, or by how much it is exceeded. \"Starting balance\" (optional).\n"
+"• \"New month\" adds the next tab. Amounts are written with a comma or a dot.\n"
+"• Summary: month by month (debits, credits, balance) and spending by category.\n"
+"• New note > \"Budget — result\": a note that totals ALL your budgets, for a month of your choice or for everything. It updates when you open it or click \"Refresh\". A locked, closed budget cannot be read: open it first.\n"
+"• \"Export to CSV…\": Date, Label, Category, Debit, Credit, Balance (\";\" separator, which LibreOffice and Excel open directly).\n"
+"• A budget is a Markdown table: readable anywhere, searchable, shareable (Sharing extension) and lockable (advised for accounts). Nothing is executed."
+
+#: plugins/budget/__init__.py:78
+#: src/scrinium/core/capture.py:40
+msgid "aucun"
+msgstr "none"
+
+#: plugins/budget/__init__.py:88
+#: plugins/budget/__init__.py:290
+msgid "Nouveau mois"
+msgstr "New month"
+
+#: plugins/budget/__init__.py:90
+#: plugins/calc/__init__.py:44
+#: plugins/tableur/__init__.py:67
+msgid "Exporter en CSV…"
+msgstr "Export to CSV…"
+
+#: plugins/budget/__init__.py:115
+msgid "facultatif : Rentrée, Vacances…"
+msgstr "optional: Back to school, Holidays…"
+
+#: plugins/budget/__init__.py:122
+msgid "AAAA-MM-JJ"
+msgstr "YYYY-MM-DD"
+
+#: plugins/budget/__init__.py:124
+#: plugins/budget/__init__.py:143
+msgid "Libellé"
+msgstr "Label"
+
+#: plugins/budget/__init__.py:128
+#: plugins/budget/__init__.py:143
+#: plugins/budget/__init__.py:161
+msgid "Catégorie"
+msgstr "Category"
+
+#: plugins/budget/__init__.py:131
+msgid "Montant"
+msgstr "Amount"
+
+#: plugins/budget/__init__.py:134
+#: plugins/budget/__init__.py:143
+msgid "Débit"
+msgstr "Debit"
+
+#: plugins/budget/__init__.py:135
+msgid "Une dépense : le montant va dans la colonne Débit"
+msgstr "An expense: the amount goes in the Debit column"
+
+#: plugins/budget/__init__.py:137
+#: plugins/budget/__init__.py:143
+msgid "Crédit"
+msgstr "Credit"
+
+#: plugins/budget/__init__.py:138
+msgid "Une entrée d'argent : le montant va dans la colonne Crédit"
+msgstr "Money coming in: the amount goes in the Credit column"
+
+#: plugins/budget/__init__.py:185
+msgid "Bilan"
+msgstr "Summary"
+
+#: plugins/budget/__init__.py:219
+msgid "Débits %(d)s · Crédits %(c)s · Solde du mois %(s)s · Solde de fin de mois %(f)s"
+msgstr "Debits %(d)s · Credits %(c)s · Balance of the month %(s)s · Balance at month end %(f)s"
+
+#: plugins/budget/__init__.py:351
+#: plugins/calc/__init__.py:219
+#: plugins/tableur/__init__.py:274
+msgid "Supprimer la ligne"
+msgstr "Delete the row"
+
+#: plugins/budget/__init__.py:355
+#: plugins/calc/__init__.py:228
+#: plugins/tableur/__init__.py:173
+msgid "Exporter en CSV"
+msgstr "Export to CSV"
+
+#: plugins/budget/__init__.py:355
+#: plugins/calc/__init__.py:228
+#: plugins/tableur/__init__.py:173
+msgid "Fichiers CSV (*.csv)"
+msgstr "CSV files (*.csv)"
+
+#: plugins/budget/__init__.py:377
+#: plugins/photos/__init__.py:185
+msgid "Actualiser"
+msgstr "Refresh"
+
+#: plugins/budget/__init__.py:396
+msgid "Tous les mois"
+msgstr "All months"
+
+#: plugins/budget/__init__.py:420
+msgid "Aucun budget : créez une fiche « Budget »."
+msgstr "No budget: create a \"Budget\" note."
+
+#: plugins/budget/__init__.py:421
+msgid "Pour un mois, le « Solde » est celui du mois ; pour « Tous les mois », c'est le solde actuel (solde de départ compris)."
+msgstr "For a month, the \"Balance\" is that of the month; for \"All months\", it is the current balance (starting balance included)."
+
+#: plugins/budget/__init__.py:432
+msgid "Extension Budget"
+msgstr "Budget extension"
+
+#: plugins/budget/__init__.py:75
+msgid "Budget mensuel"
+msgstr "Monthly budget"
+
+#: plugins/budget/__init__.py:81
+msgid "Solde de départ"
+msgstr "Starting balance"
+
+#: plugins/budget/__init__.py:113
+msgid "Titre de ce mois"
+msgstr "Title of this month"
+
+#: plugins/budget/__init__.py:143
+#: plugins/budget/__init__.py:382
+msgid "Solde"
+msgstr "Balance"
+
+#: plugins/budget/__init__.py:157
+msgid "Mois par mois"
+msgstr "Month by month"
+
+#: plugins/budget/__init__.py:158
+msgid "Mois"
+msgstr "Month"
+
+#: plugins/budget/__init__.py:158
+#: plugins/budget/__init__.py:161
+#: plugins/budget/__init__.py:382
+msgid "Débits"
+msgstr "Debits"
+
+#: plugins/budget/__init__.py:158
+#: plugins/budget/__init__.py:382
+msgid "Crédits"
+msgstr "Credits"
+
+#: plugins/budget/__init__.py:158
+msgid "Solde du mois"
+msgstr "Balance of the month"
+
+#: plugins/budget/__init__.py:158
+msgid "Solde de fin"
+msgstr "Balance at the end"
+
+#: plugins/budget/__init__.py:160
+msgid "Dépenses par catégorie (tous les mois)"
+msgstr "Spending by category (all months)"
+
+#: plugins/budget/__init__.py:161
+msgid "Part"
+msgstr "Share"
+
+#: plugins/budget/__init__.py:239
+#: plugins/budget/__init__.py:416
+msgid "Total"
+msgstr "Total"
+
+#: plugins/budget/__init__.py:301
+#: plugins/budget/__init__.py:322
+msgid "Date invalide : écrivez AAAA-MM-JJ, par exemple 2026-11-06."
+msgstr "Invalid date: write YYYY-MM-DD, for example 2026-11-06."
+
+#: plugins/budget/__init__.py:304
+#: plugins/budget/__init__.py:332
+msgid "Montant invalide : écrivez un nombre positif, par exemple 45,30."
+msgstr "Invalid amount: write a positive number, for example 45,30."
+
+#: plugins/budget/__init__.py:312
+msgid "Ajouté : %s"
+msgstr "Added: %s"
+
+#: plugins/budget/__init__.py:373
+msgid "Période"
+msgstr "Period"
+
+#: plugins/budget/__init__.py:382
+#: plugins/budget/logique.py:249
+msgid "Budget"
+msgstr "Budget"
+
+#: plugins/budget/__init__.py:382
+msgid "Reste sur le budget"
+msgstr "Left of the budget"
+
+#: plugins/budget/__init__.py:420
+msgid "%d budget(s) comptés."
+msgstr "%d budget(s) counted."
+
+#: plugins/budget/__init__.py:359
+#: plugins/calc/__init__.py:232
+#: plugins/tableur/__init__.py:177
+msgid "Exporté : %s"
+msgstr "Exported: %s"
+
+#: plugins/budget/__init__.py:423
+msgid "%d fiche(s) verrouillée(s) fermée(s) ne peuvent pas être lues : si l'une est un budget, ouvrez-la puis actualisez."
+msgstr "%d locked, closed note(s) cannot be read: if one is a budget, open it then refresh."
+
+#: plugins/budget/__init__.py:223
+msgid "Reste sur le budget : %s"
+msgstr "Left of the budget: %s"
+
+#: plugins/budget/__init__.py:224
+msgid "Budget dépassé de %s"
+msgstr "Budget exceeded by %s"
+
+#: plugins/budget/__init__.py:248
+msgid "(sans catégorie)"
+msgstr "(no category)"
+
+#: plugins/budget/logique.py:250
+msgid "Budget — résultat"
+msgstr "Budget — result"
+
 #: plugins/calc/__init__.py:264
 msgid ""
 "Un petit éditeur de listes avec de petits calculs, pour suivre des données : relevés de compteur, poids, dépenses…\n"
@@ -464,28 +708,11 @@ msgstr "Add a row"
 msgid "Ajouter une colonne"
 msgstr "Add a column"
 
-#: plugins/calc/__init__.py:44
-#: plugins/tableur/__init__.py:67
-#: src/scrinium/ui/repertoire.py:136
-msgid "Exporter en CSV…"
-msgstr "Export to CSV…"
-
 #: plugins/calc/__init__.py:46
 #: plugins/tableur/__init__.py:69
 #: src/scrinium/ui/repertoire.py:134
 msgid "Importer un CSV…"
 msgstr "Import a CSV…"
-
-#: plugins/calc/__init__.py:228
-#: plugins/tableur/__init__.py:173
-#: src/scrinium/ui/repertoire.py:397
-msgid "Exporter en CSV"
-msgstr "Export to CSV"
-
-#: plugins/calc/__init__.py:228
-#: plugins/tableur/__init__.py:173
-msgid "Fichiers CSV (*.csv)"
-msgstr "CSV files (*.csv)"
 
 #: plugins/calc/__init__.py:235
 #: plugins/calc/__init__.py:245
@@ -531,11 +758,6 @@ msgstr "Insert a row above"
 msgid "Insérer une ligne en dessous"
 msgstr "Insert a row below"
 
-#: plugins/calc/__init__.py:219
-#: plugins/tableur/__init__.py:274
-msgid "Supprimer la ligne"
-msgstr "Delete the row"
-
 #: plugins/calc/__init__.py:221
 #: plugins/tableur/__init__.py:276
 msgid "Insérer une colonne à gauche"
@@ -556,11 +778,6 @@ msgstr "Delete the column"
 #: plugins/tableur/__init__.py:191
 msgid "Ce fichier ne contient aucun tableau."
 msgstr "This file contains no table."
-
-#: plugins/calc/__init__.py:232
-#: plugins/tableur/__init__.py:177
-msgid "Exporté : %s"
-msgstr "Exported: %s"
 
 #: plugins/calc/__init__.py:248
 #: plugins/tableur/__init__.py:194
@@ -2405,10 +2622,6 @@ msgstr "Open folder"
 msgid "Choisir un autre dossier…"
 msgstr "Choose another folder…"
 
-#: plugins/photos/__init__.py:185
-msgid "Actualiser"
-msgstr "Refresh"
-
 #: plugins/photos/__init__.py:91
 msgid "Dossier introuvable sur cette machine : %s"
 msgstr "Folder not found on this machine: %s"
@@ -3232,10 +3445,6 @@ msgstr "topic not found: %(nom)s (topics: %(liste)s)"
 msgid "fiche verrouillée : « %s » doit d'abord être déverrouillée dans la fenêtre de Scrinium"
 msgstr "locked note: \"%s\" must first be unlocked in the Scrinium window"
 
-#: src/scrinium/core/capture.py:40
-msgid "aucun"
-msgstr "none"
-
 #: src/scrinium/core/doc_extensions.py:11
 msgid "Doc"
 msgstr "Docs"
@@ -3935,7 +4144,7 @@ msgstr ""
 "You can read them with any text editor. To back them up, copy this folder. Locked notes are .lock files, unreadable without their password."
 
 #: src/scrinium/core/guide.py:11
-#: src/scrinium/core/guide.py:99
+#: src/scrinium/core/guide.py:100
 msgid "Guide"
 msgstr "Guide"
 
@@ -3995,6 +4204,7 @@ msgid ""
 "• Actions CLI : des commandes à lancer d'un clic (extension Capture).\n"
 "• Agenda : des rappels et échéances (extension Agenda).\n"
 "• Calc : un petit éditeur de listes avec des totaux par colonne et l'export CSV, pour suivre des relevés (extension Calc).\n"
+"• Budget : de petits comptes (courses, argent de poche…) avec colonnes Débit et Crédit, un onglet par mois, un bilan, et une fiche « Budget — résultat » qui totalise tous les budgets (extension Budget).\n"
 "• Tableur : des cellules et des formules comme =SOMME(B2:B10), avec export et import CSV (extension Tableur).\n"
 "\n"
 "Sécurité : un type qui LANCE des commandes (Applications, Actions CLI) reste inerte tant que vous n'avez pas validé la fiche vous-même. Une fiche reçue d'un autre n'exécute donc jamais rien toute seule."
@@ -4007,15 +4217,16 @@ msgstr ""
 "• CLI actions: commands to run with a click (Capture extension).\n"
 "• Agenda: reminders and deadlines (Agenda extension).\n"
 "• Calc: a small list editor with totals per column and CSV export, to track readings (Calc extension).\n"
+"• Budget: small accounts (groceries, pocket money…) with Debit and Credit columns, one tab per month, a summary, and a \"Budget — result\" note that totals all the budgets (Budget extension).\n"
 "• Spreadsheet: cells and formulas such as =SOMME(B2:B10), with CSV export and import (Spreadsheet extension).\n"
 "\n"
 "Security: a type that RUNS commands (Applications, CLI actions) stays inert until you have validated the note yourself. A note received from someone else therefore never runs anything on its own."
 
-#: src/scrinium/core/guide.py:52
+#: src/scrinium/core/guide.py:53
 msgid "Guide 4 · Les extensions"
 msgstr "Guide 4 · Extensions"
 
-#: src/scrinium/core/guide.py:52
+#: src/scrinium/core/guide.py:53
 msgid ""
 "Menu Extensions > Gérer les extensions… : cochez celles qui vous servent. Livrées avec Scrinium :\n"
 "\n"
@@ -4024,7 +4235,7 @@ msgid ""
 "• Partage : partage des fiches avec d'autres via un serveur Scrinium (voir « Guide 6 »).\n"
 "• Traduction et Dictée : en local (modèles téléchargés seulement avec votre accord).\n"
 "• Lecture : lit une fiche à voix haute.\n"
-"• Agenda, Applications, Photos, Calc, Tableur : types de fiches ; Calculatrice : une mini calculatrice flottante (voir « Guide 3 »).\n"
+"• Agenda, Applications, Photos, Calc, Tableur, Budget : types de fiches ; Calculatrice : une mini calculatrice flottante (voir « Guide 3 »).\n"
 "• Capture : insère la sortie d'une commande dans la fiche, ou envoie du texte vers une console (voir « Guide 5 »).\n"
 "\n"
 "Écrire la vôtre : menu Aide > « Documentation des extensions »."
@@ -4036,16 +4247,16 @@ msgstr ""
 "• Sharing: shares notes with others through a Scrinium server (see \"Guide 6\").\n"
 "• Translation and Dictation: local (models downloaded only with your agreement).\n"
 "• Reading: reads a note aloud.\n"
-"• Agenda, Applications, Photos, Calc, Spreadsheet: note types; Calculator: a floating mini calculator (see \"Guide 3\").\n"
+"• Agenda, Applications, Photos, Calc, Spreadsheet, Budget: note types; Calculator: a floating mini calculator (see \"Guide 3\").\n"
 "• Capture: inserts the output of a command into the note, or sends text to a console (see \"Guide 5\").\n"
 "\n"
 "Write your own: Help menu > \"Extensions documentation\"."
 
-#: src/scrinium/core/guide.py:65
+#: src/scrinium/core/guide.py:66
 msgid "Guide 5 · Console et commandes"
 msgstr "Guide 5 · Console and commands"
 
-#: src/scrinium/core/guide.py:65
+#: src/scrinium/core/guide.py:66
 msgid ""
 "L'extension Capture relie vos fiches au terminal, sans jamais rien valider à votre place.\n"
 "\n"
@@ -4061,11 +4272,11 @@ msgstr ""
 "• Extensions > \"Run a command and insert the output…\": the opposite, the command is run after confirmation and its output is inserted in the note, at the cursor.\n"
 "• From a terminal: \"ls -al | scrinium ajouter -t Topic -f Note\" adds the output to a note."
 
-#: src/scrinium/core/guide.py:77
+#: src/scrinium/core/guide.py:78
 msgid "Guide 6 · Verrouillage, secours et partage"
 msgstr "Guide 6 · Locking, recovery and sharing"
 
-#: src/scrinium/core/guide.py:77
+#: src/scrinium/core/guide.py:78
 msgid ""
 "• Verrouiller : bouton « Verrouiller… ». Le titre reste visible, le contenu est chiffré. Mot de passe oublié = fiche perdue, sauf avec le FICHIER DE SECOURS (menu Sécurité > Fichier de secours…) : faites-le dès le premier verrouillage, gardez-le hors de cet ordinateur.\n"
 "• Une fiche verrouillée n'est jamais envoyée, lue, traduite ni partagée tant qu'elle est fermée.\n"
@@ -4077,11 +4288,11 @@ msgstr ""
 "• Sharing: the Sharing extension synchronises notes with a Scrinium server. An invitation by email (valid 48 h) gives read or write access; in a conflict, both versions are kept.\n"
 "• Invite someone to INSTALL Scrinium: File menu > \"Invite to install Scrinium…\"."
 
-#: src/scrinium/core/guide.py:85
+#: src/scrinium/core/guide.py:86
 msgid "Guide 7 · Où sont mes données, sauvegarde"
 msgstr "Guide 7 · Where is my data, backup"
 
-#: src/scrinium/core/guide.py:85
+#: src/scrinium/core/guide.py:86
 msgid ""
 "• Vos fiches : un dossier par thème, un fichier .md par fiche (.lock si verrouillée), avec un sous-dossier .pj pour les images jointes :\n"
 "\n"

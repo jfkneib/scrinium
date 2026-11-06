@@ -1,0 +1,8 @@
+{
+  "titre": "Budget",
+  "version": "0.1",
+  "auteur": "Scrinium",
+  "description": "Un type de fiche « Budget » pour tenir de petits comptes (courses, argent de poche des enfants…) : colonnes Débit et Crédit, solde, un onglet par mois avec son titre, un bilan, et une fiche « Résultat » qui totalise tous vos budgets. Pas de comptabilité : un petit suivi.",
+  "classe": "BudgetPlugin",
+  "api": 1
+}
