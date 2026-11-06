@@ -1,0 +1,11 @@
+[Desktop Entry]
+Type=Service
+MimeType=text/plain;text/markdown;text/x-python;application/x-shellscript;
+Actions=envoyer
+X-KDE-Priority=TopLevel
+
+[Desktop Action envoyer]
+Name=Envoyer à Scrinium
+Name[en]=Send to Scrinium
+Icon=scrinium
+Exec=scrinium-fichier.sh %f
