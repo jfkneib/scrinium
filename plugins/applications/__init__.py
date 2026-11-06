@@ -301,7 +301,6 @@ class ApplicationsPlugin(Plugin):
         if ctx.ui is None:
             return
         ctx.ui.enregistrer_type(logique.TYPE, VueApplications(self))
-        ctx.ui.ajouter_bouton(_("Applications"), self.modifier, "view-list-icons")
         ctx.ui.ajouter_action(_("Fiche des applications…"), self.modifier, "view-list-icons")
         ctx.ui.ajouter_sous_menu_fiche(_("Ouvrir avec"), self.entrees_ouvrir_avec, "document-open")
         self._migrer()

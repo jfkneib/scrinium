@@ -353,3 +353,10 @@ def test_menu_nouvelle_fiche_propose_les_types(fen):
     assert fen.bandeau_validation.isHidden()
     next(a for a in m.actions() if a.text() == "Fiche ordinaire").trigger()
     assert fen.pile.currentWidget() is not fen.vues_types["applications"] and not fen.fiche.texte
+
+
+def test_pas_de_bouton_dans_la_barre_mais_une_entree_de_menu(fen):
+    assert "Applications" not in [a.text() for a in fen.barre.actions()]            # la fiche suffit : plus de bouton
+    from PyQt6.QtWidgets import QMenu
+    entrees = [a.text() for m in fen.menuBar().findChildren(QMenu) for a in m.actions()]
+    assert "Fiche des applications…" in entrees
