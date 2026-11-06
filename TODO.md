@@ -20,6 +20,11 @@ Légende : ☐ à faire · ◐ en cours · ✔ fait. Ordre = priorité proposée
 - ☐ Texte du générateur d'invitation (`core/invitation.py`) : « panneau d'icônes » obsolète pour Applications, ajouter Photos.
 - ☐ Test instable sous Python 3.13 à l'intégration continue : `tests/test_traduction.py::test_fenetre_de_progression_reelle_avec_un_modele_de_plus_de_2_go` (objet Qt supprimé).
 
+## Compléments et publication des modules (idée du 2026-11-07, à reprendre avec jfk)
+- ☐ Menu **Fichier → Compléments…** : liste (Firefox, Chrome/Edge, raccourci « envoyer la sélection », menu Dolphin…), état installé ou non, boutons Installer / Retirer, confirmation avant de toucher au système ; Linux/KDE d'abord (copie des scripts de `exemples/selection/`, raccourci), puis Windows (raccourci géré par Scrinium, sans AutoHotkey). Facultatif et visible, rien d'imposé.
+- ☐ Extension de navigateur `navigateur/` (testée sur Firefox seulement) : la faire **signer** par Mozilla (addons.mozilla.org, « distribuer par moi-même », .xpi à joindre aux releases) pour une installation durable ; publier sur Edge Add-ons (gratuit) et Chrome Web Store (5 $) ; à la main de jfk (compte à son nom). Tester Chrome/Edge.
+- ☐ Mettre un zip de `navigateur/` dans les releases.
+
 ## Inviter à installer Scrinium (idée du 2026-10-21)
 - ✔ Brouillon de la fiche personnelle : `doc_jfk/invitation-scrinium.md` (dossier local non publié) : présentation, installation Debian/Ubuntu avec vérification de la somme de contrôle, autres Linux (`install.sh`), message provisoire Windows/macOS, premier lancement, extensions ; à coller dans une fiche puis à envoyer avec le plugin courriel
 - ✔ Fiche livrée dans Scrinium (2026-10-22, `dev`, v0.4) : `core/invitation.py` (texte FR/EN via gettext, liens vers la version qui crée la fiche) ; *Fichier → Inviter à installer Scrinium…* crée la fiche dans un thème « Invitations » (icône courrier), la rouvre sans l'écraser si elle existe, ouvre l'envoi de l'extension Courriel si elle est active (sinon explique) ; 6e fiche « Inviter quelqu'un » dans « Bienvenue » ; 6 tests. Pas encore essayé à l'écran
