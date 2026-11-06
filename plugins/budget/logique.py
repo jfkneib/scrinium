@@ -230,6 +230,21 @@ def vers_csv(b: Budget, separateur: str = ";") -> str:
     return sortie.getvalue()
 
 
+def portee_de(texte: str | None) -> str:
+    """Portée de la fiche « résultat » : « theme » (les budgets du même thème, par défaut) ou « tous » (tous les thèmes)."""
+    m = re.search(r"^portée[ \t]*:[ \t]*(\w+)[ \t]*$|^portee[ \t]*:[ \t]*(\w+)[ \t]*$", texte or "", re.IGNORECASE | re.MULTILINE)
+    v = ((m.group(1) or m.group(2)) if m else "theme").lower()
+    return "tous" if v == "tous" else "theme"
+
+
+def texte_resultat(portee: str, ancien: str | None = None) -> str:
+    """Texte de la fiche « résultat » avec cette portée ; le reste du texte (notes libres) est conservé."""
+    reste = [l for l in (ancien or "").replace("\r\n", "\n").split("\n")[1:] if not re.match(r"^(portée|portee)[ \t]*:", l.strip(), re.IGNORECASE)]
+    while reste and not reste[0].strip():
+        reste.pop(0)
+    return "\n".join([MARQUE_RESULTAT] + (["portée: tous"] if portee == "tous" else []) + ([""] + reste if reste else [])).rstrip("\n") + "\n"
+
+
 def est_budget(texte: str | None) -> bool:
     t = (texte or "").lstrip("\ufeff")
     return t.startswith(MARQUE) and not t.startswith(MARQUE_RESULTAT) and (len(t) == len(MARQUE) or t[len(MARQUE)] in " \t\r\n")
@@ -248,6 +263,28 @@ def mois_de_tous(budgets: list) -> list:
     for _n, b in budgets:
         ms |= {mois_de(o.date) for o in b.operations}
     return sorted(ms)
+
+
+def exemples(aujourdhui: date | None = None) -> list:
+    """[(thème, titre, texte)] : des fiches d'exemple (dans le mois courant), créées à la première activation de l'extension."""
+    m = mois_courant(aujourdhui)
+    def op(j, lib, cat="", debit="", credit=""):
+        return Operation(f"{m}-{j:02d}", lib, cat, centimes(debit) or 0, centimes(credit) or 0)
+    courses = Budget([op(2, _("Supermarché"), _("Courses"), "42,30"), op(4, _("Marché"), _("Courses"), "18,60"),
+                      op(7, _("Boulangerie"), _("Courses"), "9,40"), op(11, _("Supermarché"), _("Courses"), "56,80"),
+                      op(14, _("Pharmacie"), _("Santé"), "12,50")], 0, 300 * 100, {m: _("Exemple : à modifier")},
+                     _("Exemple. Modifiez les lignes en cliquant dans le tableau, ajoutez-en avec la saisie rapide en haut (Débit pour une "
+                       "dépense, Crédit pour une entrée d'argent), puis regardez l'onglet « Bilan ». Supprimez cette fiche quand vous voulez."))
+    poche = Budget([op(1, _("Argent de poche"), "", "", "10"), op(3, _("Bonbons"), _("Plaisir"), "1,50"), op(8, _("Argent de poche"), "", "", "10"),
+                    op(10, _("Autocollants"), _("Plaisir"), "3"), op(15, _("Argent de poche"), "", "", "10")], 500, None, {},
+                   _("Exemple : l'argent de poche d'un enfant. Le solde de départ est de 5 ; chaque crédit est une somme reçue, chaque débit une "
+                     "dépense. Le solde monte et descend."))
+    return [(_("Budget (exemples)"), _("Exemple · Courses"), ecrire(courses)),
+            (_("Budget (exemples)"), _("Exemple · Argent de poche"), ecrire(poche)),
+            (_("Budget (exemples)"), _("Exemple · Résultat de tous mes budgets"),
+             MARQUE_RESULTAT + "\n\n" + _("Cette fiche totalise les budgets (fiches « Budget ») du même thème que celle-ci, ou tous les budgets si vous le "
+                                          "choisissez en haut ; pour un mois ou pour l'ensemble. Elle se met à jour quand on l'ouvre ou qu'on clique "
+                                          "sur « Actualiser ».") + "\n")]
 
 
 TYPE = TypeFiche("budget", N_("Budget"), "wallet-open", modele=texte_neuf)

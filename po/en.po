@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: scrinium 0.2.0\n"
 "Report-Msgid-Bugs-To: \n"
-"PO-Revision-Date: 2026-11-06 15:37+0100\n"
+"PO-Revision-Date: 2026-11-06 15:44+0100\n"
 "Last-Translator: Jean-François Kneib\n"
 "Language-Team: English\n"
 "Language: en\n"
@@ -404,7 +404,7 @@ msgstr "this is not a Scrinium applications export"
 msgid "fichier illisible"
 msgstr "unreadable file"
 
-#: plugins/budget/__init__.py:450
+#: plugins/budget/__init__.py:477
 msgid ""
 "De petits comptes, pas de la comptabilité : le budget des courses, l'argent de poche d'un enfant…\n"
 "\n"
@@ -413,7 +413,7 @@ msgid ""
 "• « Budget mensuel » (facultatif) : l'onglet du mois dit ce qu'il en reste, ou de combien il est dépassé. « Solde de départ » (facultatif).\n"
 "• « Nouveau mois » : ajoute l'onglet du mois suivant, ou d'un mois déjà passé (« Mois précédent »). On peut aussi saisir une opération à une date plus ancienne : l'onglet de ce mois apparaît tout seul. Les montants s'écrivent avec une virgule ou un point.\n"
 "• Bilan : mois par mois (débits, crédits, solde) et dépenses par catégorie.\n"
-"• Nouvelle fiche > « Budget — résultat » : une fiche qui totalise TOUS vos budgets, pour un mois au choix ou pour l'ensemble. Elle se met à jour quand on l'ouvre ou qu'on clique sur « Actualiser ». Un budget verrouillé et fermé ne peut pas être lu : ouvrez-le d'abord.\n"
+"• Nouvelle fiche > « Budget — résultat » : une fiche qui totalise vos budgets, pour un mois au choix ou pour l'ensemble. Par défaut, elle totalise les budgets du MÊME THÈME qu'elle (rangez-la avec eux) ; « Tous les thèmes » en haut totalise tous vos budgets. Elle se met à jour quand on l'ouvre ou qu'on clique sur « Actualiser ». Un budget verrouillé et fermé ne peut pas être lu : ouvrez-le d'abord.\n"
 "• « Exporter en CSV… » : Date, Libellé, Catégorie, Débit, Crédit, Solde (séparateur « ; », que LibreOffice et Excel ouvrent directement).\n"
 "• Un budget est un tableau Markdown : lisible partout, cherchable, partageable (extension Partage) et verrouillable (conseillé pour des comptes). Rien n'est exécuté."
 msgstr ""
@@ -424,7 +424,7 @@ msgstr ""
 "• \"Monthly budget\" (optional): the month's tab tells you what is left, or by how much it is exceeded. \"Starting balance\" (optional).\n"
 "• \"New month\": adds the tab of the next month, or of a month already past (\"Previous month\"). You can also enter an operation with an older date: the tab of that month appears by itself. Amounts are written with a comma or a dot.\n"
 "• Summary: month by month (debits, credits, balance) and spending by category.\n"
-"• New note > \"Budget — result\": a note that totals ALL your budgets, for a month of your choice or for everything. It updates when you open it or click \"Refresh\". A locked, closed budget cannot be read: open it first.\n"
+"• New note > \"Budget — result\": a note that totals your budgets, for a month of your choice or for everything. By default it totals the budgets of the SAME TOPIC as itself (keep it with them); \"All topics\" at the top totals all your budgets. It updates when you open it or click \"Refresh\". A locked, closed budget cannot be read: open it first.\n"
 "• \"Export to CSV…\": Date, Label, Category, Debit, Credit, Balance (\";\" separator, which LibreOffice and Excel open directly).\n"
 "• A budget is a Markdown table: readable anywhere, searchable, shareable (Sharing extension) and lockable (advised for accounts). Nothing is executed."
 
@@ -510,24 +510,32 @@ msgstr "Export to CSV"
 msgid "Fichiers CSV (*.csv)"
 msgstr "CSV files (*.csv)"
 
-#: plugins/budget/__init__.py:389
+#: plugins/budget/__init__.py:387
+msgid "Ceux de ce thème"
+msgstr "Those of this topic"
+
+#: plugins/budget/__init__.py:388
+msgid "Tous les thèmes"
+msgstr "All topics"
+
+#: plugins/budget/__init__.py:395
 #: plugins/photos/__init__.py:185
 msgid "Actualiser"
 msgstr "Refresh"
 
-#: plugins/budget/__init__.py:408
+#: plugins/budget/__init__.py:432
 msgid "Tous les mois"
 msgstr "All months"
 
-#: plugins/budget/__init__.py:432
-msgid "Aucun budget : créez une fiche « Budget »."
-msgstr "No budget: create a \"Budget\" note."
+#: plugins/budget/__init__.py:456
+msgid "Aucun budget ici : créez une fiche « Budget » dans ce thème, ou choisissez « Tous les thèmes »."
+msgstr "No budget here: create a \"Budget\" note in this topic, or choose \"All topics\"."
 
-#: plugins/budget/__init__.py:433
+#: plugins/budget/__init__.py:458
 msgid "Pour un mois, le « Solde » est celui du mois ; pour « Tous les mois », c'est le solde actuel (solde de départ compris)."
 msgstr "For a month, the \"Balance\" is that of the month; for \"All months\", it is the current balance (starting balance included)."
 
-#: plugins/budget/__init__.py:444
+#: plugins/budget/__init__.py:469
 msgid "Extension Budget"
 msgstr "Budget extension"
 
@@ -544,7 +552,7 @@ msgid "Titre de ce mois"
 msgstr "Title of this month"
 
 #: plugins/budget/__init__.py:149
-#: plugins/budget/__init__.py:394
+#: plugins/budget/__init__.py:400
 msgid "Solde"
 msgstr "Balance"
 
@@ -558,12 +566,12 @@ msgstr "Month"
 
 #: plugins/budget/__init__.py:164
 #: plugins/budget/__init__.py:167
-#: plugins/budget/__init__.py:394
+#: plugins/budget/__init__.py:400
 msgid "Débits"
 msgstr "Debits"
 
 #: plugins/budget/__init__.py:164
-#: plugins/budget/__init__.py:394
+#: plugins/budget/__init__.py:400
 msgid "Crédits"
 msgstr "Credits"
 
@@ -584,7 +592,8 @@ msgid "Part"
 msgstr "Share"
 
 #: plugins/budget/__init__.py:245
-#: plugins/budget/__init__.py:428
+#: plugins/budget/__init__.py:452
+#: plugins/tableur/logique.py:411
 msgid "Total"
 msgstr "Total"
 
@@ -611,19 +620,23 @@ msgid "Ajouté : %s"
 msgstr "Added: %s"
 
 #: plugins/budget/__init__.py:385
+msgid "Budgets"
+msgstr "Budgets"
+
+#: plugins/budget/__init__.py:391
 msgid "Période"
 msgstr "Period"
 
-#: plugins/budget/__init__.py:394
-#: plugins/budget/logique.py:253
+#: plugins/budget/__init__.py:400
+#: plugins/budget/logique.py:290
 msgid "Budget"
 msgstr "Budget"
 
-#: plugins/budget/__init__.py:394
+#: plugins/budget/__init__.py:400
 msgid "Reste sur le budget"
 msgstr "Left of the budget"
 
-#: plugins/budget/__init__.py:432
+#: plugins/budget/__init__.py:456
 msgid "%d budget(s) comptés."
 msgstr "%d budget(s) counted."
 
@@ -633,7 +646,7 @@ msgstr "%d budget(s) counted."
 msgid "Exporté : %s"
 msgstr "Exported: %s"
 
-#: plugins/budget/__init__.py:435
+#: plugins/budget/__init__.py:460
 msgid "%d fiche(s) verrouillée(s) fermée(s) ne peuvent pas être lues : si l'une est un budget, ouvrez-la puis actualisez."
 msgstr "%d locked, closed note(s) cannot be read: if one is a budget, open it then refresh."
 
@@ -649,11 +662,91 @@ msgstr "Budget exceeded by %s"
 msgid "(sans catégorie)"
 msgstr "(no category)"
 
-#: plugins/budget/logique.py:254
+#: plugins/budget/logique.py:291
 msgid "Budget — résultat"
 msgstr "Budget — result"
 
-#: plugins/calc/__init__.py:264
+#: plugins/budget/logique.py:276
+msgid "Exemple. Modifiez les lignes en cliquant dans le tableau, ajoutez-en avec la saisie rapide en haut (Débit pour une dépense, Crédit pour une entrée d'argent), puis regardez l'onglet « Bilan ». Supprimez cette fiche quand vous voulez."
+msgstr "Example. Edit the rows by clicking in the table, add some with the quick entry at the top (Debit for an expense, Credit for money coming in), then look at the \"Summary\" tab. Delete this note whenever you like."
+
+#: plugins/budget/logique.py:280
+msgid "Exemple : l'argent de poche d'un enfant. Le solde de départ est de 5 ; chaque crédit est une somme reçue, chaque débit une dépense. Le solde monte et descend."
+msgstr "Example: a child's pocket money. The starting balance is 5; each credit is an amount received, each debit an expense. The balance goes up and down."
+
+#: plugins/budget/logique.py:275
+msgid "Exemple : à modifier"
+msgstr "Example: edit me"
+
+#: plugins/budget/logique.py:282
+#: plugins/budget/logique.py:283
+#: plugins/budget/logique.py:284
+msgid "Budget (exemples)"
+msgstr "Budget (examples)"
+
+#: plugins/budget/logique.py:282
+msgid "Exemple · Courses"
+msgstr "Example · Groceries"
+
+#: plugins/budget/logique.py:283
+msgid "Exemple · Argent de poche"
+msgstr "Example · Pocket money"
+
+#: plugins/budget/logique.py:284
+msgid "Exemple · Résultat de tous mes budgets"
+msgstr "Example · Result of all my budgets"
+
+#: plugins/budget/logique.py:273
+#: plugins/budget/logique.py:274
+msgid "Supermarché"
+msgstr "Supermarket"
+
+#: plugins/budget/logique.py:273
+#: plugins/budget/logique.py:273
+#: plugins/budget/logique.py:274
+msgid "Courses"
+msgstr "Groceries"
+
+#: plugins/budget/logique.py:273
+msgid "Marché"
+msgstr "Market"
+
+#: plugins/budget/logique.py:274
+msgid "Boulangerie"
+msgstr "Bakery"
+
+#: plugins/budget/logique.py:275
+msgid "Pharmacie"
+msgstr "Pharmacy"
+
+#: plugins/budget/logique.py:275
+msgid "Santé"
+msgstr "Health"
+
+#: plugins/budget/logique.py:278
+#: plugins/budget/logique.py:278
+#: plugins/budget/logique.py:279
+msgid "Argent de poche"
+msgstr "Pocket money"
+
+#: plugins/budget/logique.py:278
+msgid "Bonbons"
+msgstr "Sweets"
+
+#: plugins/budget/logique.py:278
+#: plugins/budget/logique.py:279
+msgid "Plaisir"
+msgstr "Treats"
+
+#: plugins/budget/logique.py:279
+msgid "Autocollants"
+msgstr "Stickers"
+
+#: plugins/budget/logique.py:285
+msgid "Cette fiche totalise les budgets (fiches « Budget ») du même thème que celle-ci, ou tous les budgets si vous le choisissez en haut ; pour un mois ou pour l'ensemble. Elle se met à jour quand on l'ouvre ou qu'on clique sur « Actualiser »."
+msgstr "This note totals the budgets (\"Budget\" notes) of the same topic as itself, or all the budgets if you choose so at the top; for a month or for everything. It updates when you open it or click \"Refresh\"."
+
+#: plugins/calc/__init__.py:266
 msgid ""
 "Un petit éditeur de listes avec de petits calculs, pour suivre des données : relevés de compteur, poids, dépenses…\n"
 "\n"
@@ -683,6 +776,7 @@ msgstr "No total"
 
 #: plugins/calc/__init__.py:23
 #: plugins/tableur/__init__.py:64
+#: plugins/tableur/logique.py:413
 msgid "Somme"
 msgstr "Sum"
 
@@ -791,13 +885,29 @@ msgstr "This file contains no table."
 msgid "Remplacer le contenu actuel de la fiche par ce fichier ?"
 msgstr "Replace the current content of the note with this file?"
 
-#: plugins/calc/logique.py:90
+#: plugins/calc/logique.py:94
+msgid "Exemple : un relevé. Cliquez dans une cellule pour la modifier ; « Ajouter une ligne » met la date du jour. La ligne grisée du bas donne un total par colonne (ici la moyenne) : clic droit dessus pour choisir autre chose. « Exporter en CSV… » l'envoie vers un tableur."
+msgstr "Example: a log. Click a cell to edit it; \"Add a row\" puts today's date. The grey row at the bottom gives a total per column (here the average): right-click it to choose something else. \"Export to CSV…\" sends it to a spreadsheet."
+
+#: plugins/calc/logique.py:99
 msgid "Calc"
 msgstr "Calc"
 
 #: plugins/calc/logique.py:82
 msgid "Valeur"
 msgstr "Value"
+
+#: plugins/calc/logique.py:96
+msgid "Calc (exemples)"
+msgstr "Calc (examples)"
+
+#: plugins/calc/logique.py:96
+msgid "Exemple · Relevé de poids"
+msgstr "Example · Weight log"
+
+#: plugins/calc/logique.py:93
+msgid "Poids (kg)"
+msgstr "Weight (kg)"
 
 #: plugins/calculatrice/__init__.py:161
 msgid ""
@@ -2649,7 +2759,7 @@ msgstr "Read the text (OCR) → new fiche"
 msgid "Photos"
 msgstr "Photos"
 
-#: plugins/tableur/__init__.py:293
+#: plugins/tableur/__init__.py:295
 msgid ""
 "Un tableur pour des cellules et des formules, par exemple pour suivre des relevés (compteur, poids, dépenses…).\n"
 "\n"
@@ -2689,9 +2799,45 @@ msgstr "Spreadsheet extension"
 msgid "%(l)d lignes, %(c)d colonnes. Pour une formule : cliquez une cellule, tapez = puis la formule, par exemple =SOMME(A1:A5) ou =A1*B1, et Entrée."
 msgstr "%(l)d rows, %(c)d columns. For a formula: click a cell, type = then the formula, for example =SOMME(A1:A5) or =A1*B1, and Enter."
 
-#: plugins/tableur/logique.py:409
+#: plugins/tableur/logique.py:414
+msgid "Exemple. Cliquez une cellule : la barre au-dessus de la grille montre sa formule (ici « =B2*C2 » : quantité fois prix). Tapez = dans une cellule pour écrire la vôtre, par exemple =SOMME(D2:D4) ou =D5*1.2. Entrée valide."
+msgstr "Example. Click a cell: the bar above the grid shows its formula (here \"=B2*C2\": quantity times price). Type = in a cell to write your own, for example =SOMME(D2:D4) or =D5*1.2. Enter validates."
+
+#: plugins/tableur/logique.py:419
 msgid "Tableur"
 msgstr "Spreadsheet"
+
+#: plugins/tableur/logique.py:411
+msgid "Article"
+msgstr "Item"
+
+#: plugins/tableur/logique.py:411
+msgid "Quantité"
+msgstr "Quantity"
+
+#: plugins/tableur/logique.py:411
+msgid "Prix"
+msgstr "Price"
+
+#: plugins/tableur/logique.py:412
+msgid "Pommes"
+msgstr "Apples"
+
+#: plugins/tableur/logique.py:412
+msgid "Pain"
+msgstr "Bread"
+
+#: plugins/tableur/logique.py:412
+msgid "Lait"
+msgstr "Milk"
+
+#: plugins/tableur/logique.py:416
+msgid "Tableur (exemples)"
+msgstr "Spreadsheet (examples)"
+
+#: plugins/tableur/logique.py:416
+msgid "Exemple · Liste de courses"
+msgstr "Example · Shopping list"
 
 #: plugins/traduction/__init__.py:694
 msgid ""
@@ -4699,47 +4845,62 @@ msgstr "You can also type the name of an icon from your system icon theme."
 msgid "Icône de « %s » :"
 msgstr "Icon for « %s »:"
 
-#: src/scrinium/ui/extensions.py:166
+#: src/scrinium/ui/extensions.py:167
 msgid "Extensions"
 msgstr "Extensions"
 
-#: src/scrinium/ui/extensions.py:169
+#: src/scrinium/ui/extensions.py:170
 msgid "Une extension est un programme qui s'exécute avec les mêmes droits que Scrinium : elle peut lire les fiches ouvertes. N'activez que des extensions dont vous connaissez l'origine."
 msgstr "An extension is a program that runs with the same rights as Scrinium: it can read open notes. Only enable extensions whose origin you know."
 
-#: src/scrinium/ui/extensions.py:180
+#: src/scrinium/ui/extensions.py:181
 msgid "Ouvrir le dossier des extensions"
 msgstr "Open the extensions folder"
 
-#: src/scrinium/ui/extensions.py:220
+#: src/scrinium/ui/extensions.py:221
 msgid "Dossier utilisateur"
 msgstr "User folder"
 
-#: src/scrinium/ui/extensions.py:210
+#: src/scrinium/ui/extensions.py:211
 msgid "Aucune extension installée. Déposez-en dans le dossier des extensions."
 msgstr "No extensions installed. Drop some into the extensions folder."
 
-#: src/scrinium/ui/extensions.py:220
-msgid "Installée comme paquet"
-msgstr "Installed as a package"
-
-#: src/scrinium/ui/extensions.py:220
-msgid "Fournie avec Scrinium"
-msgstr "Provided with Scrinium"
-
-#: src/scrinium/ui/extensions.py:232
-msgid "Activer l'extension"
-msgstr "Enable the extension"
-
-#: src/scrinium/ui/extensions.py:236
+#: src/scrinium/ui/extensions.py:252
+#: src/scrinium/ui/extensions.py:237
 msgid "Extension"
 msgstr "Extension"
 
+#: src/scrinium/ui/extensions.py:221
+msgid "Installée comme paquet"
+msgstr "Installed as a package"
+
+#: src/scrinium/ui/extensions.py:221
+msgid "Fournie avec Scrinium"
+msgstr "Provided with Scrinium"
+
+#: src/scrinium/ui/extensions.py:252
+msgid ""
+"Des fiches d'exemple ont été ajoutées pour la prendre en main :\n"
+"\n"
+"%s\n"
+"\n"
+"Modifiez-les, ou supprimez-les quand vous voulez."
+msgstr ""
+"Example notes have been added to get you started:\n"
+"\n"
+"%s\n"
+"\n"
+"Edit them, or delete them whenever you like."
+
 #: src/scrinium/ui/extensions.py:233
+msgid "Activer l'extension"
+msgstr "Enable the extension"
+
+#: src/scrinium/ui/extensions.py:234
 msgid "Activer « %s » ? Elle pourra lire les fiches ouvertes."
 msgstr "Enable \"%s\"? It will be able to read open notes."
 
-#: src/scrinium/ui/extensions.py:236
+#: src/scrinium/ui/extensions.py:237
 msgid "Impossible d'activer : %s"
 msgstr "Could not enable: %s"
 

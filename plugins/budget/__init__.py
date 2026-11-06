@@ -382,6 +382,12 @@ class VueResultat(QWidget):
         lay = QVBoxLayout(self)
         lay.setContentsMargins(4, 4, 4, 4)
         haut = QHBoxLayout()
+        haut.addWidget(QLabel(_("Budgets")))
+        self.c_portee = QComboBox()
+        self.c_portee.addItem(_("Ceux de ce thème"), "theme")
+        self.c_portee.addItem(_("Tous les thèmes"), "tous")
+        self.c_portee.currentIndexChanged.connect(self._portee_choisie)
+        haut.addWidget(self.c_portee)
         haut.addWidget(QLabel(_("Période")))
         self.c_mois = QComboBox()
         self.c_mois.currentIndexChanged.connect(lambda *_a: self._afficher())
@@ -397,10 +403,28 @@ class VueResultat(QWidget):
         self.note.setWordWrap(True)
         lay.addWidget(self.note)
         self._budgets: list = []
+        self._texte = ""
+
+    def _portee_choisie(self):
+        if not self._remplit:
+            self.modifie.emit(logique.texte_resultat(self.c_portee.currentData(), self._texte))
+            self.charger(logique.texte_resultat(self.c_portee.currentData(), self._texte))
+
+    _remplit = False
 
     def charger(self, texte: str):
+        self._texte = texte or ""
+        self._remplit = True
+        self.c_portee.setCurrentIndex(self.c_portee.findData(logique.portee_de(texte)))
+        self._remplit = False
+        courante = self.ctx.fiche_courante() if self.ctx else None
+        theme = courante.theme if courante is not None else None
         fiches = self.ctx.fiches() if self.ctx else []
-        self._budgets = [(f"{f.titre}  ({f.theme})", logique.lire(f.texte)) for f in fiches if f.texte is not None and logique.est_budget(f.texte)]
+        if self.c_portee.currentData() == "theme" and theme is not None:
+            fiches = [f for f in fiches if f.theme == theme]
+        tous = self.c_portee.currentData() == "tous" or theme is None
+        self._budgets = [(f"{f.titre}  ({f.theme})" if tous else f.titre, logique.lire(f.texte))
+                         for f in fiches if f.texte is not None and logique.est_budget(f.texte)]
         self._fermes = sum(1 for f in fiches if f.texte is None and f.verrou)
         courant = self.c_mois.currentData()
         self.c_mois.blockSignals(True)
@@ -429,7 +453,8 @@ class VueResultat(QWidget):
                                "" if t["reste"] is None else logique.formater(t["reste"])]):
             self.table.setItem(n, c, _item(v, droite=c > 0, editable=False, gras=True, rouge=c == 3 and solde < 0))
         self.table.resizeColumnsToContents()
-        texte = (_("%d budget(s) comptés.") % len(self._budgets)) if self._budgets else _("Aucun budget : créez une fiche « Budget ».")
+        texte = (_("%d budget(s) comptés.") % len(self._budgets)) if self._budgets else _(
+            "Aucun budget ici : créez une fiche « Budget » dans ce thème, ou choisissez « Tous les thèmes ».")
         texte += " " + _("Pour un mois, le « Solde » est celui du mois ; pour « Tous les mois », c'est le solde actuel (solde de départ compris).")
         if self._fermes:
             texte += " " + _("%d fiche(s) verrouillée(s) fermée(s) ne peuvent pas être lues : si l'une est un budget, ouvrez-la puis actualisez.") % self._fermes
@@ -442,6 +467,8 @@ class BudgetPlugin(Plugin):
     def activer(self, ctx):
         self.ctx = ctx
         ctx.ajouter_doc(_("Extension Budget"), DOC)
+        for theme, titre, texte in logique.exemples():
+            ctx.ajouter_exemple(theme, titre, texte, "wallet-open")
         if ctx.ui is not None:
             ctx.ui.enregistrer_type(logique.TYPE, VueBudget())
             ctx.ui.enregistrer_type(logique.TYPE_RESULTAT, VueResultat(ctx))
@@ -459,7 +486,8 @@ DOC = _(
     "• « Nouveau mois » : ajoute l'onglet du mois suivant, ou d'un mois déjà passé (« Mois précédent »). On peut aussi saisir une opération à une "
     "date plus ancienne : l'onglet de ce mois apparaît tout seul. Les montants s'écrivent avec une virgule ou un point.\n"
     "• Bilan : mois par mois (débits, crédits, solde) et dépenses par catégorie.\n"
-    "• Nouvelle fiche > « Budget — résultat » : une fiche qui totalise TOUS vos budgets, pour un mois au choix ou pour l'ensemble. Elle se met à "
+    "• Nouvelle fiche > « Budget — résultat » : une fiche qui totalise vos budgets, pour un mois au choix ou pour l'ensemble. Par défaut, elle "
+    "totalise les budgets du MÊME THÈME qu'elle (rangez-la avec eux) ; « Tous les thèmes » en haut totalise tous vos budgets. Elle se met à "
     "jour quand on l'ouvre ou qu'on clique sur « Actualiser ». Un budget verrouillé et fermé ne peut pas être lu : ouvrez-le d'abord.\n"
     "• « Exporter en CSV… » : Date, Libellé, Catégorie, Débit, Crédit, Solde (séparateur « ; », que LibreOffice et Excel ouvrent directement).\n"
     "• Un budget est un tableau Markdown : lisible partout, cherchable, partageable (extension Partage) et verrouillable (conseillé pour des "

@@ -162,6 +162,7 @@ class UiPlugin:
 class DialogueExtensions(QDialog):
     def __init__(self, fenetre):
         super().__init__(fenetre)
+        self._fenetre = fenetre
         self.g = fenetre.plugins
         self.setWindowTitle(_("Extensions"))
         self.resize(560, 380)
@@ -237,9 +238,19 @@ class DialogueExtensions(QDialog):
                 self.liste.blockSignals(True)
                 it.setCheckState(Qt.CheckState.Unchecked)
                 self.liste.blockSignals(False)
+            else:
+                self._exemples(nom)
         else:
             self.g.desactiver(nom)
         self._detail(self.liste.currentRow())
+
+    def _exemples(self, nom: str):
+        """Première activation : les fiches d'exemple de l'extension sont créées, et on le dit (une prise en main facile)."""
+        creees = self.g.creer_exemples(nom)
+        if creees:
+            self._fenetre.maj_themes()
+            QMessageBox.information(self, _("Extension"), _("Des fiches d'exemple ont été ajoutées pour la prendre en main :\n\n%s\n\n"
+                                    "Modifiez-les, ou supprimez-les quand vous voulez.") % "\n".join(f"• « {t} » ({th})" for th, t in creees))
 
     def _ouvrir_dossier(self):
         self.g.dossier.mkdir(parents=True, exist_ok=True)

@@ -156,3 +156,22 @@ def test_export_import_csv(fen, tmp_path, monkeypatch):
 def test_documentation_dans_le_guide(fen):
     fen.guide()
     assert any("Calc" in f.titre for f in fen.store.theme("Guide").fiches)
+
+
+def test_exemples_a_la_premiere_activation_seulement(fen, monkeypatch):
+    from scrinium.ui.extensions import DialogueExtensions
+    import scrinium.ui.extensions as ext
+    infos = []
+    monkeypatch.setattr(ext.QMessageBox, "information", staticmethod(lambda *a, **k: infos.append(a[2])))
+    assert fen.store.theme("Calc (exemples)") is None                                       # activer() seul (démarrage, tests) ne crée rien
+    d = DialogueExtensions(fen)
+    d._exemples("calc")                                                             # l'utilisateur vient de cocher l'extension
+    th = fen.store.theme("Calc (exemples)")
+    assert th is not None and len(th.fiches) == 1 and len(infos) == 1 and "Exemple" in infos[0]
+    assert all(f.texte.startswith("#scrinium-calc") or f.texte.startswith("#scrinium-budget") for f in th.fiches)
+    assert "exemples_faits" in fen.store.reglages() and "calc" in fen.store.reglages()["exemples_faits"]
+    d._exemples("calc")                                                             # une seule fois
+    assert len(fen.store.theme("Calc (exemples)").fiches) == 1 and len(infos) == 1
+    fen.plugins.desactiver("calc")
+    fen.plugins.activer("calc")
+    assert fen.plugins.creer_exemples("calc") == []

@@ -177,6 +177,12 @@ class Contexte:
         """[(titre, texte)] des documentations des extensions actives, par ordre d'activation."""
         return self._g.docs()
 
+    def ajouter_exemple(self, theme: str, titre: str, texte: str, icone_theme: str | None = None) -> None:
+        """Fiche d'exemple de l'extension, pour une prise en main facile : elle est créée UNE SEULE FOIS, quand l'utilisateur active l'extension
+        dans « Gérer les extensions » (jamais au démarrage, jamais deux fois ; une fiche de même titre déjà dans le thème est laissée telle quelle).
+        À appeler dans `activer`, avec un texte déjà traduit."""
+        self._g._exemples.append((self.info.nom, theme, titre, texte, icone_theme))
+
     def service(self, nom: str):
         """Fonction proposée par une extension active sous ce nom, sinon None (l'extension n'est pas là : on s'en passe)."""
         v = self._g._services.get(nom)
@@ -282,11 +288,33 @@ class Gestionnaire:
         self._abonnements: dict[str, list] = {}         # événement -> [(nom, fn)]
         self._services: dict[str, tuple] = {}           # service -> (extension, fn)
         self._docs: list[tuple] = []                    # (extension, titre, texte) des fiches de documentation
+        self._exemples: list[tuple] = []                # (extension, thème, titre, texte, icône du thème) des fiches d'exemple
         self.erreurs: dict[str, int] = {}
 
     def docs(self) -> list:
         """[(titre, texte)] de la documentation déclarée par les extensions actives (`Contexte.ajouter_doc`)."""
         return [(t, x) for _n, t, x in self._docs]
+
+    def creer_exemples(self, nom: str) -> list:
+        """Crée les fiches d'exemple déclarées par l'extension `nom` (`Contexte.ajouter_exemple`), une seule fois par extension (réglage
+        `exemples_faits`). Retourne [(thème, titre)] des fiches créées. À appeler quand l'utilisateur ACTIVE l'extension."""
+        faits = set(self.store.reglages().get("exemples_faits", []))
+        if nom in faits:
+            return []
+        creees = []
+        for ext, theme, titre, texte, icone_theme in [e for e in self._exemples if e[0] == nom]:
+            th = self.store.theme(theme)
+            if th is None:
+                th = self.store.nouveau_theme(theme)
+                if icone_theme:
+                    self.store.icone_theme(th, icone_theme)
+            if any(f.titre == titre for f in th.fiches):
+                continue
+            f = self.store.nouvelle_fiche(th)
+            self.store.enregistrer(th, f, titre, texte)
+            creees.append((theme, titre))
+        self.store.sauver_reglages(exemples_faits=sorted(faits | {nom}))
+        return creees
 
     # ---------- découverte (sans exécuter le code des extensions) ----------
     def decouvrir(self) -> dict:
@@ -391,6 +419,7 @@ class Gestionnaire:
             self._abonnements[evt] = [(n, f) for n, f in self._abonnements[evt] if n != nom]
         self._services = {k: v for k, v in self._services.items() if v[0] != nom}
         self._docs = [d for d in self._docs if d[0] != nom]
+        self._exemples = [e for e in self._exemples if e[0] != nom]
         if pair:
             instance, ctx = pair
             try:

@@ -285,6 +285,8 @@ class TableurPlugin(Plugin):
     def activer(self, ctx):
         self.ctx = ctx
         ctx.ajouter_doc(_("Extension Tableur"), DOC)
+        for theme, titre, texte in logique.exemples():
+            ctx.ajouter_exemple(theme, titre, texte, "x-office-spreadsheet")
         if ctx.ui is None:
             return
         ctx.ui.enregistrer_type(logique.TYPE, VueTableur())

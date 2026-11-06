@@ -257,6 +257,8 @@ class CalcPlugin(Plugin):
     def activer(self, ctx):
         self.ctx = ctx
         ctx.ajouter_doc(_("Extension Calc"), DOC)
+        for theme, titre, texte in logique.exemples():
+            ctx.ajouter_exemple(theme, titre, texte, "view-list-details")
         if ctx.ui is not None:
             ctx.ui.enregistrer_type(logique.TYPE, VueCalc())
 

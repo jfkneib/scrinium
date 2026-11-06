@@ -406,4 +406,14 @@ def ligne_de_totaux(lignes: list, fonction: str = "SOMME", libelle: str = "") ->
     return lignes + [totaux]
 
 
+def exemples() -> list:
+    """[(thème, titre, texte)] : une fiche d'exemple (une liste de courses calculée), créée à la première activation de l'extension."""
+    lignes = [[_("Article"), _("Quantité"), _("Prix"), _("Total")],
+              [_("Pommes"), "3", "1,20", "=B2*C2"], [_("Pain"), "2", "1,10", "=B3*C3"], [_("Lait"), "6", "0,95", "=B4*C4"],
+              [_("Somme"), "", "", "=SOMME(D2:D4)"], ["", "", "", ""]]
+    notes = _("Exemple. Cliquez une cellule : la barre au-dessus de la grille montre sa formule (ici « =B2*C2 » : quantité fois prix). "
+              "Tapez = dans une cellule pour écrire la vôtre, par exemple =SOMME(D2:D4) ou =D5*1.2. Entrée valide.")
+    return [(_("Tableur (exemples)"), _("Exemple · Liste de courses"), ecrire(lignes, notes))]
+
+
 TYPE = TypeFiche("tableur", N_("Tableur"), "x-office-spreadsheet", modele=texte_neuf, en_markdown=en_markdown)

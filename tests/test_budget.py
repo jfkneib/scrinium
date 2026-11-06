@@ -187,24 +187,66 @@ def test_modifier_supprimer_nouveau_mois_et_bilan(fen, tmp_path, monkeypatch):
     assert cible.read_text(encoding="utf-8-sig").splitlines()[1].startswith(mois + "-01;b;;20,00;;-20,00")
 
 
-def test_fiche_resultat_totalise_tous_les_budgets(fen):
-    th = fen.store.nouveau_theme("Comptes")
-    for nom, ops in (("Courses", "| 2026-11-02 | a | | 20 | |\n| 2026-11-03 | b | | | 5 |\n"), ("Enfant", "budget: 50\n| 2026-11-04 | c | | 30 | |\n")):
+def _budgets_dans(fen, theme, **budgets):
+    th = fen.store.theme(theme) or fen.store.nouveau_theme(theme)
+    for nom, ops in budgets.items():
         f = fen.store.nouvelle_fiche(th)
         fen.store.enregistrer(th, f, nom, "#scrinium-budget\n" + ops)
+    fen.maj_themes()
+    return th
+
+
+def test_fiche_resultat_totalise_les_budgets_du_theme_ou_de_tous(fen):
+    _budgets_dans(fen, "Comptes", Courses="| 2026-11-02 | a | | 20 | |\n| 2026-11-03 | b | | | 5 |\n", Enfant="budget: 50\n| 2026-11-04 | c | | 30 | |\n")
+    th = fen.store.theme("Comptes")
     f = fen.store.nouvelle_fiche(th)
     fen.store.enregistrer(th, f, "Note", "pas un budget")
-    fen.maj_themes()
+    _budgets_dans(fen, "Autre", Voyage="| 2026-11-05 | d | | 100 | |\n")
+    fen.montrer(theme="Comptes")
     vue = _nouvelle(fen, "Budget — résultat")
-    assert fen.pile.currentWidget() is vue and len(vue._budgets) == 2
+    assert fen.pile.currentWidget() is vue
+    assert vue.c_portee.currentData() == "theme" and len(vue._budgets) == 2                  # par défaut : les budgets du même thème
+    assert sorted(n for n, _b in vue._budgets) == ["Courses", "Enfant"]
     assert vue.c_mois.count() == 2 and vue.c_mois.itemText(0) == "Tous les mois"
-    vue.c_mois.setCurrentIndex(1)                                                       # 2026-11
+    vue.c_mois.setCurrentIndex(1)                                                            # 2026-11
     assert vue.table.rowCount() == 3 and vue.table.item(2, 0).text() == "Total"
     assert vue.table.item(2, 1).text() == "50,00" and vue.table.item(2, 2).text() == "5,00" and vue.table.item(2, 3).text() == "-45,00"
     assert vue.table.item(1, 4).text() == "20,00" and vue.table.item(0, 4).text() == ""      # reste du budget Enfant ; Courses sans budget
     assert "2 budget(s)" in vue.note.text()
+    vue.c_portee.setCurrentIndex(vue.c_portee.findData("tous"))                              # tous les thèmes : Voyage compte aussi
+    assert len(vue._budgets) == 3 and "(Autre)" in "".join(n for n, _b in vue._budgets)
+    fen.sauver()
+    assert "portée: tous" in fen.fiche.texte and lg.portee_de(fen.fiche.texte) == "tous"     # le choix est gardé dans la fiche
+    vue.charger(fen.fiche.texte)
+    assert vue.c_portee.currentData() == "tous" and len(vue._budgets) == 3
+
+
+def test_portee_du_resultat_dans_le_texte():
+    assert lg.portee_de("#scrinium-budget-resultat\n") == "theme" and lg.portee_de(None) == "theme"
+    assert lg.portee_de("#scrinium-budget-resultat\nportée: tous\n") == "tous" and lg.portee_de("#scrinium-budget-resultat\nPortee: TOUS") == "tous"
+    t = lg.texte_resultat("tous", "#scrinium-budget-resultat\n\nMes notes\n")
+    assert t == "#scrinium-budget-resultat\nportée: tous\n\nMes notes\n" and lg.texte_resultat("theme", t) == "#scrinium-budget-resultat\n\nMes notes\n"
 
 
 def test_documentation_dans_le_guide(fen):
     fen.guide()
     assert any("Budget" in f.titre for f in fen.store.theme("Guide").fiches)
+
+
+def test_exemples_a_la_premiere_activation_seulement(fen, monkeypatch):
+    from scrinium.ui.extensions import DialogueExtensions
+    import scrinium.ui.extensions as ext
+    infos = []
+    monkeypatch.setattr(ext.QMessageBox, "information", staticmethod(lambda *a, **k: infos.append(a[2])))
+    assert fen.store.theme("Budget (exemples)") is None                                       # activer() seul (démarrage, tests) ne crée rien
+    d = DialogueExtensions(fen)
+    d._exemples("budget")                                                             # l'utilisateur vient de cocher l'extension
+    th = fen.store.theme("Budget (exemples)")
+    assert th is not None and len(th.fiches) == 3 and len(infos) == 1 and "Exemple" in infos[0]
+    assert all(f.texte.startswith("#scrinium-budget") or f.texte.startswith("#scrinium-budget") for f in th.fiches)
+    assert "exemples_faits" in fen.store.reglages() and "budget" in fen.store.reglages()["exemples_faits"]
+    d._exemples("budget")                                                             # une seule fois
+    assert len(fen.store.theme("Budget (exemples)").fiches) == 3 and len(infos) == 1
+    fen.plugins.desactiver("budget")
+    fen.plugins.activer("budget")
+    assert fen.plugins.creer_exemples("budget") == []

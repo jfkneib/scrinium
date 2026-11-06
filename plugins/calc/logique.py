@@ -87,6 +87,15 @@ def texte_neuf() -> str:
     return ecrire(vide(), ["", "somme"])
 
 
+def exemples(aujourdhui: date | None = None) -> list:
+    """[(thème, titre, texte)] : une fiche d'exemple (relevé de poids), créée à la première activation de l'extension."""
+    m = (aujourdhui or date.today()).strftime("%Y-%m")
+    lignes = [[_("Date"), _("Poids (kg)")]] + [[f"{m}-{j:02d}", v] for j, v in ((1, "72,4"), (8, "72,1"), (15, "71,8"), (22, "71,9"))] + [["", ""]]
+    notes = _("Exemple : un relevé. Cliquez dans une cellule pour la modifier ; « Ajouter une ligne » met la date du jour. La ligne grisée du bas "
+              "donne un total par colonne (ici la moyenne) : clic droit dessus pour choisir autre chose. « Exporter en CSV… » l'envoie vers un tableur.")
+    return [(_("Calc (exemples)"), _("Exemple · Relevé de poids"), ecrire(lignes, ["", "moyenne"], notes))]
+
+
 TYPE = TypeFiche("calc", N_("Calc"), "view-list-details", modele=texte_neuf)
 
 
