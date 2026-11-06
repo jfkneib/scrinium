@@ -108,3 +108,26 @@ def test_depot_d_une_fiche_sur_un_theme_declenche_le_signal(app, tmp_path, monke
     finally:
         w.quitter_vraiment = True
         w.close()
+
+
+def test_montrer_ne_sort_pas_la_fenetre_du_plein_ecran(app, tmp_path, monkeypatch):
+    from PyQt6.QtCore import Qt
+    monkeypatch.setenv("XDG_CONFIG_HOME", str(tmp_path / "xdg"))
+    s, a, b, f = _magasin(tmp_path)
+    s.sauver_reglages(recovery_asked=True)
+    w = Fenetre(s)
+    try:
+        w.show()
+        w.setWindowState(Qt.WindowState.WindowMaximized)
+        app.processEvents()
+        assert w.isMaximized()
+        w.montrer(theme="A")                                   # ce que font les extensions (bouton Applications, afficher_fiche…)
+        app.processEvents()
+        assert w.isMaximized()
+        w.hide()
+        w.montrer()                                            # fenêtre cachée (zone de notification) : revient maximisée
+        app.processEvents()
+        assert w.isVisible() and w.isMaximized()
+    finally:
+        w.quitter_vraiment = True
+        w.close()

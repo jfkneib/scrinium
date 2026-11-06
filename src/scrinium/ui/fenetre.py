@@ -1100,7 +1100,9 @@ class Fenetre(QMainWindow):
             self.theme = theme
             self.maj_themes()
             self.maj_fiches()
-        self.showNormal()
+        if self.isMinimized():                  # on enlève seulement « réduite » : une fenêtre maximisée le reste
+            self.setWindowState(self.windowState() & ~Qt.WindowState.WindowMinimized | Qt.WindowState.WindowActive)
+        self.show()                             # sans effet si elle est déjà affichée (showNormal() la sortait du plein écran)
         self.raise_()
         self.activateWindow()
         self.plugins.emettre("fenetre_montree")
