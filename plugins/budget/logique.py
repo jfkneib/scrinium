@@ -12,7 +12,7 @@
     | 2026-11-03 | Carrefour | Courses | 45,30 | |
     | 2026-11-05 | Argent de poche | | | 10 |
 
-- `budget:` budget mensuel (facultatif) ; `depart:` solde de départ (facultatif) ; `mois AAAA-MM:` titre d'un onglet (facultatif).
+- `budget:` budget mensuel (facultatif) ; `depart:` solde de départ (facultatif) ; `mois AAAA-MM:` titre d'un onglet (facultatif ; sans titre, la ligne sert à créer un mois vide).
 - Une fiche = un budget. Les montants sont gardés en CENTIMES entiers (jamais de dérive de virgule flottante) ; le solde n'est pas écrit :
   il est recalculé. Type NON exécutable. Le reste du texte (notes libres) est conservé.
 - Une seconde fiche, `budget-resultat`, totalise tous les budgets (voir `__init__.py`)."""
@@ -91,6 +91,11 @@ def mois_suivant(m: str) -> str:
     return f"{a + (n == 12)}-{1 if n == 12 else n + 1:02d}"
 
 
+def mois_precedent(m: str) -> str:
+    a, n = int(m[:4]), int(m[5:7])
+    return f"{a - (n == 1)}-{12 if n == 1 else n - 1:02d}"
+
+
 def mois_courant(aujourdhui: date | None = None) -> str:
     return (aujourdhui or date.today()).strftime("%Y-%m")
 
@@ -126,8 +131,7 @@ def lire(texte: str | None) -> Budget:
             else:
                 b.depart = v or 0
         elif t and mois_valide(t.group(1)):
-            if t.group(2).strip():
-                b.titres[t.group(1)] = t.group(2).strip()
+            b.titres[t.group(1)] = t.group(2).strip()          # titre vide : le mois existe (onglet) sans titre
         else:
             notes.append(l)
     while notes and not notes[-1].strip():
@@ -149,7 +153,7 @@ def ecrire(b: Budget) -> str:
         sortie.append("budget: " + formater(b.mensuel, False))
     if b.depart:
         sortie.append("depart: " + formater(b.depart, False))
-    sortie += [f"mois {m}: {t}" for m, t in sorted(b.titres.items()) if t.strip()]
+    sortie += [f"mois {m}: {t}".rstrip() for m, t in sorted(b.titres.items())]
     sortie += ["", "| Date | Libellé | Catégorie | Débit | Crédit |", "| --- | --- | --- | --- | --- |"]
     for o in sorted(b.operations, key=lambda o: o.date):                    # tri stable
         sortie.append("| " + " | ".join([o.date, _cellule(o.libelle), _cellule(o.categorie),

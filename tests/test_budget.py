@@ -72,6 +72,13 @@ def test_soldes_totaux_et_bilan():
     assert [i for i, _o in lg.operations_du_mois(b, "2026-11")] == [1, 2, 3]
 
 
+def test_mois_precedent_et_mois_vide():
+    assert lg.mois_precedent("2026-01") == "2025-12" and lg.mois_precedent("2026-11") == "2026-10"
+    b = lg.lire("#scrinium-budget\nmois 2026-09:\nmois 2026-10: Titre\n| 2026-11-01 | a | | 5 | |\n")
+    assert b.titres == {"2026-09": "", "2026-10": "Titre"} and lg.mois_presents(b) == ["2026-09", "2026-10", "2026-11"]
+    assert "mois 2026-09:\n" in lg.ecrire(b)
+
+
 def test_mois_sans_trou_et_courant():
     b = lg.lire("#scrinium-budget\nmois 2026-12: x\n| 2026-10-05 | a | | 1 | |\n")
     assert lg.mois_presents(b) == ["2026-10", "2026-11", "2026-12"] and lg.mois_suivant("2026-12") == "2027-01"
@@ -165,9 +172,13 @@ def test_modifier_supprimer_nouveau_mois_et_bilan(fen, tmp_path, monkeypatch):
     assert len(vue.b.operations) == 1 and vue.b.operations[0].libelle == "b"
     vue.nouveau_mois()
     suivant = lg.mois_suivant(mois)
-    assert vue.courant == suivant and vue.table.rowCount() == 0 and suivant in vue.b.titres
+    assert vue.courant == suivant and vue.table.rowCount() == 0 and suivant in vue.b.titres and vue.b.titres[suivant] == ""
+    avant = lg.mois_precedent(mois)
+    vue.nouveau_mois(avant)                                                             # un mois déjà passé, avant le premier
+    assert vue.mois[0] == avant and vue.courant == avant and f"mois {avant}:" in lg.ecrire(vue.b) and lg.lire(lg.ecrire(vue.b)).titres[avant] == ""
+    assert "Mois précédent" in [a.text() for a in (vue.b_mois.menu().aboutToShow.emit() or vue.b_mois.menu().actions())][1]
     vue.onglets.setCurrentIndex(len(vue.mois))                                          # onglet Bilan
-    assert vue.pile.currentIndex() == 1 and vue.courant is None and vue.t_mois.rowCount() == 3 and vue.t_mois.item(2, 2).text() == "20,00"
+    assert vue.pile.currentIndex() == 1 and vue.courant is None and vue.t_mois.rowCount() == 4 and vue.t_mois.item(3, 2).text() == "20,00"
     import sys
     mod = sys.modules["scrinium_plugin_budget"]
     cible = tmp_path / "b.csv"

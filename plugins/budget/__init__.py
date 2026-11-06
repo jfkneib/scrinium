@@ -13,7 +13,7 @@ from datetime import date
 from PyQt6.QtCore import QLocale, Qt, pyqtSignal
 from PyQt6.QtGui import QBrush, QColor
 from PyQt6.QtWidgets import (QAbstractItemView, QComboBox, QFileDialog, QHBoxLayout, QHeaderView, QLabel, QLineEdit, QMenu, QPushButton,
-                             QStackedWidget, QTabBar, QTableWidget, QTableWidgetItem, QVBoxLayout, QWidget)
+                             QStackedWidget, QTabBar, QTableWidget, QTableWidgetItem, QToolButton, QVBoxLayout, QWidget)
 
 from scrinium.core.plugins import Plugin
 from scrinium.i18n import _
@@ -85,8 +85,14 @@ class VueBudget(QWidget):
         self.e_depart.editingFinished.connect(self._reglages)
         haut.addWidget(self.e_depart)
         haut.addStretch(1)
-        self.b_mois = QPushButton(icone("list-add"), _("Nouveau mois"))
-        self.b_mois.clicked.connect(lambda *_a: self.nouveau_mois())
+        self.b_mois = QToolButton()
+        self.b_mois.setText(_("Nouveau mois"))
+        self.b_mois.setIcon(icone("list-add"))
+        self.b_mois.setToolButtonStyle(Qt.ToolButtonStyle.ToolButtonTextBesideIcon)
+        self.b_mois.setPopupMode(QToolButton.ToolButtonPopupMode.InstantPopup)
+        menu_mois = QMenu(self.b_mois)
+        menu_mois.aboutToShow.connect(lambda: self._remplir_menu_mois(menu_mois))
+        self.b_mois.setMenu(menu_mois)
         self.b_export = QPushButton(icone("document-export"), _("Exporter en CSV…"))
         self.b_export.clicked.connect(lambda *_a: self.exporter_csv())
         haut.addWidget(self.b_mois)
@@ -278,19 +284,25 @@ class VueBudget(QWidget):
             return
         t = self.e_titre.text().strip()
         if t != self.b.titres.get(self.courant, ""):
-            if t:
-                self.b.titres[self.courant] = t
+            if t or not any(logique.mois_de(o.date) == self.courant for o in self.b.operations):
+                self.b.titres[self.courant] = t                 # un mois sans opération reste (onglet) même sans titre
             else:
                 self.b.titres.pop(self.courant, None)
             self._enregistrer()
 
-    def nouveau_mois(self):
-        """Ajoute l'onglet du mois suivant le dernier (le mois est créé par son titre : une ligne « mois AAAA-MM: » ou une opération)."""
-        m = logique.mois_suivant(self.mois[-1])
-        self.b.titres.setdefault(m, _("Nouveau mois"))
+    def _remplir_menu_mois(self, menu):
+        menu.clear()
+        avant, apres = logique.mois_precedent(self.mois[0]), logique.mois_suivant(self.mois[-1])
+        menu.addAction(_("Mois suivant : %s") % nom_mois(apres), lambda: self.nouveau_mois(apres))
+        menu.addAction(_("Mois précédent : %s") % nom_mois(avant), lambda: self.nouveau_mois(avant))
+
+    def nouveau_mois(self, mois: str | None = None):
+        """Ajoute l'onglet d'un mois (par défaut le suivant le dernier ; `logique.mois_precedent` pour un mois déjà passé). Un mois sans
+        opération existe par une ligne « mois AAAA-MM: » (titre vide)."""
+        m = mois or logique.mois_suivant(self.mois[-1])
+        self.b.titres.setdefault(m, "")
         self.courant, self._bilan_voulu = m, False
         self._enregistrer()
-        self.e_titre.selectAll()
         self.e_titre.setFocus()
 
     def ajouter(self, sens: str):
@@ -444,7 +456,8 @@ DOC = _(
     "dépense) ou « Crédit » (une entrée d'argent). Entrée dans le montant = Débit. Les cellules du tableau se modifient directement ; "
     "clic droit : supprimer la ligne. Le solde est recalculé tout seul.\n"
     "• « Budget mensuel » (facultatif) : l'onglet du mois dit ce qu'il en reste, ou de combien il est dépassé. « Solde de départ » (facultatif).\n"
-    "• « Nouveau mois » ajoute l'onglet suivant. Les montants s'écrivent avec une virgule ou un point.\n"
+    "• « Nouveau mois » : ajoute l'onglet du mois suivant, ou d'un mois déjà passé (« Mois précédent »). On peut aussi saisir une opération à une "
+    "date plus ancienne : l'onglet de ce mois apparaît tout seul. Les montants s'écrivent avec une virgule ou un point.\n"
     "• Bilan : mois par mois (débits, crédits, solde) et dépenses par catégorie.\n"
     "• Nouvelle fiche > « Budget — résultat » : une fiche qui totalise TOUS vos budgets, pour un mois au choix ou pour l'ensemble. Elle se met à "
     "jour quand on l'ouvre ou qu'on clique sur « Actualiser ». Un budget verrouillé et fermé ne peut pas être lu : ouvrez-le d'abord.\n"

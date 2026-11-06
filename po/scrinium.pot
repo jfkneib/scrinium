@@ -29,13 +29,13 @@ msgid "Événement"
 msgstr ""
 
 #: plugins/agenda/__init__.py:46
-#: plugins/budget/__init__.py:158
+#: plugins/budget/__init__.py:164
 #: src/scrinium/ui/fenetre.py:266
 msgid "Titre"
 msgstr ""
 
 #: plugins/agenda/__init__.py:47
-#: plugins/budget/__init__.py:143
+#: plugins/budget/__init__.py:149
 #: plugins/calc/logique.py:82
 msgid "Date"
 msgstr ""
@@ -391,14 +391,14 @@ msgstr ""
 msgid "fichier illisible"
 msgstr ""
 
-#: plugins/budget/__init__.py:438
+#: plugins/budget/__init__.py:450
 msgid ""
 "De petits comptes, pas de la comptabilité : le budget des courses, l'argent de poche d'un enfant…\n"
 "\n"
 "• Nouvelle fiche > « Budget » : une fiche = un budget (« Courses », « Enfant 1 »…). Un onglet par mois, avec un titre libre (« Rentrée », « Vacances »…) à renseigner en haut de l'onglet, et un onglet « Bilan ».\n"
 "• Saisie rapide : date (celle du jour), libellé, catégorie (celles déjà utilisées sont proposées), montant, puis le bouton « Débit » (une dépense) ou « Crédit » (une entrée d'argent). Entrée dans le montant = Débit. Les cellules du tableau se modifient directement ; clic droit : supprimer la ligne. Le solde est recalculé tout seul.\n"
 "• « Budget mensuel » (facultatif) : l'onglet du mois dit ce qu'il en reste, ou de combien il est dépassé. « Solde de départ » (facultatif).\n"
-"• « Nouveau mois » ajoute l'onglet suivant. Les montants s'écrivent avec une virgule ou un point.\n"
+"• « Nouveau mois » : ajoute l'onglet du mois suivant, ou d'un mois déjà passé (« Mois précédent »). On peut aussi saisir une opération à une date plus ancienne : l'onglet de ce mois apparaît tout seul. Les montants s'écrivent avec une virgule ou un point.\n"
 "• Bilan : mois par mois (débits, crédits, solde) et dépenses par catégorie.\n"
 "• Nouvelle fiche > « Budget — résultat » : une fiche qui totalise TOUS vos budgets, pour un mois au choix ou pour l'ensemble. Elle se met à jour quand on l'ouvre ou qu'on clique sur « Actualiser ». Un budget verrouillé et fermé ne peut pas être lu : ouvrez-le d'abord.\n"
 "• « Exporter en CSV… » : Date, Libellé, Catégorie, Débit, Crédit, Solde (séparateur « ; », que LibreOffice et Excel ouvrent directement).\n"
@@ -410,102 +410,101 @@ msgstr ""
 msgid "aucun"
 msgstr ""
 
-#: plugins/budget/__init__.py:88
-#: plugins/budget/__init__.py:290
+#: plugins/budget/__init__.py:89
 msgid "Nouveau mois"
 msgstr ""
 
-#: plugins/budget/__init__.py:90
+#: plugins/budget/__init__.py:96
 #: plugins/calc/__init__.py:44
 #: plugins/tableur/__init__.py:67
 msgid "Exporter en CSV…"
 msgstr ""
 
-#: plugins/budget/__init__.py:115
+#: plugins/budget/__init__.py:121
 msgid "facultatif : Rentrée, Vacances…"
 msgstr ""
 
-#: plugins/budget/__init__.py:122
+#: plugins/budget/__init__.py:128
 msgid "AAAA-MM-JJ"
 msgstr ""
 
-#: plugins/budget/__init__.py:124
-#: plugins/budget/__init__.py:143
+#: plugins/budget/__init__.py:130
+#: plugins/budget/__init__.py:149
 msgid "Libellé"
 msgstr ""
 
-#: plugins/budget/__init__.py:128
-#: plugins/budget/__init__.py:143
-#: plugins/budget/__init__.py:161
+#: plugins/budget/__init__.py:134
+#: plugins/budget/__init__.py:149
+#: plugins/budget/__init__.py:167
 msgid "Catégorie"
 msgstr ""
 
-#: plugins/budget/__init__.py:131
+#: plugins/budget/__init__.py:137
 msgid "Montant"
 msgstr ""
 
-#: plugins/budget/__init__.py:134
-#: plugins/budget/__init__.py:143
+#: plugins/budget/__init__.py:140
+#: plugins/budget/__init__.py:149
 msgid "Débit"
 msgstr ""
 
-#: plugins/budget/__init__.py:135
+#: plugins/budget/__init__.py:141
 msgid "Une dépense : le montant va dans la colonne Débit"
 msgstr ""
 
-#: plugins/budget/__init__.py:137
 #: plugins/budget/__init__.py:143
+#: plugins/budget/__init__.py:149
 msgid "Crédit"
 msgstr ""
 
-#: plugins/budget/__init__.py:138
+#: plugins/budget/__init__.py:144
 msgid "Une entrée d'argent : le montant va dans la colonne Crédit"
 msgstr ""
 
-#: plugins/budget/__init__.py:185
+#: plugins/budget/__init__.py:191
 msgid "Bilan"
 msgstr ""
 
-#: plugins/budget/__init__.py:219
+#: plugins/budget/__init__.py:225
 msgid "Débits %(d)s · Crédits %(c)s · Solde du mois %(s)s · Solde de fin de mois %(f)s"
 msgstr ""
 
-#: plugins/budget/__init__.py:351
+#: plugins/budget/__init__.py:363
 #: plugins/calc/__init__.py:219
 #: plugins/tableur/__init__.py:274
 msgid "Supprimer la ligne"
 msgstr ""
 
-#: plugins/budget/__init__.py:355
+#: plugins/budget/__init__.py:367
 #: plugins/calc/__init__.py:228
 #: plugins/tableur/__init__.py:173
 msgid "Exporter en CSV"
 msgstr ""
 
-#: plugins/budget/__init__.py:355
+#: plugins/budget/__init__.py:367
 #: plugins/calc/__init__.py:228
 #: plugins/tableur/__init__.py:173
 msgid "Fichiers CSV (*.csv)"
 msgstr ""
 
-#: plugins/budget/__init__.py:377
+#: plugins/budget/__init__.py:389
 #: plugins/photos/__init__.py:185
 msgid "Actualiser"
 msgstr ""
 
-#: plugins/budget/__init__.py:396
+#: plugins/budget/__init__.py:408
 msgid "Tous les mois"
 msgstr ""
 
-#: plugins/budget/__init__.py:420
+#: plugins/budget/__init__.py:432
 msgid "Aucun budget : créez une fiche « Budget »."
 msgstr ""
 
-#: plugins/budget/__init__.py:421
+#: plugins/budget/__init__.py:433
 msgid "Pour un mois, le « Solde » est celui du mois ; pour « Tous les mois », c'est le solde actuel (solde de départ compris)."
 msgstr ""
 
-#: plugins/budget/__init__.py:432
+#: plugins/budget/__init__.py:444
 msgid "Extension Budget"
 msgstr ""
 
@@ -517,109 +516,117 @@ msgstr ""
 msgid "Solde de départ"
 msgstr ""
 
-#: plugins/budget/__init__.py:113
+#: plugins/budget/__init__.py:119
 msgid "Titre de ce mois"
 msgstr ""
 
-#: plugins/budget/__init__.py:143
-#: plugins/budget/__init__.py:382
+#: plugins/budget/__init__.py:149
+#: plugins/budget/__init__.py:394
 msgid "Solde"
 msgstr ""
 
-#: plugins/budget/__init__.py:157
+#: plugins/budget/__init__.py:163
 msgid "Mois par mois"
 msgstr ""
 
-#: plugins/budget/__init__.py:158
+#: plugins/budget/__init__.py:164
 msgid "Mois"
 msgstr ""
 
-#: plugins/budget/__init__.py:158
-#: plugins/budget/__init__.py:161
-#: plugins/budget/__init__.py:382
+#: plugins/budget/__init__.py:164
+#: plugins/budget/__init__.py:167
+#: plugins/budget/__init__.py:394
 msgid "Débits"
 msgstr ""
 
-#: plugins/budget/__init__.py:158
-#: plugins/budget/__init__.py:382
+#: plugins/budget/__init__.py:164
+#: plugins/budget/__init__.py:394
 msgid "Crédits"
 msgstr ""
 
-#: plugins/budget/__init__.py:158
+#: plugins/budget/__init__.py:164
 msgid "Solde du mois"
 msgstr ""
 
-#: plugins/budget/__init__.py:158
+#: plugins/budget/__init__.py:164
 msgid "Solde de fin"
 msgstr ""
 
-#: plugins/budget/__init__.py:160
+#: plugins/budget/__init__.py:166
 msgid "Dépenses par catégorie (tous les mois)"
 msgstr ""
 
-#: plugins/budget/__init__.py:161
+#: plugins/budget/__init__.py:167
 msgid "Part"
 msgstr ""
 
-#: plugins/budget/__init__.py:239
-#: plugins/budget/__init__.py:416
+#: plugins/budget/__init__.py:245
+#: plugins/budget/__init__.py:428
 msgid "Total"
 msgstr ""
 
-#: plugins/budget/__init__.py:301
-#: plugins/budget/__init__.py:322
+#: plugins/budget/__init__.py:296
+msgid "Mois suivant : %s"
+msgstr ""
+
+#: plugins/budget/__init__.py:297
+msgid "Mois précédent : %s"
+msgstr ""
+
+#: plugins/budget/__init__.py:313
+#: plugins/budget/__init__.py:334
 msgid "Date invalide : écrivez AAAA-MM-JJ, par exemple 2026-11-06."
 msgstr ""
 
-#: plugins/budget/__init__.py:304
-#: plugins/budget/__init__.py:332
+#: plugins/budget/__init__.py:316
+#: plugins/budget/__init__.py:344
 msgid "Montant invalide : écrivez un nombre positif, par exemple 45,30."
 msgstr ""
 
-#: plugins/budget/__init__.py:312
+#: plugins/budget/__init__.py:324
 msgid "Ajouté : %s"
 msgstr ""
 
-#: plugins/budget/__init__.py:373
+#: plugins/budget/__init__.py:385
 msgid "Période"
 msgstr ""
 
-#: plugins/budget/__init__.py:382
-#: plugins/budget/logique.py:249
+#: plugins/budget/__init__.py:394
+#: plugins/budget/logique.py:253
 msgid "Budget"
 msgstr ""
 
-#: plugins/budget/__init__.py:382
+#: plugins/budget/__init__.py:394
 msgid "Reste sur le budget"
 msgstr ""
 
-#: plugins/budget/__init__.py:420
+#: plugins/budget/__init__.py:432
 msgid "%d budget(s) comptés."
 msgstr ""
 
-#: plugins/budget/__init__.py:359
+#: plugins/budget/__init__.py:371
 #: plugins/calc/__init__.py:232
 #: plugins/tableur/__init__.py:177
 msgid "Exporté : %s"
 msgstr ""
 
-#: plugins/budget/__init__.py:423
+#: plugins/budget/__init__.py:435
 msgid "%d fiche(s) verrouillée(s) fermée(s) ne peuvent pas être lues : si l'une est un budget, ouvrez-la puis actualisez."
 msgstr ""
 
-#: plugins/budget/__init__.py:223
+#: plugins/budget/__init__.py:229
 msgid "Reste sur le budget : %s"
 msgstr ""
 
-#: plugins/budget/__init__.py:224
+#: plugins/budget/__init__.py:230
 msgid "Budget dépassé de %s"
 msgstr ""
 
-#: plugins/budget/__init__.py:248
+#: plugins/budget/__init__.py:254
 msgid "(sans catégorie)"
 msgstr ""
 
-#: plugins/budget/logique.py:250
+#: plugins/budget/logique.py:254
 msgid "Budget — résultat"
 msgstr ""
 
