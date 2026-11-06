@@ -211,3 +211,5 @@ Mécanisme commun dans le cœur : marque `#scrinium-<type>` en première ligne (
 - ✔ Dossier local `doc_jfk/` dans le dépôt (exclu par `.git/info/exclude`, jamais publié) pour les documents personnels
 - ✔ Workflow git : branche `dev` puis `main`, sans pull request (dépôt perso) ; tests : `python3 -m pytest` (307 + 2 facultatifs au 2026-10-21 ; CI GitHub sur 3 versions de Python) ; les tests tournent TOUJOURS hors écran (`tests/conftest.py` impose `offscreen`, retire `DISPLAY` et interdit toute boîte de dialogue modale non prévue)
 - ✔ `~/scripts/scrinium/dev.sh` (XPS + Inspiron) : lance les sources avec des données de test séparées
+
+- [ ] Calculatrice et Guide : essayer à la main (fiche Calculatrice, mini calc, Aide > Guide de Scrinium) ; générateur d'invitation (`core/invitation.py`) : citer Calculatrice et Photos.

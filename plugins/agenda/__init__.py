@@ -288,6 +288,7 @@ class AgendaPlugin(Plugin):
 
     def activer(self, ctx):
         self.ctx = ctx
+        ctx.ajouter_doc(_('Extension Agenda'), DOC)
         self.popups = []
         self._migrer()
         if ctx.ui is None:
@@ -424,3 +425,12 @@ class AgendaPlugin(Plugin):
                 e["notifie"] = True
         if dus or self.ctx.reglages.get("etat") is None:       # le premier passage fixe l'état de cette machine
             self._sauver_etat(evs)
+
+
+DOC = _(
+    "Des rappels et des échéances, liés ou non à une fiche, annoncés par une notification à l'heure dite.\n"
+    '\n'
+    "• Bouton « Agenda » (barre d'outils) ou menu Extensions > « Agenda… » : ajouter, modifier, supprimer un événement, ouvrir la fiche liée.\n"
+    '• Scrinium vérifie toutes les 30 secondes. Un événement manqué pendant que Scrinium était fermé est annoncé au démarrage, « en retard ».\n'
+    '• Les événements sont écrits dans une fiche de type Agenda (thème « Agenda ») : elle se sauvegarde, se partage et se synchronise comme les autres.\n'
+    '• Aucun lien vers une fiche verrouillée (son titre resterait lisible dans les réglages).')

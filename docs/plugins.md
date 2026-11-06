@@ -41,6 +41,7 @@ class MyPlugin(Plugin):
 | `ctx.on(event, fn)` | subscribe to an event (below) |
 | `ctx.themes()` | list of topic names |
 | `ctx.proposer_service(name, fn)` / `ctx.service(name)` | offer a function to other extensions (removed when you are disabled) / get one, or `None` if its extension is not active. Example: the OCR extension offers `ocr.fichier(path, callback)`; `callback(text, error)` runs later in the UI thread. The Photos extension uses it for its right-click « Read the text (OCR) » |
+| `ctx.ajouter_doc(title, text)` | documentation of your extension: one note added to the « Guide » topic (Help > « Guide de Scrinium ») while you are active. Pass translated text; removed when you are disabled |
 | `ctx.fiches(theme=None)` | list of `FicheVue` |
 | `ctx.fiche_courante()` | the note shown in the window, or `None` |
 | `ctx.pieces(vue)` | attachments (images) of a note: list of `PieceVue` (`id`, `nom`, `type` `image/png` or `image/jpeg`, `taille`, `ajoute`, `ocr`, `ocr_moteur`); empty for a closed locked note |

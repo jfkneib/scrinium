@@ -489,6 +489,7 @@ class TraductionPlugin(Plugin):
 
     def activer(self, ctx):
         self.ctx = ctx
+        ctx.ajouter_doc(_('Extension Traduction'), DOC)
         self.occupe = 0
         self.serveur = logique.ServeurLlama(ctx.dossier_donnees / "llama-server.log")
         if ctx.ui is None:
@@ -688,3 +689,12 @@ class TraductionPlugin(Plugin):
             QMessageBox.warning(_parent(), _("Test de la traduction"), err)
         elif not err:
             QMessageBox.information(_parent(), _("Test de la traduction"), _("✔ llama.cpp fonctionne.\n\nBonjour, ceci est un test.\n→ %s") % res)
+
+
+DOC = _(
+    'Traduit la sélection ou toute la fiche avec un moteur local.\n'
+    '\n'
+    "• Bouton « Traduire » (barre d'outils), menu Extensions ou clic droit sur la fiche.\n"
+    "• TranslateGemma par llama.cpp, sans Ollama : l'extension lance llama-server à la demande (127.0.0.1) et l'arrête après inactivité. Un serveur déjà lancé peut être utilisé.\n"
+    '• Rien ne quitte votre machine, sauf si vous acceptez explicitement un serveur distant. Aucun téléchargement sans votre accord (taille et provenance affichées).\n'
+    '• « Réglages de la traduction… » : langue et serveur.')

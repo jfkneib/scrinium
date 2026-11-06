@@ -88,6 +88,7 @@ class PartagePlugin(Plugin):
 
     def activer(self, ctx):
         self.ctx = ctx
+        ctx.ajouter_doc(_('Extension Partage'), DOC)
         self.secret = logique.Secret()
         self.transports: dict = {}
         if ctx.ui is None:
@@ -834,3 +835,12 @@ class DialogueRejoindre(QDialog):
         self.accept()
         self.p.synchroniser_depot(depot)
 
+
+DOC = _(
+    "Partage des fiches avec d'autres personnes via un serveur Scrinium.\n"
+    '\n'
+    '• « Partager la fiche… » / « Partager le thème… » : choisir les personnes et leurs droits (lecture ou écriture) ; une invitation par courriel (lien valable 48 h) est préparée.\n'
+    '• « Rejoindre un partage… » : collez le lien reçu ; le compte est créé sur le serveur si besoin.\n'
+    '• « Synchroniser les partages » : à la demande, ou à intervalle régulier si vous le réglez. En cas de conflit, les DEUX versions sont gardées.\n'
+    '• Les fiches verrouillées ne sont jamais partagées. Le mot de passe va au trousseau du système si vous le demandez. Certificat auto-signé : on confirme son empreinte.\n'
+    "• Les échanges réseau durent au plus 10 secondes ; une fenêtre « Veuillez patienter » s'affiche pendant l'attente.")

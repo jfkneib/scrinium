@@ -177,6 +177,7 @@ class OcrPlugin(Plugin):
 
     def activer(self, ctx):
         self.ctx = ctx
+        ctx.ajouter_doc(_('Extension OCR'), DOC)
         self.dialogue = None
         self.en_cours = set()
         if ctx.ui is None:
@@ -370,3 +371,11 @@ class OcrPlugin(Plugin):
 
     def reglages(self):
         DialogueReglages(self, _parent()).exec()
+
+
+DOC = _(
+    "Extrait le texte des images jointes à une fiche (Tesseract, en local : rien n'est envoyé sur Internet).\n"
+    '\n'
+    "• Clic droit sur une image jointe : « Extraire le texte de l'image (OCR) » garde le texte avec l'image ; « Texte de l'image → nouvelle fiche » crée une fiche avec ce texte ; « Texte de l'image → dans la fiche, au curseur » l'insère dans la fiche.\n"
+    "• Le texte lu est cherchable (Ctrl+F). Si la fiche est verrouillée, il est chiffré avec l'image.\n"
+    '• Dans une fiche Photos, clic droit sur une image > « Lire le texte (OCR) → nouvelle fiche ».')

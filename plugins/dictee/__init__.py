@@ -93,6 +93,7 @@ class DicteePlugin(Plugin):
     # ---------- activation : dépendances d'abord ----------
     def activer(self, ctx):
         self.ctx = ctx
+        ctx.ajouter_doc(_('Extension Dictée'), DOC)
         self.deps = ctx.dossier_donnees / "deps"
         self.modeles = ctx.dossier_donnees / "modeles"
         self.rec = None
@@ -285,3 +286,12 @@ class DicteePlugin(Plugin):
     def _erreur(self, msg):
         self.occupe = False
         self.ctx.ui.notifier(_("Dictée"), _("Erreur : %s") % msg)
+
+
+DOC = _(
+    'Dictez une note au micro : le texte est inséré au curseur de la fiche.\n'
+    '\n'
+    "• Bouton « Dicter » (barre d'outils) ou menu Extensions : un clic pour commencer, un clic pour finir.\n"
+    "• Reconnaissance 100 % locale (faster-whisper). Au premier usage, Scrinium demande votre accord avant d'installer faster-whisper (dans le dossier de l'extension) et avant de télécharger un modèle (taille affichée).\n"
+    "• Rien n'est envoyé sur Internet, hormis cette installation et ce téléchargement que vous avez acceptés.\n"
+    '• « Réglages de la dictée… » : langue et modèle.')

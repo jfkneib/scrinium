@@ -14,7 +14,7 @@ from PyQt6.QtWidgets import (QAbstractItemView, QApplication, QDialog, QFileDial
 from .. import __version__
 from ..core import autostart, capture, crypto, invitation
 from ..core.plugins import FicheVue, Gestionnaire
-from ..core import doc_extensions, lien as lien_mod, repertoire, types_fiche
+from ..core import doc_extensions, guide, lien as lien_mod, repertoire, types_fiche
 from ..core.store import ICONE_DEFAUT, Store, propre
 from ..i18n import _
 from .assistant import AssistantCle
@@ -199,6 +199,7 @@ class Fenetre(QMainWindow):
             a.triggered.connect(lambda _checked, c=code: self._langue(c))
             groupe.addAction(a)
             ml.addAction(a)
+        mh.addAction(self._action(_("Guide de Scrinium"), "help-contents", self.guide))
         mh.addAction(self._action(_("Documentation des extensions"), "preferences-plugin", self.doc_extensions))
         mh.addAction(self._action(_("À propos"), "help-about", self.a_propos))
 
@@ -854,17 +855,16 @@ class Fenetre(QMainWindow):
             self._statut(_("Fiche d'invitation prête : relisez-la, puis activez l'extension Courriel (Extensions > Gérer les "
                            "extensions…) pour l'envoyer."), ORANGE)
 
-    def doc_extensions(self):
-        """Crée (ou rouvre, sans rien écraser) le thème « Doc » : comment écrire une extension. Les fiches absentes sont ajoutées."""
+    def _ouvrir_theme_doc(self, nom, icone, fiches):
+        """Crée (ou rouvre, sans rien écraser) un thème de documentation ; les fiches absentes sont ajoutées."""
         self.sauver()
-        nom = doc_extensions.nom_theme()
         th = next((t for t in self.store.themes if t.nom == nom), None)
         if th is None:
             th = self.store.nouveau_theme(nom)
-            self.store.icone_theme(th, doc_extensions.icone())
+            self.store.icone_theme(th, icone)
         titres = {f.titre for f in th.fiches}
         premiere = None
-        for titre, texte in doc_extensions.fiches(self.store.paths.base / "plugins"):
+        for titre, texte in fiches:
             if titre not in titres:
                 f = self.store.nouvelle_fiche(th)
                 self.store.enregistrer(th, f, titre, texte)
@@ -874,6 +874,16 @@ class Fenetre(QMainWindow):
         self.maj_themes()
         self.montrer(theme=th.nom)
         self.selectionner_fiche(FicheVue(th, premiere))
+
+    def doc_extensions(self):
+        """Thème « Doc » : comment écrire une extension."""
+        self._ouvrir_theme_doc(doc_extensions.nom_theme(), doc_extensions.icone(),
+                               doc_extensions.fiches(self.store.paths.base / "plugins"))
+
+    def guide(self):
+        """Thème « Guide » : présentation de Scrinium."""
+        fiches = guide.fiches(self.store.paths.fiches) + guide.fiches_extensions(self.plugins.docs())
+        self._ouvrir_theme_doc(guide.nom_theme(), guide.icone(), fiches)
 
     def ouvrir_lien(self, url: str):
         """Lien `scrinium://…` reçu du système : confié à l'extension qui sait le traiter (Partage). Rien n'est fait sans

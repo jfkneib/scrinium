@@ -168,6 +168,15 @@ class Contexte:
         """Met `fn` à la disposition des autres extensions sous le nom `nom` (ex. « ocr.fichier »). Retiré à la désactivation."""
         self._g._services[nom] = (self.info.nom, fn)
 
+    def ajouter_doc(self, titre: str, texte: str) -> None:
+        """Documentation de l'extension : une fiche ajoutée au thème « Guide » (menu Aide > « Guide de Scrinium ») tant que l'extension
+        est active. `titre` : sans numéro ; `texte` : texte de la fiche (déjà traduit). Plusieurs appels = plusieurs fiches."""
+        self._g._docs.append((self.info.nom, titre, texte))
+
+    def docs(self) -> list:
+        """[(titre, texte)] des documentations des extensions actives, par ordre d'activation."""
+        return self._g.docs()
+
     def service(self, nom: str):
         """Fonction proposée par une extension active sous ce nom, sinon None (l'extension n'est pas là : on s'en passe)."""
         v = self._g._services.get(nom)
@@ -272,7 +281,12 @@ class Gestionnaire:
         self.actifs: dict[str, tuple] = {}              # nom -> (instance, contexte)
         self._abonnements: dict[str, list] = {}         # événement -> [(nom, fn)]
         self._services: dict[str, tuple] = {}           # service -> (extension, fn)
+        self._docs: list[tuple] = []                    # (extension, titre, texte) des fiches de documentation
         self.erreurs: dict[str, int] = {}
+
+    def docs(self) -> list:
+        """[(titre, texte)] de la documentation déclarée par les extensions actives (`Contexte.ajouter_doc`)."""
+        return [(t, x) for _n, t, x in self._docs]
 
     # ---------- découverte (sans exécuter le code des extensions) ----------
     def decouvrir(self) -> dict:
@@ -376,6 +390,7 @@ class Gestionnaire:
         for evt in list(self._abonnements):
             self._abonnements[evt] = [(n, f) for n, f in self._abonnements[evt] if n != nom]
         self._services = {k: v for k, v in self._services.items() if v[0] != nom}
+        self._docs = [d for d in self._docs if d[0] != nom]
         if pair:
             instance, ctx = pair
             try:

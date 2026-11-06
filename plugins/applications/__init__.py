@@ -298,6 +298,7 @@ class ApplicationsPlugin(Plugin):
 
     def activer(self, ctx):
         self.ctx = ctx
+        ctx.ajouter_doc(_('Extension Applications'), DOC)
         if ctx.ui is None:
             return
         ctx.ui.enregistrer_type(logique.TYPE, VueApplications(self))
@@ -362,3 +363,13 @@ class ApplicationsPlugin(Plugin):
             logique.lancer(logique.construire(a["commande"], selection, vue.titre if vue else ""))
         except (OSError, ValueError) as ex:
             self.ctx.ui.notifier(_("Applications"), _("Impossible de lancer « %(nom)s » : %(err)s") % {"nom": a["nom"], "err": ex})
+
+
+DOC = _(
+    "Une fiche d'icônes pour lancer vos logiciels (Thunderbird, KWrite, LibreOffice…) sans quitter Scrinium.\n"
+    '\n'
+    "• Nouvelle fiche > « Applications » : un clic sur une icône lance l'application ; le clic droit ajoute, retire ou règle une application.\n"
+    '• On choisit parmi les applications du système ou on tape une commande. Facultatif : {selection} (texte sélectionné) et {fiche} (titre de la fiche) dans la commande lui sont passés comme arguments.\n'
+    "• Clic droit sur n'importe quelle fiche > « Ouvrir avec » : la même liste, avec le texte sélectionné.\n"
+    "• Type exécutable : une fiche reçue d'un autre ne lance rien tant que vous ne l'avez pas validée (bandeau « Valider cette fiche »).\n"
+    "• Les applications sont écrites en clair dans la fiche : n'y mettez aucun mot de passe.")

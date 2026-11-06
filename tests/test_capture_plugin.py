@@ -256,17 +256,17 @@ def test_cible_disparue_retombe_sur_la_console_de_l_extension(fen, faux, monkeyp
     assert len(lancements(faux)) == 1 and envois(faux)[-1][0] != "org.kde.konsole-111"
 
 
-def test_acces_refuse_copie_explique_une_fois_et_n_ouvre_pas_de_console_inutile(fen, faux, monkeypatch):
+def test_acces_refuse_copie_explique_a_chaque_fois_et_n_ouvre_pas_de_console_inutile(fen, faux, monkeypatch):
     (faux / "refus").write_text("")
     infos = []
-    monkeypatch.setattr(mod().QMessageBox, "information", lambda *a, **k: infos.append(a[2]))
+    monkeypatch.setattr(mod().QMessageBox, "exec", lambda self: infos.append(self.text()) or 0)
     selectionner(fen, "uname -a")
     plugin(fen).vers_console()
     assert QApplication.clipboard().text() == "uname -a" and len(infos) == 1 and "DBus" in infos[0]
     assert lancements(faux) == [] and envois(faux) == []                  # la sonde a suffi : aucune console ouverte pour rien
     selectionner(fen, "date")
     plugin(fen).vers_console()
-    assert QApplication.clipboard().text() == "date" and len(infos) == 1 and lancements(faux) == []   # explication donnée une fois
+    assert QApplication.clipboard().text() == "date" and len(infos) == 2 and lancements(faux) == []   # expliqué à chaque fois
 
 
 def test_refus_avec_la_console_de_l_extension_deja_ouverte(fen, faux, monkeypatch):
@@ -274,7 +274,7 @@ def test_refus_avec_la_console_de_l_extension_deja_ouverte(fen, faux, monkeypatc
     plugin(fen).vers_console()                                            # autorisé : la console de l'extension s'ouvre
     assert len(lancements(faux)) == 1
     (faux / "refus").write_text("")                                       # l'option est ensuite désactivée dans Konsole
-    monkeypatch.setattr(mod().QMessageBox, "information", lambda *a, **k: None)
+    monkeypatch.setattr(mod().QMessageBox, "exec", lambda self: 0)
     selectionner(fen, "deux")
     plugin(fen).vers_console()
     assert QApplication.clipboard().text() == "deux" and len(lancements(faux)) == 1
@@ -283,7 +283,7 @@ def test_refus_avec_la_console_de_l_extension_deja_ouverte(fen, faux, monkeypatc
 def test_refus_aucune_console_ouverte_ouvre_celle_de_l_extension_puis_n_insiste_pas(fen, faux, monkeypatch):
     (faux / "sessions").write_text("")                                    # aucune console ouverte : pas de sonde possible
     (faux / "refus").write_text("")
-    monkeypatch.setattr(mod().QMessageBox, "information", lambda *a, **k: None)
+    monkeypatch.setattr(mod().QMessageBox, "exec", lambda self: 0)
     selectionner(fen, "un")
     plugin(fen).vers_console()
     assert len(lancements(faux)) == 1 and QApplication.clipboard().text() == "un"      # la console ouverte sert de sonde
@@ -295,7 +295,7 @@ def test_refus_aucune_console_ouverte_ouvre_celle_de_l_extension_puis_n_insiste_
 
 def test_reessayer_apres_les_reglages(fen, faux, monkeypatch):
     (faux / "refus").write_text("")
-    monkeypatch.setattr(mod().QMessageBox, "information", lambda *a, **k: None)
+    monkeypatch.setattr(mod().QMessageBox, "exec", lambda self: 0)
     selectionner(fen, "un")
     plugin(fen).vers_console()
     assert plugin(fen).refus_vu and lancements(faux) == []
@@ -379,7 +379,7 @@ def test_premier_plan_desactivable_et_absent_si_refus(fen, faux, monkeypatch):
     assert envois(faux) and not (faux / "focus-script").exists()
     fen.plugins.actifs["capture"][1].reglages.set("premier_plan", True)
     (faux / "refus").write_text("")
-    monkeypatch.setattr(mod().QMessageBox, "information", lambda *a, **k: None)
+    monkeypatch.setattr(mod().QMessageBox, "exec", lambda self: 0)
     plugin(fen).vers_console()                                                              # refus : rien à mettre devant
     assert not (faux / "focus-script").exists()
 

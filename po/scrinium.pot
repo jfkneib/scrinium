@@ -14,12 +14,22 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
+#: plugins/agenda/__init__.py:430
+msgid ""
+"Des rappels et des échéances, liés ou non à une fiche, annoncés par une notification à l'heure dite.\n"
+"\n"
+"• Bouton « Agenda » (barre d'outils) ou menu Extensions > « Agenda… » : ajouter, modifier, supprimer un événement, ouvrir la fiche liée.\n"
+"• Scrinium vérifie toutes les 30 secondes. Un événement manqué pendant que Scrinium était fermé est annoncé au démarrage, « en retard ».\n"
+"• Les événements sont écrits dans une fiche de type Agenda (thème « Agenda ») : elle se sauvegarde, se partage et se synchronise comme les autres.\n"
+"• Aucun lien vers une fiche verrouillée (son titre resterait lisible dans les réglages)."
+msgstr ""
+
 #: plugins/agenda/__init__.py:35
 msgid "Événement"
 msgstr ""
 
 #: plugins/agenda/__init__.py:46
-#: src/scrinium/ui/fenetre.py:265
+#: src/scrinium/ui/fenetre.py:266
 msgid "Titre"
 msgstr ""
 
@@ -44,12 +54,12 @@ msgid "Jouer un son au rappel"
 msgstr ""
 
 #: plugins/agenda/__init__.py:109
-#: plugins/agenda/__init__.py:417
+#: plugins/agenda/__init__.py:418
 msgid "Rappel"
 msgstr ""
 
 #: plugins/agenda/__init__.py:148
-#: plugins/agenda/__init__.py:297
+#: plugins/agenda/__init__.py:298
 #: plugins/agenda/__init__.py:128
 msgid "Agenda"
 msgstr ""
@@ -64,11 +74,15 @@ msgstr ""
 msgid "Fermer"
 msgstr ""
 
-#: plugins/agenda/__init__.py:296
+#: plugins/agenda/__init__.py:291
+msgid "Extension Agenda"
+msgstr ""
+
+#: plugins/agenda/__init__.py:297
 msgid "Agenda…"
 msgstr ""
 
-#: plugins/agenda/__init__.py:298
+#: plugins/agenda/__init__.py:299
 msgid "Ouvrir la fenêtre Agenda…"
 msgstr ""
 
@@ -128,7 +142,7 @@ msgstr ""
 msgid "Supprimer « %s » ?"
 msgstr ""
 
-#: plugins/agenda/__init__.py:353
+#: plugins/agenda/__init__.py:354
 msgid "Vos événements sont maintenant une fiche « Agenda » (thème « %s »)."
 msgstr ""
 
@@ -174,6 +188,17 @@ msgstr ""
 
 #: plugins/agenda/logique.py:271
 msgid "en retard de %d h"
+msgstr ""
+
+#: plugins/applications/__init__.py:368
+msgid ""
+"Une fiche d'icônes pour lancer vos logiciels (Thunderbird, KWrite, LibreOffice…) sans quitter Scrinium.\n"
+"\n"
+"• Nouvelle fiche > « Applications » : un clic sur une icône lance l'application ; le clic droit ajoute, retire ou règle une application.\n"
+"• On choisit parmi les applications du système ou on tape une commande. Facultatif : {selection} (texte sélectionné) et {fiche} (titre de la fiche) dans la commande lui sont passés comme arguments.\n"
+"• Clic droit sur n'importe quelle fiche > « Ouvrir avec » : la même liste, avec le texte sélectionné.\n"
+"• Type exécutable : une fiche reçue d'un autre ne lance rien tant que vous ne l'avez pas validée (bandeau « Valider cette fiche »).\n"
+"• Les applications sont écrites en clair dans la fiche : n'y mettez aucun mot de passe."
 msgstr ""
 
 #: plugins/applications/__init__.py:60
@@ -231,10 +256,8 @@ msgstr ""
 msgid "Importer des applications"
 msgstr ""
 
-#: plugins/applications/__init__.py:304
-#: plugins/applications/__init__.py:323
-#: plugins/applications/__init__.py:339
-msgid "Applications"
+#: plugins/applications/__init__.py:301
+msgid "Extension Applications"
 msgstr ""
 
 #: plugins/applications/__init__.py:305
@@ -243,6 +266,12 @@ msgstr ""
 
 #: plugins/applications/__init__.py:306
 msgid "Ouvrir avec"
+msgstr ""
+
+#: plugins/applications/__init__.py:323
+#: plugins/applications/__init__.py:339
+#: plugins/applications/__init__.py:347
+msgid "Applications"
 msgstr ""
 
 #: plugins/applications/__init__.py:145
@@ -319,7 +348,7 @@ msgid "« %s » demande la sélection : refusé pour une fiche verrouillée."
 msgstr ""
 
 #: plugins/applications/__init__.py:360
-#: plugins/capture/__init__.py:412
+#: plugins/capture/__init__.py:413
 msgid "Sélectionnez d'abord du texte dans la fiche : « %s » en a besoin."
 msgstr ""
 
@@ -359,8 +388,105 @@ msgstr ""
 msgid "fichier illisible"
 msgstr ""
 
+#: plugins/calculatrice/__init__.py:189
+msgid ""
+"Deux outils, une extension (Extensions > Gérer les extensions…).\n"
+"\n"
+"• Fiche « Calculatrice » : flèche du bouton « Fiche » > « Nouvelle fiche » > Calculatrice. Tapez un calcul, Entrée : la ligne « calcul = résultat » est ajoutée à la fiche (c'est l'historique, cherchable et partageable). Double-clic sur une ligne pour la reprendre.\n"
+"• Mini calculatrice : bouton « Calc » de la barre d'outils (ou menu Extensions). Pavé de touches ou clavier. Si du texte comme « 12*8 » est sélectionné dans la fiche, il est repris. « Insérer le résultat » le place au curseur de la fiche ; « Copier » le met dans le presse-papiers.\n"
+"\n"
+"Calculs permis : + − × ÷, ^ (puissance), %, parenthèses, pi, e et sqrt, abs, round, min, max, sin, cos, tan, ln, log, exp, floor, ceil. « 200*20% » donne 40. La virgule décimale est acceptée (1,5). Rien n'est exécuté : seules ces opérations sont comprises."
+msgstr ""
+
+#: plugins/calculatrice/__init__.py:40
+msgid "Tapez un calcul, par exemple 2+3*4 ou sqrt(16), puis Entrée"
+msgstr ""
+
+#: plugins/calculatrice/__init__.py:53
+msgid "Effacer l'historique"
+msgstr ""
+
+#: plugins/calculatrice/__init__.py:107
+#: plugins/calculatrice/logique.py:21
+msgid "Calculatrice"
+msgstr ""
+
+#: plugins/calculatrice/__init__.py:129
+msgid "Insérer le résultat"
+msgstr ""
+
+#: plugins/calculatrice/__init__.py:131
+#: plugins/ocr/__init__.py:114
+#: plugins/traduction/__init__.py:372
+msgid "Copier"
+msgstr ""
+
+#: plugins/calculatrice/__init__.py:216
+msgid "Calc"
+msgstr ""
+
+#: plugins/calculatrice/__init__.py:217
+msgid "Mini calculatrice"
+msgstr ""
+
+#: plugins/calculatrice/__init__.py:218
+msgid "Extension Calculatrice"
+msgstr ""
+
+#: plugins/calculatrice/__init__.py:176
+msgid "Rien à insérer."
+msgstr ""
+
+#: plugins/calculatrice/__init__.py:186
+msgid "Copié dans le presse-papiers."
+msgstr ""
+
+#: plugins/calculatrice/__init__.py:178
+msgid "Résultat inséré dans la fiche."
+msgstr ""
+
+#: plugins/calculatrice/__init__.py:180
+msgid "Aucune fiche modifiable : ouvrez une fiche, puis cliquez dans sa note."
+msgstr ""
+
+#: plugins/calculatrice/logique.py:63
+#: plugins/calculatrice/logique.py:80
+msgid "Expression non comprise"
+msgstr ""
+
+#: plugins/calculatrice/logique.py:70
+msgid "Rien à calculer"
+msgstr ""
+
+#: plugins/calculatrice/logique.py:72
+msgid "Expression trop longue"
+msgstr ""
+
+#: plugins/calculatrice/logique.py:82
+msgid "Résultat impossible"
+msgstr ""
+
+#: plugins/calculatrice/logique.py:59
+msgid "Exposant trop grand"
+msgstr ""
+
+#: plugins/calculatrice/logique.py:78
+msgid "Division par zéro"
+msgstr ""
+
 #: plugins/capture/__init__.py:36
 msgid "Pour que Scrinium tape directement dans Konsole, activez dans Konsole l'option « Enable the security sensitive parts of the DBus API » (Paramètres de Konsole). Elle est désactivée par défaut car elle permet à un programme d'envoyer du texte à vos terminaux : c'est votre choix. En attendant, le texte est copié dans le presse-papiers."
+msgstr ""
+
+#: plugins/capture/__init__.py:555
+msgid ""
+"Relie vos fiches au terminal, sans jamais rien valider à votre place (voir aussi « Guide 5 »).\n"
+"\n"
+"• Bouton « Console » : le texte sélectionné est tapé dans une Konsole « Scrinium », sans Entrée. Il faut cocher dans Konsole « Enable the security sensitive parts of the DBus API » ; sinon le texte est copié (collez avec Ctrl+Maj+V).\n"
+"• « Choisir la console cible… » : envoyer vers une autre Konsole déjà ouverte.\n"
+"• « Exécuter une commande et insérer la sortie… » : la commande est lancée après confirmation, sa sortie est insérée au curseur dans un bloc daté.\n"
+"• Fiches « Actions CLI » : des commandes à lancer d'un clic ; type exécutable, donc inerte tant que la fiche n'est pas validée.\n"
+"• Depuis un terminal : « ls -al | scrinium ajouter -t Thème -f Fiche »."
 msgstr ""
 
 #: plugins/capture/__init__.py:57
@@ -420,51 +546,59 @@ msgstr ""
 msgid "Mettre la console au premier plan après l'envoi (KDE)"
 msgstr ""
 
-#: plugins/capture/__init__.py:356
-#: plugins/capture/__init__.py:380
-#: plugins/capture/__init__.py:396
-msgid "Actions CLI"
+#: plugins/capture/__init__.py:350
+msgid "Extension Capture et console"
 msgstr ""
 
 #: plugins/capture/__init__.py:357
-#: plugins/capture/__init__.py:438
-#: plugins/capture/__init__.py:467
-msgid "Console"
+#: plugins/capture/__init__.py:381
+#: plugins/capture/__init__.py:397
+msgid "Actions CLI"
 msgstr ""
 
 #: plugins/capture/__init__.py:358
-msgid "Envoyer la sélection vers une console"
+#: plugins/capture/__init__.py:439
+#: plugins/capture/__init__.py:468
+msgid "Console"
 msgstr ""
 
 #: plugins/capture/__init__.py:359
-msgid "Choisir la console cible…"
+msgid "Envoyer la sélection vers une console"
 msgstr ""
 
 #: plugins/capture/__init__.py:360
-msgid "Revenir à la console de l'extension"
+msgid "Choisir la console cible…"
 msgstr ""
 
 #: plugins/capture/__init__.py:361
-msgid "Exécuter une commande et insérer la sortie…"
+msgid "Revenir à la console de l'extension"
 msgstr ""
 
 #: plugins/capture/__init__.py:362
-msgid "Fiche des actions CLI…"
+msgid "Exécuter une commande et insérer la sortie…"
 msgstr ""
 
 #: plugins/capture/__init__.py:363
+msgid "Fiche des actions CLI…"
+msgstr ""
+
+#: plugins/capture/__init__.py:364
 msgid "Réglages de la capture…"
 msgstr ""
 
-#: plugins/capture/__init__.py:438
+#: plugins/capture/__init__.py:439
 msgid "Le texte ira dans la console de l'extension (ouverte au besoin)."
 msgstr ""
 
-#: plugins/capture/__init__.py:467
-msgid "Copié dans le presse-papiers : collez dans votre console (Ctrl+Maj+V). Rien n'est validé."
+#: plugins/capture/__init__.py:468
+msgid "Copié dans le presse-papiers (Konsole n'accepte pas l'envoi direct) : collez dans votre console avec Ctrl+Maj+V, rien n'est validé. Pour l'envoi direct : Konsole → Configuration → Configurer Konsole → Général → cocher « Enable the security sensitive parts of the DBus API »."
 msgstr ""
 
-#: plugins/capture/__init__.py:538
+#: plugins/capture/__init__.py:540
+msgid "Ne plus afficher ce message"
+msgstr ""
+
+#: plugins/capture/__init__.py:551
 msgid "Envoyer vers quelle console ?"
 msgstr ""
 
@@ -481,7 +615,7 @@ msgid "Terminé."
 msgstr ""
 
 #: plugins/capture/__init__.py:118
-#: plugins/capture/__init__.py:428
+#: plugins/capture/__init__.py:429
 msgid "Capture"
 msgstr ""
 
@@ -506,22 +640,22 @@ msgstr ""
 msgid "Ajouter une action…"
 msgstr ""
 
-#: plugins/capture/__init__.py:404
+#: plugins/capture/__init__.py:405
 msgid "Fiche « Actions CLI » créée : validez-la pour qu'elle serve au menu « Actions CLI »."
 msgstr ""
 
-#: plugins/capture/__init__.py:428
-#: plugins/courriel/__init__.py:357
-#: plugins/lecture/__init__.py:287
+#: plugins/capture/__init__.py:429
+#: plugins/courriel/__init__.py:358
+#: plugins/lecture/__init__.py:288
 msgid "Ouvrez d'abord une fiche."
 msgstr ""
 
-#: plugins/capture/__init__.py:445
+#: plugins/capture/__init__.py:446
 msgid "Aucune console Konsole ouverte : celle de l'extension s'ouvrira au premier envoi."
 msgstr ""
 
-#: plugins/capture/__init__.py:455
-#: plugins/lecture/__init__.py:307
+#: plugins/capture/__init__.py:456
+#: plugins/lecture/__init__.py:308
 msgid "Sélectionnez d'abord du texte dans la fiche."
 msgstr ""
 
@@ -537,27 +671,27 @@ msgstr ""
 msgid "Ajouter %d action(s) CLI à la liste ? Relisez leurs commandes avant de les utiliser."
 msgstr ""
 
-#: plugins/capture/__init__.py:396
+#: plugins/capture/__init__.py:397
 msgid "Vos actions CLI sont maintenant une fiche « Actions CLI » (thème « %s ») : ouvrez-la et validez-la."
 msgstr ""
 
-#: plugins/capture/__init__.py:417
+#: plugins/capture/__init__.py:418
 msgid "Ouvrez d'abord une fiche : la sortie y sera insérée."
 msgstr ""
 
-#: plugins/capture/__init__.py:450
+#: plugins/capture/__init__.py:451
 msgid "Console cible : %s"
 msgstr ""
 
-#: plugins/capture/__init__.py:519
+#: plugins/capture/__init__.py:523
 msgid "Konsole refuse l'envoi direct : texte copié dans le presse-papiers."
 msgstr ""
 
-#: plugins/capture/__init__.py:529
+#: plugins/capture/__init__.py:531
 msgid "Console ouverte : "
 msgstr ""
 
-#: plugins/capture/__init__.py:530
+#: plugins/capture/__init__.py:532
 msgid "texte tapé dans « %s » (non validé : relisez, puis Entrée)."
 msgstr ""
 
@@ -565,11 +699,11 @@ msgstr ""
 msgid "code de retour %d"
 msgstr ""
 
-#: plugins/capture/__init__.py:422
+#: plugins/capture/__init__.py:423
 msgid "Copié dans le presse-papiers : « %s »."
 msgstr ""
 
-#: plugins/capture/__init__.py:525
+#: plugins/capture/__init__.py:527
 msgid "Konsole : %s"
 msgstr ""
 
@@ -587,6 +721,16 @@ msgstr ""
 
 #: plugins/capture/logique.py:152
 msgid "qdbus a échoué (code %d)"
+msgstr ""
+
+#: plugins/courriel/__init__.py:454
+msgid ""
+"Envoie la fiche affichée par courriel.\n"
+"\n"
+"• Bouton « Envoyer par courriel » (barre d'outils), menu Extensions ou clic droit sur la fiche. Un récapitulatif des destinataires s'affiche ; rien ne part sans clic sur « Envoyer ».\n"
+"• « Carnet d'adresses… » : vos destinataires. « Serveur d'envoi… » : réglages SMTP.\n"
+"• Le mot de passe SMTP va au trousseau du système si possible ; sinon il n'est gardé que pour la session (ou, case à cocher explicite, dans un fichier réservé à vous, non chiffré).\n"
+"• Une fiche verrouillée fermée n'est jamais envoyée ; ouverte, elle part en clair après avertissement et accord."
 msgstr ""
 
 #: plugins/courriel/__init__.py:96
@@ -618,7 +762,7 @@ msgid "Identifiant :"
 msgstr ""
 
 #: plugins/courriel/__init__.py:121
-#: plugins/partage/__init__.py:337
+#: plugins/partage/__init__.py:338
 msgid "Mot de passe :"
 msgstr ""
 
@@ -644,8 +788,8 @@ msgid "Contact"
 msgstr ""
 
 #: plugins/courriel/__init__.py:202
-#: plugins/partage/__init__.py:469
-#: plugins/partage/__init__.py:614
+#: plugins/partage/__init__.py:470
+#: plugins/partage/__init__.py:615
 msgid "Adresse :"
 msgstr ""
 
@@ -658,7 +802,7 @@ msgid "Gérer le carnet…"
 msgstr ""
 
 #: plugins/courriel/__init__.py:280
-#: plugins/partage/__init__.py:711
+#: plugins/partage/__init__.py:712
 msgid "Envoyer"
 msgstr ""
 
@@ -666,39 +810,43 @@ msgstr ""
 msgid "Confirmer l'envoi"
 msgstr ""
 
-#: plugins/courriel/__init__.py:330
-msgid "Envoyer la fiche par courriel…"
+#: plugins/courriel/__init__.py:324
+msgid "Extension Courriel"
 msgstr ""
 
 #: plugins/courriel/__init__.py:331
-msgid "Envoyer par courriel"
+msgid "Envoyer la fiche par courriel…"
 msgstr ""
 
 #: plugins/courriel/__init__.py:332
+msgid "Envoyer par courriel"
+msgstr ""
+
 #: plugins/courriel/__init__.py:333
+#: plugins/courriel/__init__.py:334
 msgid "Envoyer par courriel…"
 msgstr ""
 
-#: plugins/courriel/__init__.py:334
+#: plugins/courriel/__init__.py:335
 msgid "Carnet d'adresses…"
 msgstr ""
 
-#: plugins/courriel/__init__.py:335
+#: plugins/courriel/__init__.py:336
 msgid "Serveur d'envoi…"
 msgstr ""
 
-#: plugins/courriel/__init__.py:394
-#: plugins/courriel/__init__.py:424
-#: plugins/courriel/__init__.py:436
+#: plugins/courriel/__init__.py:395
+#: plugins/courriel/__init__.py:425
+#: plugins/courriel/__init__.py:437
 msgid "Courriel"
 msgstr ""
 
-#: plugins/courriel/__init__.py:394
-#: plugins/courriel/__init__.py:424
+#: plugins/courriel/__init__.py:395
+#: plugins/courriel/__init__.py:425
 msgid "Envoi en cours…"
 msgstr ""
 
-#: plugins/courriel/__init__.py:442
+#: plugins/courriel/__init__.py:443
 msgid "Le serveur a refusé l'identifiant ou le mot de passe. Cliquez sur « Envoyer » pour le saisir de nouveau (ou corrigez-le dans Extensions → Serveur d'envoi…). Votre message est conservé."
 msgstr ""
 
@@ -759,16 +907,16 @@ msgid ""
 "%s"
 msgstr ""
 
-#: plugins/courriel/__init__.py:361
+#: plugins/courriel/__init__.py:362
 msgid "Cette fiche est verrouillée et fermée : déverrouillez-la d'abord. Son contenu n'est jamais envoyé sans que vous l'ayez ouverte."
 msgstr ""
 
-#: plugins/courriel/__init__.py:366
-#: plugins/courriel/__init__.py:378
+#: plugins/courriel/__init__.py:367
+#: plugins/courriel/__init__.py:379
 msgid "Renseignez d'abord le serveur d'envoi."
 msgstr ""
 
-#: plugins/courriel/__init__.py:445
+#: plugins/courriel/__init__.py:446
 msgid "Votre message est conservé : vous pouvez réessayer."
 msgstr ""
 
@@ -776,17 +924,17 @@ msgstr ""
 msgid "Adresse(s) invalide(s) : %s"
 msgstr ""
 
-#: plugins/courriel/__init__.py:388
-#: plugins/courriel/__init__.py:411
+#: plugins/courriel/__init__.py:389
+#: plugins/courriel/__init__.py:412
 msgid "Mot de passe de %s :"
 msgstr ""
 
-#: plugins/courriel/__init__.py:431
+#: plugins/courriel/__init__.py:432
 msgid "Message envoyé à %s."
 msgstr ""
 
-#: plugins/courriel/__init__.py:436
-#: plugins/courriel/__init__.py:445
+#: plugins/courriel/__init__.py:437
+#: plugins/courriel/__init__.py:446
 msgid "Échec de l'envoi : %s"
 msgstr ""
 
@@ -822,40 +970,54 @@ msgstr ""
 msgid "adresse invalide : %s"
 msgstr ""
 
-#: plugins/dictee/__init__.py:112
-#: plugins/dictee/__init__.py:114
-#: plugins/dictee/__init__.py:180
+#: plugins/dictee/__init__.py:291
+msgid ""
+"Dictez une note au micro : le texte est inséré au curseur de la fiche.\n"
+"\n"
+"• Bouton « Dicter » (barre d'outils) ou menu Extensions : un clic pour commencer, un clic pour finir.\n"
+"• Reconnaissance 100 % locale (faster-whisper). Au premier usage, Scrinium demande votre accord avant d'installer faster-whisper (dans le dossier de l'extension) et avant de télécharger un modèle (taille affichée).\n"
+"• Rien n'est envoyé sur Internet, hormis cette installation et ce téléchargement que vous avez acceptés.\n"
+"• « Réglages de la dictée… » : langue et modèle."
+msgstr ""
+
+#: plugins/dictee/__init__.py:96
+msgid "Extension Dictée"
+msgstr ""
+
+#: plugins/dictee/__init__.py:113
+#: plugins/dictee/__init__.py:115
+#: plugins/dictee/__init__.py:181
 msgid "Dicter"
 msgstr ""
 
-#: plugins/dictee/__init__.py:118
+#: plugins/dictee/__init__.py:119
 msgid "Réglages de la dictée…"
 msgstr ""
 
-#: plugins/dictee/__init__.py:134
-#: plugins/dictee/__init__.py:229
+#: plugins/dictee/__init__.py:135
+#: plugins/dictee/__init__.py:230
 msgid "Dictée vocale"
 msgstr ""
 
-#: plugins/dictee/__init__.py:155
-#: plugins/dictee/__init__.py:162
-#: plugins/dictee/__init__.py:192
+#: plugins/dictee/__init__.py:156
+#: plugins/dictee/__init__.py:163
+#: plugins/dictee/__init__.py:193
 msgid "Dictée"
 msgstr ""
 
-#: plugins/dictee/__init__.py:155
+#: plugins/dictee/__init__.py:156
 msgid "Modèle de reconnaissance :"
 msgstr ""
 
-#: plugins/dictee/__init__.py:162
+#: plugins/dictee/__init__.py:163
 msgid "Langue parlée :"
 msgstr ""
 
-#: plugins/dictee/__init__.py:192
+#: plugins/dictee/__init__.py:193
 msgid "Je vous écoute… (cliquer à nouveau ou Ctrl+Alt+D pour arrêter)"
 msgstr ""
 
-#: plugins/dictee/__init__.py:216
+#: plugins/dictee/__init__.py:217
 msgid "Transcription en cours…"
 msgstr ""
 
@@ -863,11 +1025,11 @@ msgstr ""
 msgid "Installation de %s"
 msgstr ""
 
-#: plugins/dictee/__init__.py:106
+#: plugins/dictee/__init__.py:107
 msgid "aucun enregistreur audio trouvé (parecord, pw-record ou arecord)"
 msgstr ""
 
-#: plugins/dictee/__init__.py:135
+#: plugins/dictee/__init__.py:136
 msgid ""
 "La dictée a besoin du paquet Python « %s » (≈ 250 Mo avec ses dépendances).\n"
 "\n"
@@ -877,11 +1039,11 @@ msgid ""
 "L'installation télécharge depuis Internet (PyPI). Installer maintenant ?"
 msgstr ""
 
-#: plugins/dictee/__init__.py:184
+#: plugins/dictee/__init__.py:185
 msgid "Ouvrez d'abord une fiche modifiable."
 msgstr ""
 
-#: plugins/dictee/__init__.py:230
+#: plugins/dictee/__init__.py:231
 msgid ""
 "Le modèle de reconnaissance « %s » (%s) n'est pas encore sur cet ordinateur.\n"
 "\n"
@@ -891,15 +1053,15 @@ msgid ""
 "(le premier enregistrement attendra la fin du téléchargement). Continuer ?"
 msgstr ""
 
-#: plugins/dictee/__init__.py:237
+#: plugins/dictee/__init__.py:238
 msgid "Téléchargement du modèle %s…"
 msgstr ""
 
-#: plugins/dictee/__init__.py:281
+#: plugins/dictee/__init__.py:282
 msgid "Rien compris."
 msgstr ""
 
-#: plugins/dictee/__init__.py:287
+#: plugins/dictee/__init__.py:288
 msgid "Erreur : %s"
 msgstr ""
 
@@ -908,28 +1070,38 @@ msgstr ""
 msgid "Échec (code %s). Voyez ci-dessus."
 msgstr ""
 
-#: plugins/dictee/__init__.py:139
+#: plugins/dictee/__init__.py:140
 msgid "installation de %s refusée"
 msgstr ""
 
-#: plugins/dictee/__init__.py:144
+#: plugins/dictee/__init__.py:145
 msgid "échec de l'installation de %s"
 msgstr ""
 
-#: plugins/dictee/__init__.py:148
+#: plugins/dictee/__init__.py:149
 msgid "%s installé mais introuvable"
 msgstr ""
 
-#: plugins/dictee/__init__.py:180
+#: plugins/dictee/__init__.py:181
 msgid "● Enregistrement… (cliquer pour arrêter)"
 msgstr ""
 
-#: plugins/dictee/__init__.py:283
+#: plugins/dictee/__init__.py:284
 msgid "La fiche n'est plus modifiable : texte non inséré."
 msgstr ""
 
-#: plugins/dictee/__init__.py:243
+#: plugins/dictee/__init__.py:244
 msgid "Modèle indisponible : %s"
+msgstr ""
+
+#: plugins/lecture/__init__.py:421
+msgid ""
+"Lit une fiche, la sélection ou toutes les fiches d'un thème.\n"
+"\n"
+"• Bouton « Lire » (barre d'outils), menu Extensions, ou clic droit > « Lire à voix haute ».\n"
+"• Voix Piper (naturelle, hors ligne) installée avec votre accord ; repli sur espeak-ng s'il est présent. Français ou anglais, détectés fiche par fiche.\n"
+"• Contrôles : pause, fiche suivante, arrêt.\n"
+"• Les fiches verrouillées ne sont jamais lues, même ouvertes. Le Markdown est nettoyé et les blocs de code sautés."
 msgstr ""
 
 #: plugins/lecture/__init__.py:29
@@ -948,19 +1120,19 @@ msgstr ""
 
 #: plugins/lecture/__init__.py:84
 #: plugins/traduction/__init__.py:53
-#: plugins/traduction/__init__.py:614
+#: plugins/traduction/__init__.py:615
 msgid "Annuler"
 msgstr ""
 
 #: plugins/lecture/__init__.py:123
-#: plugins/lecture/__init__.py:262
-#: plugins/lecture/__init__.py:273
+#: plugins/lecture/__init__.py:263
+#: plugins/lecture/__init__.py:274
 msgid "Lecture à voix haute"
 msgstr ""
 
 #: plugins/lecture/__init__.py:133
-#: plugins/lecture/__init__.py:385
-#: plugins/lecture/__init__.py:393
+#: plugins/lecture/__init__.py:386
+#: plugins/lecture/__init__.py:394
 msgid "Pause"
 msgstr ""
 
@@ -993,41 +1165,45 @@ msgstr ""
 msgid "Vitesse :"
 msgstr ""
 
-#: plugins/lecture/__init__.py:215
+#: plugins/lecture/__init__.py:204
+msgid "Extension Lecture à voix haute"
+msgstr ""
+
+#: plugins/lecture/__init__.py:216
 msgid "Lire la fiche à voix haute"
 msgstr ""
 
-#: plugins/lecture/__init__.py:217
+#: plugins/lecture/__init__.py:218
 msgid "Lire"
 msgstr ""
 
-#: plugins/lecture/__init__.py:218
+#: plugins/lecture/__init__.py:219
 msgid "Lire à voix haute"
 msgstr ""
 
-#: plugins/lecture/__init__.py:219
+#: plugins/lecture/__init__.py:220
 msgid "Lire la sélection à voix haute"
 msgstr ""
 
-#: plugins/lecture/__init__.py:220
+#: plugins/lecture/__init__.py:221
 msgid "Lire un thème à voix haute…"
 msgstr ""
 
-#: plugins/lecture/__init__.py:221
+#: plugins/lecture/__init__.py:222
 msgid "Arrêter la lecture"
 msgstr ""
 
-#: plugins/lecture/__init__.py:222
+#: plugins/lecture/__init__.py:223
 msgid "Réglages de la lecture…"
 msgstr ""
 
-#: plugins/lecture/__init__.py:248
-#: plugins/lecture/__init__.py:317
-#: plugins/lecture/__init__.py:287
+#: plugins/lecture/__init__.py:249
+#: plugins/lecture/__init__.py:318
+#: plugins/lecture/__init__.py:288
 msgid "Lecture"
 msgstr ""
 
-#: plugins/lecture/__init__.py:317
+#: plugins/lecture/__init__.py:318
 msgid "Lire toutes les fiches de quel thème ?"
 msgstr ""
 
@@ -1059,11 +1235,11 @@ msgstr ""
 msgid "Toujours l'anglais"
 msgstr ""
 
-#: plugins/lecture/__init__.py:213
+#: plugins/lecture/__init__.py:214
 msgid "lecture à voix haute : pour l'instant Linux seulement"
 msgstr ""
 
-#: plugins/lecture/__init__.py:263
+#: plugins/lecture/__init__.py:264
 msgid ""
 "Pour une voix naturelle, Piper a besoin de :\n"
 "\n"
@@ -1072,16 +1248,16 @@ msgid ""
 "Rien d'autre n'est touché sur votre système. Installer maintenant ? (Sinon, espeak-ng sera utilisé s'il est présent.)"
 msgstr ""
 
-#: plugins/lecture/__init__.py:303
-#: plugins/lecture/__init__.py:289
+#: plugins/lecture/__init__.py:304
+#: plugins/lecture/__init__.py:290
 msgid "Une fiche verrouillée n'est jamais lue à voix haute."
 msgstr ""
 
-#: plugins/lecture/__init__.py:344
+#: plugins/lecture/__init__.py:345
 msgid "Rien à lire."
 msgstr ""
 
-#: plugins/lecture/__init__.py:396
+#: plugins/lecture/__init__.py:397
 msgid "Reprendre"
 msgstr ""
 
@@ -1093,31 +1269,31 @@ msgstr ""
 msgid "Voix (%s) :"
 msgstr ""
 
-#: plugins/lecture/__init__.py:257
+#: plugins/lecture/__init__.py:258
 msgid ""
 "• le paquet Python « piper-tts » (≈ 50 Mo avec ses dépendances), installé uniquement pour cette extension dans :\n"
 "  %s (depuis PyPI)"
 msgstr ""
 
-#: plugins/lecture/__init__.py:260
+#: plugins/lecture/__init__.py:261
 msgid ""
 "• la voix « %(voix)s » (%(taille)s), téléchargée depuis huggingface.co dans :\n"
 "  %(dossier)s (taille et SHA-256 vérifiés)"
 msgstr ""
 
-#: plugins/lecture/__init__.py:273
+#: plugins/lecture/__init__.py:274
 msgid "L'installation de Piper a échoué."
 msgstr ""
 
-#: plugins/lecture/__init__.py:309
+#: plugins/lecture/__init__.py:310
 msgid "Sélection"
 msgstr ""
 
-#: plugins/lecture/__init__.py:334
+#: plugins/lecture/__init__.py:335
 msgid "Aucune fiche à lire dans « %s »."
 msgstr ""
 
-#: plugins/lecture/__init__.py:412
+#: plugins/lecture/__init__.py:413
 msgid "Le moteur de voix a échoué : %s"
 msgstr ""
 
@@ -1125,11 +1301,11 @@ msgstr ""
 msgid "installée"
 msgstr ""
 
-#: plugins/lecture/__init__.py:279
+#: plugins/lecture/__init__.py:280
 msgid "Téléchargement impossible : %s"
 msgstr ""
 
-#: plugins/lecture/__init__.py:372
+#: plugins/lecture/__init__.py:373
 msgid "Impossible de lire : %s"
 msgstr ""
 
@@ -1137,11 +1313,11 @@ msgstr ""
 msgid "à télécharger, %s"
 msgstr ""
 
-#: plugins/lecture/__init__.py:384
+#: plugins/lecture/__init__.py:385
 msgid "%d fiche(s) verrouillée(s) ignorée(s)"
 msgstr ""
 
-#: plugins/lecture/__init__.py:382
+#: plugins/lecture/__init__.py:383
 msgid "Fiche %(i)d sur %(n)d"
 msgstr ""
 
@@ -1190,6 +1366,15 @@ msgstr ""
 #: plugins/lecture/logique.py:295
 #: plugins/traduction/logique.py:618
 msgid "fichier téléchargé incorrect (taille ou somme de contrôle) : supprimé"
+msgstr ""
+
+#: plugins/ocr/__init__.py:376
+msgid ""
+"Extrait le texte des images jointes à une fiche (Tesseract, en local : rien n'est envoyé sur Internet).\n"
+"\n"
+"• Clic droit sur une image jointe : « Extraire le texte de l'image (OCR) » garde le texte avec l'image ; « Texte de l'image → nouvelle fiche » crée une fiche avec ce texte ; « Texte de l'image → dans la fiche, au curseur » l'insère dans la fiche.\n"
+"• Le texte lu est cherchable (Ctrl+F). Si la fiche est verrouillée, il est chiffré avec l'image.\n"
+"• Dans une fiche Photos, clic droit sur une image > « Lire le texte (OCR) → nouvelle fiche »."
 msgstr ""
 
 #: plugins/ocr/__init__.py:41
@@ -1243,43 +1428,41 @@ msgstr ""
 msgid "Enregistrer la correction"
 msgstr ""
 
-#: plugins/ocr/__init__.py:114
-#: plugins/traduction/__init__.py:372
-#: src/scrinium/ui/repertoire.py:315
-msgid "Copier"
-msgstr ""
-
-#: plugins/ocr/__init__.py:188
-msgid "Extraire le texte des images de la fiche"
+#: plugins/ocr/__init__.py:180
+msgid "Extension OCR"
 msgstr ""
 
 #: plugins/ocr/__init__.py:189
-msgid "Texte extrait des images…"
+msgid "Extraire le texte des images de la fiche"
 msgstr ""
 
 #: plugins/ocr/__init__.py:190
-msgid "Extraire le texte de l'image (OCR)"
+msgid "Texte extrait des images…"
 msgstr ""
 
 #: plugins/ocr/__init__.py:191
-msgid "Texte de l'image → nouvelle fiche"
+msgid "Extraire le texte de l'image (OCR)"
 msgstr ""
 
 #: plugins/ocr/__init__.py:192
-msgid "Texte de l'image → dans la fiche, au curseur"
+msgid "Texte de l'image → nouvelle fiche"
 msgstr ""
 
 #: plugins/ocr/__init__.py:193
+msgid "Texte de l'image → dans la fiche, au curseur"
+msgstr ""
+
+#: plugins/ocr/__init__.py:194
 msgid "Réglages de l'OCR…"
 msgstr ""
 
-#: plugins/ocr/__init__.py:255
-#: plugins/ocr/__init__.py:273
-#: plugins/ocr/__init__.py:330
+#: plugins/ocr/__init__.py:256
+#: plugins/ocr/__init__.py:274
+#: plugins/ocr/__init__.py:331
 msgid "OCR"
 msgstr ""
 
-#: plugins/ocr/__init__.py:273
+#: plugins/ocr/__init__.py:274
 msgid "Extraction du texte…"
 msgstr ""
 
@@ -1287,40 +1470,40 @@ msgstr ""
 msgid "(tesseract introuvable)"
 msgstr ""
 
-#: plugins/ocr/__init__.py:223
-#: plugins/ocr/__init__.py:234
-#: plugins/ocr/__init__.py:286
+#: plugins/ocr/__init__.py:224
+#: plugins/ocr/__init__.py:235
+#: plugins/ocr/__init__.py:287
 msgid "Fiche verrouillée : déverrouillez-la d'abord."
 msgstr ""
 
-#: plugins/ocr/__init__.py:227
+#: plugins/ocr/__init__.py:228
 msgid "Cette fiche n'a pas d'image."
 msgstr ""
 
-#: plugins/ocr/__init__.py:255
+#: plugins/ocr/__init__.py:256
 msgid "Extraction du texte de %d image(s)…"
 msgstr ""
 
-#: plugins/ocr/__init__.py:320
+#: plugins/ocr/__init__.py:321
 msgid "La fiche n'est plus affichée : texte non inséré."
 msgstr ""
 
-#: plugins/ocr/__init__.py:328
-#: plugins/ocr/__init__.py:330
+#: plugins/ocr/__init__.py:329
+#: plugins/ocr/__init__.py:331
 #: plugins/photos/__init__.py:162
 msgid "Texte de %s"
 msgstr ""
 
-#: plugins/ocr/__init__.py:330
+#: plugins/ocr/__init__.py:331
 #: plugins/photos/__init__.py:164
 msgid "Fiche créée : %s"
 msgstr ""
 
-#: plugins/ocr/__init__.py:355
+#: plugins/ocr/__init__.py:356
 msgid "Texte extrait."
 msgstr ""
 
-#: plugins/ocr/__init__.py:367
+#: plugins/ocr/__init__.py:368
 msgid "Ouvrez d'abord une fiche (déverrouillée)."
 msgstr ""
 
@@ -1328,36 +1511,36 @@ msgstr ""
 msgid "✔ Tesseract trouvé : %s"
 msgstr ""
 
-#: plugins/ocr/__init__.py:322
+#: plugins/ocr/__init__.py:323
 msgid "Aucun texte reconnu."
 msgstr ""
 
-#: plugins/ocr/__init__.py:327
+#: plugins/ocr/__init__.py:328
 #: plugins/photos/__init__.py:161
 msgid "(aucun texte reconnu)"
 msgstr ""
 
-#: plugins/ocr/__init__.py:347
-#: plugins/ocr/__init__.py:299
+#: plugins/ocr/__init__.py:348
+#: plugins/ocr/__init__.py:300
 #: plugins/photos/__init__.py:158
 msgid "Échec : %s"
 msgstr ""
 
-#: plugins/ocr/__init__.py:203
+#: plugins/ocr/__init__.py:204
 msgid "Tesseract est introuvable."
 msgstr ""
 
-#: plugins/ocr/__init__.py:324
+#: plugins/ocr/__init__.py:325
 msgid "La fiche n'est pas modifiable."
 msgstr ""
 
-#: plugins/ocr/__init__.py:327
+#: plugins/ocr/__init__.py:328
 #: src/scrinium/ui/capture_rapide.py:41
 #: src/scrinium/ui/fenetre.py:147
 msgid "Fiche"
 msgstr ""
 
-#: plugins/ocr/__init__.py:327
+#: plugins/ocr/__init__.py:328
 #: plugins/photos/__init__.py:161
 #: src/scrinium/ui/images.py:408
 msgid "Image"
@@ -1367,7 +1550,7 @@ msgstr ""
 msgid "Tesseract introuvable."
 msgstr ""
 
-#: plugins/ocr/__init__.py:211
+#: plugins/ocr/__init__.py:212
 #: plugins/ocr/__init__.py:82
 msgid "Langue(s) non installée(s) : %s"
 msgstr ""
@@ -1388,9 +1571,20 @@ msgstr ""
 msgid "tesseract a échoué (code %d)"
 msgstr ""
 
+#: plugins/partage/__init__.py:839
+msgid ""
+"Partage des fiches avec d'autres personnes via un serveur Scrinium.\n"
+"\n"
+"• « Partager la fiche… » / « Partager le thème… » : choisir les personnes et leurs droits (lecture ou écriture) ; une invitation par courriel (lien valable 48 h) est préparée.\n"
+"• « Rejoindre un partage… » : collez le lien reçu ; le compte est créé sur le serveur si besoin.\n"
+"• « Synchroniser les partages » : à la demande, ou à intervalle régulier si vous le réglez. En cas de conflit, les DEUX versions sont gardées.\n"
+"• Les fiches verrouillées ne sont jamais partagées. Le mot de passe va au trousseau du système si vous le demandez. Certificat auto-signé : on confirme son empreinte.\n"
+"• Les échanges réseau durent au plus 10 secondes ; une fenêtre « Veuillez patienter » s'affiche pendant l'attente."
+msgstr ""
+
 #: plugins/partage/__init__.py:67
-#: plugins/partage/__init__.py:146
-#: plugins/partage/__init__.py:169
+#: plugins/partage/__init__.py:147
+#: plugins/partage/__init__.py:170
 msgid "Partage"
 msgstr ""
 
@@ -1398,301 +1592,305 @@ msgstr ""
 msgid "Échange avec le serveur de partage…"
 msgstr ""
 
-#: plugins/partage/__init__.py:95
+#: plugins/partage/__init__.py:91
+msgid "Extension Partage"
+msgstr ""
+
 #: plugins/partage/__init__.py:96
 #: plugins/partage/__init__.py:97
+#: plugins/partage/__init__.py:98
 msgid "Partager la fiche…"
 msgstr ""
 
-#: plugins/partage/__init__.py:99
+#: plugins/partage/__init__.py:100
 msgid "Partager le thème…"
 msgstr ""
 
-#: plugins/partage/__init__.py:100
+#: plugins/partage/__init__.py:101
 msgid "Rejoindre un partage…"
 msgstr ""
 
-#: plugins/partage/__init__.py:101
+#: plugins/partage/__init__.py:102
 msgid "Synchroniser les partages"
 msgstr ""
 
-#: plugins/partage/__init__.py:102
+#: plugins/partage/__init__.py:103
 msgid "Serveurs de partage…"
 msgstr ""
 
-#: plugins/partage/__init__.py:212
+#: plugins/partage/__init__.py:213
 msgid "Certificat du serveur"
 msgstr ""
 
-#: plugins/partage/__init__.py:326
+#: plugins/partage/__init__.py:327
 msgid "Ajouter un serveur de partage"
 msgstr ""
 
-#: plugins/partage/__init__.py:334
-#: plugins/partage/__init__.py:795
+#: plugins/partage/__init__.py:335
+#: plugins/partage/__init__.py:796
 msgid "Mémoriser le mot de passe (trousseau du système)"
 msgstr ""
 
-#: plugins/partage/__init__.py:335
+#: plugins/partage/__init__.py:336
 msgid "Adresse du serveur :"
 msgstr ""
 
-#: plugins/partage/__init__.py:336
+#: plugins/partage/__init__.py:337
 msgid "Compte :"
 msgstr ""
 
-#: plugins/partage/__init__.py:374
-#: plugins/partage/__init__.py:420
+#: plugins/partage/__init__.py:375
+#: plugins/partage/__init__.py:421
 msgid "Serveurs de partage"
 msgstr ""
 
-#: plugins/partage/__init__.py:389
+#: plugins/partage/__init__.py:390
 #: plugins/traduction/__init__.py:244
 msgid " min"
 msgstr ""
 
-#: plugins/partage/__init__.py:456
-#: plugins/partage/__init__.py:601
+#: plugins/partage/__init__.py:457
+#: plugins/partage/__init__.py:602
 msgid "Retirer l'accès"
-msgstr ""
-
-#: plugins/partage/__init__.py:467
-#: plugins/partage/__init__.py:612
-msgid "Lecture seule"
 msgstr ""
 
 #: plugins/partage/__init__.py:468
 #: plugins/partage/__init__.py:613
+msgid "Lecture seule"
+msgstr ""
+
+#: plugins/partage/__init__.py:469
+#: plugins/partage/__init__.py:614
 msgid "Lecture et écriture"
 msgstr ""
 
-#: plugins/partage/__init__.py:470
-#: plugins/partage/__init__.py:615
+#: plugins/partage/__init__.py:471
+#: plugins/partage/__init__.py:616
 msgid "Droits :"
 msgstr ""
 
-#: plugins/partage/__init__.py:472
-#: plugins/partage/__init__.py:618
+#: plugins/partage/__init__.py:473
+#: plugins/partage/__init__.py:619
 msgid "Inviter…"
 msgstr ""
 
-#: plugins/partage/__init__.py:481
+#: plugins/partage/__init__.py:482
 msgid "Annuler l'invitation"
 msgstr ""
 
-#: plugins/partage/__init__.py:518
+#: plugins/partage/__init__.py:519
 msgid "propriétaire"
 msgstr ""
 
-#: plugins/partage/__init__.py:518
-#: plugins/partage/__init__.py:657
+#: plugins/partage/__init__.py:519
+#: plugins/partage/__init__.py:658
 msgid "lecture et écriture"
 msgstr ""
 
-#: plugins/partage/__init__.py:518
-#: plugins/partage/__init__.py:657
+#: plugins/partage/__init__.py:519
+#: plugins/partage/__init__.py:658
 msgid "lecture seule"
 msgstr ""
 
-#: plugins/partage/__init__.py:523
+#: plugins/partage/__init__.py:524
 msgid "en attente"
 msgstr ""
 
-#: plugins/partage/__init__.py:523
+#: plugins/partage/__init__.py:524
 msgid "acceptée"
 msgstr ""
 
-#: plugins/partage/__init__.py:523
+#: plugins/partage/__init__.py:524
 msgid "expirée"
 msgstr ""
 
-#: plugins/partage/__init__.py:523
+#: plugins/partage/__init__.py:524
 msgid "annulée"
 msgstr ""
 
-#: plugins/partage/__init__.py:578
+#: plugins/partage/__init__.py:579
 msgid "Partager un thème"
 msgstr ""
 
-#: plugins/partage/__init__.py:604
+#: plugins/partage/__init__.py:605
 msgid "Mettre aussi en ligne les nouvelles fiches de ce thème, avec les mêmes droits"
 msgstr ""
 
-#: plugins/partage/__init__.py:699
+#: plugins/partage/__init__.py:700
 msgid "Invitation prête"
 msgstr ""
 
-#: plugins/partage/__init__.py:706
+#: plugins/partage/__init__.py:707
 msgid "Copier le message"
 msgstr ""
 
-#: plugins/partage/__init__.py:708
+#: plugins/partage/__init__.py:709
 msgid "Ouvrir dans mon logiciel de courriel"
 msgstr ""
 
-#: plugins/partage/__init__.py:739
+#: plugins/partage/__init__.py:740
 msgid "Rejoindre un partage"
 msgstr ""
 
-#: plugins/partage/__init__.py:747
+#: plugins/partage/__init__.py:748
 msgid "Vérifier l'invitation"
 msgstr ""
 
-#: plugins/partage/__init__.py:755
+#: plugins/partage/__init__.py:756
 msgid "Rejoindre"
 msgstr ""
 
-#: plugins/partage/__init__.py:779
+#: plugins/partage/__init__.py:780
 #: plugins/partage/logique.py:46
 #: plugins/partage/logique.py:57
 msgid "lire et modifier"
 msgstr ""
 
-#: plugins/partage/__init__.py:779
+#: plugins/partage/__init__.py:780
 #: plugins/partage/logique.py:46
 #: plugins/partage/logique.py:57
 msgid "lire"
 msgstr ""
 
-#: plugins/partage/__init__.py:781
+#: plugins/partage/__init__.py:782
 msgid "une fiche"
 msgstr ""
 
-#: plugins/partage/__init__.py:169
+#: plugins/partage/__init__.py:170
 msgid "Compte ou mot de passe refusé par le serveur."
 msgstr ""
 
-#: plugins/partage/__init__.py:243
+#: plugins/partage/__init__.py:244
 msgid "Reçues"
 msgstr ""
 
-#: plugins/partage/__init__.py:243
+#: plugins/partage/__init__.py:244
 msgid "Mises à jour"
 msgstr ""
 
-#: plugins/partage/__init__.py:243
+#: plugins/partage/__init__.py:244
 msgid "Envoyées"
 msgstr ""
 
-#: plugins/partage/__init__.py:244
+#: plugins/partage/__init__.py:245
 msgid "Identiques des deux côtés"
 msgstr ""
 
-#: plugins/partage/__init__.py:272
+#: plugins/partage/__init__.py:273
 msgid "Aucun serveur de partage. Utilisez « Rejoindre un partage… » ou « Serveurs de partage… »."
 msgstr ""
 
-#: plugins/partage/__init__.py:283
+#: plugins/partage/__init__.py:284
 msgid "Ouvrez d'abord la fiche à partager."
 msgstr ""
 
-#: plugins/partage/__init__.py:286
+#: plugins/partage/__init__.py:287
 msgid "Une fiche verrouillée ne se partage pas. Déverrouillez-la d'abord, ou copiez son contenu dans une autre fiche."
 msgstr ""
 
-#: plugins/partage/__init__.py:339
+#: plugins/partage/__init__.py:340
 msgid "Pas encore de compte ? Demandez une invitation au propriétaire d'une fiche, puis « Rejoindre un partage… »."
 msgstr ""
 
-#: plugins/partage/__init__.py:354
+#: plugins/partage/__init__.py:355
 msgid "Mot de passe absent."
 msgstr ""
 
-#: plugins/partage/__init__.py:380
+#: plugins/partage/__init__.py:381
 msgid "Synchroniser"
 msgstr ""
 
-#: plugins/partage/__init__.py:387
+#: plugins/partage/__init__.py:388
 msgid "Synchroniser automatiquement toutes les"
 msgstr ""
 
-#: plugins/partage/__init__.py:388
+#: plugins/partage/__init__.py:389
 msgid "(jamais)"
 msgstr ""
 
-#: plugins/partage/__init__.py:394
+#: plugins/partage/__init__.py:395
 msgid "Pendant un échange, la fenêtre peut se figer quelques secondes si le serveur répond lentement."
 msgstr ""
 
-#: plugins/partage/__init__.py:452
+#: plugins/partage/__init__.py:453
 msgid "Personnes ayant accès :"
 msgstr ""
 
-#: plugins/partage/__init__.py:462
+#: plugins/partage/__init__.py:463
 msgid "Inviter par courriel (le lien est valable 48 h) :"
 msgstr ""
 
-#: plugins/partage/__init__.py:476
+#: plugins/partage/__init__.py:477
 msgid "Invitations :"
 msgstr ""
 
-#: plugins/partage/__init__.py:511
+#: plugins/partage/__init__.py:512
 msgid "Pas encore partagée : elle sera mise en ligne à la première invitation."
 msgstr ""
 
-#: plugins/partage/__init__.py:515
+#: plugins/partage/__init__.py:516
 msgid "(impossible de lire les droits : voir le message d'erreur)"
 msgstr ""
 
-#: plugins/partage/__init__.py:550
-#: plugins/partage/__init__.py:674
+#: plugins/partage/__init__.py:551
+#: plugins/partage/__init__.py:675
 msgid "Adresse de courriel invalide."
 msgstr ""
 
-#: plugins/partage/__init__.py:593
+#: plugins/partage/__init__.py:594
 #: src/scrinium/ui/lien_ajout.py:26
 msgid "Thème :"
 msgstr ""
 
-#: plugins/partage/__init__.py:598
+#: plugins/partage/__init__.py:599
 msgid "Personnes ayant accès à tout le thème :"
 msgstr ""
 
-#: plugins/partage/__init__.py:607
+#: plugins/partage/__init__.py:608
 msgid "Inviter par courriel (un seul lien pour tout le thème, valable 48 h) :"
 msgstr ""
 
-#: plugins/partage/__init__.py:645
+#: plugins/partage/__init__.py:646
 msgid "(impossible de lire l'état du partage : voir le message d'erreur)"
 msgstr ""
 
-#: plugins/partage/__init__.py:648
+#: plugins/partage/__init__.py:649
 msgid "{n} fiche(s) partageable(s)"
 msgstr ""
 
-#: plugins/partage/__init__.py:712
+#: plugins/partage/__init__.py:713
 msgid "Envoie le message avec l'extension Courriel (activez-la dans les extensions)"
 msgstr ""
 
-#: plugins/partage/__init__.py:713
+#: plugins/partage/__init__.py:714
 msgid "Envoie le message depuis votre boîte, via l'extension Courriel"
 msgstr ""
 
-#: plugins/partage/__init__.py:742
+#: plugins/partage/__init__.py:743
 msgid "Collez le lien reçu par courriel :"
 msgstr ""
 
-#: plugins/partage/__init__.py:790
+#: plugins/partage/__init__.py:791
 msgid "Créer un compte sur ce serveur"
 msgstr ""
 
-#: plugins/partage/__init__.py:792
+#: plugins/partage/__init__.py:793
 msgid "J'ai déjà un compte sur ce serveur"
 msgstr ""
 
-#: plugins/partage/__init__.py:797
+#: plugins/partage/__init__.py:798
 msgid "Nom de compte :"
 msgstr ""
 
-#: plugins/partage/__init__.py:798
+#: plugins/partage/__init__.py:799
 msgid "Mot de passe (10 caractères minimum pour un nouveau compte) :"
 msgstr ""
 
-#: plugins/partage/__init__.py:146
+#: plugins/partage/__init__.py:147
 msgid "Mot de passe de {compte} sur {url} :"
 msgstr ""
 
-#: plugins/partage/__init__.py:212
+#: plugins/partage/__init__.py:213
 msgid ""
 "Ce serveur utilise un certificat que votre système ne connaît pas (certificat auto-signé).\n"
 "\n"
@@ -1704,89 +1902,89 @@ msgid ""
 "Faire confiance à ce certificat ?"
 msgstr ""
 
-#: plugins/partage/__init__.py:249
+#: plugins/partage/__init__.py:250
 msgid ""
 "Conflits (votre version est gardée dans une copie « conflit », la version du serveur est reprise) :\n"
 "  "
 msgstr ""
 
-#: plugins/partage/__init__.py:252
+#: plugins/partage/__init__.py:253
 msgid ""
 "Modifications refusées (lecture seule), gardées dans une copie :\n"
 "  "
 msgstr ""
 
-#: plugins/partage/__init__.py:254
+#: plugins/partage/__init__.py:255
 msgid "N'existent plus sur le serveur (gardées ici, plus partagées) : "
 msgstr ""
 
-#: plugins/partage/__init__.py:256
+#: plugins/partage/__init__.py:257
 msgid "Supprimées ici mais toujours sur le serveur (rien n'est supprimé là-bas) : "
 msgstr ""
 
-#: plugins/partage/__init__.py:258
+#: plugins/partage/__init__.py:259
 msgid ""
 "Erreurs :\n"
 "  "
 msgstr ""
 
-#: plugins/partage/__init__.py:420
+#: plugins/partage/__init__.py:421
 msgid "Oublier le serveur {url} ? Vos fiches reçues restent ici, mais ne seront plus synchronisées. Rien n'est supprimé sur le serveur."
 msgstr ""
 
-#: plugins/partage/__init__.py:443
+#: plugins/partage/__init__.py:444
 msgid "Partager « {titre} »"
 msgstr ""
 
-#: plugins/partage/__init__.py:781
+#: plugins/partage/__init__.py:782
 msgid "{n} fiches"
 msgstr ""
 
-#: plugins/partage/__init__.py:782
+#: plugins/partage/__init__.py:783
 msgid "{qui} vous invite à {droit} {objet} (valable jusqu'au {fin})."
 msgstr ""
 
-#: plugins/partage/__init__.py:803
+#: plugins/partage/__init__.py:804
 msgid "Les fiches partagées sont stockées sur ce serveur : son administrateur peut les lire."
 msgstr ""
 
-#: plugins/partage/__init__.py:814
+#: plugins/partage/__init__.py:815
 msgid "Nom de compte et mot de passe requis."
 msgstr ""
 
-#: plugins/partage/__init__.py:260
+#: plugins/partage/__init__.py:261
 msgid "Partage — {nom}"
 msgstr ""
 
-#: plugins/partage/__init__.py:265
+#: plugins/partage/__init__.py:266
 msgid "Tout est à jour."
 msgstr ""
 
-#: plugins/partage/__init__.py:535
+#: plugins/partage/__init__.py:536
 msgid "Retirer l'accès de {c} ? Sa copie reste chez lui, mais ne sera plus mise à jour."
 msgstr ""
 
-#: plugins/partage/__init__.py:650
+#: plugins/partage/__init__.py:651
 msgid "{n} verrouillée(s), jamais partagée(s)"
 msgstr ""
 
-#: plugins/partage/__init__.py:652
+#: plugins/partage/__init__.py:653
 msgid "{n} reçue(s) d'un autre compte, non partagée(s)"
 msgstr ""
 
-#: plugins/partage/__init__.py:665
+#: plugins/partage/__init__.py:666
 msgid "Retirer l'accès de « {c} » à toutes les fiches du thème ?"
 msgstr ""
 
-#: plugins/partage/__init__.py:681
+#: plugins/partage/__init__.py:682
 msgid "Rien à partager : %s"
 msgstr ""
 
-#: plugins/partage/__init__.py:702
+#: plugins/partage/__init__.py:703
 msgid "Envoyez ce message à {e}. Le lien ne marche qu'une fois, pendant 48 h."
 msgstr ""
 
-#: plugins/partage/__init__.py:171
+#: plugins/partage/__init__.py:172
 msgid ""
 "Le certificat du serveur n'est pas reconnu ou a changé :\n"
 "{m}\n"
@@ -1794,35 +1992,35 @@ msgid ""
 "Par prudence, rien n'a été envoyé. Vérifiez auprès de l'administrateur, puis réajoutez le serveur."
 msgstr ""
 
-#: plugins/partage/__init__.py:777
+#: plugins/partage/__init__.py:778
 msgid "Invitation introuvable, expirée ou déjà utilisée."
 msgstr ""
 
-#: plugins/partage/__init__.py:788
+#: plugins/partage/__init__.py:789
 msgid "Vous serez ajouté avec votre compte « {c} » sur ce serveur."
 msgstr ""
 
-#: plugins/partage/__init__.py:174
+#: plugins/partage/__init__.py:175
 msgid ""
 "Serveur injoignable. Rien n'est perdu : réessayez plus tard.\n"
 "{m}"
 msgstr ""
 
-#: plugins/partage/__init__.py:178
+#: plugins/partage/__init__.py:179
 msgid "Introuvable (lien expiré, déjà utilisé, ou fiche plus partagée avec vous)."
 msgstr ""
 
-#: plugins/partage/__init__.py:176
+#: plugins/partage/__init__.py:177
 msgid ""
 "Ce serveur n'est pas compatible avec cette version de Scrinium.\n"
 "{m}"
 msgstr ""
 
-#: plugins/partage/__init__.py:180
+#: plugins/partage/__init__.py:181
 msgid "Refusé par le serveur : {m}"
 msgstr ""
 
-#: plugins/partage/__init__.py:180
+#: plugins/partage/__init__.py:181
 msgid "droits insuffisants"
 msgstr ""
 
@@ -1862,6 +2060,16 @@ msgid ""
 "Cordialement"
 msgstr ""
 
+#: plugins/photos/__init__.py:200
+msgid ""
+"Un dossier d'images montré en vignettes, dans une fiche.\n"
+"\n"
+"• Nouvelle fiche > « Photos » > « Choisir un dossier… ». La fiche garde seulement le chemin ; les images restent dans leur dossier, rien n'est copié.\n"
+"• Double-clic sur une vignette : l'image s'ouvre dans votre visionneuse. Clic droit : ouvrir le dossier, en choisir un autre, actualiser, et (avec l'extension OCR) lire le texte de l'image.\n"
+"• Sur une autre machine, le dossier n'existe peut-être pas : la fiche le dit et propose d'en choisir un.\n"
+"• Lecture seule : la fiche ne modifie jamais vos images."
+msgstr ""
+
 #: plugins/photos/__init__.py:57
 msgid "Choisir un dossier…"
 msgstr ""
@@ -1872,6 +2080,10 @@ msgstr ""
 
 #: plugins/photos/__init__.py:169
 msgid "Dossier d'images"
+msgstr ""
+
+#: plugins/photos/__init__.py:194
+msgid "Extension Photos"
 msgstr ""
 
 #: plugins/photos/__init__.py:88
@@ -1909,6 +2121,16 @@ msgstr ""
 
 #: plugins/photos/logique.py:21
 msgid "Photos"
+msgstr ""
+
+#: plugins/traduction/__init__.py:694
+msgid ""
+"Traduit la sélection ou toute la fiche avec un moteur local.\n"
+"\n"
+"• Bouton « Traduire » (barre d'outils), menu Extensions ou clic droit sur la fiche.\n"
+"• TranslateGemma par llama.cpp, sans Ollama : l'extension lance llama-server à la demande (127.0.0.1) et l'arrête après inactivité. Un serveur déjà lancé peut être utilisé.\n"
+"• Rien ne quitte votre machine, sauf si vous acceptez explicitement un serveur distant. Aucun téléchargement sans votre accord (taille et provenance affichées).\n"
+"• « Réglages de la traduction… » : langue et serveur."
 msgstr ""
 
 #: plugins/traduction/__init__.py:132
@@ -2042,7 +2264,7 @@ msgid "Rapide : quelques secondes. Meilleur : plus fidèle, plusieurs fois plus 
 msgstr ""
 
 #: plugins/traduction/__init__.py:350
-#: plugins/traduction/__init__.py:496
+#: plugins/traduction/__init__.py:497
 msgid "Traduire"
 msgstr ""
 
@@ -2059,47 +2281,51 @@ msgstr ""
 msgid "Remplacer"
 msgstr ""
 
-#: plugins/traduction/__init__.py:497
-msgid "Traduire la sélection ou la fiche…"
+#: plugins/traduction/__init__.py:492
+msgid "Extension Traduction"
 msgstr ""
 
 #: plugins/traduction/__init__.py:498
-msgid "Traduire…"
+msgid "Traduire la sélection ou la fiche…"
 msgstr ""
 
 #: plugins/traduction/__init__.py:499
+msgid "Traduire…"
+msgstr ""
+
+#: plugins/traduction/__init__.py:500
 msgid "Réglages de la traduction…"
 msgstr ""
 
-#: plugins/traduction/__init__.py:528
+#: plugins/traduction/__init__.py:529
 msgid "Installer llama.cpp"
 msgstr ""
 
-#: plugins/traduction/__init__.py:529
+#: plugins/traduction/__init__.py:530
 msgid "llama.cpp n'est pas installé par l'extension : vous choisissez comment."
 msgstr ""
 
-#: plugins/traduction/__init__.py:531
+#: plugins/traduction/__init__.py:532
 msgid "Ouvrir la page des versions"
 msgstr ""
 
-#: plugins/traduction/__init__.py:613
+#: plugins/traduction/__init__.py:614
 msgid "Continuer quand même"
 msgstr ""
 
-#: plugins/traduction/__init__.py:677
+#: plugins/traduction/__init__.py:678
 #: plugins/traduction/__init__.py:412
 #: plugins/traduction/__init__.py:415
 msgid "Traduction"
 msgstr ""
 
-#: plugins/traduction/__init__.py:685
-#: plugins/traduction/__init__.py:688
-#: plugins/traduction/__init__.py:690
+#: plugins/traduction/__init__.py:686
+#: plugins/traduction/__init__.py:689
+#: plugins/traduction/__init__.py:691
 msgid "Test de la traduction"
 msgstr ""
 
-#: plugins/traduction/__init__.py:685
+#: plugins/traduction/__init__.py:686
 msgid "Démarrage de llama.cpp et traduction d'essai…"
 msgstr ""
 
@@ -2166,53 +2392,53 @@ msgstr ""
 msgid "Terminé : relisez, puis insérez ou remplacez."
 msgstr ""
 
-#: plugins/traduction/__init__.py:519
+#: plugins/traduction/__init__.py:520
 msgid "Ouvrez une fiche (déverrouillée) qui contient du texte."
 msgstr ""
 
-#: plugins/traduction/__init__.py:602
+#: plugins/traduction/__init__.py:603
 msgid "Cette machine n'a pas de mémoire d'échange (swap) : le système pourrait fermer d'autres programmes de force."
 msgstr ""
 
-#: plugins/traduction/__init__.py:603
+#: plugins/traduction/__init__.py:604
 msgid "La machine risque de ralentir très fortement."
 msgstr ""
 
-#: plugins/traduction/__init__.py:606
+#: plugins/traduction/__init__.py:607
 msgid "%(d)s de mémoire disponible : « %(m)s » tiendra mais ira plus lentement (il en faut %(r)s pour aller vite). Fermer quelques programmes aidera."
 msgstr ""
 
-#: plugins/traduction/__init__.py:610
+#: plugins/traduction/__init__.py:611
 msgid "Mémoire insuffisante"
 msgstr ""
 
-#: plugins/traduction/__init__.py:610
+#: plugins/traduction/__init__.py:611
 msgid "Mémoire un peu juste"
 msgstr ""
 
-#: plugins/traduction/__init__.py:612
+#: plugins/traduction/__init__.py:613
 msgid "Utiliser le modèle rapide (4B)"
 msgstr ""
 
-#: plugins/traduction/__init__.py:658
-#: plugins/traduction/__init__.py:663
-#: plugins/traduction/__init__.py:675
+#: plugins/traduction/__init__.py:659
+#: plugins/traduction/__init__.py:664
+#: plugins/traduction/__init__.py:676
 msgid "Modèle de traduction"
 msgstr ""
 
-#: plugins/traduction/__init__.py:658
+#: plugins/traduction/__init__.py:659
 msgid "Choisissez un fichier .gguf dans les réglages."
 msgstr ""
 
-#: plugins/traduction/__init__.py:668
+#: plugins/traduction/__init__.py:669
 msgid "Modèle de traduction : %s"
 msgstr ""
 
-#: plugins/traduction/__init__.py:668
+#: plugins/traduction/__init__.py:669
 msgid "Téléchargement de %(n)s (%(t)s)…"
 msgstr ""
 
-#: plugins/traduction/__init__.py:677
+#: plugins/traduction/__init__.py:678
 msgid "Modèle « %s » téléchargé et vérifié."
 msgstr ""
 
@@ -2240,11 +2466,11 @@ msgstr ""
 msgid "Remplacer tout le texte de la fiche par la traduction ? (Ctrl+Z l'annule.)"
 msgstr ""
 
-#: plugins/traduction/__init__.py:640
+#: plugins/traduction/__init__.py:641
 msgid "Modèle « %s » choisi pour cette machine (modifiable dans les réglages)."
 msgstr ""
 
-#: plugins/traduction/__init__.py:664
+#: plugins/traduction/__init__.py:665
 msgid ""
 "Il manque le modèle « %(n)s » (TranslateGemma, quantifié Q4_K_M, licence Gemma).\n"
 "\n"
@@ -2271,11 +2497,11 @@ msgstr ""
 msgid "TranslateGemma par llama.cpp"
 msgstr ""
 
-#: plugins/traduction/__init__.py:604
+#: plugins/traduction/__init__.py:605
 msgid "Il n'y a que %(d)s de mémoire disponible ; « %(m)s » en demande au moins %(a)s (jusqu'à %(r)s pour aller vite)."
 msgstr ""
 
-#: plugins/traduction/__init__.py:690
+#: plugins/traduction/__init__.py:691
 msgid ""
 "✔ llama.cpp fonctionne.\n"
 "\n"
@@ -2283,17 +2509,17 @@ msgid ""
 "→ %s"
 msgstr ""
 
-#: plugins/traduction/__init__.py:549
+#: plugins/traduction/__init__.py:550
 msgid "Le serveur %s n'est pas local : le texte serait envoyé hors de cette machine. Cochez la case d'acceptation dans les réglages pour l'autoriser."
 msgstr ""
 
-#: plugins/traduction/__init__.py:553
-#: src/scrinium/ui/fenetre.py:1280
-#: src/scrinium/ui/fenetre.py:1289
+#: plugins/traduction/__init__.py:554
+#: src/scrinium/ui/fenetre.py:1292
+#: src/scrinium/ui/fenetre.py:1301
 msgid "Fiche verrouillée"
 msgstr ""
 
-#: plugins/traduction/__init__.py:553
+#: plugins/traduction/__init__.py:554
 msgid "Cette fiche est verrouillée et le serveur %s n'est pas local : envoyer quand même son texte ?"
 msgstr ""
 
@@ -3093,6 +3319,118 @@ msgid ""
 "Vous pouvez les lire avec n'importe quel éditeur de texte. Pour les sauvegarder, copiez ce dossier. Les fiches verrouillées sont des fichiers .lock, illisibles sans leur mot de passe."
 msgstr ""
 
+#: src/scrinium/core/guide.py:11
+#: src/scrinium/core/guide.py:98
+msgid "Guide"
+msgstr ""
+
+#: src/scrinium/core/guide.py:21
+msgid "Guide 1 · Le principe"
+msgstr ""
+
+#: src/scrinium/core/guide.py:21
+msgid ""
+"Scrinium range vos petites notes (codes, procédures, listes, numéros…) en FICHES, classées par THÈMES.\n"
+"\n"
+"• Tout est fiche : une note, mais aussi une liste d'applications, un dossier de photos, des actions de terminal. Une fiche peut avoir un TYPE (voir « Guide 3 »).\n"
+"• Tout s'enregistre tout seul. Chaque fiche est un fichier texte (.md) dans un dossier de thème : vous pouvez les lire avec n'importe quel éditeur.\n"
+"• Rien ne quitte votre ordinateur sans votre action : pas de compte, pas de nuage. Le partage, la traduction, la dictée… sont des EXTENSIONS facultatives, désactivées tant que vous ne les activez pas.\n"
+"• Une fiche sensible se VERROUILLE par mot de passe (chiffrement AES-256)."
+msgstr ""
+
+#: src/scrinium/core/guide.py:31
+msgid "Guide 2 · Gestes utiles"
+msgstr ""
+
+#: src/scrinium/core/guide.py:31
+msgid ""
+"• Nouvelle fiche : Ctrl+N ou le bouton « Fiche ». Nouveau thème : bouton « Thème ».\n"
+"• Chercher : Ctrl+F (titres, notes et thèmes, tous thèmes confondus). Le thème « ★ Toutes les fiches » montre tout.\n"
+"• Déplacer une fiche vers un autre thème : glissez-la sur le thème (ou clic droit sur la fiche > « Déplacer vers le thème »).\n"
+"• Ranger : glissez les fiches pour changer leur ordre, mettez-les en favoris.\n"
+"• Images : on peut joindre des images à une fiche ; le clic droit sur une image propose l'OCR si l'extension est activée.\n"
+"• Supprimer : la fiche ou le thème va à la corbeille, rien n'est détruit tout de suite.\n"
+"• Langue : menu Aide > Langue (automatique, français, anglais)."
+msgstr ""
+
+#: src/scrinium/core/guide.py:39
+msgid "Guide 3 · Les types de fiches"
+msgstr ""
+
+#: src/scrinium/core/guide.py:39
+msgid ""
+"Un type change l'AFFICHAGE d'une fiche. Il se choisit à la création : flèche du bouton « Fiche » > « Nouvelle fiche » > type.\n"
+"\n"
+"• Note (par défaut) : du texte.\n"
+"• Applications : une grille d'icônes pour lancer vos logiciels sans quitter Scrinium (extension Applications).\n"
+"• Photos : un dossier d'images montré en vignettes ; les images restent dans leur dossier (extension Photos).\n"
+"• Actions CLI : des commandes à lancer d'un clic (extension Capture).\n"
+"• Agenda : des rappels et échéances (extension Agenda).\n"
+"• Calculatrice : une calculatrice dont l'historique reste dans la fiche (extension Calculatrice).\n"
+"\n"
+"Sécurité : un type qui LANCE des commandes (Applications, Actions CLI) reste inerte tant que vous n'avez pas validé la fiche vous-même. Une fiche reçue d'un autre n'exécute donc jamais rien toute seule."
+msgstr ""
+
+#: src/scrinium/core/guide.py:51
+msgid "Guide 4 · Les extensions"
+msgstr ""
+
+#: src/scrinium/core/guide.py:51
+msgid ""
+"Menu Extensions > Gérer les extensions… : cochez celles qui vous servent. Livrées avec Scrinium :\n"
+"\n"
+"• Courriel : envoie la fiche affichée.\n"
+"• OCR : extrait le texte des images jointes (Tesseract, en local) ; le texte devient cherchable. Clic droit sur l'image : « Texte de l'image → nouvelle fiche » ou « → dans la fiche, au curseur ».\n"
+"• Partage : partage des fiches avec d'autres via un serveur Scrinium (voir « Guide 6 »).\n"
+"• Traduction et Dictée : en local (modèles téléchargés seulement avec votre accord).\n"
+"• Lecture : lit une fiche à voix haute.\n"
+"• Agenda, Applications, Photos, Calculatrice : types de fiches (voir « Guide 3 »).\n"
+"• Capture : insère la sortie d'une commande dans la fiche, ou envoie du texte vers une console (voir « Guide 5 »).\n"
+"\n"
+"Écrire la vôtre : menu Aide > « Documentation des extensions »."
+msgstr ""
+
+#: src/scrinium/core/guide.py:64
+msgid "Guide 5 · Console et commandes"
+msgstr ""
+
+#: src/scrinium/core/guide.py:64
+msgid ""
+"L'extension Capture relie vos fiches au terminal, sans jamais rien valider à votre place.\n"
+"\n"
+"• Bouton « Console » : sélectionnez du texte dans la fiche (par exemple « ls -al »), cliquez. Le texte est TAPÉ dans une Konsole « Scrinium », SANS Entrée : vous relisez, puis vous validez. Le résultat apparaît dans la console, pas dans la fiche.\n"
+"• Pour que Scrinium puisse taper dans Konsole : Konsole > Configuration > Configurer Konsole > Général > cocher « Enable the security sensitive parts of the DBus API ». Sinon, le texte est seulement copié dans le presse-papiers : collez-le avec Ctrl+Maj+V. (Cette option est désactivée par défaut car elle permet à un programme d'envoyer du texte à vos terminaux : c'est votre choix.)\n"
+"• Extensions > « Exécuter une commande et insérer la sortie… » : le contraire, la commande est lancée après confirmation et sa sortie est insérée dans la fiche, au curseur.\n"
+"• Depuis un terminal : « ls -al | scrinium ajouter -t Thème -f Fiche » ajoute la sortie à une fiche."
+msgstr ""
+
+#: src/scrinium/core/guide.py:76
+msgid "Guide 6 · Verrouillage, secours et partage"
+msgstr ""
+
+#: src/scrinium/core/guide.py:76
+msgid ""
+"• Verrouiller : bouton « Verrouiller… ». Le titre reste visible, le contenu est chiffré. Mot de passe oublié = fiche perdue, sauf avec le FICHIER DE SECOURS (menu Sécurité > Fichier de secours…) : faites-le dès le premier verrouillage, gardez-le hors de cet ordinateur.\n"
+"• Une fiche verrouillée n'est jamais envoyée, lue, traduite ni partagée tant qu'elle est fermée.\n"
+"• Partage : l'extension Partage synchronise des fiches avec un serveur Scrinium. Une invitation par courriel (valable 48 h) donne un accès en lecture ou en écriture ; en cas de conflit, les deux versions sont gardées.\n"
+"• Inviter quelqu'un à INSTALLER Scrinium : menu Fichier > « Inviter à installer Scrinium… »."
+msgstr ""
+
+#: src/scrinium/core/guide.py:84
+msgid "Guide 7 · Où sont mes données, sauvegarde"
+msgstr ""
+
+#: src/scrinium/core/guide.py:84
+msgid ""
+"• Vos fiches : un dossier par thème, un fichier .md par fiche (.lock si verrouillée), avec un sous-dossier .pj pour les images jointes :\n"
+"\n"
+"    %s\n"
+"\n"
+"• Sauvegarder : copiez ce dossier, et votre fichier de secours à part. Restaurer : remettez-le en place, Scrinium fermé.\n"
+"• Scrinium ne recharge pas les fiches modifiées pendant qu'il tourne : fermez-le avant de changer des fichiers à la main.\n"
+"• Aucune télémétrie. Logiciel libre (GPL-3.0-or-later) : le code est sur github.com/jfkneib/scrinium."
+msgstr ""
+
 #: src/scrinium/core/invitation.py:13
 msgid "Invitation à essayer Scrinium"
 msgstr ""
@@ -3222,7 +3560,7 @@ msgid "non disponible sous %(ici)s (réservée à : %(ou)s)"
 msgstr ""
 
 #: src/scrinium/core/repertoire.py:90
-#: src/scrinium/ui/fenetre.py:789
+#: src/scrinium/ui/fenetre.py:790
 msgid "Répertoire"
 msgstr ""
 
@@ -3296,7 +3634,7 @@ msgid "Mot de passe du fichier (facultatif) :"
 msgstr ""
 
 #: src/scrinium/ui/assistant.py:67
-#: src/scrinium/ui/fenetre.py:1314
+#: src/scrinium/ui/fenetre.py:1326
 msgid "Confirmer le mot de passe :"
 msgstr ""
 
@@ -3305,7 +3643,7 @@ msgid "Un mot de passe sur le fichier ajoute une protection si on vous le vole :
 msgstr ""
 
 #: src/scrinium/ui/assistant.py:75
-#: src/scrinium/ui/fenetre.py:1352
+#: src/scrinium/ui/fenetre.py:1364
 msgid "Créer le fichier de secours"
 msgstr ""
 
@@ -3318,8 +3656,8 @@ msgid "Fichier de secours créé"
 msgstr ""
 
 #: src/scrinium/ui/assistant.py:88
-#: src/scrinium/ui/fenetre.py:1312
-#: src/scrinium/ui/fenetre.py:1316
+#: src/scrinium/ui/fenetre.py:1324
+#: src/scrinium/ui/fenetre.py:1328
 msgid "Mot de passe"
 msgstr ""
 
@@ -3366,7 +3704,7 @@ msgstr ""
 
 #: src/scrinium/ui/capture_rapide.py:40
 #: src/scrinium/ui/fenetre.py:149
-#: src/scrinium/ui/fenetre.py:547
+#: src/scrinium/ui/fenetre.py:548
 msgid "Thème"
 msgstr ""
 
@@ -3391,7 +3729,7 @@ msgid "Choisissez ou tapez un titre de fiche."
 msgstr ""
 
 #: src/scrinium/ui/choix_icone.py:33
-#: src/scrinium/ui/fenetre.py:225
+#: src/scrinium/ui/fenetre.py:226
 msgid "Icône du thème"
 msgstr ""
 
@@ -3451,13 +3789,13 @@ msgstr ""
 msgid "★ Toutes les fiches"
 msgstr ""
 
-#: src/scrinium/ui/fenetre.py:679
+#: src/scrinium/ui/fenetre.py:680
 msgid "Navigateur du système (par défaut)"
 msgstr ""
 
 #: src/scrinium/ui/fenetre.py:112
-#: src/scrinium/ui/fenetre.py:1012
-#: src/scrinium/ui/fenetre.py:1077
+#: src/scrinium/ui/fenetre.py:1022
+#: src/scrinium/ui/fenetre.py:1087
 msgid "Scrinium"
 msgstr ""
 
@@ -3509,197 +3847,197 @@ msgstr ""
 msgid "&Langue"
 msgstr ""
 
-#: src/scrinium/ui/fenetre.py:221
+#: src/scrinium/ui/fenetre.py:222
 msgid "Épingler le thème (il reste en haut de la liste)"
 msgstr ""
 
-#: src/scrinium/ui/fenetre.py:249
+#: src/scrinium/ui/fenetre.py:250
 msgid "Supprimer la fiche"
 msgstr ""
 
-#: src/scrinium/ui/fenetre.py:253
+#: src/scrinium/ui/fenetre.py:254
 msgid "Épingler la fiche (elle reste en haut de la liste)"
 msgstr ""
 
-#: src/scrinium/ui/fenetre.py:270
-#: src/scrinium/ui/fenetre.py:1164
+#: src/scrinium/ui/fenetre.py:271
+#: src/scrinium/ui/fenetre.py:1176
 msgid "Copier la note"
 msgstr ""
 
-#: src/scrinium/ui/fenetre.py:272
-#: src/scrinium/ui/fenetre.py:1147
-#: src/scrinium/ui/fenetre.py:1153
+#: src/scrinium/ui/fenetre.py:273
+#: src/scrinium/ui/fenetre.py:1159
+#: src/scrinium/ui/fenetre.py:1165
 msgid "Verrouiller…"
 msgstr ""
 
-#: src/scrinium/ui/fenetre.py:274
+#: src/scrinium/ui/fenetre.py:275
 msgid "Refermer"
 msgstr ""
 
-#: src/scrinium/ui/fenetre.py:275
+#: src/scrinium/ui/fenetre.py:276
 msgid "Referme la fiche : le mot de passe sera redemandé (Ctrl+Maj+L)"
 msgstr ""
 
-#: src/scrinium/ui/fenetre.py:283
+#: src/scrinium/ui/fenetre.py:284
 msgid "Note"
 msgstr ""
 
-#: src/scrinium/ui/fenetre.py:311
+#: src/scrinium/ui/fenetre.py:312
 msgid "Cette fiche peut lancer des commandes. Elle est inerte tant que vous ne l'avez pas validée (elle n'a pas été créée ici, ou son contenu a changé)."
 msgstr ""
 
-#: src/scrinium/ui/fenetre.py:315
+#: src/scrinium/ui/fenetre.py:316
 msgid "Valider cette fiche"
 msgstr ""
 
-#: src/scrinium/ui/fenetre.py:542
+#: src/scrinium/ui/fenetre.py:543
 msgid "Nouveau thème"
 msgstr ""
 
-#: src/scrinium/ui/fenetre.py:542
+#: src/scrinium/ui/fenetre.py:543
 msgid "Nom du thème :"
 msgstr ""
 
-#: src/scrinium/ui/fenetre.py:560
+#: src/scrinium/ui/fenetre.py:561
 msgid "Renommer"
 msgstr ""
 
-#: src/scrinium/ui/fenetre.py:560
+#: src/scrinium/ui/fenetre.py:561
 msgid "Nouveau nom :"
 msgstr ""
 
-#: src/scrinium/ui/fenetre.py:620
-#: src/scrinium/ui/fenetre.py:985
-#: src/scrinium/ui/fenetre.py:988
+#: src/scrinium/ui/fenetre.py:621
+#: src/scrinium/ui/fenetre.py:995
+#: src/scrinium/ui/fenetre.py:998
 msgid "(sans titre)"
 msgstr ""
 
-#: src/scrinium/ui/fenetre.py:684
+#: src/scrinium/ui/fenetre.py:685
 msgid "Navigateur pour les liens"
 msgstr ""
 
-#: src/scrinium/ui/fenetre.py:685
+#: src/scrinium/ui/fenetre.py:686
 msgid "Choisissez un navigateur, ou tapez une commande (ex. : firefox) :"
 msgstr ""
 
-#: src/scrinium/ui/fenetre.py:786
-#: src/scrinium/ui/fenetre.py:789
+#: src/scrinium/ui/fenetre.py:787
+#: src/scrinium/ui/fenetre.py:790
 msgid "Nouveau répertoire"
 msgstr ""
 
-#: src/scrinium/ui/fenetre.py:786
+#: src/scrinium/ui/fenetre.py:787
 msgid "Modèle de colonnes (modifiables ensuite) :"
 msgstr ""
 
-#: src/scrinium/ui/fenetre.py:789
+#: src/scrinium/ui/fenetre.py:790
 msgid "Titre du répertoire :"
 msgstr ""
 
-#: src/scrinium/ui/fenetre.py:971
+#: src/scrinium/ui/fenetre.py:981
 msgid "Fiche ordinaire"
 msgstr ""
 
-#: src/scrinium/ui/fenetre.py:1000
+#: src/scrinium/ui/fenetre.py:1010
 msgid "● modification en cours…"
 msgstr ""
 
-#: src/scrinium/ui/fenetre.py:1045
+#: src/scrinium/ui/fenetre.py:1055
 msgid "Extension désactivée"
 msgstr ""
 
-#: src/scrinium/ui/fenetre.py:1058
+#: src/scrinium/ui/fenetre.py:1068
 msgid "Langue"
 msgstr ""
 
-#: src/scrinium/ui/fenetre.py:1058
+#: src/scrinium/ui/fenetre.py:1068
 msgid "Langue modifiée : redémarrez Scrinium pour l'appliquer."
 msgstr ""
 
-#: src/scrinium/ui/fenetre.py:1079
+#: src/scrinium/ui/fenetre.py:1089
 msgid "Ouvrir Scrinium"
 msgstr ""
 
-#: src/scrinium/ui/fenetre.py:1080
+#: src/scrinium/ui/fenetre.py:1090
 msgid "Nouvelle fiche"
 msgstr ""
 
-#: src/scrinium/ui/fenetre.py:1081
+#: src/scrinium/ui/fenetre.py:1091
 #: src/scrinium/ui/fenetre.py:172
 msgid "Capture rapide…"
 msgstr ""
 
-#: src/scrinium/ui/fenetre.py:1083
+#: src/scrinium/ui/fenetre.py:1093
 #: src/scrinium/ui/fenetre.py:185
 msgid "Quitter"
 msgstr ""
 
-#: src/scrinium/ui/fenetre.py:1180
+#: src/scrinium/ui/fenetre.py:1192
 #: src/scrinium/ui/images.py:126
 #: src/scrinium/ui/markdown.py:250
 msgid "Imprimer…"
 msgstr ""
 
-#: src/scrinium/ui/fenetre.py:1181
+#: src/scrinium/ui/fenetre.py:1193
 #: src/scrinium/ui/images.py:127
 #: src/scrinium/ui/markdown.py:251
 msgid "Exporter la fiche en PDF…"
 msgstr ""
 
-#: src/scrinium/ui/fenetre.py:1208
+#: src/scrinium/ui/fenetre.py:1220
 msgid "Imprimer"
 msgstr ""
 
-#: src/scrinium/ui/fenetre.py:1208
+#: src/scrinium/ui/fenetre.py:1220
 msgid "l'impression"
 msgstr ""
 
-#: src/scrinium/ui/fenetre.py:1217
+#: src/scrinium/ui/fenetre.py:1229
 msgid "✔ Fiche envoyée à l'impression"
 msgstr ""
 
-#: src/scrinium/ui/fenetre.py:1224
-#: src/scrinium/ui/fenetre.py:1229
-#: src/scrinium/ui/fenetre.py:1238
+#: src/scrinium/ui/fenetre.py:1236
+#: src/scrinium/ui/fenetre.py:1241
+#: src/scrinium/ui/fenetre.py:1250
 msgid "Exporter en PDF"
 msgstr ""
 
-#: src/scrinium/ui/fenetre.py:1224
+#: src/scrinium/ui/fenetre.py:1236
 msgid "le PDF"
 msgstr ""
 
-#: src/scrinium/ui/fenetre.py:1230
+#: src/scrinium/ui/fenetre.py:1242
 msgid "Documents PDF (*.pdf)"
 msgstr ""
 
-#: src/scrinium/ui/fenetre.py:1303
-#: src/scrinium/ui/fenetre.py:1299
+#: src/scrinium/ui/fenetre.py:1315
+#: src/scrinium/ui/fenetre.py:1311
 msgid "Mot de passe oublié : le fichier de secours permettra de rouvrir la fiche."
 msgstr ""
 
-#: src/scrinium/ui/fenetre.py:1308
-#: src/scrinium/ui/fenetre.py:1314
-#: src/scrinium/ui/fenetre.py:1321
+#: src/scrinium/ui/fenetre.py:1320
+#: src/scrinium/ui/fenetre.py:1326
+#: src/scrinium/ui/fenetre.py:1333
 msgid "Verrouiller"
 msgstr ""
 
-#: src/scrinium/ui/fenetre.py:1308
+#: src/scrinium/ui/fenetre.py:1320
 msgid "Mot de passe (4 caractères minimum) :"
 msgstr ""
 
-#: src/scrinium/ui/fenetre.py:1349
+#: src/scrinium/ui/fenetre.py:1361
 msgid "Avant de verrouiller : voulez-vous créer un fichier de secours ?"
 msgstr ""
 
-#: src/scrinium/ui/fenetre.py:1350
+#: src/scrinium/ui/fenetre.py:1362
 msgid "Si vous oubliez le mot de passe d'une fiche, le fichier de secours permet de la rouvrir. Sans lui, une fiche dont le mot de passe est oublié est perdue pour toujours."
 msgstr ""
 
-#: src/scrinium/ui/fenetre.py:1353
+#: src/scrinium/ui/fenetre.py:1365
 msgid "Verrouiller sans fichier de secours"
 msgstr ""
 
-#: src/scrinium/ui/fenetre.py:1408
-#: src/scrinium/ui/fenetre.py:203
+#: src/scrinium/ui/fenetre.py:1420
+#: src/scrinium/ui/fenetre.py:204
 msgid "À propos"
 msgstr ""
 
@@ -3736,177 +4074,181 @@ msgid "Automatique"
 msgstr ""
 
 #: src/scrinium/ui/fenetre.py:202
+msgid "Guide de Scrinium"
+msgstr ""
+
+#: src/scrinium/ui/fenetre.py:203
 msgid "Documentation des extensions"
 msgstr ""
 
-#: src/scrinium/ui/fenetre.py:224
+#: src/scrinium/ui/fenetre.py:225
 msgid "Renommer le thème"
 msgstr ""
 
-#: src/scrinium/ui/fenetre.py:226
-#: src/scrinium/ui/fenetre.py:601
+#: src/scrinium/ui/fenetre.py:227
+#: src/scrinium/ui/fenetre.py:602
 msgid "Supprimer le thème"
 msgstr ""
 
-#: src/scrinium/ui/fenetre.py:472
+#: src/scrinium/ui/fenetre.py:473
 msgid "Remettre les fiches dans l'ordre alphabétique"
 msgstr ""
 
-#: src/scrinium/ui/fenetre.py:475
+#: src/scrinium/ui/fenetre.py:476
 msgid "Déplacer vers le thème"
 msgstr ""
 
-#: src/scrinium/ui/fenetre.py:479
-#: src/scrinium/ui/fenetre.py:528
+#: src/scrinium/ui/fenetre.py:480
+#: src/scrinium/ui/fenetre.py:529
 msgid "Supprimer…"
 msgstr ""
 
-#: src/scrinium/ui/fenetre.py:524
+#: src/scrinium/ui/fenetre.py:525
 #: src/scrinium/ui/repertoire.py:36
 msgid "Renommer…"
 msgstr ""
 
-#: src/scrinium/ui/fenetre.py:525
+#: src/scrinium/ui/fenetre.py:526
 msgid "Icône…"
 msgstr ""
 
-#: src/scrinium/ui/fenetre.py:527
+#: src/scrinium/ui/fenetre.py:528
 msgid "Remettre les thèmes dans l'ordre alphabétique"
 msgstr ""
 
-#: src/scrinium/ui/fenetre.py:547
+#: src/scrinium/ui/fenetre.py:548
 msgid "Ce thème existe déjà."
 msgstr ""
 
-#: src/scrinium/ui/fenetre.py:605
+#: src/scrinium/ui/fenetre.py:606
 msgid "Supprimer les thèmes"
 msgstr ""
 
-#: src/scrinium/ui/fenetre.py:622
-#: src/scrinium/ui/fenetre.py:988
+#: src/scrinium/ui/fenetre.py:623
+#: src/scrinium/ui/fenetre.py:998
 msgid "(verrouillée)"
 msgstr ""
 
-#: src/scrinium/ui/fenetre.py:712
+#: src/scrinium/ui/fenetre.py:713
 msgid ""
 "Fiche verrouillée.\n"
 "\n"
 "Cliquer sur « Déverrouiller… » (ou double-clic sur la fiche) et saisir le mot de passe."
 msgstr ""
 
-#: src/scrinium/ui/fenetre.py:780
+#: src/scrinium/ui/fenetre.py:781
 msgid "✔ Fiche validée : elle peut maintenant agir"
 msgstr ""
 
-#: src/scrinium/ui/fenetre.py:854
+#: src/scrinium/ui/fenetre.py:855
 msgid "Fiche d'invitation prête : relisez-la, puis activez l'extension Courriel (Extensions > Gérer les extensions…) pour l'envoyer."
 msgstr ""
 
-#: src/scrinium/ui/fenetre.py:893
+#: src/scrinium/ui/fenetre.py:903
 msgid "Lien de partage reçu : activez l'extension Partage (Extensions > Gérer les extensions…) pour le utiliser."
 msgstr ""
 
-#: src/scrinium/ui/fenetre.py:923
+#: src/scrinium/ui/fenetre.py:933
 msgid "✔ Fiche ajoutée depuis un lien"
 msgstr ""
 
-#: src/scrinium/ui/fenetre.py:985
+#: src/scrinium/ui/fenetre.py:995
 msgid "Mettre la fiche « %s » à la corbeille ?"
 msgstr ""
 
-#: src/scrinium/ui/fenetre.py:1046
+#: src/scrinium/ui/fenetre.py:1056
 msgid ""
 "L'extension « %(nom)s » a été désactivée après des erreurs répétées :\n"
 "%(erreur)s"
 msgstr ""
 
-#: src/scrinium/ui/fenetre.py:1074
+#: src/scrinium/ui/fenetre.py:1084
 msgid "Pas de zone de notification sur ce bureau."
 msgstr ""
 
-#: src/scrinium/ui/fenetre.py:1228
+#: src/scrinium/ui/fenetre.py:1240
 msgid "fiche"
 msgstr ""
 
-#: src/scrinium/ui/fenetre.py:1240
+#: src/scrinium/ui/fenetre.py:1252
 msgid "✔ PDF écrit : %s"
 msgstr ""
 
-#: src/scrinium/ui/fenetre.py:1280
+#: src/scrinium/ui/fenetre.py:1292
 msgid "Mot de passe de « %s » :"
 msgstr ""
 
-#: src/scrinium/ui/fenetre.py:1301
+#: src/scrinium/ui/fenetre.py:1313
 msgid "Pas de fichier de secours : mot de passe oublié = fiche perdue."
 msgstr ""
 
-#: src/scrinium/ui/fenetre.py:1304
+#: src/scrinium/ui/fenetre.py:1316
 msgid "Verrouiller la fiche"
 msgstr ""
 
-#: src/scrinium/ui/fenetre.py:1312
+#: src/scrinium/ui/fenetre.py:1324
 msgid "Trop court (4 caractères minimum)."
 msgstr ""
 
-#: src/scrinium/ui/fenetre.py:1316
+#: src/scrinium/ui/fenetre.py:1328
 msgid "Les deux saisies sont différentes, fiche non verrouillée."
 msgstr ""
 
-#: src/scrinium/ui/fenetre.py:1329
-#: src/scrinium/ui/fenetre.py:1337
-#: src/scrinium/ui/fenetre.py:1151
+#: src/scrinium/ui/fenetre.py:1341
+#: src/scrinium/ui/fenetre.py:1349
+#: src/scrinium/ui/fenetre.py:1163
 msgid "Retirer le mot de passe"
 msgstr ""
 
-#: src/scrinium/ui/fenetre.py:1330
+#: src/scrinium/ui/fenetre.py:1342
 msgid "Le texte et les images de la fiche seront de nouveau stockés en clair. Continuer ?"
 msgstr ""
 
-#: src/scrinium/ui/fenetre.py:1378
+#: src/scrinium/ui/fenetre.py:1390
 msgid "Sélectionnez d'abord une fiche verrouillée."
 msgstr ""
 
-#: src/scrinium/ui/fenetre.py:1386
+#: src/scrinium/ui/fenetre.py:1398
 msgid "Mot de passe du fichier de secours :"
 msgstr ""
 
-#: src/scrinium/ui/fenetre.py:1395
+#: src/scrinium/ui/fenetre.py:1407
 msgid "Fiche rouverte. La remettre en clair (retirer le mot de passe) ?"
 msgstr ""
 
-#: src/scrinium/ui/fenetre.py:1401
+#: src/scrinium/ui/fenetre.py:1413
 msgid "Fiche toujours verrouillée."
 msgstr ""
 
-#: src/scrinium/ui/fenetre.py:469
-#: src/scrinium/ui/fenetre.py:522
+#: src/scrinium/ui/fenetre.py:470
+#: src/scrinium/ui/fenetre.py:523
 msgid "Désépingler"
 msgstr ""
 
-#: src/scrinium/ui/fenetre.py:469
-#: src/scrinium/ui/fenetre.py:522
+#: src/scrinium/ui/fenetre.py:470
+#: src/scrinium/ui/fenetre.py:523
 msgid "Épingler"
 msgstr ""
 
-#: src/scrinium/ui/fenetre.py:479
+#: src/scrinium/ui/fenetre.py:480
 msgid "Supprimer les %d fiches…"
 msgstr ""
 
-#: src/scrinium/ui/fenetre.py:503
+#: src/scrinium/ui/fenetre.py:504
 msgid "✔ %(n)d fiche(s) déplacée(s) vers « %(theme)s »"
 msgstr ""
 
-#: src/scrinium/ui/fenetre.py:528
+#: src/scrinium/ui/fenetre.py:529
 msgid "Supprimer les %d thèmes…"
 msgstr ""
 
-#: src/scrinium/ui/fenetre.py:602
+#: src/scrinium/ui/fenetre.py:603
 msgid ""
 "Mettre « %(nom)s » et ses %(n)d fiche(s) à la corbeille ?\n"
 "(%(dossier)s)"
 msgstr ""
 
-#: src/scrinium/ui/fenetre.py:606
+#: src/scrinium/ui/fenetre.py:607
 msgid ""
 "Mettre ces %(t)d thèmes et leurs %(n)d fiche(s) à la corbeille ?\n"
 "\n"
@@ -3915,121 +4257,121 @@ msgid ""
 "(%(dossier)s)"
 msgstr ""
 
-#: src/scrinium/ui/fenetre.py:714
+#: src/scrinium/ui/fenetre.py:715
 msgid "Verrouillée"
 msgstr ""
 
-#: src/scrinium/ui/fenetre.py:717
+#: src/scrinium/ui/fenetre.py:718
 msgid "Verrouillée (ouverte)"
 msgstr ""
 
-#: src/scrinium/ui/fenetre.py:717
-#: src/scrinium/ui/fenetre.py:1021
+#: src/scrinium/ui/fenetre.py:718
+#: src/scrinium/ui/fenetre.py:1031
 msgid "✔ Enregistré"
 msgstr ""
 
-#: src/scrinium/ui/fenetre.py:721
+#: src/scrinium/ui/fenetre.py:722
 msgid "Aucune fiche : « Fiche » (Ctrl+N)"
 msgstr ""
 
-#: src/scrinium/ui/fenetre.py:826
+#: src/scrinium/ui/fenetre.py:827
 msgid "Ajouté à « %(theme)s / %(fiche)s »"
 msgstr ""
 
-#: src/scrinium/ui/fenetre.py:885
+#: src/scrinium/ui/fenetre.py:895
 msgid "Lien Scrinium"
 msgstr ""
 
-#: src/scrinium/ui/fenetre.py:1064
+#: src/scrinium/ui/fenetre.py:1074
 msgid "Démarrage de la session"
 msgstr ""
 
-#: src/scrinium/ui/fenetre.py:1149
+#: src/scrinium/ui/fenetre.py:1161
 msgid "Déverrouiller…"
 msgstr ""
 
-#: src/scrinium/ui/fenetre.py:1247
+#: src/scrinium/ui/fenetre.py:1259
 msgid "✔ Note copiée dans le presse-papiers"
 msgstr ""
 
-#: src/scrinium/ui/fenetre.py:1286
+#: src/scrinium/ui/fenetre.py:1298
 msgid "Mot de passe incorrect."
 msgstr ""
 
-#: src/scrinium/ui/fenetre.py:1305
+#: src/scrinium/ui/fenetre.py:1317
 msgid ""
 "Le texte et les images de la fiche seront chiffrés avec un mot de passe (le titre reste visible).\n"
 "\n"
 msgstr ""
 
-#: src/scrinium/ui/fenetre.py:1367
+#: src/scrinium/ui/fenetre.py:1379
 msgid ""
 "Un fichier de secours est déjà actif.\n"
 "\n"
 "En créer un nouveau ? Il servira pour les fiches verrouillées à partir de maintenant ; les fiches déjà verrouillées ne s'ouvriront qu'avec l'ancien."
 msgstr ""
 
-#: src/scrinium/ui/fenetre.py:1410
+#: src/scrinium/ui/fenetre.py:1422
 msgid "Fiches rangées par thème, verrouillables (AES-256-GCM)."
 msgstr ""
 
-#: src/scrinium/ui/fenetre.py:340
+#: src/scrinium/ui/fenetre.py:341
 #: src/scrinium/ui/markdown.py:198
 msgid "gras"
 msgstr ""
 
-#: src/scrinium/ui/fenetre.py:341
+#: src/scrinium/ui/fenetre.py:342
 #: src/scrinium/ui/markdown.py:199
 msgid "italique"
 msgstr ""
 
-#: src/scrinium/ui/fenetre.py:938
+#: src/scrinium/ui/fenetre.py:948
 msgid "✔ Images mises à jour"
 msgstr ""
 
-#: src/scrinium/ui/fenetre.py:987
+#: src/scrinium/ui/fenetre.py:997
 msgid "Mettre ces %d fiches à la corbeille ?"
 msgstr ""
 
-#: src/scrinium/ui/fenetre.py:1015
+#: src/scrinium/ui/fenetre.py:1025
 msgid "✔ Enregistré à"
 msgstr ""
 
-#: src/scrinium/ui/fenetre.py:1064
+#: src/scrinium/ui/fenetre.py:1074
 msgid "Impossible de modifier le lancement automatique : %s"
 msgstr ""
 
-#: src/scrinium/ui/fenetre.py:1193
+#: src/scrinium/ui/fenetre.py:1205
 msgid "Cette fiche est verrouillée : %s contiendra son texte et ses images EN CLAIR. Continuer ?"
 msgstr ""
 
-#: src/scrinium/ui/fenetre.py:1238
+#: src/scrinium/ui/fenetre.py:1250
 #: src/scrinium/ui/repertoire.py:406
 msgid "Écriture impossible : %s"
 msgstr ""
 
-#: src/scrinium/ui/fenetre.py:1289
+#: src/scrinium/ui/fenetre.py:1301
 #: src/scrinium/ui/repertoire.py:383
 msgid "Lecture impossible : %s"
 msgstr ""
 
-#: src/scrinium/ui/fenetre.py:1321
+#: src/scrinium/ui/fenetre.py:1333
 msgid "Fiche non verrouillée : %s"
 msgstr ""
 
-#: src/scrinium/ui/fenetre.py:1337
+#: src/scrinium/ui/fenetre.py:1349
 msgid "Verrou conservé : %s"
 msgstr ""
 
-#: src/scrinium/ui/fenetre.py:1392
+#: src/scrinium/ui/fenetre.py:1404
 msgid "Impossible de rouvrir la fiche : %s"
 msgstr ""
 
-#: src/scrinium/ui/fenetre.py:497
+#: src/scrinium/ui/fenetre.py:498
 msgid "Déplacement impossible : %s"
 msgstr ""
 
-#: src/scrinium/ui/fenetre.py:718
+#: src/scrinium/ui/fenetre.py:719
 msgid "modifié le"
 msgstr ""
 

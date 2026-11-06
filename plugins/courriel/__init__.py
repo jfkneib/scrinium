@@ -321,6 +321,7 @@ class CourrielPlugin(Plugin):
 
     def activer(self, ctx):
         self.ctx = ctx
+        ctx.ajouter_doc(_('Extension Courriel'), DOC)
         self.secret = _Secret(ctx.dossier_donnees)
         self._dialogue = None
         if ctx.ui is None:
@@ -448,3 +449,12 @@ class CourrielPlugin(Plugin):
             QTimer.singleShot(0, self._reprendre_envoi)
         else:
             QMessageBox.warning(_parent(), _("Courriel"), texte)
+
+
+DOC = _(
+    'Envoie la fiche affichée par courriel.\n'
+    '\n'
+    "• Bouton « Envoyer par courriel » (barre d'outils), menu Extensions ou clic droit sur la fiche. Un récapitulatif des destinataires s'affiche ; rien ne part sans clic sur « Envoyer ».\n"
+    "• « Carnet d'adresses… » : vos destinataires. « Serveur d'envoi… » : réglages SMTP.\n"
+    "• Le mot de passe SMTP va au trousseau du système si possible ; sinon il n'est gardé que pour la session (ou, case à cocher explicite, dans un fichier réservé à vous, non chiffré).\n"
+    "• Une fiche verrouillée fermée n'est jamais envoyée ; ouverte, elle part en clair après avertissement et accord.")

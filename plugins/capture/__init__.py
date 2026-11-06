@@ -347,6 +347,7 @@ class CapturePlugin(Plugin):
 
     def activer(self, ctx):
         self.ctx = ctx
+        ctx.ajouter_doc(_('Extension Capture et console'), DOC)
         self.cible = None          # console choisie à la main (service, session) : gardée tant qu'elle existe
         self.pid_dedie = None      # PID de la Konsole ouverte par l'extension
         self.refus_vu = False      # Konsole a refusé l'envoi : on n'ouvre plus de console pour rien (remis à zéro par les réglages)
@@ -464,7 +465,9 @@ class CapturePlugin(Plugin):
         if self.ctx.reglages.get("direct", True) and self._konsole(texte):
             return
         QApplication.clipboard().setText(texte)
-        self.ctx.ui.notifier(_("Console"), _("Copié dans le presse-papiers : collez dans votre console (Ctrl+Maj+V). Rien n'est validé."))
+        self.ctx.ui.notifier(_("Console"), _("Copié dans le presse-papiers (Konsole n'accepte pas l'envoi direct) : collez dans votre console avec Ctrl+Maj+V, "
+                                                    "rien n'est validé. Pour l'envoi direct : Konsole → Configuration → Configurer Konsole → Général → "
+                                                    "cocher « Enable the security sensitive parts of the DBus API »."))
 
     def _console_dediee(self, qdbus):
         """Session de la Konsole ouverte par l'extension, si elle existe encore (sinon None)."""
@@ -506,6 +509,7 @@ class CapturePlugin(Plugin):
                 choix = self._console_dediee(qdbus)
                 if choix is None:
                     if self.refus_vu:
+                        self._aide_refus()
                         return False                       # déjà refusé : inutile d'ouvrir une console qui resterait vide
                     if sessions:                           # sonde sur une console existante : Konsole accepte-t-il l'envoi ?
                         logique.envoyer(qdbus, *sessions[0][:2], "")
@@ -517,9 +521,7 @@ class CapturePlugin(Plugin):
         except logique.AccesRefuse:
             self.refus_vu = True
             self.ctx.ui.notifier(_("Console"), _("Konsole refuse l'envoi direct : texte copié dans le presse-papiers."))
-            if not self.ctx.reglages.get("aide_vue", False):
-                self.ctx.reglages.set("aide_vue", True)
-                QMessageBox.information(_parent(), _("Console"), AIDE_KONSOLE)
+            self._aide_refus()
             return False
         except Exception as ex:
             self.ctx.ui.notifier(_("Console"), _("Konsole : %s") % ex)
@@ -530,6 +532,17 @@ class CapturePlugin(Plugin):
                              + _("texte tapé dans « %s » (non validé : relisez, puis Entrée).") % choix[2])
         return True
 
+    def _aide_refus(self):
+        """Explique pourquoi aucune console ne s'ouvre (rappelé à chaque fois, sauf si l'utilisateur l'a masqué)."""
+        if self.ctx.reglages.get("aide_masquee", False):
+            return
+        boite = QMessageBox(QMessageBox.Icon.Information, _("Console"), AIDE_KONSOLE, QMessageBox.StandardButton.Ok, _parent())
+        case = QCheckBox(_("Ne plus afficher ce message"))
+        boite.setCheckBox(case)
+        boite.exec()
+        if case.isChecked():
+            self.ctx.reglages.set("aide_masquee", True)
+
     def _choisir(self, sessions, forcer=False):
         if len(sessions) == 1 and not forcer:
             return sessions[0]
@@ -537,3 +550,13 @@ class CapturePlugin(Plugin):
         defaut = next((i for i, x in enumerate(sessions) if x[:2] == self.cible), 0)
         choix, ok = QInputDialog.getItem(_parent(), _("Console"), _("Envoyer vers quelle console ?"), libelles, defaut, False)
         return sessions[libelles.index(choix)] if ok else None
+
+
+DOC = _(
+    'Relie vos fiches au terminal, sans jamais rien valider à votre place (voir aussi « Guide 5 »).\n'
+    '\n'
+    '• Bouton « Console » : le texte sélectionné est tapé dans une Konsole « Scrinium », sans Entrée. Il faut cocher dans Konsole « Enable the security sensitive parts of the DBus API » ; sinon le texte est copié (collez avec Ctrl+Maj+V).\n'
+    '• « Choisir la console cible… » : envoyer vers une autre Konsole déjà ouverte.\n'
+    '• « Exécuter une commande et insérer la sortie… » : la commande est lancée après confirmation, sa sortie est insérée au curseur dans un bloc daté.\n'
+    "• Fiches « Actions CLI » : des commandes à lancer d'un clic ; type exécutable, donc inerte tant que la fiche n'est pas validée.\n"
+    '• Depuis un terminal : « ls -al | scrinium ajouter -t Thème -f Fiche ».')

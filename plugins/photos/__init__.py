@@ -191,6 +191,16 @@ class PhotosPlugin(Plugin):
 
     def activer(self, ctx):
         self.ctx = ctx
+        ctx.ajouter_doc(_('Extension Photos'), DOC)
         if ctx.ui is None:
             return
         ctx.ui.enregistrer_type(logique.TYPE, VuePhotos(ctx))
+
+
+DOC = _(
+    "Un dossier d'images montré en vignettes, dans une fiche.\n"
+    '\n'
+    "• Nouvelle fiche > « Photos » > « Choisir un dossier… ». La fiche garde seulement le chemin ; les images restent dans leur dossier, rien n'est copié.\n"
+    "• Double-clic sur une vignette : l'image s'ouvre dans votre visionneuse. Clic droit : ouvrir le dossier, en choisir un autre, actualiser, et (avec l'extension OCR) lire le texte de l'image.\n"
+    "• Sur une autre machine, le dossier n'existe peut-être pas : la fiche le dit et propose d'en choisir un.\n"
+    '• Lecture seule : la fiche ne modifie jamais vos images.')

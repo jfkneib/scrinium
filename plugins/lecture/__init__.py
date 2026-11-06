@@ -201,6 +201,7 @@ class LecturePlugin(Plugin):
 
     def activer(self, ctx):
         self.ctx = ctx
+        ctx.ajouter_doc(_('Extension Lecture à voix haute'), DOC)
         self.deps = ctx.dossier_donnees / "deps"
         self.modeles = ctx.dossier_donnees / "modeles"
         self.lecture = None
@@ -415,3 +416,12 @@ class LecturePlugin(Plugin):
 
     def reglages(self):
         DialogueReglages(self, _parent()).exec()
+
+
+DOC = _(
+    "Lit une fiche, la sélection ou toutes les fiches d'un thème.\n"
+    '\n'
+    "• Bouton « Lire » (barre d'outils), menu Extensions, ou clic droit > « Lire à voix haute ».\n"
+    "• Voix Piper (naturelle, hors ligne) installée avec votre accord ; repli sur espeak-ng s'il est présent. Français ou anglais, détectés fiche par fiche.\n"
+    '• Contrôles : pause, fiche suivante, arrêt.\n'
+    '• Les fiches verrouillées ne sont jamais lues, même ouvertes. Le Markdown est nettoyé et les blocs de code sautés.')

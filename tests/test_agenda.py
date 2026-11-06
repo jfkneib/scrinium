@@ -96,7 +96,7 @@ def faux_ctx(fiches=(), courante=None):
     ui = SimpleNamespace(ajouter_action=lambda *a: None, ajouter_bouton=lambda *a: None, ajouter_action_fiche=lambda *a, **k: None, planifier=lambda *a, **k: None,
                          notifier=lambda t, m: notes.append((t, m)), afficher_fiche=ouvertes.append,
                          enregistrer_type=lambda *a: None, actualiser=lambda: None)
-    ctx = SimpleNamespace(reglages=Reglages(), ui=ui, fiche_courante=lambda: courante, creer_fiche=creer, modifier=modifier,
+    ctx = SimpleNamespace(reglages=Reglages(), ui=ui, ajouter_doc=lambda *a: None, fiche_courante=lambda: courante, creer_fiche=creer, modifier=modifier,
                           fiches=lambda theme=None: [f for f in toutes if theme in (None, f.theme)])
     return ctx, notes, ouvertes
 
