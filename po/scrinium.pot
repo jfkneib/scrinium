@@ -34,6 +34,7 @@ msgid "Titre"
 msgstr ""
 
 #: plugins/agenda/__init__.py:47
+#: plugins/calc/logique.py:84
 msgid "Date"
 msgstr ""
 
@@ -388,6 +389,97 @@ msgstr ""
 msgid "fichier illisible"
 msgstr ""
 
+#: plugins/calc/__init__.py:236
+msgid ""
+"Un mini tableur pour suivre des données, par exemple des relevés (compteur, poids, dépenses…).\n"
+"\n"
+"• Nouvelle fiche > « Calc » : une grille avec les colonnes « Date » et « Valeur ». La première ligne est l'en-tête : renommez-la, ajoutez des colonnes.\n"
+"• Double-clic (ou F2) sur une cellule pour la modifier. Un nombre s'écrit avec une virgule ou un point.\n"
+"• « Ajouter une ligne » : si la première colonne s'appelle « Date », elle reçoit la date du jour. « Totaux » ajoute une ligne de somme, moyenne, minimum ou maximum.\n"
+"• Formules : une cellule qui commence par « = ». Exemples : =B2*C2, =SOMME(B2:B10), =MOYENNE(B2:B10), =MAX(B2:B10)-MIN(B2:B10), =B3-B2. Fonctions : SOMME, MOYENNE, MIN, MAX, NB, ABS, ARRONDI, RACINE, ENT. Opérations : + - * / ^ %. Les erreurs s'affichent dans la cellule (#DIV/0!, #REF!, #CYCLE!…).\n"
+"• Clic droit : insérer ou supprimer des lignes et des colonnes. Suppr vide les cellules. Ctrl+C et Ctrl+V : copier, coller (on peut coller depuis un autre tableur).\n"
+"• Le texte de la fiche est un tableau Markdown : lisible partout, cherchable, partageable, verrouillable. Rien n'est exécuté : seules ces opérations sont comprises. L'impression et l'export PDF montrent les résultats."
+msgstr ""
+
+#: plugins/calc/__init__.py:53
+msgid "Ajouter une ligne"
+msgstr ""
+
+#: plugins/calc/__init__.py:55
+msgid "Ajouter une colonne"
+msgstr ""
+
+#: plugins/calc/__init__.py:58
+msgid "Totaux"
+msgstr ""
+
+#: plugins/calc/__init__.py:212
+#: plugins/calculatrice/__init__.py:131
+#: plugins/ocr/__init__.py:114
+msgid "Copier"
+msgstr ""
+
+#: plugins/calc/__init__.py:213
+msgid "Coller"
+msgstr ""
+
+#: plugins/calc/__init__.py:215
+msgid "Insérer une ligne au-dessus"
+msgstr ""
+
+#: plugins/calc/__init__.py:216
+msgid "Insérer une ligne en dessous"
+msgstr ""
+
+#: plugins/calc/__init__.py:217
+msgid "Supprimer la ligne"
+msgstr ""
+
+#: plugins/calc/__init__.py:219
+msgid "Insérer une colonne à gauche"
+msgstr ""
+
+#: plugins/calc/__init__.py:220
+msgid "Insérer une colonne à droite"
+msgstr ""
+
+#: plugins/calc/__init__.py:221
+#: src/scrinium/ui/repertoire.py:90
+msgid "Supprimer la colonne"
+msgstr ""
+
+#: plugins/calc/__init__.py:230
+msgid "Extension Calc"
+msgstr ""
+
+#: plugins/calc/__init__.py:63
+msgid "Somme"
+msgstr ""
+
+#: plugins/calc/__init__.py:63
+msgid "Moyenne"
+msgstr ""
+
+#: plugins/calc/__init__.py:63
+msgid "Minimum"
+msgstr ""
+
+#: plugins/calc/__init__.py:63
+msgid "Maximum"
+msgstr ""
+
+#: plugins/calc/__init__.py:114
+msgid "%(l)d lignes, %(c)d colonnes. Une cellule qui commence par = est une formule, par exemple =SOMME(B2:B10)."
+msgstr ""
+
+#: plugins/calc/logique.py:378
+msgid "Calc"
+msgstr ""
+
+#: plugins/calc/logique.py:84
+msgid "Valeur"
+msgstr ""
+
 #: plugins/calculatrice/__init__.py:189
 msgid ""
 "Deux outils, une extension (Extensions > Gérer les extensions…).\n"
@@ -413,12 +505,6 @@ msgstr ""
 
 #: plugins/calculatrice/__init__.py:129
 msgid "Insérer le résultat"
-msgstr ""
-
-#: plugins/calculatrice/__init__.py:131
-#: plugins/ocr/__init__.py:114
-#: plugins/traduction/__init__.py:372
-msgid "Copier"
 msgstr ""
 
 #: plugins/calculatrice/__init__.py:216
@@ -3317,7 +3403,7 @@ msgid ""
 msgstr ""
 
 #: src/scrinium/core/guide.py:11
-#: src/scrinium/core/guide.py:98
+#: src/scrinium/core/guide.py:99
 msgid "Guide"
 msgstr ""
 
@@ -3363,16 +3449,17 @@ msgid ""
 "• Photos : un dossier d'images montré en vignettes ; les images restent dans leur dossier (extension Photos).\n"
 "• Actions CLI : des commandes à lancer d'un clic (extension Capture).\n"
 "• Agenda : des rappels et échéances (extension Agenda).\n"
+"• Calc : un mini tableur (cellules, formules comme =SOMME(B2:B10)) pour suivre des relevés (extension Calc).\n"
 "• Calculatrice : une calculatrice dont l'historique reste dans la fiche (extension Calculatrice).\n"
 "\n"
 "Sécurité : un type qui LANCE des commandes (Applications, Actions CLI) reste inerte tant que vous n'avez pas validé la fiche vous-même. Une fiche reçue d'un autre n'exécute donc jamais rien toute seule."
 msgstr ""
 
-#: src/scrinium/core/guide.py:51
+#: src/scrinium/core/guide.py:52
 msgid "Guide 4 · Les extensions"
 msgstr ""
 
-#: src/scrinium/core/guide.py:51
+#: src/scrinium/core/guide.py:52
 msgid ""
 "Menu Extensions > Gérer les extensions… : cochez celles qui vous servent. Livrées avec Scrinium :\n"
 "\n"
@@ -3381,17 +3468,17 @@ msgid ""
 "• Partage : partage des fiches avec d'autres via un serveur Scrinium (voir « Guide 6 »).\n"
 "• Traduction et Dictée : en local (modèles téléchargés seulement avec votre accord).\n"
 "• Lecture : lit une fiche à voix haute.\n"
-"• Agenda, Applications, Photos, Calculatrice : types de fiches (voir « Guide 3 »).\n"
+"• Agenda, Applications, Photos, Calc, Calculatrice : types de fiches (voir « Guide 3 »).\n"
 "• Capture : insère la sortie d'une commande dans la fiche, ou envoie du texte vers une console (voir « Guide 5 »).\n"
 "\n"
 "Écrire la vôtre : menu Aide > « Documentation des extensions »."
 msgstr ""
 
-#: src/scrinium/core/guide.py:64
+#: src/scrinium/core/guide.py:65
 msgid "Guide 5 · Console et commandes"
 msgstr ""
 
-#: src/scrinium/core/guide.py:64
+#: src/scrinium/core/guide.py:65
 msgid ""
 "L'extension Capture relie vos fiches au terminal, sans jamais rien valider à votre place.\n"
 "\n"
@@ -3401,11 +3488,11 @@ msgid ""
 "• Depuis un terminal : « ls -al | scrinium ajouter -t Thème -f Fiche » ajoute la sortie à une fiche."
 msgstr ""
 
-#: src/scrinium/core/guide.py:76
+#: src/scrinium/core/guide.py:77
 msgid "Guide 6 · Verrouillage, secours et partage"
 msgstr ""
 
-#: src/scrinium/core/guide.py:76
+#: src/scrinium/core/guide.py:77
 msgid ""
 "• Verrouiller : bouton « Verrouiller… ». Le titre reste visible, le contenu est chiffré. Mot de passe oublié = fiche perdue, sauf avec le FICHIER DE SECOURS (menu Sécurité > Fichier de secours…) : faites-le dès le premier verrouillage, gardez-le hors de cet ordinateur.\n"
 "• Une fiche verrouillée n'est jamais envoyée, lue, traduite ni partagée tant qu'elle est fermée.\n"
@@ -3413,11 +3500,11 @@ msgid ""
 "• Inviter quelqu'un à INSTALLER Scrinium : menu Fichier > « Inviter à installer Scrinium… »."
 msgstr ""
 
-#: src/scrinium/core/guide.py:84
+#: src/scrinium/core/guide.py:85
 msgid "Guide 7 · Où sont mes données, sauvegarde"
 msgstr ""
 
-#: src/scrinium/core/guide.py:84
+#: src/scrinium/core/guide.py:85
 msgid ""
 "• Vos fiches : un dossier par thème, un fichier .md par fiche (.lock si verrouillée), avec un sous-dossier .pj pour les images jointes :\n"
 "\n"
@@ -4626,10 +4713,6 @@ msgstr ""
 
 #: src/scrinium/ui/repertoire.py:330
 msgid "Aucune application pour ouvrir ceci : copié"
-msgstr ""
-
-#: src/scrinium/ui/repertoire.py:90
-msgid "Supprimer la colonne"
 msgstr ""
 
 #: src/scrinium/ui/repertoire.py:247
