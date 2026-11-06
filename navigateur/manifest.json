@@ -1,0 +1,16 @@
+{
+  "manifest_version": 3,
+  "name": "__MSG_nom__",
+  "version": "0.1.0",
+  "description": "__MSG_description__",
+  "default_locale": "fr",
+  "permissions": ["contextMenus", "activeTab"],
+  "background": {
+    "service_worker": "background.js",
+    "scripts": ["background.js"]
+  },
+  "icons": {"128": "icon.png"},
+  "browser_specific_settings": {
+    "gecko": {"id": "scrinium-ajouter@jfkneib.github.io", "strict_min_version": "121.0"}
+  }
+}

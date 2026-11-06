@@ -1,0 +1,6 @@
+{
+  "nom": {"message": "Send to Scrinium"},
+  "description": {"message": "Right-click a selection or a page: offers to create a note in Scrinium (nothing is saved without your confirmation)."},
+  "menuSelection": {"message": "Send selection to Scrinium"},
+  "menuPage": {"message": "Send this page to Scrinium"}
+}

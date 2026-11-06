@@ -1,0 +1,6 @@
+{
+  "nom": {"message": "Envoyer à Scrinium"},
+  "description": {"message": "Clic droit sur une sélection ou une page : propose de créer une fiche dans Scrinium (rien n'est enregistré sans votre validation)."},
+  "menuSelection": {"message": "Envoyer la sélection à Scrinium"},
+  "menuPage": {"message": "Envoyer cette page à Scrinium"}
+}
