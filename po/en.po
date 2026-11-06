@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: scrinium 0.2.0\n"
 "Report-Msgid-Bugs-To: \n"
-"PO-Revision-Date: 2026-11-06 14:47+0100\n"
+"PO-Revision-Date: 2026-11-06 15:00+0100\n"
 "Last-Translator: Jean-François Kneib\n"
 "Language-Team: English\n"
 "Language: en\n"
@@ -40,7 +40,8 @@ msgid "Titre"
 msgstr "Title"
 
 #: plugins/agenda/__init__.py:47
-#: plugins/calc/logique.py:84
+#: plugins/calc/logique.py:82
+#: plugins/tableur/logique.py:86
 msgid "Date"
 msgstr "Date"
 
@@ -402,185 +403,253 @@ msgstr "this is not a Scrinium applications export"
 msgid "fichier illisible"
 msgstr "unreadable file"
 
-#: plugins/calc/__init__.py:236
+#: plugins/calc/__init__.py:264
 msgid ""
-"Un mini tableur pour suivre des données, par exemple des relevés (compteur, poids, dépenses…).\n"
+"Un petit éditeur de listes avec de petits calculs, pour suivre des données : relevés de compteur, poids, dépenses…\n"
 "\n"
-"• Nouvelle fiche > « Calc » : une grille avec les colonnes « Date » et « Valeur ». La première ligne est l'en-tête : renommez-la, ajoutez des colonnes.\n"
+"• Nouvelle fiche > « Calc » : une liste avec les colonnes « Date » et « Valeur ». La première ligne est l'en-tête : renommez-la, ajoutez des colonnes.\n"
 "• Double-clic (ou F2) sur une cellule pour la modifier. Un nombre s'écrit avec une virgule ou un point.\n"
-"• « Ajouter une ligne » : si la première colonne s'appelle « Date », elle reçoit la date du jour. « Totaux » ajoute une ligne de somme, moyenne, minimum ou maximum.\n"
-"• Formules : une cellule qui commence par « = ». Exemples : =B2*C2, =SOMME(B2:B10), =MOYENNE(B2:B10), =MAX(B2:B10)-MIN(B2:B10), =B3-B2. Fonctions : SOMME, MOYENNE, MIN, MAX, NB, ABS, ARRONDI, RACINE, ENT. Opérations : + - * / ^ %. Les erreurs s'affichent dans la cellule (#DIV/0!, #REF!, #CYCLE!…).\n"
+"• « Ajouter une ligne » : si la première colonne s'appelle « Date », elle reçoit la date du jour.\n"
+"• La ligne grisée du bas donne un total par colonne : clic droit dessus pour choisir (somme, moyenne, minimum, maximum, nombre, ou aucun). Les totaux se recalculent à chaque modification.\n"
+"• « Exporter en CSV… » écrit la liste dans un fichier (séparateur « ; », que LibreOffice et Excel ouvrent directement) ; « Importer un CSV… » remplace la liste par un fichier.\n"
 "• Clic droit : insérer ou supprimer des lignes et des colonnes. Suppr vide les cellules. Ctrl+C et Ctrl+V : copier, coller (on peut coller depuis un autre tableur).\n"
-"• Le texte de la fiche est un tableau Markdown : lisible partout, cherchable, partageable, verrouillable. Rien n'est exécuté : seules ces opérations sont comprises. L'impression et l'export PDF montrent les résultats."
+"• Le texte de la fiche est un tableau Markdown : lisible partout, cherchable, partageable, verrouillable. Rien n'est exécuté.\n"
+"• Besoin de formules cellule par cellule (=B2*C2, =SOMME(B2:B10)) ? Utilisez l'extension Tableur."
 msgstr ""
-"A mini spreadsheet to track data, for example readings (meter, weight, expenses…).\n"
+"A small list editor with small calculations, to track data: meter readings, weight, expenses…\n"
 "\n"
-"• New note > \"Calc\": a grid with the \"Date\" and \"Value\" columns. The first row is the header: rename it, add columns.\n"
+"• New note > \"Calc\": a list with the \"Date\" and \"Value\" columns. The first row is the header: rename it, add columns.\n"
 "• Double-click (or F2) a cell to edit it. A number can be written with a comma or a dot.\n"
-"• \"Add a row\": if the first column is called \"Date\", it gets today's date. \"Totals\" adds a row with the sum, average, minimum or maximum.\n"
-"• Formulas: a cell that starts with \"=\". Examples: =B2*C2, =SOMME(B2:B10), =MOYENNE(B2:B10), =MAX(B2:B10)-MIN(B2:B10), =B3-B2. Functions: SOMME (SUM), MOYENNE (AVERAGE), MIN, MAX, NB (COUNT), ABS, ARRONDI (ROUND), RACINE (SQRT), ENT (INT). Operations: + - * / ^ %. Errors are shown in the cell (#DIV/0!, #REF!, #CYCLE!…).\n"
+"• \"Add a row\": if the first column is called \"Date\", it gets today's date.\n"
+"• The grey row at the bottom gives a total per column: right-click on it to choose (sum, average, minimum, maximum, count, or none). Totals are recalculated at each change.\n"
+"• \"Export to CSV…\" writes the list to a file (\";\" separator, which LibreOffice and Excel open directly); \"Import a CSV…\" replaces the list with a file.\n"
 "• Right-click: insert or delete rows and columns. Delete clears the cells. Ctrl+C and Ctrl+V: copy, paste (you can paste from another spreadsheet).\n"
-"• The note's text is a Markdown table: readable anywhere, searchable, shareable, lockable. Nothing is executed: only these operations are understood. Printing and PDF export show the results."
+"• The note's text is a Markdown table: readable anywhere, searchable, shareable, lockable. Nothing is executed.\n"
+"• Need formulas cell by cell (=B2*C2, =SOMME(B2:B10))? Use the Spreadsheet extension."
 
-#: plugins/calc/__init__.py:53
+#: plugins/calc/__init__.py:23
+msgid "Aucun total"
+msgstr "No total"
+
+#: plugins/calc/__init__.py:23
+#: plugins/tableur/__init__.py:63
+msgid "Somme"
+msgstr "Sum"
+
+#: plugins/calc/__init__.py:23
+#: plugins/tableur/__init__.py:63
+msgid "Moyenne"
+msgstr "Average"
+
+#: plugins/calc/__init__.py:23
+#: plugins/tableur/__init__.py:63
+msgid "Minimum"
+msgstr "Minimum"
+
+#: plugins/calc/__init__.py:23
+#: plugins/tableur/__init__.py:63
+msgid "Maximum"
+msgstr "Maximum"
+
+#: plugins/calc/__init__.py:23
+msgid "Nombre"
+msgstr "Count"
+
+#: plugins/calc/__init__.py:40
+#: plugins/tableur/__init__.py:53
 msgid "Ajouter une ligne"
 msgstr "Add a row"
 
-#: plugins/calc/__init__.py:55
+#: plugins/calc/__init__.py:42
+#: plugins/tableur/__init__.py:55
 msgid "Ajouter une colonne"
 msgstr "Add a column"
 
-#: plugins/calc/__init__.py:58
-msgid "Totaux"
-msgstr "Totals"
+#: plugins/calc/__init__.py:44
+#: plugins/tableur/__init__.py:66
+#: src/scrinium/ui/repertoire.py:136
+msgid "Exporter en CSV…"
+msgstr "Export to CSV…"
 
-#: plugins/calc/__init__.py:212
-#: plugins/calculatrice/__init__.py:131
+#: plugins/calc/__init__.py:46
+#: plugins/tableur/__init__.py:68
+#: src/scrinium/ui/repertoire.py:134
+msgid "Importer un CSV…"
+msgstr "Import a CSV…"
+
+#: plugins/calc/__init__.py:228
+#: plugins/tableur/__init__.py:148
+#: src/scrinium/ui/repertoire.py:397
+msgid "Exporter en CSV"
+msgstr "Export to CSV"
+
+#: plugins/calc/__init__.py:228
+#: plugins/tableur/__init__.py:148
+msgid "Fichiers CSV (*.csv)"
+msgstr "CSV files (*.csv)"
+
+#: plugins/calc/__init__.py:235
+#: plugins/calc/__init__.py:245
+#: plugins/calc/__init__.py:242
+msgid "Importer un CSV"
+msgstr "Import a CSV"
+
+#: plugins/calc/__init__.py:235
+#: plugins/tableur/__init__.py:156
+msgid "Fichiers CSV (*.csv *.txt);;Tous les fichiers (*)"
+msgstr "CSV files (*.csv *.txt);;All files (*)"
+
+#: plugins/calc/__init__.py:259
+msgid "Extension Calc"
+msgstr "Calc extension"
+
+#: plugins/calc/__init__.py:96
+msgid "Clic droit : choisir le total de cette colonne"
+msgstr "Right-click: choose this column's total"
+
+#: plugins/calc/__init__.py:102
+msgid "%(l)d lignes, %(c)d colonnes. La ligne grisée du bas donne un total par colonne (clic droit pour le choisir)."
+msgstr "%(l)d rows, %(c)d columns. The grey row at the bottom gives a total per column (right-click to choose it)."
+
+#: plugins/calc/__init__.py:214
+#: plugins/calculatrice/__init__.py:59
 #: plugins/ocr/__init__.py:114
 msgid "Copier"
 msgstr "Copy"
 
-#: plugins/calc/__init__.py:213
+#: plugins/calc/__init__.py:215
+#: plugins/tableur/__init__.py:245
 msgid "Coller"
 msgstr "Paste"
 
-#: plugins/calc/__init__.py:215
+#: plugins/calc/__init__.py:217
+#: plugins/tableur/__init__.py:247
 msgid "Insérer une ligne au-dessus"
 msgstr "Insert a row above"
 
-#: plugins/calc/__init__.py:216
+#: plugins/calc/__init__.py:218
+#: plugins/tableur/__init__.py:248
 msgid "Insérer une ligne en dessous"
 msgstr "Insert a row below"
 
-#: plugins/calc/__init__.py:217
+#: plugins/calc/__init__.py:219
+#: plugins/tableur/__init__.py:249
 msgid "Supprimer la ligne"
 msgstr "Delete the row"
 
-#: plugins/calc/__init__.py:219
+#: plugins/calc/__init__.py:221
+#: plugins/tableur/__init__.py:251
 msgid "Insérer une colonne à gauche"
 msgstr "Insert a column on the left"
 
-#: plugins/calc/__init__.py:220
+#: plugins/calc/__init__.py:222
+#: plugins/tableur/__init__.py:252
 msgid "Insérer une colonne à droite"
 msgstr "Insert a column on the right"
 
-#: plugins/calc/__init__.py:221
+#: plugins/calc/__init__.py:223
+#: plugins/tableur/__init__.py:253
 #: src/scrinium/ui/repertoire.py:90
 msgid "Supprimer la colonne"
 msgstr "Delete the column"
 
-#: plugins/calc/__init__.py:230
-msgid "Extension Calc"
-msgstr "Calc extension"
+#: plugins/calc/__init__.py:245
+#: plugins/tableur/__init__.py:166
+msgid "Ce fichier ne contient aucun tableau."
+msgstr "This file contains no table."
 
-#: plugins/calc/__init__.py:63
-msgid "Somme"
-msgstr "Sum"
+#: plugins/calc/__init__.py:232
+#: plugins/tableur/__init__.py:152
+msgid "Exporté : %s"
+msgstr "Exported: %s"
 
-#: plugins/calc/__init__.py:63
-msgid "Moyenne"
-msgstr "Average"
+#: plugins/calc/__init__.py:248
+#: plugins/tableur/__init__.py:169
+msgid "Remplacer le contenu actuel de la fiche par ce fichier ?"
+msgstr "Replace the current content of the note with this file?"
 
-#: plugins/calc/__init__.py:63
-msgid "Minimum"
-msgstr "Minimum"
-
-#: plugins/calc/__init__.py:63
-msgid "Maximum"
-msgstr "Maximum"
-
-#: plugins/calc/__init__.py:114
-msgid "%(l)d lignes, %(c)d colonnes. Une cellule qui commence par = est une formule, par exemple =SOMME(B2:B10)."
-msgstr "%(l)d rows, %(c)d columns. A cell that starts with = is a formula, for example =SOMME(B2:B10)."
-
-#: plugins/calc/logique.py:378
+#: plugins/calc/logique.py:90
 msgid "Calc"
 msgstr "Calc"
 
-#: plugins/calc/logique.py:84
+#: plugins/calc/logique.py:82
+#: plugins/tableur/logique.py:86
 msgid "Valeur"
 msgstr "Value"
 
-#: plugins/calculatrice/__init__.py:189
+#: plugins/calculatrice/__init__.py:117
 msgid ""
-"Deux outils, une extension (Extensions > Gérer les extensions…).\n"
+"Une mini calculatrice flottante pour un calcul rapide, sans quitter votre fiche.\n"
 "\n"
-"• Fiche « Calculatrice » : flèche du bouton « Fiche » > « Nouvelle fiche » > Calculatrice. Tapez un calcul, Entrée : la ligne « calcul = résultat » est ajoutée à la fiche (c'est l'historique, cherchable et partageable). Double-clic sur une ligne pour la reprendre.\n"
-"• Mini calculatrice : bouton « Mini calculatrice » (icône) de la barre d'outils (ou menu Extensions). Pavé de touches ou clavier. Si du texte comme « 12*8 » est sélectionné dans la fiche, il est repris. « Insérer le résultat » le place au curseur de la fiche ; « Copier » le met dans le presse-papiers.\n"
+"• Bouton « Mini calculatrice » (icône de la barre d'outils) ou menu Extensions. Pavé de touches ou clavier ; Entrée donne le résultat, qu'on peut enchaîner.\n"
+"• Si du texte comme « 12*8 » est sélectionné dans la fiche, il est repris à l'ouverture. « Insérer le résultat » le place au curseur de la fiche ; « Copier » le met dans le presse-papiers.\n"
 "\n"
-"Calculs permis : + − × ÷, ^ (puissance), %, parenthèses, pi, e et sqrt, abs, round, min, max, sin, cos, tan, ln, log, exp, floor, ceil. « 200*20% » donne 40. La virgule décimale est acceptée (1,5). Rien n'est exécuté : seules ces opérations sont comprises."
+"Calculs permis : + − × ÷, ^ (puissance), %, parenthèses, pi, e et sqrt, abs, round, min, max, sin, cos, tan, ln, log, exp, floor, ceil. « 200*20% » donne 40. La virgule décimale est acceptée (1,5). Rien n'est exécuté : seules ces opérations sont comprises.\n"
+"• Pour suivre des données : extensions Calc (listes avec totaux) et Tableur (cellules et formules)."
 msgstr ""
-"Two tools, one extension (Extensions > Manage extensions…).\n"
+"A mini calculator to calculate quickly, without leaving your note.\n"
 "\n"
-"• \"Calculator\" note: arrow of the \"Note\" button > \"New note\" > Calculator. Type a calculation, Enter: the line \"calculation = result\" is added to the note (that is the history, searchable and shareable). Double-click a line to reuse it.\n"
-"• Mini calculator: \"Mini calculator\" toolbar button (icon) or Extensions menu. Keypad or keyboard. If text such as \"12*8\" is selected in the note, it is picked up. \"Insert the result\" puts it at the note's cursor; \"Copy\" puts it in the clipboard.\n"
+"• \"Mini calculator\" button (toolbar icon) or Extensions menu. Keypad or keyboard; Enter gives the result, which you can chain on.\n"
+"• If text such as \"12*8\" is selected in the note, it is picked up when opening. \"Insert the result\" puts it at the note's cursor; \"Copy\" puts it in the clipboard.\n"
 "\n"
-"Allowed: + − × ÷, ^ (power), %, parentheses, pi, e and sqrt, abs, round, min, max, sin, cos, tan, ln, log, exp, floor, ceil. \"200*20%\" gives 40. The decimal comma is accepted (1,5). Nothing is executed: only these operations are understood."
+"Allowed: + − × ÷, ^ (power), %, parentheses, pi, e and sqrt, abs, round, min, max, sin, cos, tan, ln, log, exp, floor, ceil. \"200*20%\" gives 40. The decimal comma is accepted (1,5). Nothing is executed: only these operations are understood.\n"
+"• To track data: Calc (lists with totals) and Spreadsheet (cells and formulas) extensions."
 
-#: plugins/calculatrice/__init__.py:40
-msgid "Tapez un calcul, par exemple 2+3*4 ou sqrt(16), puis Entrée"
-msgstr "Type a calculation, for example 2+3*4 or sqrt(16), then Enter"
-
-#: plugins/calculatrice/__init__.py:53
-msgid "Effacer l'historique"
-msgstr "Clear the history"
-
-#: plugins/calculatrice/__init__.py:107
-#: plugins/calculatrice/logique.py:21
+#: plugins/calculatrice/__init__.py:35
 msgid "Calculatrice"
 msgstr "Calculator"
 
-#: plugins/calculatrice/__init__.py:129
+#: plugins/calculatrice/__init__.py:57
 msgid "Insérer le résultat"
 msgstr "Insert the result"
 
-#: plugins/calculatrice/__init__.py:216
-#: plugins/calculatrice/__init__.py:217
+#: plugins/calculatrice/__init__.py:142
+#: plugins/calculatrice/__init__.py:143
 msgid "Mini calculatrice"
 msgstr "Mini calculator"
 
-#: plugins/calculatrice/__init__.py:218
+#: plugins/calculatrice/__init__.py:144
 msgid "Extension Calculatrice"
 msgstr "Calculator extension"
 
-#: plugins/calculatrice/__init__.py:176
+#: plugins/calculatrice/__init__.py:104
 msgid "Rien à insérer."
 msgstr "Nothing to insert."
 
-#: plugins/calculatrice/__init__.py:186
+#: plugins/calculatrice/__init__.py:114
 msgid "Copié dans le presse-papiers."
 msgstr "Copied to the clipboard."
 
-#: plugins/calculatrice/__init__.py:178
+#: plugins/calculatrice/__init__.py:106
 msgid "Résultat inséré dans la fiche."
 msgstr "Result inserted in the note."
 
-#: plugins/calculatrice/__init__.py:180
+#: plugins/calculatrice/__init__.py:108
 msgid "Aucune fiche modifiable : ouvrez une fiche, puis cliquez dans sa note."
 msgstr "No editable note: open a note, then click in its text."
 
-#: plugins/calculatrice/logique.py:63
-#: plugins/calculatrice/logique.py:80
+#: plugins/calculatrice/logique.py:52
+#: plugins/calculatrice/logique.py:69
 msgid "Expression non comprise"
 msgstr "Expression not understood"
 
-#: plugins/calculatrice/logique.py:70
+#: plugins/calculatrice/logique.py:59
 msgid "Rien à calculer"
 msgstr "Nothing to calculate"
 
-#: plugins/calculatrice/logique.py:72
+#: plugins/calculatrice/logique.py:61
 msgid "Expression trop longue"
 msgstr "Expression too long"
 
-#: plugins/calculatrice/logique.py:82
+#: plugins/calculatrice/logique.py:71
 msgid "Résultat impossible"
 msgstr "Impossible result"
 
-#: plugins/calculatrice/logique.py:59
+#: plugins/calculatrice/logique.py:48
 msgid "Exposant trop grand"
 msgstr "Exponent too large"
 
-#: plugins/calculatrice/logique.py:78
+#: plugins/calculatrice/logique.py:67
 msgid "Division par zéro"
 msgstr "Division by zero"
 
@@ -2342,6 +2411,44 @@ msgstr "Read the text (OCR) → new fiche"
 msgid "Photos"
 msgstr "Photos"
 
+#: plugins/tableur/__init__.py:268
+msgid ""
+"Un mini tableur pour suivre des données, par exemple des relevés (compteur, poids, dépenses…).\n"
+"\n"
+"• Nouvelle fiche > « Tableur » : une grille avec les colonnes « Date » et « Valeur ». La première ligne est l'en-tête : renommez-la, ajoutez des colonnes.\n"
+"• Double-clic (ou F2) sur une cellule pour la modifier. Un nombre s'écrit avec une virgule ou un point.\n"
+"• « Ajouter une ligne » : si la première colonne s'appelle « Date », elle reçoit la date du jour. « Totaux » ajoute une ligne de somme, moyenne, minimum ou maximum.\n"
+"• Formules : une cellule qui commence par « = ». Exemples : =B2*C2, =SOMME(B2:B10), =MOYENNE(B2:B10), =MAX(B2:B10)-MIN(B2:B10), =B3-B2. Fonctions : SOMME, MOYENNE, MIN, MAX, NB, ABS, ARRONDI, RACINE, ENT. Opérations : + - * / ^ %. Les erreurs s'affichent dans la cellule (#DIV/0!, #REF!, #CYCLE!…).\n"
+"• Clic droit : insérer ou supprimer des lignes et des colonnes. Suppr vide les cellules. Ctrl+C et Ctrl+V : copier, coller (on peut coller depuis un autre tableur).\n"
+"• « Exporter en CSV… » écrit les résultats dans un fichier (séparateur « ; », que LibreOffice et Excel ouvrent directement) ; « Importer un CSV… » remplace le tableau par un fichier.\n"
+"• Le texte de la fiche est un tableau Markdown : lisible partout, cherchable, partageable, verrouillable. Rien n'est exécuté : seules ces opérations sont comprises. L'impression et l'export PDF montrent les résultats."
+msgstr ""
+"A spreadsheet to track data, for example readings (meter, weight, expenses…).\n"
+"\n"
+"• New note > \"Spreadsheet\": a grid with the \"Date\" and \"Value\" columns. The first row is the header: rename it, add columns.\n"
+"• Double-click (or F2) a cell to edit it. A number can be written with a comma or a dot.\n"
+"• \"Add a row\": if the first column is called \"Date\", it gets today's date. \"Totals\" adds a row with the sum, average, minimum or maximum.\n"
+"• Formulas: a cell that starts with \"=\". Examples: =B2*C2, =SOMME(B2:B10), =MOYENNE(B2:B10), =MAX(B2:B10)-MIN(B2:B10), =B3-B2. Functions: SOMME (SUM), MOYENNE (AVERAGE), MIN, MAX, NB (COUNT), ABS, ARRONDI (ROUND), RACINE (SQRT), ENT (INT). Operations: + - * / ^ %. Errors are shown in the cell (#DIV/0!, #REF!, #CYCLE!…).\n"
+"• Right-click: insert or delete rows and columns. Delete clears the cells. Ctrl+C and Ctrl+V: copy, paste (you can paste from another spreadsheet).\n"
+"• \"Export to CSV…\" writes the results to a file (\";\" separator, which LibreOffice and Excel open directly); \"Import a CSV…\" replaces the table with a file.\n"
+"• The note's text is a Markdown table: readable anywhere, searchable, shareable, lockable. Nothing is executed: only these operations are understood. Printing and PDF export show the results."
+
+#: plugins/tableur/__init__.py:58
+msgid "Totaux"
+msgstr "Totals"
+
+#: plugins/tableur/__init__.py:262
+msgid "Extension Tableur"
+msgstr "Spreadsheet extension"
+
+#: plugins/tableur/__init__.py:118
+msgid "%(l)d lignes, %(c)d colonnes. Une cellule qui commence par = est une formule, par exemple =SOMME(B2:B10)."
+msgstr "%(l)d rows, %(c)d columns. A cell that starts with = is a formula, for example =SOMME(B2:B10)."
+
+#: plugins/tableur/logique.py:401
+msgid "Tableur"
+msgstr "Spreadsheet"
+
 #: plugins/traduction/__init__.py:694
 msgid ""
 "Traduit la sélection ou toute la fiche avec un moteur local.\n"
@@ -3863,8 +3970,8 @@ msgid ""
 "• Photos : un dossier d'images montré en vignettes ; les images restent dans leur dossier (extension Photos).\n"
 "• Actions CLI : des commandes à lancer d'un clic (extension Capture).\n"
 "• Agenda : des rappels et échéances (extension Agenda).\n"
-"• Calc : un mini tableur (cellules, formules comme =SOMME(B2:B10)) pour suivre des relevés (extension Calc).\n"
-"• Calculatrice : une calculatrice dont l'historique reste dans la fiche (extension Calculatrice).\n"
+"• Calc : un petit éditeur de listes avec des totaux par colonne et l'export CSV, pour suivre des relevés (extension Calc).\n"
+"• Tableur : des cellules et des formules comme =SOMME(B2:B10), avec export et import CSV (extension Tableur).\n"
 "\n"
 "Sécurité : un type qui LANCE des commandes (Applications, Actions CLI) reste inerte tant que vous n'avez pas validé la fiche vous-même. Une fiche reçue d'un autre n'exécute donc jamais rien toute seule."
 msgstr ""
@@ -3875,8 +3982,8 @@ msgstr ""
 "• Photos: a folder of images shown as thumbnails; the images stay in their folder (Photos extension).\n"
 "• CLI actions: commands to run with a click (Capture extension).\n"
 "• Agenda: reminders and deadlines (Agenda extension).\n"
-"• Calc: a mini spreadsheet (cells, formulas such as =SOMME(B2:B10)) to track readings (Calc extension).\n"
-"• Calculator: a calculator whose history stays in the note (Calculator extension).\n"
+"• Calc: a small list editor with totals per column and CSV export, to track readings (Calc extension).\n"
+"• Spreadsheet: cells and formulas such as =SOMME(B2:B10), with CSV export and import (Spreadsheet extension).\n"
 "\n"
 "Security: a type that RUNS commands (Applications, CLI actions) stays inert until you have validated the note yourself. A note received from someone else therefore never runs anything on its own."
 
@@ -3893,7 +4000,7 @@ msgid ""
 "• Partage : partage des fiches avec d'autres via un serveur Scrinium (voir « Guide 6 »).\n"
 "• Traduction et Dictée : en local (modèles téléchargés seulement avec votre accord).\n"
 "• Lecture : lit une fiche à voix haute.\n"
-"• Agenda, Applications, Photos, Calc, Calculatrice : types de fiches (voir « Guide 3 »).\n"
+"• Agenda, Applications, Photos, Calc, Tableur : types de fiches ; Calculatrice : une mini calculatrice flottante (voir « Guide 3 »).\n"
 "• Capture : insère la sortie d'une commande dans la fiche, ou envoie du texte vers une console (voir « Guide 5 »).\n"
 "\n"
 "Écrire la vôtre : menu Aide > « Documentation des extensions »."
@@ -3905,7 +4012,7 @@ msgstr ""
 "• Sharing: shares notes with others through a Scrinium server (see \"Guide 6\").\n"
 "• Translation and Dictation: local (models downloaded only with your agreement).\n"
 "• Reading: reads a note aloud.\n"
-"• Agenda, Applications, Photos, Calc, Calculator: note types (see \"Guide 3\").\n"
+"• Agenda, Applications, Photos, Calc, Spreadsheet: note types; Calculator: a floating mini calculator (see \"Guide 3\").\n"
 "• Capture: inserts the output of a command into the note, or sends text to a console (see \"Guide 5\").\n"
 "\n"
 "Write your own: Help menu > \"Extensions documentation\"."
@@ -5214,20 +5321,6 @@ msgstr "Adds an entry in the displayed letter: type its name, it sorts itself"
 msgid "Colonnes…"
 msgstr "Columns…"
 
-#: src/scrinium/ui/repertoire.py:134
-msgid "Importer un CSV…"
-msgstr "Import a CSV…"
-
-#: src/scrinium/ui/repertoire.py:136
-msgid "Exporter en CSV…"
-msgstr "Export to CSV…"
-
-#: src/scrinium/ui/repertoire.py:377
-#: src/scrinium/ui/repertoire.py:393
-#: src/scrinium/ui/repertoire.py:383
-msgid "Importer un CSV"
-msgstr "Import a CSV"
-
 #: src/scrinium/ui/repertoire.py:377
 msgid "Fichiers CSV (*.csv *.txt);;Tous (*)"
 msgstr "CSV files (*.csv *.txt);;All (*)"
@@ -5243,11 +5336,6 @@ msgstr "CSV, comma separator (*.csv)"
 #: src/scrinium/ui/repertoire.py:396
 msgid "CSV, séparateur point-virgule — Excel en français (*.csv)"
 msgstr "CSV, semicolon separator — French Excel (*.csv)"
-
-#: src/scrinium/ui/repertoire.py:397
-#: src/scrinium/ui/repertoire.py:406
-msgid "Exporter en CSV"
-msgstr "Export to CSV"
 
 #: src/scrinium/ui/repertoire.py:32
 msgid "Les colonnes de votre tableau. Ce qui est saisi suit sa colonne quand vous la déplacez."

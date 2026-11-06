@@ -1,24 +1,13 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 # Copyright (C) 2026 Jean-François Kneib
 """Logique (sans interface) de l'extension « Calculatrice » : un évaluateur arithmétique SÛR (jamais d'`eval` : on lit l'arbre syntaxique et
-on n'accepte que des nombres, quelques opérateurs et quelques fonctions) et le format du type de fiche `calculatrice`.
-
-    #scrinium-calculatrice
-    2+3*4 = 14
-    sqrt(16) = 4
-
-Type NON exécutable : la fiche ne lance rien, elle garde seulement l'historique « calcul = résultat » (une ligne par calcul ; tout
-ce qui n'est pas de la forme `calcul = résultat` est conservé tel quel)."""
+on n'accepte que des nombres, quelques opérateurs et quelques fonctions)."""
 import ast
 import math
 import operator
 import re
 
-from scrinium.core.types_fiche import TypeFiche
 from scrinium.i18n import N_
-
-MARQUE = "#scrinium-calculatrice"
-TYPE = TypeFiche("calculatrice", N_("Calculatrice"), "accessories-calculator")
 
 MAX_EXPOSANT = 1000
 MAX_LONGUEUR = 500
@@ -95,24 +84,3 @@ def formater(v) -> str:
 def calcul_texte(expr: str) -> str:
     """Résultat formaté de l'expression (ErreurCalcul sinon)."""
     return formater(calculer(expr))
-
-
-# ---------- format de la fiche ----------
-def historique(texte: str | None) -> list:
-    """[(calcul, résultat)] des lignes « calcul = résultat » de la fiche, dans l'ordre."""
-    sortie = []
-    for ligne in (texte or "").replace("\r\n", "\n").split("\n")[1:]:
-        if "=" in ligne:
-            calcul, _sep, res = ligne.rpartition("=")
-            if calcul.strip() and res.strip():
-                sortie.append((calcul.strip(), res.strip()))
-    return sortie
-
-
-def ajouter(texte: str | None, expr: str, resultat: str) -> str:
-    """Texte de la fiche avec la ligne « calcul = résultat » ajoutée à la fin (la marque est mise si elle manque)."""
-    lignes = (texte or "").replace("\r\n", "\n").split("\n")
-    if not lignes or not lignes[0].startswith(MARQUE):
-        lignes = [MARQUE] + [x for x in lignes if x.strip()]
-    corps = "\n".join(lignes).rstrip("\n")
-    return corps + f"\n{expr.strip()} = {resultat}\n"

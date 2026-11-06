@@ -2,7 +2,7 @@
   "titre": "Calc",
   "version": "0.1",
   "auteur": "Scrinium",
-  "description": "Un type de fiche « Calc » : un mini tableur (cellules A1, B2…, formules simples comme =SOMME(B2:B10)) pour suivre des relevés. Le tableau est un tableau Markdown dans la fiche ; le calcul est sûr, aucun code n'est exécuté.",
+  "description": "Un type de fiche « Calc » : un petit éditeur de listes avec de petits calculs (totaux par colonne : somme, moyenne, minimum, maximum, nombre) et l'export / import CSV. Pour suivre des relevés. Pour des formules cellule par cellule, voir l'extension Tableur.",
   "classe": "CalcPlugin",
   "api": 1
 }

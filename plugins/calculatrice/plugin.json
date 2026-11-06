@@ -2,7 +2,7 @@
   "titre": "Calculatrice",
   "version": "0.1",
   "auteur": "Scrinium",
-  "description": "Un type de fiche « Calculatrice » (l'historique des calculs reste dans la fiche) et une mini calculatrice flottante, avec « Insérer le résultat » au curseur. Calcul arithmétique sûr : aucun code n'est exécuté.",
+  "description": "Une mini calculatrice flottante (bouton de la barre d'outils) avec « Insérer le résultat » au curseur de la fiche. Calcul arithmétique sûr : aucun code n'est exécuté.",
   "classe": "CalculatricePlugin",
   "api": 1
 }

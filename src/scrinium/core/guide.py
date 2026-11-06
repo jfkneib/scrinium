@@ -44,8 +44,8 @@ def fiches(dossier_fiches) -> list:
             "• Photos : un dossier d'images montré en vignettes ; les images restent dans leur dossier (extension Photos).\n"
             "• Actions CLI : des commandes à lancer d'un clic (extension Capture).\n"
             "• Agenda : des rappels et échéances (extension Agenda).\n"
-            "• Calc : un mini tableur (cellules, formules comme =SOMME(B2:B10)) pour suivre des relevés (extension Calc).\n"
-            "• Calculatrice : une calculatrice dont l'historique reste dans la fiche (extension Calculatrice).\n"
+            "• Calc : un petit éditeur de listes avec des totaux par colonne et l'export CSV, pour suivre des relevés (extension Calc).\n"
+            "• Tableur : des cellules et des formules comme =SOMME(B2:B10), avec export et import CSV (extension Tableur).\n"
             "\n"
             "Sécurité : un type qui LANCE des commandes (Applications, Actions CLI) reste inerte tant que vous n'avez pas validé la "
             "fiche vous-même. Une fiche reçue d'un autre n'exécute donc jamais rien toute seule.")),
@@ -58,7 +58,7 @@ def fiches(dossier_fiches) -> list:
             "• Partage : partage des fiches avec d'autres via un serveur Scrinium (voir « Guide 6 »).\n"
             "• Traduction et Dictée : en local (modèles téléchargés seulement avec votre accord).\n"
             "• Lecture : lit une fiche à voix haute.\n"
-            "• Agenda, Applications, Photos, Calc, Calculatrice : types de fiches (voir « Guide 3 »).\n"
+            "• Agenda, Applications, Photos, Calc, Tableur : types de fiches ; Calculatrice : une mini calculatrice flottante (voir « Guide 3 »).\n"
             "• Capture : insère la sortie d'une commande dans la fiche, ou envoie du texte vers une console (voir « Guide 5 »).\n"
             "\n"
             "Écrire la vôtre : menu Aide > « Documentation des extensions ».")),

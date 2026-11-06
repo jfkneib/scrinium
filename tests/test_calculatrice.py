@@ -46,15 +46,6 @@ def test_aucun_code_execute(tmp_path):
     assert not marque.exists()
 
 
-def test_format_de_la_fiche():
-    assert lg.TYPE.nom == "calculatrice" and not lg.TYPE.executable and lg.TYPE.marque == lg.MARQUE
-    t = lg.ajouter("#scrinium-calculatrice\n", "2+3", "5")
-    t = lg.ajouter(t, "sqrt(16)", "4")
-    assert t == "#scrinium-calculatrice\n2+3 = 5\nsqrt(16) = 4\n" and lg.historique(t) == [("2+3", "5"), ("sqrt(16)", "4")]
-    assert lg.ajouter("", "1+1", "2") == "#scrinium-calculatrice\n1+1 = 2\n"
-    assert lg.historique("") == lg.historique(None) == lg.historique("#scrinium-calculatrice\nnote libre\n") == []
-
-
 # ---------- dans la fenêtre ----------
 @pytest.fixture(scope="module")
 def app():
@@ -73,26 +64,6 @@ def fen(app, tmp_path, monkeypatch):
     yield w
     w.quitter_vraiment = True
     w.close()
-
-
-def test_fiche_calculatrice_historique_dans_la_fiche(fen):
-    m = fen.menu_nouvelle
-    m.aboutToShow.emit()
-    next(a for a in m.actions() if a.text() == "Calculatrice").trigger()
-    vue = fen.vues_types["calculatrice"]
-    assert fen.pile.currentWidget() is vue and fen.fiche.texte.startswith("#scrinium-calculatrice")
-    vue.saisie.setText("2+3*4")
-    assert vue.resultat.text() == "= 14"                                   # aperçu pendant la frappe
-    vue.valider()
-    vue.saisie.setText("1/0")
-    vue.valider()
-    assert "zéro" in vue.resultat.text() and vue.liste.count() == 1        # l'erreur n'entre pas dans l'historique
-    fen.sauver()
-    assert fen.fiche.texte == "#scrinium-calculatrice\n2+3*4 = 14\n"
-    vue.liste.itemDoubleClicked.emit(vue.liste.item(0))
-    assert vue.saisie.text() == "2+3*4"
-    vue.effacer()
-    assert vue.liste.count() == 0 and lg.historique(vue.texte) == []
 
 
 def _fiche_note(fen, texte):
