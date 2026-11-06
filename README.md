@@ -14,21 +14,21 @@ Qt interface (PyQt6): Linux, Windows, macOS (Windows and macOS packages: coming)
 
 ## Installation
 
-**Debian / Ubuntu**: download `scrinium_0.6.1_all.deb` from the [**Releases page**](https://github.com/jfkneib/scrinium/releases/latest) (section *Assets*, at the bottom), or directly:
+**Debian / Ubuntu**: download `scrinium_0.7.0_all.deb` from the [**Releases page**](https://github.com/jfkneib/scrinium/releases/latest) (section *Assets*, at the bottom), or directly:
 
 ```bash
-wget https://github.com/jfkneib/scrinium/releases/download/v0.6.1/scrinium_0.6.1_all.deb
+wget https://github.com/jfkneib/scrinium/releases/download/v0.7.0/scrinium_0.7.0_all.deb
 ```
 
 then install it:
 
 ```bash
-sudo apt install ./scrinium_0.6.1_all.deb
+sudo apt install ./scrinium_0.7.0_all.deb
 ```
 
 To check the download, also get `SHA256SUMS` from the same page and run `sha256sum -c SHA256SUMS`.
 
-**Windows**: download `Scrinium-0.6.1-setup.exe` from the [Releases page](https://github.com/jfkneib/scrinium/releases/latest) (*Assets*) and double-click it. No administrator rights are needed (it installs for your user, in `%LOCALAPPDATA%\Programs\Scrinium`, with a Start menu shortcut and an entry in *Settings → Apps* to uninstall it). The installer is **not signed**: Windows shows "Windows protected your PC" the first time; click *More info*, then *Run anyway*. Your notes (`%APPDATA%\scrinium`) are never deleted. Extensions that need Linux tools (dictation, read aloud, capture and console) are greyed out on Windows.
+**Windows**: download `Scrinium-0.7.0-setup.exe` from the [Releases page](https://github.com/jfkneib/scrinium/releases/latest) (*Assets*) and double-click it. No administrator rights are needed (it installs for your user, in `%LOCALAPPDATA%\Programs\Scrinium`, with a Start menu shortcut and an entry in *Settings → Apps* to uninstall it). The installer is **not signed**: Windows shows "Windows protected your PC" the first time; click *More info*, then *Run anyway*. Your notes (`%APPDATA%\scrinium`) are never deleted. Extensions that need Linux tools (dictation, read aloud, capture and console) are greyed out on Windows.
 
 **Other distributions** (no root needed, from this repository):
 
@@ -94,7 +94,7 @@ scrinium rescue unlock "title" --key ~/rescue-file.pem    # puts the note back i
 
 ## Extensions
 
-Scrinium can be extended with plugins. Ten are shipped with it (and with the `.deb`): **read aloud** (a note, the selection or a whole topic, in French or English: Piper voice or espeak-ng; locked notes are never read), **agenda** (dated reminders, linked to a note or not), **applications** (a note of icons to launch Thunderbird, KWrite, LibreOffice…), **photos** (a note that keeps a folder path and shows its images as thumbnails; right-click an image to read its text into a new note), **OCR** (Tesseract, text of attached images), **dictation** (local faster-whisper), **email** (send a note by SMTP), **capture and console** (run a command into a note, send the selection to Konsole) **translation** (TranslateGemma through llama.cpp, no Ollama needed) and **sharing** (share notes through a small Scrinium server that you host yourself, `serveur/` folder). They are **disabled by default**:
+Scrinium can be extended with plugins. Fourteen are shipped with it (and with the `.deb`): **Calc** (a small list editor with totals per column and CSV export), **spreadsheet** (cells and formulas such as `=SOMME(B2:B10)`, with a formula bar), **budget** (small accounts with Debit and Credit columns, one tab per month, a summary, and a result note that totals your budgets), **calculator** (a floating mini calculator with a scientific mode), **read aloud** (a note, the selection or a whole topic, in French or English: Piper voice or espeak-ng; locked notes are never read), **agenda** (dated reminders, linked to a note or not), **applications** (a note of icons to launch Thunderbird, KWrite, LibreOffice…), **photos** (a note that keeps a folder path and shows its images as thumbnails; right-click an image to read its text into a new note), **OCR** (Tesseract, text of attached images), **dictation** (local faster-whisper), **email** (send a note by SMTP), **capture and console** (run a command into a note, send the selection to Konsole) **translation** (TranslateGemma through llama.cpp, no Ollama needed) and **sharing** (share notes through a small Scrinium server that you host yourself, `serveur/` folder). They are **disabled by default**; the first time you enable a note-type extension, example notes are added to get you started:
 *Extensions → Manage extensions…* lists them and enables them one by one, after a warning (an extension is Python code
 running with the same rights as Scrinium: only enable ones you trust). Drop an extension folder into
 `<data folder>/plugins/`, or install a package that provides one. Each one lists the optional programs it needs (Tesseract, faster-whisper, llama.cpp…) and asks before installing or downloading anything; nothing leaves your machine except the email you send. A working example is in [`plugins/hello`](plugins/hello);

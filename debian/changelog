@@ -1,18 +1,28 @@
-scrinium (0.6.1) unstable; urgency=medium
+scrinium (0.7.0) unstable; urgency=medium
 
-  * Nouvelle extension Calculatrice : une fiche « Calculatrice » (l'historique des
-    calculs reste dans la fiche) et une mini calculatrice flottante (bouton « Calc »,
-    « Insérer le résultat » au curseur). Calcul arithmétique sûr : rien n'est exécuté.
+  * Nouvelles extensions, chacune avec son type de fiche et des fiches d'exemple créées
+    à la première activation :
+    - Calc : un petit éditeur de listes (relevés, poids…) avec un total par colonne
+      (somme, moyenne, minimum, maximum, nombre), export et import CSV.
+    - Tableur : cellules (A1, B2…) et formules (=SOMME(B2:B10), =B2*C2…) avec une barre
+      de formule, totaux, export et import CSV.
+    - Budget : de petits comptes (courses, argent de poche…) avec colonnes Débit et
+      Crédit, solde, un onglet par mois avec son titre, un bilan, et une fiche
+      « Budget — résultat » qui totalise les budgets du thème (ou de tous).
+    - Calculatrice : une mini calculatrice flottante, avec un mode Scientifique
+      (sin, cos, tan, ln, log, racines, n!…, degrés ou radians) et « Insérer le résultat ».
+    Tous les calculs sont sûrs : rien n'est exécuté.
   * Aide → « Guide de Scrinium » : un thème de fiches qui présente le produit ; chaque
-    extension active y ajoute sa propre fiche de documentation (ctx.ajouter_doc).
+    extension active y ajoute sa documentation (ctx.ajouter_doc).
+  * Extensions : fiches d'exemple à la première activation (ctx.ajouter_exemple).
+  * Barre d'outils : les boutons des extensions n'affichent que l'icône, le nom reste
+    en infobulle ; le bouton « Applications » est retiré (la fiche suffit).
   * OCR : clic droit sur une image jointe → « Texte de l'image → nouvelle fiche » ou
     « → dans la fiche, au curseur ».
-  * Console : message clair quand Konsole refuse l'envoi direct (option D-Bus à cocher),
-    expliqué à chaque fois sauf si masqué.
-  * Corrections : la fenêtre n'est plus réduite en sortant du plein écran ; le bouton
-    « Applications » de la barre d'outils est retiré (la fiche suffit).
+  * Console : message clair quand Konsole refuse l'envoi direct (option D-Bus à cocher).
+  * Correction : la fenêtre n'est plus réduite en sortant du plein écran.
 
- -- Jean-François Kneib <kneib.jean-francois@cegetel.net>  Fri, 06 Nov 2026 12:00:00 +0100
+ -- Jean-François Kneib <kneib.jean-francois@cegetel.net>  Sat, 07 Nov 2026 12:00:00 +0100
 
 scrinium (0.6.0) unstable; urgency=medium
 
