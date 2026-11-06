@@ -36,6 +36,9 @@ class UiPlugin:
         a.setToolTip(texte)
         a.triggered.connect(self._appeler(fn))
         self._f.barre.addAction(a)
+        w = self._f.barre.widgetForAction(a)
+        if w is not None:                                   # boutons d'extensions : l'icône seule, le nom au survol (infobulle)
+            w.setToolButtonStyle(Qt.ToolButtonStyle.ToolButtonIconOnly)
         self._actions.append((self._f.barre, a))
         return a
 

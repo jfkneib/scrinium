@@ -393,7 +393,7 @@ msgid ""
 "Deux outils, une extension (Extensions > Gérer les extensions…).\n"
 "\n"
 "• Fiche « Calculatrice » : flèche du bouton « Fiche » > « Nouvelle fiche » > Calculatrice. Tapez un calcul, Entrée : la ligne « calcul = résultat » est ajoutée à la fiche (c'est l'historique, cherchable et partageable). Double-clic sur une ligne pour la reprendre.\n"
-"• Mini calculatrice : bouton « Calc » de la barre d'outils (ou menu Extensions). Pavé de touches ou clavier. Si du texte comme « 12*8 » est sélectionné dans la fiche, il est repris. « Insérer le résultat » le place au curseur de la fiche ; « Copier » le met dans le presse-papiers.\n"
+"• Mini calculatrice : bouton « Mini calculatrice » (icône) de la barre d'outils (ou menu Extensions). Pavé de touches ou clavier. Si du texte comme « 12*8 » est sélectionné dans la fiche, il est repris. « Insérer le résultat » le place au curseur de la fiche ; « Copier » le met dans le presse-papiers.\n"
 "\n"
 "Calculs permis : + − × ÷, ^ (puissance), %, parenthèses, pi, e et sqrt, abs, round, min, max, sin, cos, tan, ln, log, exp, floor, ceil. « 200*20% » donne 40. La virgule décimale est acceptée (1,5). Rien n'est exécuté : seules ces opérations sont comprises."
 msgstr ""
@@ -422,9 +422,6 @@ msgid "Copier"
 msgstr ""
 
 #: plugins/calculatrice/__init__.py:216
-msgid "Calc"
-msgstr ""
-
 #: plugins/calculatrice/__init__.py:217
 msgid "Mini calculatrice"
 msgstr ""
@@ -3741,47 +3738,47 @@ msgstr ""
 msgid "Icône de « %s » :"
 msgstr ""
 
-#: src/scrinium/ui/extensions.py:163
+#: src/scrinium/ui/extensions.py:166
 msgid "Extensions"
 msgstr ""
 
-#: src/scrinium/ui/extensions.py:166
+#: src/scrinium/ui/extensions.py:169
 msgid "Une extension est un programme qui s'exécute avec les mêmes droits que Scrinium : elle peut lire les fiches ouvertes. N'activez que des extensions dont vous connaissez l'origine."
 msgstr ""
 
-#: src/scrinium/ui/extensions.py:177
+#: src/scrinium/ui/extensions.py:180
 msgid "Ouvrir le dossier des extensions"
 msgstr ""
 
-#: src/scrinium/ui/extensions.py:217
+#: src/scrinium/ui/extensions.py:220
 msgid "Dossier utilisateur"
 msgstr ""
 
-#: src/scrinium/ui/extensions.py:207
+#: src/scrinium/ui/extensions.py:210
 msgid "Aucune extension installée. Déposez-en dans le dossier des extensions."
 msgstr ""
 
-#: src/scrinium/ui/extensions.py:217
+#: src/scrinium/ui/extensions.py:220
 msgid "Installée comme paquet"
 msgstr ""
 
-#: src/scrinium/ui/extensions.py:217
+#: src/scrinium/ui/extensions.py:220
 msgid "Fournie avec Scrinium"
 msgstr ""
 
-#: src/scrinium/ui/extensions.py:229
+#: src/scrinium/ui/extensions.py:232
 msgid "Activer l'extension"
 msgstr ""
 
-#: src/scrinium/ui/extensions.py:233
+#: src/scrinium/ui/extensions.py:236
 msgid "Extension"
 msgstr ""
 
-#: src/scrinium/ui/extensions.py:230
+#: src/scrinium/ui/extensions.py:233
 msgid "Activer « %s » ? Elle pourra lire les fiches ouvertes."
 msgstr ""
 
-#: src/scrinium/ui/extensions.py:233
+#: src/scrinium/ui/extensions.py:236
 msgid "Impossible d'activer : %s"
 msgstr ""
 

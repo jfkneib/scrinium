@@ -10,6 +10,7 @@ import pytest
 
 os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
 pytest.importorskip("PyQt6")
+from PyQt6.QtCore import Qt  # noqa: E402
 from PyQt6.QtWidgets import QApplication  # noqa: E402
 
 from scrinium.core.paths import Paths  # noqa: E402
@@ -149,7 +150,9 @@ def test_documentation_ajoutee_au_guide(fen):
 
 
 def test_bouton_et_menu(fen):
-    assert any(a.text() == "Calc" for a in fen.barre.actions())
+    a = next(a for a in fen.barre.actions() if a.text() == "Mini calculatrice")
+    w = fen.barre.widgetForAction(a)
+    assert w.toolButtonStyle() == Qt.ToolButtonStyle.ToolButtonIconOnly and a.toolTip() == "Mini calculatrice"   # icône seule, nom en infobulle
     assert any(a.text() == "Mini calculatrice" for a in fen.menu_ext.actions())
     fen.plugins.desactiver("calculatrice")
-    assert not any(a.text() == "Calc" for a in fen.barre.actions())
+    assert not any(a.text() == "Mini calculatrice" for a in fen.barre.actions())

@@ -5,7 +5,7 @@
 - Une fiche d'un nouveau type, `calculatrice` (`#scrinium-calculatrice`) : on tape un calcul, Entrée donne le résultat, et la ligne
   « calcul = résultat » est ajoutée à la fiche. Un double-clic sur une ligne de l'historique remet le calcul dans la zone de saisie.
   « Nouvelle fiche » (flèche du bouton « Fiche ») → « Calculatrice ».
-- Une mini calculatrice flottante (bouton « Calc » de la barre d'outils, ou menu Extensions) : pavé de touches, « Insérer le résultat »
+- Une mini calculatrice flottante (bouton « Mini calculatrice » (icône) de la barre d'outils, ou menu Extensions) : pavé de touches, « Insérer le résultat »
   au curseur de la fiche affichée. La sélection de la fiche (par exemple « 12*8 ») y est reprise à l'ouverture."""
 from PyQt6.QtCore import Qt, pyqtSignal
 from PyQt6.QtWidgets import (QApplication, QDialog, QGridLayout, QHBoxLayout, QLabel, QLineEdit, QListWidget, QListWidgetItem, QPushButton,
@@ -192,7 +192,7 @@ DOC = _(
     "• Fiche « Calculatrice » : flèche du bouton « Fiche » > « Nouvelle fiche » > Calculatrice. Tapez un calcul, Entrée : la ligne "
     "« calcul = résultat » est ajoutée à la fiche (c'est l'historique, cherchable et partageable). Double-clic sur une ligne pour "
     "la reprendre.\n"
-    "• Mini calculatrice : bouton « Calc » de la barre d'outils (ou menu Extensions). Pavé de touches ou clavier. Si du texte "
+    "• Mini calculatrice : bouton « Mini calculatrice » (icône) de la barre d'outils (ou menu Extensions). Pavé de touches ou clavier. Si du texte "
     "comme « 12*8 » est sélectionné dans la fiche, il est repris. « Insérer le résultat » le place au curseur de la fiche ; "
     "« Copier » le met dans le presse-papiers.\n"
     "\n"
@@ -213,7 +213,7 @@ class CalculatricePlugin(Plugin):
         if ctx.ui is None:
             return
         ctx.ui.enregistrer_type(logique.TYPE, VueCalculatrice())
-        ctx.ui.ajouter_bouton(_("Calc"), self.ouvrir_mini, "accessories-calculator")
+        ctx.ui.ajouter_bouton(_("Mini calculatrice"), self.ouvrir_mini, "accessories-calculator")
         ctx.ui.ajouter_action(_("Mini calculatrice"), self.ouvrir_mini, "accessories-calculator")
         ctx.ajouter_doc(_("Extension Calculatrice"), DOC)
 
