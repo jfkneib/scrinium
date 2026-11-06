@@ -3,15 +3,16 @@
 """Extension Scrinium « Tableur » : une fiche d'un nouveau type, `tableur` (`#scrinium-tableur`) : un mini tableur pour suivre des données, par
 exemple des relevés (voir `logique.py` : format, formules, calcul sûr).
 
-- La fiche montre une grille (colonnes A, B… ; lignes 1, 2…). La première ligne sert d'en-tête. Double-clic ou F2 : on modifie une cellule ;
-  une cellule qui commence par « = » est une formule (=B2*C2, =SOMME(B2:B10), =MOYENNE(B2:B10)…). On voit le résultat, on édite la formule.
-- « Ajouter une ligne » : si la première colonne s'appelle « Date », elle reçoit la date du jour. « Totaux » : une ligne de somme, moyenne,
-  minimum ou maximum. Clic droit : insérer ou supprimer des lignes et des colonnes. Suppr : vide les cellules. Ctrl+C / Ctrl+V : copier,
-  coller (tabulations : on peut coller depuis un autre tableur).
+- La fiche montre une grille vide (colonnes A, B… ; lignes 1, 2… ; la première cellule est A1). Au-dessus, une BARRE DE FORMULE montre le contenu
+  brut de la cellule choisie ; on le modifie là (Entrée) ou dans la cellule (double-clic, F2). Une cellule qui commence par « = » est une formule
+  (=A1*B1, =SOMME(B1:B10), =MOYENNE(B1:B10)…) : la grille montre le résultat, la barre la formule.
+- « Ajouter une ligne » : si A1 s'appelle « Date », la colonne A reçoit la date du jour. « Totaux » : une ligne de somme, moyenne, minimum ou
+  maximum sous les données. Clic droit : insérer ou supprimer des lignes et des colonnes. Suppr : vide les cellules. Ctrl+C / Ctrl+V : copier,
+  coller (tabulations : on peut coller depuis un autre tableur). Export et import CSV.
 - Le texte de la fiche reste un tableau Markdown lisible partout ; type non exécutable : la fiche ne lance rien."""
 from PyQt6.QtCore import Qt, pyqtSignal
-from PyQt6.QtGui import QBrush, QColor, QFont, QKeySequence
-from PyQt6.QtWidgets import (QAbstractItemView, QApplication, QFileDialog, QHBoxLayout, QLabel, QMenu, QMessageBox, QPushButton, QStyledItemDelegate,
+from PyQt6.QtGui import QBrush, QColor, QKeySequence
+from PyQt6.QtWidgets import (QAbstractItemView, QApplication, QFileDialog, QHBoxLayout, QLabel, QLineEdit, QMenu, QMessageBox, QPushButton, QStyledItemDelegate,
                              QTableWidget, QTableWidgetItem, QToolButton, QVBoxLayout, QWidget)
 
 from scrinium.core.plugins import Plugin
@@ -71,7 +72,18 @@ class VueTableur(QWidget):
             haut.addWidget(b)
         haut.addStretch(1)
         lay.addLayout(haut)
+        barre = QHBoxLayout()                    # barre de formule : nom de la cellule courante + son contenu brut
+        self.nom_cellule = QLabel("A1")
+        self.nom_cellule.setMinimumWidth(40)
+        self.nom_cellule.setStyleSheet("font-weight: bold;")
+        self.barre = QLineEdit()
+        self.barre.setPlaceholderText(_("Contenu de la cellule : un nombre, du texte, ou une formule comme =SOMME(A1:A5)"))
+        self.barre.returnPressed.connect(self._valider_barre)
+        barre.addWidget(self.nom_cellule)
+        barre.addWidget(self.barre, 1)
+        lay.addLayout(barre)
         self.table = QTableWidget()
+        self.table.currentCellChanged.connect(lambda *_a: self._maj_barre())
         self.table.setItemDelegate(_Delegue(self))
         self.table.setSelectionMode(QAbstractItemView.SelectionMode.ExtendedSelection)
         self.table.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
@@ -87,7 +99,22 @@ class VueTableur(QWidget):
         self.lignes = lignes or logique.vide()
         self._afficher()
 
+    def _maj_barre(self):
+        l, c = self.table.currentRow(), self.table.currentColumn()
+        ok = 0 <= l < len(self.lignes) and 0 <= c < len(self.lignes[0])
+        self.nom_cellule.setText(logique.nom_cellule(l, c) if ok else "")
+        self.barre.setText(self.lignes[l][c] if ok else "")
+        self.barre.setEnabled(ok)
+
+    def _valider_barre(self):
+        l, c = self.table.currentRow(), self.table.currentColumn()
+        if 0 <= l < len(self.lignes) and 0 <= c < len(self.lignes[0]):
+            self.modifier_cellule(l, c, self.barre.text())
+            self.table.setCurrentCell(min(l + 1, len(self.lignes) - 1), c)
+            self.table.setFocus()
+
     def _afficher(self):
+        courante = (self.table.currentRow(), self.table.currentColumn())
         self._remplit = True
         n_l, n_c = len(self.lignes), len(self.lignes[0])
         self.table.clear()
@@ -96,8 +123,6 @@ class VueTableur(QWidget):
         self.table.setHorizontalHeaderLabels([logique.nom_colonne(c) for c in range(n_c)])
         self.table.setVerticalHeaderLabels([str(i + 1) for i in range(n_l)])
         feuille = logique.Feuille(self.lignes)
-        gras = QFont(self.table.font())
-        gras.setBold(True)
         for l in range(n_l):
             for c in range(n_c):
                 brut = self.lignes[l][c]
@@ -107,17 +132,17 @@ class VueTableur(QWidget):
                     it.setToolTip(brut)
                     if feuille.est_erreur(l, c):
                         it.setForeground(QBrush(QColor("#c0392b")))
-                if l == 0:
-                    it.setFont(gras)
-                elif logique.nombre(brut) is not None or brut.strip().startswith("="):
+                if logique.nombre(brut) is not None or brut.strip().startswith("="):
                     it.setTextAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter)
                 self.table.setItem(l, c, it)
         self.table.resizeColumnsToContents()
         for c in range(n_c):
             self.table.setColumnWidth(c, max(90, self.table.columnWidth(c)))
-        self.etat.setText(_("%(l)d lignes, %(c)d colonnes. Une cellule qui commence par = est une formule, par exemple =SOMME(B2:B10).")
+        self.etat.setText(_("%(l)d lignes, %(c)d colonnes. Pour une formule : cliquez une cellule, tapez = puis la formule, par exemple =SOMME(A1:A5) ou =A1*B1, et Entrée.")
                           % {"l": n_l, "c": n_c})
         self._remplit = False
+        self.table.setCurrentCell(max(0, courante[0]), max(0, courante[1]))
+        self._maj_barre()
 
     def _enregistrer(self):
         self.modifie.emit(logique.ecrire(self.lignes, self.notes))
@@ -266,17 +291,21 @@ class TableurPlugin(Plugin):
 
 
 DOC = _(
-    "Un mini tableur pour suivre des données, par exemple des relevés (compteur, poids, dépenses…).\n"
+    "Un tableur pour des cellules et des formules, par exemple pour suivre des relevés (compteur, poids, dépenses…).\n"
     "\n"
-    "• Nouvelle fiche > « Tableur » : une grille avec les colonnes « Date » et « Valeur ». La première ligne est l'en-tête : renommez-la, ajoutez des colonnes.\n"
-    "• Double-clic (ou F2) sur une cellule pour la modifier. Un nombre s'écrit avec une virgule ou un point.\n"
-    "• « Ajouter une ligne » : si la première colonne s'appelle « Date », elle reçoit la date du jour. « Totaux » ajoute une ligne de somme, "
-    "moyenne, minimum ou maximum.\n"
-    "• Formules : une cellule qui commence par « = ». Exemples : =B2*C2, =SOMME(B2:B10), =MOYENNE(B2:B10), =MAX(B2:B10)-MIN(B2:B10), =B3-B2. "
+    "• Nouvelle fiche > « Tableur » : une grille vide. Les colonnes sont A, B, C… et les lignes 1, 2, 3… : la première cellule est A1.\n"
+    "• Cliquez une cellule et tapez : un nombre (virgule ou point), du texte, ou une FORMULE. Une formule commence par « = ». La barre au-dessus "
+    "de la grille montre le contenu de la cellule choisie (la formule, pas son résultat) : on peut aussi la modifier là, puis Entrée. "
+    "Double-clic ou F2 : modifier dans la cellule.\n"
+    "• Exemples de formules : =A1*B1, =B3-B2, =SOMME(B1:B10), =MOYENNE(B1:B10), =MAX(B1:B10)-MIN(B1:B10), =ARRONDI(A1/3;2). "
     "Fonctions : SOMME, MOYENNE, MIN, MAX, NB, ABS, ARRONDI, RACINE, ENT. Opérations : + - * / ^ %. Les erreurs s'affichent dans la cellule "
     "(#DIV/0!, #REF!, #CYCLE!…).\n"
+    "• Si la première colonne s'appelle « Date » (cellule A1), « Ajouter une ligne » y met la date du jour. « Totaux » ajoute une ligne de somme, "
+    "moyenne, minimum ou maximum sous les données.\n"
     "• Clic droit : insérer ou supprimer des lignes et des colonnes. Suppr vide les cellules. Ctrl+C et Ctrl+V : copier, coller (on peut "
     "coller depuis un autre tableur).\n"
-    "• « Exporter en CSV… » écrit les résultats dans un fichier (séparateur « ; », que LibreOffice et Excel ouvrent directement) ; « Importer un CSV… » remplace le tableau par un fichier.\n"
+    "• « Exporter en CSV… » écrit les résultats dans un fichier (séparateur « ; », que LibreOffice et Excel ouvrent directement) ; « Importer "
+    "un CSV… » remplace le tableau par un fichier.\n"
     "• Le texte de la fiche est un tableau Markdown : lisible partout, cherchable, partageable, verrouillable. Rien n'est exécuté : seules "
-    "ces opérations sont comprises. L'impression et l'export PDF montrent les résultats.")
+    "ces opérations sont comprises. L'impression et l'export PDF montrent les résultats.\n"
+    "• Pour une simple liste avec des totaux par colonne, voyez l'extension Calc.")

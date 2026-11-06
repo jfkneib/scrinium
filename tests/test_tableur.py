@@ -93,7 +93,12 @@ def test_aides_a_l_edition():
     assert plus[-1] == ["2026-11-08", "", ""] and len(plus) == 4
     assert lg.ajouter_ligne([["Nom", "Qté"]], date(2026, 1, 1))[-1] == ["", ""]                      # pas de « Date » : pas de date
     tot = lg.ligne_de_totaux(lignes[:3], "MOYENNE", "Moyenne")
-    assert tot[-1] == ["Moyenne", "=MOYENNE(B2:B3)", "=MOYENNE(C2:C3)"] and feuille(lg.ecrire(tot)).affichage(3, 1) == "12,75"
+    assert tot[-1] == ["Moyenne", "=MOYENNE(B1:B3)", "=MOYENNE(C1:C3)"] and feuille(lg.ecrire(tot)).affichage(3, 1) == "12,75"
+    # grille vide : les totaux vont dans la première ligne vide sous les données (ici la 3e, sans agrandir la grille)
+    grille = lg.vide(3, 6)
+    grille[0][1], grille[1][1] = "4", "6"
+    tot = lg.ligne_de_totaux(grille, "SOMME")
+    assert len(tot) == 6 and tot[2] == ["Somme", "=SOMME(B1:B2)", "=SOMME(C1:C2)"] and lg.Feuille(tot).affichage(2, 1) == "10"
 
 
 def test_rendu_impression_avec_les_resultats():
@@ -128,38 +133,49 @@ def _nouvelle(fen):
     return fen.vues_types["tableur"]
 
 
-def test_nouvelle_fiche_grille_formules_et_sauvegarde(fen):
+def test_nouvelle_fiche_grille_vide_formules_et_barre(fen):
     vue = _nouvelle(fen)
-    assert fen.pile.currentWidget() is vue and fen.fiche.texte.startswith("#scrinium-tableur") and vue.table.columnCount() == 2
-    assert vue.table.rowCount() == 6 and vue.table.item(0, 0).text() == "Date"
-    vue.modifier_cellule(1, 1, "10")
-    vue.modifier_cellule(2, 1, "12,5")
-    vue.modifier_cellule(3, 1, "=SOMME(B2:B3)")
-    assert vue.table.item(3, 1).text() == "22,5" and vue.table.item(3, 1).data(0x0100) == "=SOMME(B2:B3)"      # affiché / brut
+    assert fen.pile.currentWidget() is vue and fen.fiche.texte.startswith("#scrinium-tableur")
+    assert vue.table.rowCount() == 12 and vue.table.columnCount() == 6 and vue.table.item(0, 0).text() == "" and vue.nom_cellule.text() == "A1"
+    vue.modifier_cellule(0, 0, "10")
+    vue.modifier_cellule(1, 0, "12,5")
+    vue.modifier_cellule(2, 0, "=SOMME(A1:A2)")
+    assert vue.table.item(2, 0).text() == "22,5" and vue.table.item(2, 0).data(0x0100) == "=SOMME(A1:A2)"      # affiché / brut
     fen.sauver()
-    assert "=SOMME(B2:B3)" in fen.fiche.texte and "| 12,5 |" in fen.fiche.texte
-    vue.modifier_cellule(3, 1, "=1/0")
-    assert vue.table.item(3, 1).text() == "#DIV/0!"
+    assert "=SOMME(A1:A2)" in fen.fiche.texte and "| 12,5 |" in fen.fiche.texte
+    vue.table.setCurrentCell(2, 0)                                                 # la barre de formule montre la FORMULE, pas le résultat
+    assert vue.nom_cellule.text() == "A3" and vue.barre.text() == "=SOMME(A1:A2)"
+    vue.barre.setText("=A1*A2")
+    vue.barre.returnPressed.emit()
+    assert vue.table.item(2, 0).text() == "125" and vue.table.currentRow() == 3     # Entrée valide et descend d'une cellule
+    vue.modifier_cellule(2, 0, "=1/0")
+    assert vue.table.item(2, 0).text() == "#DIV/0!"
 
 
-def test_lignes_colonnes_totaux_et_date(fen, monkeypatch):
+def test_lignes_colonnes_totaux_et_date(fen):
     vue = _nouvelle(fen)
+    vue.modifier_cellule(0, 0, "Date")
+    vue.modifier_cellule(0, 1, "Valeur")
     vue.modifier_cellule(1, 1, "4")
-    vue.ajouter_ligne()
-    assert vue.table.rowCount() == 7 and vue.table.item(6, 0).text() == date.today().isoformat()
-    vue.ajouter_colonne()
-    assert vue.table.columnCount() == 3
     vue.totaux("SOMME", "Somme")
-    assert vue.table.item(7, 0).text() == "Somme" and vue.table.item(7, 1).text() == "4"
-    vue.supprimer_lignes([0, 7])                                                   # l'en-tête reste
-    assert vue.table.rowCount() == 7 and vue.table.item(0, 0).text() == "Date"
+    assert vue.table.item(2, 0).text() == "Somme" and vue.table.item(2, 1).text() == "4"      # dans la première ligne vide sous les données
+    assert vue.table.rowCount() == 12
+    vue.supprimer_lignes([2])
+    assert vue.table.rowCount() == 11
+    vue.ajouter_ligne()
+    assert vue.table.rowCount() == 12 and vue.table.item(11, 0).text() == date.today().isoformat()
+    vue.ajouter_colonne()
+    assert vue.table.columnCount() == 7
+    vue.inserer_ligne(5)
+    vue.supprimer_lignes([5])
     vue.inserer_ligne(1)
-    assert vue.table.rowCount() == 8
-    vue.supprimer_colonnes([2])
+    assert vue.table.rowCount() == 13
+    vue.supprimer_colonnes([6])
     vue.inserer_colonne(0)
-    assert vue.table.columnCount() == 3
-    vue.vider([(1, 1)])
-    assert vue.lignes[1][1] == ""
+    assert vue.table.columnCount() == 7
+    assert vue.lignes[2][2] == "4"                                                 # la colonne insérée à gauche a décalé les données
+    vue.vider([(2, 2)])
+    assert vue.lignes[2][2] == ""
 
 
 def test_copier_coller_depuis_un_autre_tableur(fen):
@@ -169,7 +185,7 @@ def test_copier_coller_depuis_un_autre_tableur(fen):
     vue.table.selectRow(1)
     vue.table.setCurrentCell(1, 0)
     vue.coller()
-    assert vue.lignes[1][:3] == ["a", "b", "c"] and vue.lignes[2][:3] == ["1", "2", "3"] and vue.table.columnCount() == 3
+    assert vue.lignes[1][:3] == ["a", "b", "c"] and vue.lignes[2][:3] == ["1", "2", "3"] and vue.table.columnCount() == 6
     vue.table.clearSelection()
     vue.table.setRangeSelected(QTableWidgetSelectionRange(1, 0, 2, 1), True)
     vue.copier()

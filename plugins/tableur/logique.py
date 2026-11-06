@@ -81,10 +81,9 @@ def _ligne(cellules: list) -> str:
     return "| " + " | ".join(str(c).replace("|", "\\|").replace("\n", " ") for c in cellules) + " |"
 
 
-def vide(colonnes: int = 2, lignes: int = 5) -> list:
-    """Tableau neuf : une ligne d'en-têtes (Date, Valeur…) et des lignes vides."""
-    entetes = [_("Date"), _("Valeur")] + [""] * max(0, colonnes - 2)
-    return [entetes[:colonnes]] + [[""] * colonnes for _i in range(lignes)]
+def vide(colonnes: int = 6, lignes: int = 12) -> list:
+    """Tableau neuf : une grille vide (A1 est la première cellule, comme dans tous les tableurs)."""
+    return [[""] * colonnes for _i in range(lignes)]
 
 
 def texte_neuf() -> str:
@@ -359,10 +358,14 @@ def en_markdown(texte: str) -> str:
 def vers_csv(lignes: list, separateur: str = ";") -> str:
     """CSV (RÉSULTATS des formules, pas les formules) ; « ; » par défaut, que les tableurs français ouvrent directement."""
     f = Feuille(lignes)
+    calcule = [[f.affichage(l, c) for c in range(len(lignes[l]))] for l in range(len(lignes))]
+    while calcule and not any(calcule[-1]):                    # la grille vide du bas n'est pas exportée
+        calcule.pop()
+    largeur = max((max((i + 1 for i, v in enumerate(r) if v), default=0) for r in calcule), default=0)
     sortie = io.StringIO()
     w = csv.writer(sortie, delimiter=separateur, lineterminator="\n")
-    for l in range(len(lignes)):
-        w.writerow([f.affichage(l, c) for c in range(len(lignes[l]))])
+    for r in calcule:
+        w.writerow(r[:largeur])
     return sortie.getvalue()
 
 
@@ -389,12 +392,17 @@ def ajouter_ligne(lignes: list, aujourdhui: date | None = None) -> list:
 
 
 def ligne_de_totaux(lignes: list, fonction: str = "SOMME", libelle: str = "") -> list:
-    """Ajoute une ligne de totaux (SOMME, MOYENNE, MIN, MAX) sous les données, pour chaque colonne sauf la première."""
+    """Met une ligne de totaux (SOMME, MOYENNE, MIN, MAX) sous les données : dans la première ligne vide après la dernière ligne remplie
+    (ou à la fin). Chaque colonne sauf la première totalise les lignes du dessus (le texte, comme un en-tête, est ignoré)."""
     if not lignes:
         return lignes
     n = len(lignes[0])
-    fin = len(lignes)                                 # dernière ligne de données (numérotée à partir de 1)
-    totaux = [libelle or fonction.capitalize()] + [f"={fonction}({nom_colonne(c)}2:{nom_colonne(c)}{fin})" for c in range(1, n)]
+    derniere = max((i for i, r in enumerate(lignes) if any(c.strip() for c in r)), default=-1)      # base 0
+    totaux = [libelle or fonction.capitalize()] + [f"={fonction}({nom_colonne(c)}1:{nom_colonne(c)}{derniere + 1})" for c in range(1, n)]
+    lignes = [list(r) for r in lignes]
+    if derniere + 1 < len(lignes):
+        lignes[derniere + 1] = totaux
+        return lignes
     return lignes + [totaux]
 
 

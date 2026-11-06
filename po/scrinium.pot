@@ -35,7 +35,6 @@ msgstr ""
 
 #: plugins/agenda/__init__.py:47
 #: plugins/calc/logique.py:82
-#: plugins/tableur/logique.py:86
 msgid "Date"
 msgstr ""
 
@@ -409,22 +408,22 @@ msgid "Aucun total"
 msgstr ""
 
 #: plugins/calc/__init__.py:23
-#: plugins/tableur/__init__.py:63
+#: plugins/tableur/__init__.py:64
 msgid "Somme"
 msgstr ""
 
 #: plugins/calc/__init__.py:23
-#: plugins/tableur/__init__.py:63
+#: plugins/tableur/__init__.py:64
 msgid "Moyenne"
 msgstr ""
 
 #: plugins/calc/__init__.py:23
-#: plugins/tableur/__init__.py:63
+#: plugins/tableur/__init__.py:64
 msgid "Minimum"
 msgstr ""
 
 #: plugins/calc/__init__.py:23
-#: plugins/tableur/__init__.py:63
+#: plugins/tableur/__init__.py:64
 msgid "Maximum"
 msgstr ""
 
@@ -433,35 +432,35 @@ msgid "Nombre"
 msgstr ""
 
 #: plugins/calc/__init__.py:40
-#: plugins/tableur/__init__.py:53
+#: plugins/tableur/__init__.py:54
 msgid "Ajouter une ligne"
 msgstr ""
 
 #: plugins/calc/__init__.py:42
-#: plugins/tableur/__init__.py:55
+#: plugins/tableur/__init__.py:56
 msgid "Ajouter une colonne"
 msgstr ""
 
 #: plugins/calc/__init__.py:44
-#: plugins/tableur/__init__.py:66
+#: plugins/tableur/__init__.py:67
 #: src/scrinium/ui/repertoire.py:136
 msgid "Exporter en CSV…"
 msgstr ""
 
 #: plugins/calc/__init__.py:46
-#: plugins/tableur/__init__.py:68
+#: plugins/tableur/__init__.py:69
 #: src/scrinium/ui/repertoire.py:134
 msgid "Importer un CSV…"
 msgstr ""
 
 #: plugins/calc/__init__.py:228
-#: plugins/tableur/__init__.py:148
+#: plugins/tableur/__init__.py:173
 #: src/scrinium/ui/repertoire.py:397
 msgid "Exporter en CSV"
 msgstr ""
 
 #: plugins/calc/__init__.py:228
-#: plugins/tableur/__init__.py:148
+#: plugins/tableur/__init__.py:173
 msgid "Fichiers CSV (*.csv)"
 msgstr ""
 
@@ -472,7 +471,7 @@ msgid "Importer un CSV"
 msgstr ""
 
 #: plugins/calc/__init__.py:235
-#: plugins/tableur/__init__.py:156
+#: plugins/tableur/__init__.py:181
 msgid "Fichiers CSV (*.csv *.txt);;Tous les fichiers (*)"
 msgstr ""
 
@@ -495,53 +494,53 @@ msgid "Copier"
 msgstr ""
 
 #: plugins/calc/__init__.py:215
-#: plugins/tableur/__init__.py:245
+#: plugins/tableur/__init__.py:270
 msgid "Coller"
 msgstr ""
 
 #: plugins/calc/__init__.py:217
-#: plugins/tableur/__init__.py:247
+#: plugins/tableur/__init__.py:272
 msgid "Insérer une ligne au-dessus"
 msgstr ""
 
 #: plugins/calc/__init__.py:218
-#: plugins/tableur/__init__.py:248
+#: plugins/tableur/__init__.py:273
 msgid "Insérer une ligne en dessous"
 msgstr ""
 
 #: plugins/calc/__init__.py:219
-#: plugins/tableur/__init__.py:249
+#: plugins/tableur/__init__.py:274
 msgid "Supprimer la ligne"
 msgstr ""
 
 #: plugins/calc/__init__.py:221
-#: plugins/tableur/__init__.py:251
+#: plugins/tableur/__init__.py:276
 msgid "Insérer une colonne à gauche"
 msgstr ""
 
 #: plugins/calc/__init__.py:222
-#: plugins/tableur/__init__.py:252
+#: plugins/tableur/__init__.py:277
 msgid "Insérer une colonne à droite"
 msgstr ""
 
 #: plugins/calc/__init__.py:223
-#: plugins/tableur/__init__.py:253
+#: plugins/tableur/__init__.py:278
 #: src/scrinium/ui/repertoire.py:90
 msgid "Supprimer la colonne"
 msgstr ""
 
 #: plugins/calc/__init__.py:245
-#: plugins/tableur/__init__.py:166
+#: plugins/tableur/__init__.py:191
 msgid "Ce fichier ne contient aucun tableau."
 msgstr ""
 
 #: plugins/calc/__init__.py:232
-#: plugins/tableur/__init__.py:152
+#: plugins/tableur/__init__.py:177
 msgid "Exporté : %s"
 msgstr ""
 
 #: plugins/calc/__init__.py:248
-#: plugins/tableur/__init__.py:169
+#: plugins/tableur/__init__.py:194
 msgid "Remplacer le contenu actuel de la fiche par ce fichier ?"
 msgstr ""
 
@@ -550,7 +549,6 @@ msgid "Calc"
 msgstr ""
 
 #: plugins/calc/logique.py:82
-#: plugins/tableur/logique.py:86
 msgid "Valeur"
 msgstr ""
 
@@ -2272,32 +2270,37 @@ msgstr ""
 msgid "Photos"
 msgstr ""
 
-#: plugins/tableur/__init__.py:268
+#: plugins/tableur/__init__.py:293
 msgid ""
-"Un mini tableur pour suivre des données, par exemple des relevés (compteur, poids, dépenses…).\n"
+"Un tableur pour des cellules et des formules, par exemple pour suivre des relevés (compteur, poids, dépenses…).\n"
 "\n"
-"• Nouvelle fiche > « Tableur » : une grille avec les colonnes « Date » et « Valeur ». La première ligne est l'en-tête : renommez-la, ajoutez des colonnes.\n"
-"• Double-clic (ou F2) sur une cellule pour la modifier. Un nombre s'écrit avec une virgule ou un point.\n"
-"• « Ajouter une ligne » : si la première colonne s'appelle « Date », elle reçoit la date du jour. « Totaux » ajoute une ligne de somme, moyenne, minimum ou maximum.\n"
-"• Formules : une cellule qui commence par « = ». Exemples : =B2*C2, =SOMME(B2:B10), =MOYENNE(B2:B10), =MAX(B2:B10)-MIN(B2:B10), =B3-B2. Fonctions : SOMME, MOYENNE, MIN, MAX, NB, ABS, ARRONDI, RACINE, ENT. Opérations : + - * / ^ %. Les erreurs s'affichent dans la cellule (#DIV/0!, #REF!, #CYCLE!…).\n"
+"• Nouvelle fiche > « Tableur » : une grille vide. Les colonnes sont A, B, C… et les lignes 1, 2, 3… : la première cellule est A1.\n"
+"• Cliquez une cellule et tapez : un nombre (virgule ou point), du texte, ou une FORMULE. Une formule commence par « = ». La barre au-dessus de la grille montre le contenu de la cellule choisie (la formule, pas son résultat) : on peut aussi la modifier là, puis Entrée. Double-clic ou F2 : modifier dans la cellule.\n"
+"• Exemples de formules : =A1*B1, =B3-B2, =SOMME(B1:B10), =MOYENNE(B1:B10), =MAX(B1:B10)-MIN(B1:B10), =ARRONDI(A1/3;2). Fonctions : SOMME, MOYENNE, MIN, MAX, NB, ABS, ARRONDI, RACINE, ENT. Opérations : + - * / ^ %. Les erreurs s'affichent dans la cellule (#DIV/0!, #REF!, #CYCLE!…).\n"
+"• Si la première colonne s'appelle « Date » (cellule A1), « Ajouter une ligne » y met la date du jour. « Totaux » ajoute une ligne de somme, moyenne, minimum ou maximum sous les données.\n"
 "• Clic droit : insérer ou supprimer des lignes et des colonnes. Suppr vide les cellules. Ctrl+C et Ctrl+V : copier, coller (on peut coller depuis un autre tableur).\n"
 "• « Exporter en CSV… » écrit les résultats dans un fichier (séparateur « ; », que LibreOffice et Excel ouvrent directement) ; « Importer un CSV… » remplace le tableau par un fichier.\n"
-"• Le texte de la fiche est un tableau Markdown : lisible partout, cherchable, partageable, verrouillable. Rien n'est exécuté : seules ces opérations sont comprises. L'impression et l'export PDF montrent les résultats."
+"• Le texte de la fiche est un tableau Markdown : lisible partout, cherchable, partageable, verrouillable. Rien n'est exécuté : seules ces opérations sont comprises. L'impression et l'export PDF montrent les résultats.\n"
+"• Pour une simple liste avec des totaux par colonne, voyez l'extension Calc."
 msgstr ""
 
-#: plugins/tableur/__init__.py:58
+#: plugins/tableur/__init__.py:59
 msgid "Totaux"
 msgstr ""
 
-#: plugins/tableur/__init__.py:262
+#: plugins/tableur/__init__.py:80
+msgid "Contenu de la cellule : un nombre, du texte, ou une formule comme =SOMME(A1:A5)"
+msgstr ""
+
+#: plugins/tableur/__init__.py:287
 msgid "Extension Tableur"
 msgstr ""
 
-#: plugins/tableur/__init__.py:118
-msgid "%(l)d lignes, %(c)d colonnes. Une cellule qui commence par = est une formule, par exemple =SOMME(B2:B10)."
+#: plugins/tableur/__init__.py:141
+msgid "%(l)d lignes, %(c)d colonnes. Pour une formule : cliquez une cellule, tapez = puis la formule, par exemple =SOMME(A1:A5) ou =A1*B1, et Entrée."
 msgstr ""
 
-#: plugins/tableur/logique.py:401
+#: plugins/tableur/logique.py:409
 msgid "Tableur"
 msgstr ""
 
