@@ -39,6 +39,21 @@ def test_refus_et_securite(expr):
         lg.calculer(expr)
 
 
+@pytest.mark.parametrize("expr,degres,attendu", [
+    ("sin(30)", True, "0.5"), ("sin(180)", True, "0"), ("cos(60)", True, "0.5"), ("tan(45)", True, "1"), ("asin(1)", True, "90"),
+    ("acos(0.5)", True, "60"), ("sin(pi/2)", False, "1"), ("atan(1)", False, "0.785398163397"), ("5!", False, "120"), ("(2+3)!", False, "120"),
+    ("0!", False, "1"), ("ln(e)", False, "1"), ("log(1000)", False, "3"), ("log2(8)", False, "3"), ("exp(0)", False, "1"), ("cbrt(27)", False, "3"),
+    ("sinh(0)", False, "0"), ("deg(pi)", False, "180"), ("rad(180)", False, "3.14159265359"), ("2^0.5", False, "1.41421356237"), ("1/(4)", False, "0.25")])
+def test_fonctions_scientifiques(expr, degres, attendu):
+    assert lg.calcul_texte(expr, degres) == attendu
+
+
+@pytest.mark.parametrize("expr", ["tan(90)", "sqrt(-1)", "ln(0)", "asin(2)", "171!", "0.5!", "(-1)!", "fact(1,2)", "sin()", "log(0)"])
+def test_scientifique_hors_domaine(expr):
+    with pytest.raises(lg.ErreurCalcul):
+        lg.calculer(expr, True)
+
+
 def test_aucun_code_execute(tmp_path):
     marque = tmp_path / "pwn"
     with pytest.raises(lg.ErreurCalcul):
@@ -98,6 +113,26 @@ def test_mini_calculatrice_insere_au_curseur(fen):
     mini.saisie.setText("1/0")
     mini.touche("=")
     assert "zéro" in mini.resultat.text() and mini.saisie.text() == "1/0"
+    mini.close()
+
+
+def test_mode_scientifique_et_unite_des_angles(fen):
+    instance = fen.plugins.actifs["calculatrice"][0]
+    instance.ouvrir_mini()
+    mini = instance.mini
+    assert mini.zone_sci.isHidden() and mini.degres and mini.b_angle.text() == "Deg"
+    mini.b_scientifique.setChecked(True)
+    assert not mini.zone_sci.isHidden()
+    for t in ("sin(", "30", ")"):
+        mini.touche(t)
+    assert mini.resultat.text() == "= 0.5"                                    # degrés par défaut
+    mini.b_angle.setChecked(False)
+    assert mini.b_angle.text() == "Rad" and mini.resultat.text() != "= 0.5"   # l'aperçu suit l'unité
+    mini.touche("C")
+    for t in ("5", "!"):
+        mini.touche(t)
+    assert mini.resultat.text() == "= 120"
+    assert fen.plugins.actifs["calculatrice"][1].reglages.get("scientifique") is True
     mini.close()
 
 

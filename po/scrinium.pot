@@ -488,7 +488,7 @@ msgid "%(l)d lignes, %(c)d colonnes. La ligne grisée du bas donne un total par 
 msgstr ""
 
 #: plugins/calc/__init__.py:214
-#: plugins/calculatrice/__init__.py:59
+#: plugins/calculatrice/__init__.py:87
 #: plugins/ocr/__init__.py:114
 msgid "Copier"
 msgstr ""
@@ -552,72 +552,91 @@ msgstr ""
 msgid "Valeur"
 msgstr ""
 
-#: plugins/calculatrice/__init__.py:117
+#: plugins/calculatrice/__init__.py:161
 msgid ""
 "Une mini calculatrice flottante pour un calcul rapide, sans quitter votre fiche.\n"
 "\n"
 "• Bouton « Mini calculatrice » (icône de la barre d'outils) ou menu Extensions. Pavé de touches ou clavier ; Entrée donne le résultat, qu'on peut enchaîner.\n"
+"• Bouton « Scientifique » : ajoute les fonctions sin, cos, tan, asin, acos, atan, ln, log, exp, racines, puissances, factorielle (n!), π et e. Le bouton « Deg / Rad » choisit l'unité des angles (degrés ou radians) ; le choix est retenu.\n"
 "• Si du texte comme « 12*8 » est sélectionné dans la fiche, il est repris à l'ouverture. « Insérer le résultat » le place au curseur de la fiche ; « Copier » le met dans le presse-papiers.\n"
 "\n"
-"Calculs permis : + − × ÷, ^ (puissance), %, parenthèses, pi, e et sqrt, abs, round, min, max, sin, cos, tan, ln, log, exp, floor, ceil. « 200*20% » donne 40. La virgule décimale est acceptée (1,5). Rien n'est exécuté : seules ces opérations sont comprises.\n"
+"On peut aussi taper : + − × ÷, ^ (puissance), %, parenthèses, pi, e, sqrt, cbrt, abs, round, min, max, sin, cos, tan, asin, acos, atan, sinh, cosh, tanh, ln, log (base 10), log2, exp, floor, ceil, rad, deg, 5! (factorielle). « 200*20% » donne 40, « sin(30) » donne 0,5 en degrés. La virgule décimale est acceptée (1,5). Rien n'est exécuté : seules ces opérations sont comprises.\n"
 "• Pour suivre des données : extensions Calc (listes avec totaux) et Tableur (cellules et formules)."
 msgstr ""
 
-#: plugins/calculatrice/__init__.py:35
+#: plugins/calculatrice/__init__.py:40
 msgid "Calculatrice"
 msgstr ""
 
-#: plugins/calculatrice/__init__.py:57
+#: plugins/calculatrice/__init__.py:54
+msgid "Scientifique"
+msgstr ""
+
+#: plugins/calculatrice/__init__.py:61
+msgid "Unité des angles pour sin, cos, tan, asin, acos, atan : degrés ou radians"
+msgstr ""
+
+#: plugins/calculatrice/__init__.py:85
 msgid "Insérer le résultat"
 msgstr ""
 
-#: plugins/calculatrice/__init__.py:142
-#: plugins/calculatrice/__init__.py:143
+#: plugins/calculatrice/__init__.py:189
+#: plugins/calculatrice/__init__.py:190
 msgid "Mini calculatrice"
 msgstr ""
 
-#: plugins/calculatrice/__init__.py:144
+#: plugins/calculatrice/__init__.py:191
 msgid "Extension Calculatrice"
 msgstr ""
 
-#: plugins/calculatrice/__init__.py:104
+#: plugins/calculatrice/__init__.py:107
+msgid "Deg"
+msgstr ""
+
+#: plugins/calculatrice/__init__.py:107
+msgid "Rad"
+msgstr ""
+
+#: plugins/calculatrice/__init__.py:148
 msgid "Rien à insérer."
 msgstr ""
 
-#: plugins/calculatrice/__init__.py:114
+#: plugins/calculatrice/__init__.py:158
 msgid "Copié dans le presse-papiers."
 msgstr ""
 
-#: plugins/calculatrice/__init__.py:106
+#: plugins/calculatrice/__init__.py:150
 msgid "Résultat inséré dans la fiche."
 msgstr ""
 
-#: plugins/calculatrice/__init__.py:108
+#: plugins/calculatrice/__init__.py:152
 msgid "Aucune fiche modifiable : ouvrez une fiche, puis cliquez dans sa note."
 msgstr ""
 
-#: plugins/calculatrice/logique.py:52
-#: plugins/calculatrice/logique.py:69
+#: plugins/calculatrice/logique.py:87
+#: plugins/calculatrice/logique.py:105
 msgid "Expression non comprise"
 msgstr ""
 
-#: plugins/calculatrice/logique.py:59
-msgid "Rien à calculer"
-msgstr ""
-
-#: plugins/calculatrice/logique.py:61
-msgid "Expression trop longue"
-msgstr ""
-
-#: plugins/calculatrice/logique.py:71
+#: plugins/calculatrice/logique.py:25
+#: plugins/calculatrice/logique.py:107
+#: plugins/calculatrice/logique.py:42
 msgid "Résultat impossible"
 msgstr ""
 
-#: plugins/calculatrice/logique.py:48
+#: plugins/calculatrice/logique.py:95
+msgid "Rien à calculer"
+msgstr ""
+
+#: plugins/calculatrice/logique.py:97
+msgid "Expression trop longue"
+msgstr ""
+
+#: plugins/calculatrice/logique.py:79
 msgid "Exposant trop grand"
 msgstr ""
 
-#: plugins/calculatrice/logique.py:67
+#: plugins/calculatrice/logique.py:103
 msgid "Division par zéro"
 msgstr ""
 
