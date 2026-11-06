@@ -1,3 +1,19 @@
+scrinium (0.6.1) unstable; urgency=medium
+
+  * Nouvelle extension Calculatrice : une fiche « Calculatrice » (l'historique des
+    calculs reste dans la fiche) et une mini calculatrice flottante (bouton « Calc »,
+    « Insérer le résultat » au curseur). Calcul arithmétique sûr : rien n'est exécuté.
+  * Aide → « Guide de Scrinium » : un thème de fiches qui présente le produit ; chaque
+    extension active y ajoute sa propre fiche de documentation (ctx.ajouter_doc).
+  * OCR : clic droit sur une image jointe → « Texte de l'image → nouvelle fiche » ou
+    « → dans la fiche, au curseur ».
+  * Console : message clair quand Konsole refuse l'envoi direct (option D-Bus à cocher),
+    expliqué à chaque fois sauf si masqué.
+  * Corrections : la fenêtre n'est plus réduite en sortant du plein écran ; le bouton
+    « Applications » de la barre d'outils est retiré (la fiche suffit).
+
+ -- Jean-François Kneib <kneib.jean-francois@cegetel.net>  Fri, 06 Nov 2026 12:00:00 +0100
+
 scrinium (0.6.0) unstable; urgency=medium
 
   * Applications et Actions CLI sans panneau : la fiche est l'écran. Applications :
