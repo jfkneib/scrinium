@@ -1,3 +1,9 @@
+scrinium (0.7.1) unstable; urgency=medium
+
+  * Calculatrice : la racine cubique fonctionne aussi avec Python 3.10 (Ubuntu 22.04).
+
+ -- Jean-François Kneib <kneib.jean-francois@cegetel.net>  Sat, 07 Nov 2026 18:00:00 +0100
+
 scrinium (0.7.0) unstable; urgency=medium
 
   * Nouvelles extensions, chacune avec son type de fiche et des fiches d'exemple créées

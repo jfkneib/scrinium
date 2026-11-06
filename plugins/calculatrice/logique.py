@@ -15,7 +15,14 @@ _BINAIRES = {ast.Add: operator.add, ast.Sub: operator.sub, ast.Mult: operator.mu
              ast.FloorDiv: operator.floordiv, ast.Mod: operator.mod, ast.Pow: operator.pow}
 _UNAIRES = {ast.UAdd: operator.pos, ast.USub: operator.neg}
 MAX_FACTORIELLE = 170
-FONCTIONS = {"sqrt": math.sqrt, "cbrt": math.cbrt, "abs": abs, "round": round, "min": min, "max": max, "ln": math.log, "log": math.log10,
+def _cbrt(x):
+    """Racine cubique (math.cbrt n'existe qu'à partir de Python 3.11)."""
+    r = round(abs(x) ** (1 / 3))
+    r = float(r) if r ** 3 == abs(x) else abs(x) ** (1 / 3)
+    return -r if x < 0 else r
+
+
+FONCTIONS = {"sqrt": math.sqrt, "cbrt": _cbrt, "abs": abs, "round": round, "min": min, "max": max, "ln": math.log, "log": math.log10,
              "log2": math.log2, "exp": math.exp, "floor": math.floor, "ceil": math.ceil, "sinh": math.sinh, "cosh": math.cosh,
              "tanh": math.tanh, "rad": math.radians, "deg": math.degrees}
 
