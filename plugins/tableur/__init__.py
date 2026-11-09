@@ -10,6 +10,7 @@ exemple des relevés (voir `logique.py` : format, formules, calcul sûr).
   maximum sous les données. Clic droit : insérer ou supprimer des lignes et des colonnes. Suppr : vide les cellules. Ctrl+C / Ctrl+V : copier,
   coller (tabulations : on peut coller depuis un autre tableur). Export et import CSV.
 - Le texte de la fiche reste un tableau Markdown lisible partout ; type non exécutable : la fiche ne lance rien."""
+import time
 from PyQt6.QtCore import QEvent, Qt, pyqtSignal
 from PyQt6.QtGui import QBrush, QColor, QKeySequence
 from PyQt6.QtWidgets import (QAbstractItemView, QApplication, QFileDialog, QHBoxLayout, QLabel, QLineEdit, QMenu, QMessageBox, QPushButton, QStyledItemDelegate,
@@ -36,6 +37,12 @@ class _Delegue(QStyledItemDelegate):
 
     def setModelData(self, editeur, modele, index):
         self.vue.modifier_cellule(index.row(), index.column(), editeur.text())
+
+    def eventFilter(self, editeur, ev):
+        # Un clic sur une autre cellule retire le focus à l'éditeur, ce qui le validerait : pendant une formule, on le garde ouvert.
+        if ev.type() == QEvent.Type.FocusOut and ev.reason() == Qt.FocusReason.MouseFocusReason and self.vue._attend_reference(editeur):
+            return False
+        return super().eventFilter(editeur, ev)
 
 
 class VueTableur(QWidget):
@@ -90,24 +97,31 @@ class VueTableur(QWidget):
         self.table.customContextMenuRequested.connect(self._menu)
         self.table.keyPressEvent = self._touche
         self.table.viewport().installEventFilter(self)
+        self.barre.installEventFilter(self)
+        self._barre_quittee = 0.0                # instant où un clic a retiré le focus à la barre en pleine formule
         self._ins = None                         # saisie d'une référence à la souris : (éditeur, avant, après, cellule de départ)
         lay.addWidget(self.table, 1)
         self.etat = QLabel()
         lay.addWidget(self.etat)
 
     # ---------- choisir une cellule à la souris pendant une formule ----------
+    @staticmethod
+    def _attend_reference(ed) -> bool:
+        """Vrai si le champ contient une formule et que le curseur suit « = », un opérateur, « ( » ou « ; » : une cellule cliquée s'y écrit."""
+        if ed is None or not ed.text().startswith("="):
+            return False
+        avant = ed.text()[:ed.cursorPosition()].rstrip()
+        return bool(avant) and avant[-1] in "=+-*/^(;:"
+
     def _editeur_formule(self):
         """Le champ de saisie d'une formule en cours (dans la cellule ou dans la barre), ou None."""
-        if self.barre.hasFocus():
+        if self.barre.hasFocus() or time.monotonic() - self._barre_quittee < 0.5:
             ed = self.barre
         elif self.table.state() == QAbstractItemView.State.EditingState:
             ed = self.table.viewport().findChild(QLineEdit)
         else:
             return None
-        if ed is None or not ed.text().startswith("="):
-            return None
-        avant = ed.text()[:ed.cursorPosition()].rstrip()
-        return ed if avant and avant[-1] in "=+-*/^(;:" else None
+        return ed if self._attend_reference(ed) else None
 
     def _poser_reference(self, a, b):
         ed, avant, apres, _d = self._ins
@@ -116,7 +130,12 @@ class VueTableur(QWidget):
         ed.setCursorPosition(len(avant) + len(ref))
 
     def eventFilter(self, obj, ev):
-        if obj is self.table.viewport():
+        if obj is self.barre:
+            if ev.type() == QEvent.Type.FocusOut and ev.reason() == Qt.FocusReason.MouseFocusReason and self._attend_reference(self.barre):
+                self._barre_quittee = time.monotonic()
+            elif ev.type() == QEvent.Type.FocusIn:
+                self._barre_quittee = 0.0
+        elif obj is self.table.viewport():
             t = ev.type()
             if t == QEvent.Type.MouseButtonPress and ev.button() == Qt.MouseButton.LeftButton:
                 ed = self._editeur_formule()
