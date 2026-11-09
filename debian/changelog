@@ -1,3 +1,20 @@
+scrinium (0.8.0) unstable; urgency=medium
+
+  * Nouvelle extension Planning : un type de fiche « Planning » pour suivre des tâches
+    (qui, quand, où on en est) avec un diagramme de Gantt coloré par catégorie, avancement,
+    retards, jalons, dépendances, rétroplanning à rebours d'une date de fin, calcul en avant,
+    déplacement et redimensionnement des barres à la souris, export CSV.
+  * Planning — résultat : le point sur les plannings du même thème (ou de tous) : avancement,
+    retards, dates.
+  * Tableur : pendant une formule, on peut cliquer une cellule (ou glisser une plage) pour
+    écrire sa référence, dans la cellule comme dans la barre de formule.
+  * Extension de navigateur facultative (Firefox, Chrome, Edge) : clic droit sur une sélection
+    ou une page, pour créer une fiche dans Scrinium.
+  * Exemples pour envoyer une sélection à Scrinium depuis n'importe quelle application
+    (raccourci Linux, menu Dolphin, AutoHotkey, Services macOS).
+
+ -- Jean-François Kneib <kneib.jean-francois@cegetel.net>  Mon, 09 Nov 2026 17:00:00 +0100
+
 scrinium (0.7.1) unstable; urgency=medium
 
   * Calculatrice : la racine cubique fonctionne aussi avec Python 3.10 (Ubuntu 22.04).
