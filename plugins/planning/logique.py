@@ -17,7 +17,8 @@
 - Début et Fin sont INCLUS (une tâche du 10 au 12 dure 3 jours). Une ligne SANS Fin est un jalon (un losange, à la date de Début).
   Une ligne sans Début n'est pas encore planifiée (« Recaler » lui donne des dates).
 - `Après` : noms de tâches (séparés par « ; ») qui doivent être finies avant. Sert aux flèches et au calcul des dates.
-- Type NON exécutable : la fiche ne lance rien. Le reste du texte (notes libres) est conservé."""
+- Type NON exécutable : la fiche ne lance rien. Le reste du texte (notes libres) est conservé.
+- Une seconde fiche, `planning-resultat`, fait le point sur les plannings du même thème (ou de tous) : voir `resultat()`."""
 import csv
 import io
 import re
@@ -29,6 +30,7 @@ from scrinium.core.types_fiche import TypeFiche
 from scrinium.i18n import N_, _
 
 MARQUE = "#scrinium-planning"
+MARQUE_RESULTAT = "#scrinium-planning-resultat"
 ENTETES = ["Tâche", "Début", "Fin", "%", "Qui", "Catégorie", "Après"]
 MAX_TACHES = 5000
 PALETTE = ["#3d85c6", "#e67e22", "#27ae60", "#9b59b6", "#c0392b", "#16a085", "#d4ac0d", "#d35498"]
@@ -305,6 +307,50 @@ def tache_neuve(nom: str, debut: str, jours: int, categorie: str = "", qui: str 
     return t
 
 
+# ---------- la fiche « résultat » : plusieurs plannings ----------
+def est_planning(texte: str | None) -> bool:
+    t = (texte or "").lstrip("\ufeff")
+    return t.startswith(MARQUE) and not t.startswith(MARQUE_RESULTAT) and (len(t) == len(MARQUE) or t[len(MARQUE)] in " \t\r\n")
+
+
+def portee_de(texte: str | None) -> str:
+    """Portée de la fiche « résultat » : « theme » (les plannings du même thème, par défaut) ou « tous » (tous les thèmes)."""
+    m = re.search(r"^portée[ \t]*:[ \t]*(\w+)[ \t]*$|^portee[ \t]*:[ \t]*(\w+)[ \t]*$", texte or "", re.IGNORECASE | re.MULTILINE)
+    v = ((m.group(1) or m.group(2)) if m else "theme").lower()
+    return "tous" if v == "tous" else "theme"
+
+
+def texte_resultat(portee: str, ancien: str | None = None) -> str:
+    """Texte de la fiche « résultat » avec cette portée ; le reste du texte (notes libres) est conservé."""
+    reste = [l for l in (ancien or "").replace("\r\n", "\n").split("\n")[1:] if not re.match(r"^(portée|portee)[ \t]*:", l.strip(), re.IGNORECASE)]
+    while reste and not reste[0].strip():
+        reste.pop(0)
+    return "\n".join([MARQUE_RESULTAT] + (["portée: tous"] if portee == "tous" else []) + ([""] + reste if reste else [])).rstrip("\n") + "\n"
+
+
+def resultat(plannings: list, aujourdhui: date | None = None) -> dict:
+    """Synthèse de plusieurs plannings : `plannings` = [(nom, Planning)].
+    {lignes: [(nom, bilan)], total: bilan cumulé, retards: [(nom du planning, tâche, fin, %)] triés par date}."""
+    lignes, retards = [], []
+    poids = fait = 0
+    total = {"total": 0, "fini": 0, "retard": 0, "en_cours": 0, "a_venir": 0, "non_planifie": 0, "debut": "", "fin": ""}
+    for nom, p in plannings:
+        b = bilan(p, aujourdhui)
+        lignes.append((nom, b))
+        for k in ("total", "fini", "retard", "en_cours", "a_venir", "non_planifie"):
+            total[k] += b[k]
+        total["debut"] = min([x for x in (total["debut"], b["debut"]) if x], default="")
+        total["fin"] = max(total["fin"], b["fin"])
+        for t in p.taches:
+            poids += duree(t)
+            fait += duree(t) * t.pourcent
+            if etat(t, aujourdhui) == "retard":
+                retards.append((nom, t.nom, fin_effective(t), t.pourcent))
+    total["avancement"] = round(fait / poids) if poids else 0
+    retards.sort(key=lambda r: (r[2], r[0], r[1]))
+    return {"lignes": lignes, "total": total, "retards": retards}
+
+
 # ---------- exemples ----------
 def exemples(aujourdhui: date | None = None) -> list:
     """[(thème, titre, texte)] : des fiches d'exemple, créées à la première activation de l'extension."""
@@ -342,7 +388,12 @@ def exemples(aujourdhui: date | None = None) -> list:
     p4 = tache_neuve(_("Livraison"), _s(ajd + timedelta(days=12)), 0, _("Étude"), apres=_("Réalisation"))
     projet.taches = [p1, p2, p3, p4]
     return [(_("Planning (exemples)"), _("Exemple · Déménagement (rétroplanning)"), ecrire(demenagement)),
-            (_("Planning (exemples)"), _("Exemple · Petit projet"), ecrire(projet))]
+            (_("Planning (exemples)"), _("Exemple · Petit projet"), ecrire(projet)),
+            (_("Planning (exemples)"), _("Exemple · Résultat de mes plannings"),
+             MARQUE_RESULTAT + "\n\n" + _("Cette fiche fait le point sur les plannings (fiches « Planning ») du même thème que celle-ci, ou sur tous si "
+                                          "vous le choisissez en haut : avancement, retards, dates. Elle se met à jour quand on l'ouvre ou qu'on "
+                                          "clique sur « Actualiser ».") + "\n")]
 
 
 TYPE = TypeFiche("planning", N_("Planning"), "view-calendar-timeline", modele=texte_neuf)
+TYPE_RESULTAT = TypeFiche("planning-resultat", N_("Planning — résultat"), "view-statistics", modele=lambda: MARQUE_RESULTAT + "\n")

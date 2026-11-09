@@ -578,6 +578,111 @@ class VuePlanning(QWidget):
             self.statut.setText(_("Exporté : %s") % chemin)
 
 
+class VueResultat(QWidget):
+    """Vue du type « planning-resultat » : le point sur les plannings du même thème (ou de tous) : avancement, retards, dates."""
+    modifie = pyqtSignal(str)
+    _remplit = False
+
+    def __init__(self, ctx, parent=None):
+        super().__init__(parent)
+        self.ctx = ctx
+        self.actif = True
+        self.aujourdhui = date.today()
+        self._texte = ""
+        self._plannings: list = []
+        self._fermes = 0
+        lay = QVBoxLayout(self)
+        lay.setContentsMargins(4, 4, 4, 4)
+        haut = QHBoxLayout()
+        haut.addWidget(QLabel(_("Plannings")))
+        self.c_portee = QComboBox()
+        self.c_portee.addItem(_("Ceux de ce thème"), "theme")
+        self.c_portee.addItem(_("Tous les thèmes"), "tous")
+        self.c_portee.currentIndexChanged.connect(self._portee_choisie)
+        haut.addWidget(self.c_portee)
+        self.b_maj = QPushButton(icone("view-refresh"), _("Actualiser"))
+        self.b_maj.clicked.connect(lambda *_a: self.charger(self._texte))
+        haut.addWidget(self.b_maj)
+        haut.addStretch(1)
+        lay.addLayout(haut)
+        self.table = self._tableau([_("Planning"), _("Tâches"), _("Finies"), _("En cours"), _("En retard"), _("À venir"), _("Avancement"),
+                                    _("Début"), _("Fin")])
+        lay.addWidget(self.table, 1)
+        lay.addWidget(QLabel(_("Tâches en retard")))
+        self.retards = self._tableau([_("Planning"), _("Tâche"), _("Fin prévue"), "%"])
+        lay.addWidget(self.retards, 1)
+        self.note = QLabel()
+        self.note.setWordWrap(True)
+        lay.addWidget(self.note)
+
+    @staticmethod
+    def _tableau(colonnes: list) -> QTableWidget:
+        t = QTableWidget(0, len(colonnes))
+        t.setHorizontalHeaderLabels(colonnes)
+        t.verticalHeader().setVisible(False)
+        t.horizontalHeader().setSectionResizeMode(0, QHeaderView.ResizeMode.Stretch)
+        t.horizontalHeader().setSectionResizeMode(1, QHeaderView.ResizeMode.Stretch if len(colonnes) == 4 else QHeaderView.ResizeMode.Interactive)
+        t.setEditTriggers(QAbstractItemView.EditTrigger.NoEditTriggers)
+        t.setSelectionMode(QAbstractItemView.SelectionMode.NoSelection)
+        return t
+
+    def _portee_choisie(self):
+        if not self._remplit:
+            self._texte = logique.texte_resultat(self.c_portee.currentData(), self._texte)
+            self.modifie.emit(self._texte)
+            self.charger(self._texte)
+
+    def charger(self, texte: str):
+        self._texte = texte or ""
+        self._remplit = True
+        self.c_portee.setCurrentIndex(self.c_portee.findData(logique.portee_de(texte)))
+        self._remplit = False
+        courante = self.ctx.fiche_courante() if self.ctx else None
+        theme = courante.theme if courante is not None else None
+        fiches = self.ctx.fiches() if self.ctx else []
+        if self.c_portee.currentData() == "theme" and theme is not None:
+            fiches = [f for f in fiches if f.theme == theme]
+        tous = self.c_portee.currentData() == "tous" or theme is None
+        self._plannings = [(f"{f.titre}  ({f.theme})" if tous else f.titre, logique.lire(f.texte))
+                           for f in fiches if f.texte is not None and logique.est_planning(f.texte)]
+        self._fermes = sum(1 for f in fiches if f.texte is None and f.verrou)
+        self._afficher()
+
+    @staticmethod
+    def _cellule(texte, centre=True, rouge=False, gras=False) -> QTableWidgetItem:
+        it = QTableWidgetItem(str(texte))
+        if centre:
+            it.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
+        if rouge:
+            it.setForeground(ROUGE)
+        if gras:
+            f = it.font()
+            f.setBold(True)
+            it.setFont(f)
+        return it
+
+    def _afficher(self):
+        r = logique.resultat(self._plannings, self.aujourdhui)
+        self.table.setRowCount(len(r["lignes"]) + (1 if len(r["lignes"]) > 1 else 0))
+        def ligne(i, nom, b, gras=False):
+            vals = [nom, b["total"], b["fini"], b["en_cours"], b["retard"], b["a_venir"], f"{b['avancement']} %", b["debut"], b["fin"]]
+            for c, v in enumerate(vals):
+                self.table.setItem(i, c, self._cellule(v, centre=c > 0, rouge=c == 4 and b["retard"] > 0, gras=gras))
+        for i, (nom, b) in enumerate(r["lignes"]):
+            ligne(i, nom, b)
+        if len(r["lignes"]) > 1:
+            ligne(len(r["lignes"]), _("Total"), r["total"], gras=True)
+        self.retards.setRowCount(len(r["retards"]))
+        for i, vals in enumerate(r["retards"]):
+            for c, v in enumerate([vals[0], vals[1], vals[2], vals[3]]):
+                self.retards.setItem(i, c, self._cellule(v, centre=c > 1, rouge=True))
+        texte = (_("%d planning(s) comptés.") % len(self._plannings)) if self._plannings else _(
+            "Aucun planning ici : créez une fiche « Planning » dans ce thème, ou choisissez « Tous les thèmes ».")
+        if self._fermes:
+            texte += " " + _("%d fiche(s) verrouillée(s) fermée(s) ne peuvent pas être lues : si l'une est un planning, ouvrez-la puis actualisez.") % self._fermes
+        self.note.setText(texte)
+
+
 class PlanningPlugin(Plugin):
     api = 1
 
@@ -585,9 +690,10 @@ class PlanningPlugin(Plugin):
         self.ctx = ctx
         ctx.ajouter_doc(_("Extension Planning"), DOC)
         for theme, titre, texte in logique.exemples():
-            ctx.ajouter_exemple(theme, titre, texte, "view-calendar-timeline")
+            ctx.ajouter_exemple(theme, titre, texte, "view-statistics" if texte.startswith(logique.MARQUE_RESULTAT) else "view-calendar-timeline")
         if ctx.ui is not None:
             ctx.ui.enregistrer_type(logique.TYPE, VuePlanning())
+            ctx.ui.enregistrer_type(logique.TYPE_RESULTAT, VueResultat(ctx))
 
 
 DOC = _(
@@ -607,4 +713,8 @@ DOC = _(
     "tâches terminées (100 %) ne bougent pas. Une tâche sans date est planifiée par ce calcul.\n"
     "• Le bilan (sous la barre d'outils) compte les tâches finies, en cours, en retard et à venir, et donne l'avancement global.\n"
     "• « Exporter en CSV… » : Tâche, Début, Fin, %, Qui, Catégorie, Après (séparateur « ; »).\n"
+    "• Nouvelle fiche > « Planning — résultat » : le point sur vos plannings, avec pour chacun le nombre de tâches finies, en cours, en retard "
+    "et à venir, l'avancement, les dates, et la liste des tâches en retard. Par défaut, elle porte sur les plannings du MÊME THÈME qu'elle "
+    "(rangez-la avec eux) ; « Tous les thèmes » en haut prend tous vos plannings. Elle se met à jour quand on l'ouvre ou qu'on clique sur "
+    "« Actualiser ». Un planning verrouillé et fermé ne peut pas être lu : ouvrez-le d'abord.\n"
     "• Un planning est un tableau Markdown : lisible partout, cherchable, partageable (extension Partage) et verrouillable. Rien n'est exécuté.")

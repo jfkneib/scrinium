@@ -488,15 +488,18 @@ msgid "Fichiers CSV (*.csv)"
 msgstr ""
 
 #: plugins/budget/__init__.py:387
+#: plugins/planning/__init__.py:599
 msgid "Ceux de ce thème"
 msgstr ""
 
 #: plugins/budget/__init__.py:388
+#: plugins/planning/__init__.py:600
 msgid "Tous les thèmes"
 msgstr ""
 
 #: plugins/budget/__init__.py:395
 #: plugins/photos/__init__.py:185
+#: plugins/planning/__init__.py:603
 msgid "Actualiser"
 msgstr ""
 
@@ -571,7 +574,7 @@ msgstr ""
 
 #: plugins/budget/__init__.py:245
 #: plugins/budget/__init__.py:452
-#: plugins/tableur/logique.py:411
+#: plugins/planning/__init__.py:674
 msgid "Total"
 msgstr ""
 
@@ -2611,7 +2614,7 @@ msgstr ""
 msgid "Photos"
 msgstr ""
 
-#: plugins/planning/__init__.py:593
+#: plugins/planning/__init__.py:699
 msgid ""
 "Un petit planning pour suivre des tâches : qui fait quoi, quand, et où on en est. Pas de la gestion de projet lourde.\n"
 "\n"
@@ -2621,6 +2624,7 @@ msgid ""
 "• « Calculer les dates > À rebours d'une date de fin » : le rétroplanning. Vous donnez la date d'arrivée (jour J) ; chaque tâche est placée pour finir à temps, en tenant compte de sa durée et des tâches qui l'attendent. « En avant d'une date de début » fait l'inverse. Les tâches terminées (100 %) ne bougent pas. Une tâche sans date est planifiée par ce calcul.\n"
 "• Le bilan (sous la barre d'outils) compte les tâches finies, en cours, en retard et à venir, et donne l'avancement global.\n"
 "• « Exporter en CSV… » : Tâche, Début, Fin, %, Qui, Catégorie, Après (séparateur « ; »).\n"
+"• Nouvelle fiche > « Planning — résultat » : le point sur vos plannings, avec pour chacun le nombre de tâches finies, en cours, en retard et à venir, l'avancement, les dates, et la liste des tâches en retard. Par défaut, elle porte sur les plannings du MÊME THÈME qu'elle (rangez-la avec eux) ; « Tous les thèmes » en haut prend tous vos plannings. Elle se met à jour quand on l'ouvre ou qu'on clique sur « Actualiser ». Un planning verrouillé et fermé ne peut pas être lu : ouvrez-le d'abord.\n"
 "• Un planning est un tableau Markdown : lisible partout, cherchable, partageable (extension Partage) et verrouillable. Rien n'est exécuté."
 msgstr ""
 
@@ -2630,6 +2634,7 @@ msgstr ""
 
 #: plugins/planning/__init__.py:271
 #: plugins/planning/__init__.py:331
+#: plugins/planning/__init__.py:609
 msgid "Début"
 msgstr ""
 
@@ -2679,12 +2684,17 @@ msgstr ""
 msgid "Marquer comme terminée"
 msgstr ""
 
-#: plugins/planning/__init__.py:586
+#: plugins/planning/__init__.py:679
+msgid "Aucun planning ici : créez une fiche « Planning » dans ce thème, ou choisissez « Tous les thèmes »."
+msgstr ""
+
+#: plugins/planning/__init__.py:691
 msgid "Extension Planning"
 msgstr ""
 
 #: plugins/planning/__init__.py:135
 #: plugins/planning/__init__.py:331
+#: plugins/planning/__init__.py:609
 msgid "Fin"
 msgstr ""
 
@@ -2701,6 +2711,7 @@ msgid "Échelle"
 msgstr ""
 
 #: plugins/planning/__init__.py:331
+#: plugins/planning/__init__.py:612
 msgid "Tâche"
 msgstr ""
 
@@ -2724,12 +2735,62 @@ msgstr ""
 msgid "Ajoutée : %s"
 msgstr ""
 
+#: plugins/planning/__init__.py:597
+msgid "Plannings"
+msgstr ""
+
+#: plugins/planning/__init__.py:608
+#: plugins/planning/__init__.py:612
+#: plugins/planning/logique.py:398
+msgid "Planning"
+msgstr ""
+
+#: plugins/planning/__init__.py:608
+msgid "Tâches"
+msgstr ""
+
+#: plugins/planning/__init__.py:608
+msgid "Finies"
+msgstr ""
+
+#: plugins/planning/__init__.py:608
+msgid "En cours"
+msgstr ""
+
+#: plugins/planning/__init__.py:608
+msgid "En retard"
+msgstr ""
+
+#: plugins/planning/__init__.py:608
+msgid "À venir"
+msgstr ""
+
+#: plugins/planning/__init__.py:608
+msgid "Avancement"
+msgstr ""
+
+#: plugins/planning/__init__.py:611
+msgid "Tâches en retard"
+msgstr ""
+
+#: plugins/planning/__init__.py:612
+msgid "Fin prévue"
+msgstr ""
+
+#: plugins/planning/__init__.py:679
+msgid "%d planning(s) comptés."
+msgstr ""
+
 #: plugins/planning/__init__.py:441
 msgid "Le nom d'une tâche ne peut pas être vide."
 msgstr ""
 
 #: plugins/planning/__init__.py:539
 msgid "Couleur de la catégorie « %s »…"
+msgstr ""
+
+#: plugins/planning/__init__.py:682
+msgid "%d fiche(s) verrouillée(s) fermée(s) ne peuvent pas être lues : si l'une est un planning, ouvrez-la puis actualisez."
 msgstr ""
 
 #: plugins/planning/__init__.py:308
@@ -2752,110 +2813,119 @@ msgstr ""
 msgid "du %(d)s au %(f)s"
 msgstr ""
 
-#: plugins/planning/logique.py:348
-msgid "Planning"
+#: plugins/planning/logique.py:399
+msgid "Planning — résultat"
 msgstr ""
 
-#: plugins/planning/logique.py:320
+#: plugins/planning/logique.py:366
 msgid "Démarches"
 msgstr ""
 
-#: plugins/planning/logique.py:320
+#: plugins/planning/logique.py:366
 msgid "Logistique"
 msgstr ""
 
-#: plugins/planning/logique.py:320
+#: plugins/planning/logique.py:366
 msgid "Jour J"
 msgstr ""
 
-#: plugins/planning/logique.py:337
-#: plugins/planning/logique.py:339
+#: plugins/planning/logique.py:383
+#: plugins/planning/logique.py:385
 msgid "Cahier des charges"
 msgstr ""
 
-#: plugins/planning/logique.py:337
-#: plugins/planning/logique.py:339
-#: plugins/planning/logique.py:342
+#: plugins/planning/logique.py:383
+#: plugins/planning/logique.py:385
+#: plugins/planning/logique.py:388
 msgid "Étude"
 msgstr ""
 
-#: plugins/planning/logique.py:339
-#: plugins/planning/logique.py:341
+#: plugins/planning/logique.py:385
+#: plugins/planning/logique.py:387
 msgid "Maquette"
 msgstr ""
 
-#: plugins/planning/logique.py:341
-#: plugins/planning/logique.py:342
+#: plugins/planning/logique.py:387
+#: plugins/planning/logique.py:388
 msgid "Réalisation"
 msgstr ""
 
-#: plugins/planning/logique.py:341
+#: plugins/planning/logique.py:387
 msgid "Travaux"
 msgstr ""
 
-#: plugins/planning/logique.py:342
+#: plugins/planning/logique.py:388
 msgid "Livraison"
 msgstr ""
 
-#: plugins/planning/logique.py:312
+#: plugins/planning/logique.py:358
 msgid "Exemple de rétroplanning : on a fixé le jour du déménagement (« fin: » en haut), et les dates sont calculées à rebours à partir des durées et des tâches « Après ». Changez la date de fin puis cliquez sur « Calculer les dates > À rebours d'une date de fin » : tout se décale. Supprimez cette fiche quand vous voulez."
 msgstr ""
 
-#: plugins/planning/logique.py:322
-#: plugins/planning/logique.py:323
-#: plugins/planning/logique.py:324
+#: plugins/planning/logique.py:368
+#: plugins/planning/logique.py:369
+#: plugins/planning/logique.py:370
 msgid "Donner son préavis"
 msgstr ""
 
-#: plugins/planning/logique.py:323
+#: plugins/planning/logique.py:369
 msgid "Réserver le camion"
 msgstr ""
 
-#: plugins/planning/logique.py:324
-#: plugins/planning/logique.py:325
+#: plugins/planning/logique.py:370
+#: plugins/planning/logique.py:371
 msgid "Acheter des cartons"
 msgstr ""
 
-#: plugins/planning/logique.py:325
-#: plugins/planning/logique.py:327
+#: plugins/planning/logique.py:371
+#: plugins/planning/logique.py:373
 msgid "Faire les cartons"
 msgstr ""
 
-#: plugins/planning/logique.py:326
+#: plugins/planning/logique.py:372
 msgid "Changer d'adresse (banque, assurance…)"
 msgstr ""
 
-#: plugins/planning/logique.py:327
+#: plugins/planning/logique.py:373
 msgid "Nettoyer l'ancien logement"
 msgstr ""
 
-#: plugins/planning/logique.py:328
+#: plugins/planning/logique.py:374
 msgid "Déménagement"
 msgstr ""
 
-#: plugins/planning/logique.py:328
+#: plugins/planning/logique.py:374
 msgid "Nettoyer l'ancien logement ; Réserver le camion"
 msgstr ""
 
-#: plugins/planning/logique.py:334
+#: plugins/planning/logique.py:380
 msgid "Exemple : un petit projet planifié en avant. Les barres sont colorées par catégorie ; le remplissage montre l'avancement (colonne « % »). Une tâche dont la date de fin est passée et qui n'est pas à 100 % est en retard (en rouge)."
 msgstr ""
 
-#: plugins/planning/logique.py:344
-#: plugins/planning/logique.py:345
+#: plugins/planning/logique.py:390
+#: plugins/planning/logique.py:391
+#: plugins/planning/logique.py:392
 msgid "Planning (exemples)"
 msgstr ""
 
-#: plugins/planning/logique.py:344
+#: plugins/planning/logique.py:390
 msgid "Exemple · Déménagement (rétroplanning)"
 msgstr ""
 
-#: plugins/planning/logique.py:345
+#: plugins/planning/logique.py:391
 msgid "Exemple · Petit projet"
 msgstr ""
 
-#: plugins/planning/logique.py:243
+#: plugins/planning/logique.py:392
+msgid "Exemple · Résultat de mes plannings"
+msgstr ""
+
+#: plugins/planning/logique.py:245
 msgid "Boucle dans les dépendances autour de « %s »"
+msgstr ""
+
+#: plugins/planning/logique.py:393
+msgid "Cette fiche fait le point sur les plannings (fiches « Planning ») du même thème que celle-ci, ou sur tous si vous le choisissez en haut : avancement, retards, dates. Elle se met à jour quand on l'ouvre ou qu'on clique sur « Actualiser »."
 msgstr ""
 
 #: plugins/tableur/__init__.py:295

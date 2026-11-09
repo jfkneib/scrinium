@@ -125,11 +125,27 @@ def test_tache_neuve_csv_et_exemples():
     assert lg.tache_neuve("j", "2026-11-09", 0).jalon and not lg.tache_neuve("x", "pas une date", 2).planifiee
     assert lg.vers_csv(lg.lire(TEXTE)).splitlines()[0] == "Tâche;Début;Fin;%;Qui;Catégorie;Après"
     ex = lg.exemples(AJD)
-    assert len(ex) == 2
+    assert len(ex) == 3 and ex[2][2].startswith(lg.MARQUE_RESULTAT)
     demenagement = lg.lire(ex[0][2])
     assert demenagement.fin and not any(not t.planifiee for t in demenagement.taches)
     assert demenagement.taches[-1].jalon and demenagement.taches[-1].debut == demenagement.fin    # le jour J est le dernier
     assert lg.bilan(lg.lire(ex[1][2]), AJD)["retard"] == 1                                         # l'exemple montre un retard
+
+
+def test_resultat_de_plusieurs_plannings():
+    ex = [lg.lire(x[2]) for x in lg.exemples(AJD)[:2]]
+    r = lg.resultat([("Déménagement", ex[0]), ("Projet", ex[1])], AJD)
+    assert [n for n, _b in r["lignes"]] == ["Déménagement", "Projet"]
+    t = r["total"]
+    assert t["total"] == 11 and t["retard"] == 1 and t["fini"] == 3 and t["total"] == t["fini"] + t["retard"] + t["en_cours"] + t["a_venir"]
+    assert t["debut"] == "2026-10-28" and t["fin"] == lg.lire(lg.exemples(AJD)[0][2]).fin
+    assert r["retards"] == [("Projet", "Maquette", "2026-11-06", 60)]
+    assert lg.resultat([], AJD)["total"]["avancement"] == 0
+    assert lg.est_planning(TEXTE) and not lg.est_planning(lg.MARQUE_RESULTAT + "\n") and not lg.est_planning("autre") and not lg.est_planning(None)
+    assert lg.portee_de(None) == "theme" and lg.portee_de("#x\nportée: tous\n") == "tous"
+    t2 = lg.texte_resultat("tous", lg.MARQUE_RESULTAT + "\n\nMes notes\n")
+    assert t2 == lg.MARQUE_RESULTAT + "\nportée: tous\n\nMes notes\n"
+    assert lg.texte_resultat("theme", t2) == lg.MARQUE_RESULTAT + "\n\nMes notes\n"
 
 
 # ---------- interface ----------
@@ -239,3 +255,30 @@ def test_diagramme_souris_et_dessin(fen, tmp_path):
     g.mousePressEvent(evt(QMouseEvent.Type.MouseButtonPress, pos))
     g.mouseReleaseEvent(evt(QMouseEvent.Type.MouseButtonRelease, pos))
     assert sorties == []
+
+
+def _fiche(fen, theme, titre, texte):
+    th = fen.store.theme(theme) or fen.store.nouveau_theme(theme)
+    f = fen.store.nouvelle_fiche(th)
+    fen.store.enregistrer(th, f, titre, texte)
+    fen.maj_themes()
+
+
+def test_fiche_resultat_par_theme(fen):
+    _fiche(fen, "Maison", "Déménagement", lg.exemples(AJD)[0][2])
+    _fiche(fen, "Travail", "Projet", lg.exemples(AJD)[1][2])
+    _fiche(fen, "Travail", "Notes", "pas un planning")
+    fen.montrer(theme="Maison")
+    m = fen.menu_nouvelle
+    m.aboutToShow.emit()
+    next(a for a in m.actions() if a.text() == "Planning — résultat").trigger()
+    vr = fen.vues_types["planning-resultat"]
+    vr.aujourdhui = AJD
+    assert fen.pile.currentWidget() is vr
+    vr.charger(vr._texte)
+    assert [vr.table.item(i, 0).text() for i in range(vr.table.rowCount())] == ["Déménagement"]      # le thème de la fiche seulement
+    vr.c_portee.setCurrentIndex(vr.c_portee.findData("tous"))
+    assert [vr.table.item(i, 0).text() for i in range(vr.table.rowCount())] == ["Déménagement  (Maison)", "Projet  (Travail)", "Total"]
+    assert vr.retards.rowCount() == 1 and vr.retards.item(0, 1).text() == "Maquette"
+    fen.sauver()
+    assert lg.portee_de(fen.fiche.texte) == "tous"                                                       # le choix est gardé dans la fiche
