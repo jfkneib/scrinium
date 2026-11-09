@@ -10,7 +10,7 @@ exemple des relevés (voir `logique.py` : format, formules, calcul sûr).
   maximum sous les données. Clic droit : insérer ou supprimer des lignes et des colonnes. Suppr : vide les cellules. Ctrl+C / Ctrl+V : copier,
   coller (tabulations : on peut coller depuis un autre tableur). Export et import CSV.
 - Le texte de la fiche reste un tableau Markdown lisible partout ; type non exécutable : la fiche ne lance rien."""
-from PyQt6.QtCore import Qt, pyqtSignal
+from PyQt6.QtCore import QEvent, Qt, pyqtSignal
 from PyQt6.QtGui import QBrush, QColor, QKeySequence
 from PyQt6.QtWidgets import (QAbstractItemView, QApplication, QFileDialog, QHBoxLayout, QLabel, QLineEdit, QMenu, QMessageBox, QPushButton, QStyledItemDelegate,
                              QTableWidget, QTableWidgetItem, QToolButton, QVBoxLayout, QWidget)
@@ -89,9 +89,53 @@ class VueTableur(QWidget):
         self.table.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
         self.table.customContextMenuRequested.connect(self._menu)
         self.table.keyPressEvent = self._touche
+        self.table.viewport().installEventFilter(self)
+        self._ins = None                         # saisie d'une référence à la souris : (éditeur, avant, après, cellule de départ)
         lay.addWidget(self.table, 1)
         self.etat = QLabel()
         lay.addWidget(self.etat)
+
+    # ---------- choisir une cellule à la souris pendant une formule ----------
+    def _editeur_formule(self):
+        """Le champ de saisie d'une formule en cours (dans la cellule ou dans la barre), ou None."""
+        if self.barre.hasFocus():
+            ed = self.barre
+        elif self.table.state() == QAbstractItemView.State.EditingState:
+            ed = self.table.viewport().findChild(QLineEdit)
+        else:
+            return None
+        if ed is None or not ed.text().startswith("="):
+            return None
+        avant = ed.text()[:ed.cursorPosition()].rstrip()
+        return ed if avant and avant[-1] in "=+-*/^(;:" else None
+
+    def _poser_reference(self, a, b):
+        ed, avant, apres, _d = self._ins
+        ref = logique.nom_cellule(*a) if a == b else f"{logique.nom_cellule(*a)}:{logique.nom_cellule(*b)}"
+        ed.setText(avant + ref + apres)
+        ed.setCursorPosition(len(avant) + len(ref))
+
+    def eventFilter(self, obj, ev):
+        if obj is self.table.viewport():
+            t = ev.type()
+            if t == QEvent.Type.MouseButtonPress and ev.button() == Qt.MouseButton.LeftButton:
+                ed = self._editeur_formule()
+                idx = self.table.indexAt(ev.position().toPoint())
+                if ed is not None and idx.isValid():
+                    pos = ed.cursorPosition()
+                    self._ins = (ed, ed.text()[:pos], ed.text()[pos:], (idx.row(), idx.column()))
+                    self._poser_reference(self._ins[3], self._ins[3])
+                    ed.setFocus()
+                    return True
+            elif self._ins is not None and t == QEvent.Type.MouseMove:
+                idx = self.table.indexAt(ev.position().toPoint())
+                if idx.isValid():
+                    self._poser_reference(self._ins[3], (idx.row(), idx.column()))
+                return True
+            elif self._ins is not None and t == QEvent.Type.MouseButtonRelease:
+                self._ins = None
+                return True
+        return super().eventFilter(obj, ev)
 
     # ---------- affichage ----------
     def charger(self, texte: str):
@@ -299,6 +343,7 @@ DOC = _(
     "• Cliquez une cellule et tapez : un nombre (virgule ou point), du texte, ou une FORMULE. Une formule commence par « = ». La barre au-dessus "
     "de la grille montre le contenu de la cellule choisie (la formule, pas son résultat) : on peut aussi la modifier là, puis Entrée. "
     "Double-clic ou F2 : modifier dans la cellule.\n"
+    "• Pendant une formule, après « = », un opérateur ou « ( », cliquez une cellule avec la souris : sa référence s'écrit toute seule ; glissez pour une plage (A1:A5).\n"
     "• Exemples de formules : =A1*B1, =B3-B2, =SOMME(B1:B10), =MOYENNE(B1:B10), =MAX(B1:B10)-MIN(B1:B10), =ARRONDI(A1/3;2). "
     "Fonctions : SOMME, MOYENNE, MIN, MAX, NB, ABS, ARRONDI, RACINE, ENT. Opérations : + - * / ^ %. Les erreurs s'affichent dans la cellule "
     "(#DIV/0!, #REF!, #CYCLE!…).\n"

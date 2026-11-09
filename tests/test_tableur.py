@@ -152,6 +152,44 @@ def test_nouvelle_fiche_grille_vide_formules_et_barre(fen):
     assert vue.table.item(2, 0).text() == "#DIV/0!"
 
 
+def test_choisir_les_cellules_a_la_souris_dans_une_formule(fen):
+    from PyQt6.QtCore import QPoint, Qt
+    from PyQt6.QtTest import QTest
+    vue = _nouvelle(fen)
+    vue.show()
+    for l, v in enumerate(("2", "3", "4")):
+        vue.modifier_cellule(l, 0, v)
+
+    def centre(l, c):
+        return vue.table.visualRect(vue.table.model().index(l, c)).center()
+
+    vue.table.setCurrentCell(0, 1)
+    vue.table.edit(vue.table.model().index(0, 1))
+    editeur = vue.table.viewport().findChild(type(vue.barre))
+    editeur.setText("=")
+    editeur.setCursorPosition(1)
+    vp = vue.table.viewport()
+    QTest.mouseClick(vp, Qt.MouseButton.LeftButton, pos=centre(0, 0))          # clic sur A1 : « =A1 », l'édition continue
+    assert editeur.text() == "=A1" and vue.table.state().name == "EditingState"
+    editeur.setText("=SOMME(")
+    editeur.setCursorPosition(7)
+    QTest.mousePress(vp, Qt.MouseButton.LeftButton, pos=centre(0, 0))           # glisser A1 → A3 : une plage
+    QTest.mouseMove(vp, centre(2, 0))
+    QTest.mouseRelease(vp, Qt.MouseButton.LeftButton, pos=centre(2, 0))
+    assert editeur.text() == "=SOMME(A1:A3" and vue.table.state().name == "EditingState"
+    editeur.setText("=SOMME(A1:A3)")
+    vue.table.commitData(editeur)
+    # un clic sans opérateur avant le curseur ne s'insère pas : il valide et change de cellule
+    assert vue._editeur_formule() is None
+    # la barre de formule fonctionne de même
+    vue.table.setCurrentCell(3, 0)
+    vue.barre.hasFocus = lambda: True                                              # fenêtre non active en test hors écran
+    vue.barre.setText("=A1+")
+    vue.barre.setCursorPosition(4)
+    QTest.mouseClick(vp, Qt.MouseButton.LeftButton, pos=centre(1, 0))
+    assert vue.barre.text() == "=A1+A2" and vue.table.currentRow() == 3
+
+
 def test_lignes_colonnes_totaux_et_date(fen):
     vue = _nouvelle(fen)
     vue.modifier_cellule(0, 0, "Date")
