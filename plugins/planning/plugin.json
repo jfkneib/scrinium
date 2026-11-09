@@ -1,0 +1,8 @@
+{
+  "titre": "Planning",
+  "version": "0.1",
+  "auteur": "Scrinium",
+  "description": "Un type de fiche « Planning » pour suivre des tâches : un diagramme de Gantt en couleurs (par catégorie), l'avancement en % de chaque tâche, les retards, un bilan, et le calcul des dates à rebours d'une date de fin (rétroplanning) ou en avant d'une date de début. Pas de gestion de projet lourde : un petit planning lisible.",
+  "classe": "PlanningPlugin",
+  "api": 1
+}

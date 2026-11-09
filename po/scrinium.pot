@@ -314,13 +314,13 @@ msgstr ""
 
 #: plugins/applications/__init__.py:234
 #: plugins/capture/__init__.py:257
-#: src/scrinium/ui/repertoire.py:37
+#: plugins/planning/__init__.py:535
 msgid "Monter"
 msgstr ""
 
 #: plugins/applications/__init__.py:235
 #: plugins/capture/__init__.py:258
-#: src/scrinium/ui/repertoire.py:37
+#: plugins/planning/__init__.py:536
 msgid "Descendre"
 msgstr ""
 
@@ -416,7 +416,7 @@ msgstr ""
 
 #: plugins/budget/__init__.py:96
 #: plugins/calc/__init__.py:44
-#: plugins/tableur/__init__.py:67
+#: plugins/planning/__init__.py:312
 msgid "Exporter en CSV…"
 msgstr ""
 
@@ -471,19 +471,19 @@ msgstr ""
 
 #: plugins/budget/__init__.py:363
 #: plugins/calc/__init__.py:219
-#: plugins/tableur/__init__.py:274
+#: plugins/planning/__init__.py:541
 msgid "Supprimer la ligne"
 msgstr ""
 
 #: plugins/budget/__init__.py:367
 #: plugins/calc/__init__.py:228
-#: plugins/tableur/__init__.py:173
+#: plugins/planning/__init__.py:574
 msgid "Exporter en CSV"
 msgstr ""
 
 #: plugins/budget/__init__.py:367
 #: plugins/calc/__init__.py:228
-#: plugins/tableur/__init__.py:173
+#: plugins/planning/__init__.py:574
 msgid "Fichiers CSV (*.csv)"
 msgstr ""
 
@@ -538,6 +538,7 @@ msgid "Mois par mois"
 msgstr ""
 
 #: plugins/budget/__init__.py:164
+#: plugins/planning/__init__.py:308
 msgid "Mois"
 msgstr ""
 
@@ -584,6 +585,7 @@ msgstr ""
 
 #: plugins/budget/__init__.py:313
 #: plugins/budget/__init__.py:334
+#: plugins/planning/__init__.py:427
 msgid "Date invalide : écrivez AAAA-MM-JJ, par exemple 2026-11-06."
 msgstr ""
 
@@ -619,7 +621,7 @@ msgstr ""
 
 #: plugins/budget/__init__.py:371
 #: plugins/calc/__init__.py:232
-#: plugins/tableur/__init__.py:177
+#: plugins/planning/__init__.py:578
 msgid "Exporté : %s"
 msgstr ""
 
@@ -937,30 +939,30 @@ msgstr ""
 msgid "Aucune fiche modifiable : ouvrez une fiche, puis cliquez dans sa note."
 msgstr ""
 
-#: plugins/calculatrice/logique.py:87
-#: plugins/calculatrice/logique.py:105
+#: plugins/calculatrice/logique.py:94
+#: plugins/calculatrice/logique.py:112
 msgid "Expression non comprise"
 msgstr ""
 
-#: plugins/calculatrice/logique.py:25
-#: plugins/calculatrice/logique.py:107
-#: plugins/calculatrice/logique.py:42
+#: plugins/calculatrice/logique.py:32
+#: plugins/calculatrice/logique.py:114
+#: plugins/calculatrice/logique.py:49
 msgid "Résultat impossible"
 msgstr ""
 
-#: plugins/calculatrice/logique.py:95
+#: plugins/calculatrice/logique.py:102
 msgid "Rien à calculer"
 msgstr ""
 
-#: plugins/calculatrice/logique.py:97
+#: plugins/calculatrice/logique.py:104
 msgid "Expression trop longue"
 msgstr ""
 
-#: plugins/calculatrice/logique.py:79
+#: plugins/calculatrice/logique.py:86
 msgid "Exposant trop grand"
 msgstr ""
 
-#: plugins/calculatrice/logique.py:103
+#: plugins/calculatrice/logique.py:110
 msgid "Division par zéro"
 msgstr ""
 
@@ -2609,6 +2611,253 @@ msgstr ""
 msgid "Photos"
 msgstr ""
 
+#: plugins/planning/__init__.py:593
+msgid ""
+"Un petit planning pour suivre des tâches : qui fait quoi, quand, et où on en est. Pas de la gestion de projet lourde.\n"
+"\n"
+"• Nouvelle fiche > « Planning ». En haut, le diagramme de Gantt : une barre par tâche, colorée selon sa catégorie ; le remplissage montre l'avancement. Un losange est un jalon (une date, sans durée). Une flèche relie une tâche à celle qui l'attend. Le trait rouge est aujourd'hui ; le trait pointillé, la fin du projet. Une tâche dont la fin est passée et qui n'est pas à 100 % est en retard (en rouge).\n"
+"• Ajouter une tâche : son nom, sa date de début (celle du jour), sa durée en jours (0 = un jalon) et sa catégorie, puis « Ajouter ». Les cellules du tableau en dessous se modifient directement : dates (AAAA-MM-JJ), « % » d'avancement, « Qui », catégorie, et « Après » (les noms des tâches à finir avant, séparés par « ; »). Clic droit : marquer comme terminée, monter, descendre, supprimer, changer la couleur d'une catégorie.\n"
+"• À la souris : glisser une barre pour la déplacer, tirer son bord droit pour la rallonger ou la raccourcir. « Échelle » : jours, semaines ou mois.\n"
+"• « Calculer les dates > À rebours d'une date de fin » : le rétroplanning. Vous donnez la date d'arrivée (jour J) ; chaque tâche est placée pour finir à temps, en tenant compte de sa durée et des tâches qui l'attendent. « En avant d'une date de début » fait l'inverse. Les tâches terminées (100 %) ne bougent pas. Une tâche sans date est planifiée par ce calcul.\n"
+"• Le bilan (sous la barre d'outils) compte les tâches finies, en cours, en retard et à venir, et donne l'avancement global.\n"
+"• « Exporter en CSV… » : Tâche, Début, Fin, %, Qui, Catégorie, Après (séparateur « ; »).\n"
+"• Un planning est un tableau Markdown : lisible partout, cherchable, partageable (extension Partage) et verrouillable. Rien n'est exécuté."
+msgstr ""
+
+#: plugins/planning/__init__.py:267
+msgid "Nouvelle tâche"
+msgstr ""
+
+#: plugins/planning/__init__.py:271
+#: plugins/planning/__init__.py:331
+msgid "Début"
+msgstr ""
+
+#: plugins/planning/__init__.py:276
+msgid "Durée en jours (0 = un jalon, une date sans durée)"
+msgstr ""
+
+#: plugins/planning/__init__.py:281
+#: src/scrinium/ui/lien_ajout.py:32
+#: src/scrinium/ui/repertoire.py:127
+msgid "Ajouter"
+msgstr ""
+
+#: plugins/planning/__init__.py:291
+msgid "aucune"
+msgstr ""
+
+#: plugins/planning/__init__.py:295
+msgid "Calculer les dates"
+msgstr ""
+
+#: plugins/planning/__init__.py:300
+msgid "En avant d'une date de début…"
+msgstr ""
+
+#: plugins/planning/__init__.py:301
+msgid "À rebours d'une date de fin…"
+msgstr ""
+
+#: plugins/planning/__init__.py:504
+msgid "Dates calculées."
+msgstr ""
+
+#: plugins/planning/__init__.py:508
+msgid "Date (AAAA-MM-JJ) :"
+msgstr ""
+
+#: plugins/planning/__init__.py:517
+msgid "Calculer les dates en avant"
+msgstr ""
+
+#: plugins/planning/__init__.py:522
+msgid "Calculer les dates à rebours"
+msgstr ""
+
+#: plugins/planning/__init__.py:534
+msgid "Marquer comme terminée"
+msgstr ""
+
+#: plugins/planning/__init__.py:586
+msgid "Extension Planning"
+msgstr ""
+
+#: plugins/planning/__init__.py:135
+#: plugins/planning/__init__.py:331
+msgid "Fin"
+msgstr ""
+
+#: plugins/planning/__init__.py:275
+msgid "j"
+msgstr ""
+
+#: plugins/planning/__init__.py:288
+msgid "Fin du projet"
+msgstr ""
+
+#: plugins/planning/__init__.py:305
+msgid "Échelle"
+msgstr ""
+
+#: plugins/planning/__init__.py:331
+msgid "Tâche"
+msgstr ""
+
+#: plugins/planning/__init__.py:331
+msgid "Qui"
+msgstr ""
+
+#: plugins/planning/__init__.py:331
+msgid "Après"
+msgstr ""
+
+#: plugins/planning/__init__.py:390
+msgid "Aucune tâche : écrivez-en une en haut, puis « Ajouter »."
+msgstr ""
+
+#: plugins/planning/__init__.py:423
+msgid "Donnez un nom à la tâche."
+msgstr ""
+
+#: plugins/planning/__init__.py:432
+msgid "Ajoutée : %s"
+msgstr ""
+
+#: plugins/planning/__init__.py:441
+msgid "Le nom d'une tâche ne peut pas être vide."
+msgstr ""
+
+#: plugins/planning/__init__.py:539
+msgid "Couleur de la catégorie « %s »…"
+msgstr ""
+
+#: plugins/planning/__init__.py:308
+msgid "Jours"
+msgstr ""
+
+#: plugins/planning/__init__.py:308
+msgid "Semaines"
+msgstr ""
+
+#: plugins/planning/__init__.py:392
+msgid "%(total)d tâche(s) : %(fini)d finie(s), %(en_cours)d en cours, %(retard)d en retard, %(a_venir)d à venir — avancement %(av)d %%"
+msgstr ""
+
+#: plugins/planning/__init__.py:567
+msgid "Couleur de la catégorie « %s »"
+msgstr ""
+
+#: plugins/planning/__init__.py:395
+msgid "du %(d)s au %(f)s"
+msgstr ""
+
+#: plugins/planning/logique.py:348
+msgid "Planning"
+msgstr ""
+
+#: plugins/planning/logique.py:320
+msgid "Démarches"
+msgstr ""
+
+#: plugins/planning/logique.py:320
+msgid "Logistique"
+msgstr ""
+
+#: plugins/planning/logique.py:320
+msgid "Jour J"
+msgstr ""
+
+#: plugins/planning/logique.py:337
+#: plugins/planning/logique.py:339
+msgid "Cahier des charges"
+msgstr ""
+
+#: plugins/planning/logique.py:337
+#: plugins/planning/logique.py:339
+#: plugins/planning/logique.py:342
+msgid "Étude"
+msgstr ""
+
+#: plugins/planning/logique.py:339
+#: plugins/planning/logique.py:341
+msgid "Maquette"
+msgstr ""
+
+#: plugins/planning/logique.py:341
+#: plugins/planning/logique.py:342
+msgid "Réalisation"
+msgstr ""
+
+#: plugins/planning/logique.py:341
+msgid "Travaux"
+msgstr ""
+
+#: plugins/planning/logique.py:342
+msgid "Livraison"
+msgstr ""
+
+#: plugins/planning/logique.py:312
+msgid "Exemple de rétroplanning : on a fixé le jour du déménagement (« fin: » en haut), et les dates sont calculées à rebours à partir des durées et des tâches « Après ». Changez la date de fin puis cliquez sur « Calculer les dates > À rebours d'une date de fin » : tout se décale. Supprimez cette fiche quand vous voulez."
+msgstr ""
+
+#: plugins/planning/logique.py:322
+#: plugins/planning/logique.py:323
+#: plugins/planning/logique.py:324
+msgid "Donner son préavis"
+msgstr ""
+
+#: plugins/planning/logique.py:323
+msgid "Réserver le camion"
+msgstr ""
+
+#: plugins/planning/logique.py:324
+#: plugins/planning/logique.py:325
+msgid "Acheter des cartons"
+msgstr ""
+
+#: plugins/planning/logique.py:325
+#: plugins/planning/logique.py:327
+msgid "Faire les cartons"
+msgstr ""
+
+#: plugins/planning/logique.py:326
+msgid "Changer d'adresse (banque, assurance…)"
+msgstr ""
+
+#: plugins/planning/logique.py:327
+msgid "Nettoyer l'ancien logement"
+msgstr ""
+
+#: plugins/planning/logique.py:328
+msgid "Déménagement"
+msgstr ""
+
+#: plugins/planning/logique.py:328
+msgid "Nettoyer l'ancien logement ; Réserver le camion"
+msgstr ""
+
+#: plugins/planning/logique.py:334
+msgid "Exemple : un petit projet planifié en avant. Les barres sont colorées par catégorie ; le remplissage montre l'avancement (colonne « % »). Une tâche dont la date de fin est passée et qui n'est pas à 100 % est en retard (en rouge)."
+msgstr ""
+
+#: plugins/planning/logique.py:344
+#: plugins/planning/logique.py:345
+msgid "Planning (exemples)"
+msgstr ""
+
+#: plugins/planning/logique.py:344
+msgid "Exemple · Déménagement (rétroplanning)"
+msgstr ""
+
+#: plugins/planning/logique.py:345
+msgid "Exemple · Petit projet"
+msgstr ""
+
+#: plugins/planning/logique.py:243
+msgid "Boucle dans les dépendances autour de « %s »"
+msgstr ""
+
 #: plugins/tableur/__init__.py:295
 msgid ""
 "Un tableur pour des cellules et des formules, par exemple pour suivre des relevés (compteur, poids, dépenses…).\n"
@@ -3872,7 +4121,7 @@ msgid ""
 msgstr ""
 
 #: src/scrinium/core/guide.py:11
-#: src/scrinium/core/guide.py:100
+#: src/scrinium/core/guide.py:101
 msgid "Guide"
 msgstr ""
 
@@ -3920,16 +4169,17 @@ msgid ""
 "• Agenda : des rappels et échéances (extension Agenda).\n"
 "• Calc : un petit éditeur de listes avec des totaux par colonne et l'export CSV, pour suivre des relevés (extension Calc).\n"
 "• Budget : de petits comptes (courses, argent de poche…) avec colonnes Débit et Crédit, un onglet par mois, un bilan, et une fiche « Budget — résultat » qui totalise tous les budgets (extension Budget).\n"
+"• Planning : des tâches en couleurs sur un diagramme de Gantt, avec l'avancement, les retards et un rétroplanning à partir d'une date de fin (extension Planning).\n"
 "• Tableur : des cellules et des formules comme =SOMME(B2:B10), avec export et import CSV (extension Tableur).\n"
 "\n"
 "Sécurité : un type qui LANCE des commandes (Applications, Actions CLI) reste inerte tant que vous n'avez pas validé la fiche vous-même. Une fiche reçue d'un autre n'exécute donc jamais rien toute seule."
 msgstr ""
 
-#: src/scrinium/core/guide.py:53
+#: src/scrinium/core/guide.py:54
 msgid "Guide 4 · Les extensions"
 msgstr ""
 
-#: src/scrinium/core/guide.py:53
+#: src/scrinium/core/guide.py:54
 msgid ""
 "Menu Extensions > Gérer les extensions… : cochez celles qui vous servent. Livrées avec Scrinium :\n"
 "\n"
@@ -3938,17 +4188,17 @@ msgid ""
 "• Partage : partage des fiches avec d'autres via un serveur Scrinium (voir « Guide 6 »).\n"
 "• Traduction et Dictée : en local (modèles téléchargés seulement avec votre accord).\n"
 "• Lecture : lit une fiche à voix haute.\n"
-"• Agenda, Applications, Photos, Calc, Tableur, Budget : types de fiches ; Calculatrice : une mini calculatrice flottante (voir « Guide 3 »).\n"
+"• Agenda, Applications, Photos, Calc, Tableur, Budget, Planning : types de fiches ; Calculatrice : une mini calculatrice flottante (voir « Guide 3 »).\n"
 "• Capture : insère la sortie d'une commande dans la fiche, ou envoie du texte vers une console (voir « Guide 5 »).\n"
 "\n"
 "Écrire la vôtre : menu Aide > « Documentation des extensions »."
 msgstr ""
 
-#: src/scrinium/core/guide.py:66
+#: src/scrinium/core/guide.py:67
 msgid "Guide 5 · Console et commandes"
 msgstr ""
 
-#: src/scrinium/core/guide.py:66
+#: src/scrinium/core/guide.py:67
 msgid ""
 "L'extension Capture relie vos fiches au terminal, sans jamais rien valider à votre place.\n"
 "\n"
@@ -3958,11 +4208,11 @@ msgid ""
 "• Depuis un terminal : « ls -al | scrinium ajouter -t Thème -f Fiche » ajoute la sortie à une fiche."
 msgstr ""
 
-#: src/scrinium/core/guide.py:78
+#: src/scrinium/core/guide.py:79
 msgid "Guide 6 · Verrouillage, secours et partage"
 msgstr ""
 
-#: src/scrinium/core/guide.py:78
+#: src/scrinium/core/guide.py:79
 msgid ""
 "• Verrouiller : bouton « Verrouiller… ». Le titre reste visible, le contenu est chiffré. Mot de passe oublié = fiche perdue, sauf avec le FICHIER DE SECOURS (menu Sécurité > Fichier de secours…) : faites-le dès le premier verrouillage, gardez-le hors de cet ordinateur.\n"
 "• Une fiche verrouillée n'est jamais envoyée, lue, traduite ni partagée tant qu'elle est fermée.\n"
@@ -3970,11 +4220,11 @@ msgid ""
 "• Inviter quelqu'un à INSTALLER Scrinium : menu Fichier > « Inviter à installer Scrinium… »."
 msgstr ""
 
-#: src/scrinium/core/guide.py:86
+#: src/scrinium/core/guide.py:87
 msgid "Guide 7 · Où sont mes données, sauvegarde"
 msgstr ""
 
-#: src/scrinium/core/guide.py:86
+#: src/scrinium/core/guide.py:87
 msgid ""
 "• Vos fiches : un dossier par thème, un fichier .md par fiche (.lock si verrouillée), avec un sous-dossier .pj pour les images jointes :\n"
 "\n"
@@ -5060,11 +5310,6 @@ msgstr ""
 
 #: src/scrinium/ui/lien_ajout.py:27
 msgid "Titre :"
-msgstr ""
-
-#: src/scrinium/ui/lien_ajout.py:32
-#: src/scrinium/ui/repertoire.py:127
-msgid "Ajouter"
 msgstr ""
 
 #: src/scrinium/ui/markdown.py:130
