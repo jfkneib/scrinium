@@ -4,6 +4,8 @@
 
 Le tableau lui-même (`core.repertoire.Tableau`) est du texte CSV ; ce widget le lit, l'édite et signale chaque changement par
 `modifie(texte)` — la fenêtre l'enregistre comme n'importe quelle fiche."""
+import shutil
+import subprocess
 from pathlib import Path
 
 from PyQt6.QtCore import Qt, QUrl, pyqtSignal
@@ -12,7 +14,8 @@ from PyQt6.QtWidgets import (QDialog, QDialogButtonBox, QFileDialog, QFormLayout
                              QLineEdit, QListWidget, QListWidgetItem, QMessageBox, QPlainTextEdit, QPushButton, QRadioButton,
                              QScrollArea, QToolTip, QVBoxLayout, QWidget)
 
-from ..core.repertoire import LETTRES, MAX_COLONNES, Tableau, actions
+from ..core.repertoire import (LETTRES, MAX_COLONNES, Tableau, actions, applications_citees, commande_application, lire_declarations,
+                               sans_applications, texte_declarations)
 from ..i18n import _
 from .icons import icone
 from .markdown import ouvrir_url
@@ -118,6 +121,8 @@ class VueRepertoire(QWidget):
         self._groupes: dict = {}
         self._champs: list = []
         self._remplissage = False
+        self.applications = lambda: {}  # applications déclarées sur cette machine {nom: commande} (réglages)
+        self.sauver_applications = lambda d: None
         self.navigateur = lambda: ""    # commande de navigateur choisie par l'utilisateur (vide = celui du système)
         self._pendante = None           # numéro d'une entrée tout juste ajoutée et encore vide : reste dans la lettre où on l'a créée
         self._lettre_pendante = "#"
@@ -135,7 +140,10 @@ class VueRepertoire(QWidget):
         self.b_importer.clicked.connect(self.importer)
         self.b_exporter = QPushButton(icone("document-save"), _("Exporter en CSV…"))
         self.b_exporter.clicked.connect(self.exporter)
-        for b in (self.b_ajouter, self.b_supprimer, self.b_colonnes, self.b_importer, self.b_exporter):
+        self.b_applications = QPushButton(icone("system-run"), _("Applications…"))
+        self.b_applications.clicked.connect(lambda *_a: self.declarer_applications())
+        self.b_applications.setToolTip(_("Les applications que les fiches peuvent lancer, avec « app:nom paramètre » (déclarées sur cet ordinateur seulement)"))
+        for b in (self.b_ajouter, self.b_supprimer, self.b_colonnes, self.b_importer, self.b_exporter, self.b_applications):
             barre.addWidget(b)
         barre.addStretch()
         self.filtre = QLineEdit()
@@ -296,13 +304,27 @@ class VueRepertoire(QWidget):
         if not 0 <= i < len(self.tableau.lignes):
             return
         trouves = []
+        lancements = []
         for cellule in self.tableau.lignes[i]:
-            trouves += [a for a in actions(cellule) if a not in trouves]
-        if not trouves:
+            lancements += [a for a in applications_citees(cellule) if a not in lancements]
+            trouves += [a for a in actions(sans_applications(cellule)) if a not in trouves]
+        if not trouves and not lancements:
             return
         titre = QLabel("<b>" + _("Actions rapides") + "</b>")
         self.rapides.addWidget(titre)
         pictos = {"tel": "☎", "mail": "✉", "web": "↗"}               # des caractères : les mêmes quel que soit le thème d'icônes
+        declarees = self.applications()
+        for nom, param in lancements:
+            ligne = QWidget()
+            h = QHBoxLayout(ligne)
+            h.setContentsMargins(0, 0, 0, 0)
+            ok = nom in declarees
+            lancer = QPushButton("▶  " + (_("Lancer %s") % nom if ok else _("%s (à déclarer)") % nom) + (" " + param if param else ""))
+            lancer.setStyleSheet("text-align:left")
+            lancer.setToolTip(declarees[nom] if ok else _("Cette application n'est pas déclarée sur cet ordinateur : cliquez pour la déclarer."))
+            lancer.clicked.connect(lambda *_a, n=nom, p=param: self.lancer(n, p))
+            h.addWidget(lancer, 1)
+            self.rapides.addWidget(ligne)
         for type_, valeur, cible in trouves:
             ligne = QWidget()
             h = QHBoxLayout(ligne)
@@ -317,6 +339,51 @@ class VueRepertoire(QWidget):
             h.addWidget(ouvrir, 1)
             h.addWidget(copier)
             self.rapides.addWidget(ligne)
+
+    def lancer(self, nom: str, param: str) -> bool:
+        """Lance l'application déclarée `nom` avec `param` (un seul argument, sans shell) ; sinon propose de la déclarer."""
+        modele = self.applications().get(nom)
+        if modele is None:
+            self.declarer_applications(nom)
+            return False
+        try:
+            argv = commande_application(modele, param)
+        except ValueError:
+            QMessageBox.warning(self, _("Applications"), _("Paramètre refusé pour %s : il ne doit pas commencer par « - ».") % nom)
+            return False
+        if shutil.which(argv[0]) is None:
+            QMessageBox.warning(self, _("Applications"), _("Programme introuvable : %s") % argv[0])
+            return False
+        try:
+            subprocess.Popen(argv, stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, start_new_session=True)
+        except OSError as ex:
+            QMessageBox.warning(self, _("Applications"), _("Lancement impossible : %s") % ex)
+            return False
+        return True
+
+    def declarer_applications(self, nom: str = ""):
+        """Fenêtre où l'on déclare, sur cet ordinateur, les applications que les fiches peuvent lancer."""
+        d = QDialog(self)
+        d.setWindowTitle(_("Applications"))
+        d.resize(560, 360)
+        lay = QVBoxLayout(d)
+        aide = QLabel(_("Une ligne par application : nom = commande. Dans une fiche, « app:nom paramètre » donne un bouton qui la lance. "
+                        "« {valeur} » est remplacé par le paramètre (un seul argument, sans shell ; il ne peut pas commencer par « - »). "
+                        "Ces réglages restent sur cet ordinateur : une fiche reçue ne lance que ce que vous avez déclaré ici."))
+        aide.setWordWrap(True)
+        lay.addWidget(aide)
+        ed = QPlainTextEdit(texte_declarations(self.applications()))
+        ed.setPlaceholderText("ssh = konsole -e ssh {valeur}\nzoom = xdg-open zoommtg://{valeur}\nnavigateur = firefox --private-window {valeur}")
+        if nom:
+            ed.appendPlainText(f"{nom} = ")
+        lay.addWidget(ed)
+        boutons = QDialogButtonBox(QDialogButtonBox.StandardButton.Ok | QDialogButtonBox.StandardButton.Cancel)
+        boutons.accepted.connect(d.accept)
+        boutons.rejected.connect(d.reject)
+        lay.addWidget(boutons)
+        if d.exec():
+            self.sauver_applications(lire_declarations(ed.toPlainText()))
+            self._maj_rapides()
 
     def agir(self, cible: str, valeur: str):
         """Ouvre l'adresse : mailto: et tel: par le système, http(s) par le navigateur choisi. Si rien ne sait la traiter

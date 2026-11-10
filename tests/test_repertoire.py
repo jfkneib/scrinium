@@ -322,3 +322,42 @@ def test_modele_contacts_a_une_colonne_lien_dont_l_adresse_donne_un_bouton():
     ligne = t.ligne_vide()
     ligne[t.colonnes.index("Lien")] = "https://zoom.us/j/123"
     assert actions(" ".join(ligne)) == [("web", "https://zoom.us/j/123", "https://zoom.us/j/123")]
+
+
+def test_convention_app_declaration_commande_et_garde_fous():
+    import pytest
+    from scrinium.core.repertoire import (applications_citees, commande_application, lire_declarations, sans_applications,
+                                          texte_declarations)
+    assert applications_citees("Serveur\napp:ssh root@h.local\nvoir app:zoom 123 456\napp:ssh root@h.local") == \
+        [("ssh", "root@h.local"), ("zoom", "123 456")]
+    assert applications_citees("mailto:a@b.fr http://x.org/app:truc xapp:ssh y") == []
+    assert actions(sans_applications("app:ssh root@h.local")) == []                      # le paramètre n'est pas pris pour un courriel
+    assert lire_declarations("# note\nSSH = konsole -e ssh {valeur}\nmauvais nom = x\nvide =\n") == {"ssh": "konsole -e ssh {valeur}"}
+    assert lire_declarations(texte_declarations({"b": "y", "a": "x {valeur}"})) == {"a": "x {valeur}", "b": "y"}
+    assert commande_application("konsole -e ssh {valeur}", "root@h") == ["konsole", "-e", "ssh", "root@h"]
+    assert commande_application("firefox", "https://x.org") == ["firefox", "https://x.org"] and commande_application("htop", "") == ["htop"]
+    assert commande_application("echo {valeur}", "a; rm -rf ~ $(x)") == ["echo", "a; rm -rf ~ $(x)"]       # un seul argument, rien n'est interprété
+    for mauvais in ("-oProxyCommand=evil", "ok\nsuite"):
+        with pytest.raises(ValueError):
+            commande_application("ssh {valeur}", mauvais)
+
+
+def test_vue_bouton_lancer_seulement_les_applications_declarees(monkeypatch):
+    from scrinium.ui import repertoire as ui_rep
+    v = VueRepertoire()
+    v.charger(contacts(("Serveur", "", "", "", "", "app:ssh root@h.local\napp:inconnue x")).en_texte())
+    stock = {"ssh": "echo {valeur}"}
+    v.applications = lambda: stock
+    v._maj_rapides()
+    textes = [b.findChildren(type(v.b_ajouter))[0].text() for b in _boutons(v)[1:]]
+    assert textes == ["▶  Lancer ssh root@h.local", "▶  inconnue (à déclarer) x"]
+    lances = []
+    monkeypatch.setattr(ui_rep.QMessageBox, "warning", staticmethod(lambda *a, **k: None))
+    monkeypatch.setattr(ui_rep.subprocess, "Popen", lambda argv, **k: lances.append(argv))
+    assert v.lancer("ssh", "root@h.local") and lances == [["echo", "root@h.local"]]
+    assert not v.lancer("ssh", "-oEvil") and len(lances) == 1
+    ouverts = []
+    monkeypatch.setattr(v, "declarer_applications", lambda nom="": ouverts.append(nom))
+    assert not v.lancer("inconnue", "x") and ouverts == ["inconnue"] and len(lances) == 1
+    stock["absent"] = "programme-qui-nexiste-pas {valeur}"
+    assert not v.lancer("absent", "x") and len(lances) == 1

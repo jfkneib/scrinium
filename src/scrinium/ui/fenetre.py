@@ -305,6 +305,9 @@ class Fenetre(QMainWindow):
         self._validation_en_attente = False                    # la vue d'un type vient d'être modifiée par l'utilisateur
         self.repertoire = VueRepertoire()                      # page des fiches « répertoire » (tableau rangé par lettre)
         self.repertoire.navigateur = lambda: str(self.store.reglages().get("navigateur", ""))
+        self.repertoire.applications = lambda: {str(k): str(v) for k, v in (self.store.reglages().get("applications") or {}).items()} \
+            if isinstance(self.store.reglages().get("applications"), dict) else {}
+        self.repertoire.sauver_applications = lambda d: self.store.sauver_reglages(applications=d)
         self.ajouter_vue_type(repertoire.TYPE.nom, self.repertoire)
         self.bandeau_validation = QWidget()                    # fiche d'un type exécutable reçue de l'extérieur : inerte jusqu'à validation
         lv = QHBoxLayout(self.bandeau_validation)

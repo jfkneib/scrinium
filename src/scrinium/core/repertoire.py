@@ -12,7 +12,9 @@ texte ordinaire (il se verrouille, se cherche, se partage, se sauvegarde comme n
 Partie sans interface ; l'affichage est dans `ui/repertoire.py`."""
 import csv
 import io
+import os
 import re
+import shlex
 import unicodedata
 
 from ..i18n import N_
@@ -74,6 +76,61 @@ def actions(texte: str) -> list:
             continue
         ajouter("tel", brut, "tel:" + ("+" if brut.startswith("+") else "") + chiffres)
     return trouves
+
+
+# ---------- applications à lancer (« app:nom paramètre ») ----------
+# La fiche ne contient que le NOM d'une application et un paramètre ; la commande réelle est déclarée sur chaque machine (réglages, jamais dans
+# la fiche) : une fiche reçue ne peut donc rien lancer que l'utilisateur n'ait déclaré. Le paramètre est UN seul argument (pas de shell).
+_APP = re.compile(r"(?<![\w:/@.-])app:([A-Za-z0-9_-]{1,30})(?:[ \t]+([^\n\r]{1,200}))?", re.I)
+MAX_APPLICATIONS = 100
+
+
+def applications_citees(texte: str) -> list:
+    """[(nom en minuscules, paramètre)] des conventions « app:nom paramètre » d'un texte, sans doublon."""
+    res = []
+    for m in _APP.finditer(texte or ""):
+        a = (m.group(1).lower(), (m.group(2) or "").strip())
+        if a not in res:
+            res.append(a)
+    return res
+
+
+def sans_applications(texte: str) -> str:
+    """Le texte sans ses conventions « app:… » (le paramètre n'est alors pas pris pour un courriel ou un numéro)."""
+    return _APP.sub(" ", texte or "")
+
+
+def lire_declarations(texte: str) -> dict:
+    """{nom: commande} depuis des lignes « nom = commande » (les lignes vides et celles qui commencent par # sont ignorées)."""
+    res = {}
+    for ligne in (texte or "").splitlines():
+        ligne = ligne.strip()
+        if not ligne or ligne.startswith("#") or "=" not in ligne:
+            continue
+        nom, _sep, cmd = ligne.partition("=")
+        nom, cmd = nom.strip().lower(), cmd.strip()
+        if re.fullmatch(r"[a-z0-9_-]{1,30}", nom) and cmd and len(res) < MAX_APPLICATIONS:
+            res[nom] = cmd
+    return res
+
+
+def texte_declarations(declarations: dict) -> str:
+    return "".join(f"{nom} = {cmd}\n" for nom, cmd in sorted(declarations.items()))
+
+
+def commande_application(modele: str, valeur: str) -> list:
+    """Arguments à lancer pour la commande déclarée `modele` (« {valeur} » est remplacé, entier, par le paramètre ; sans « {valeur} »,
+    le paramètre est ajouté en dernier argument). ValueError si le paramètre est refusé : il ne doit pas pouvoir passer pour une option
+    (commençant par « - ») ni contenir de caractère de contrôle."""
+    valeur = (valeur or "").strip()
+    if valeur.startswith("-") or any(ord(c) < 32 for c in valeur):
+        raise ValueError("paramètre refusé")
+    argv = shlex.split(modele, posix=os.name != "nt")
+    if not argv:
+        raise ValueError("commande vide")
+    if any("{valeur}" in a for a in argv):
+        return [a.replace("{valeur}", valeur) for a in argv]
+    return argv + ([valeur] if valeur else [])
 
 
 def sans_accents(texte: str) -> str:
