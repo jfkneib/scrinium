@@ -184,6 +184,12 @@ def marquer_lus(doc: Document, articles: list) -> None:
     del doc.lus[:-MAX_LUS]
 
 
+def marquer_non_lus(doc: Document, articles: list) -> None:
+    """Remet des articles à « non lu » (retire leur empreinte de la liste des lus)."""
+    retirer = {a.empreinte for a in articles}
+    doc.lus = [e for e in doc.lus if e not in retirer]
+
+
 # Nombre de non lus connu par fiche (empreinte de la liste de sources) : rempli par l'extension après chaque relève, lu par la pastille.
 NON_LUS: dict = {}
 

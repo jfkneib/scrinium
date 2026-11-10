@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: scrinium 0.2.0\n"
 "Report-Msgid-Bugs-To: \n"
-"PO-Revision-Date: 2026-11-10 16:37+0100\n"
+"PO-Revision-Date: 2026-11-10 16:38+0100\n"
 "Last-Translator: Jean-François Kneib\n"
 "Language-Team: English\n"
 "Language: en\n"
@@ -5570,7 +5570,7 @@ msgstr "llama-server stopped: %s"
 msgid "llama-server n'est pas prêt après %d s"
 msgstr "llama-server not ready after %d s"
 
-#: plugins/veille/__init__.py:377
+#: plugins/veille/__init__.py:385
 msgid ""
 "Suivre des sites sans les ouvrir un par un : flux RSS ou Atom, avec un mot-clé facultatif.\n"
 "\n"
@@ -5633,15 +5633,11 @@ msgstr "Checks validated Watch notes every 30 minutes, even when they are not di
 msgid "Ouvrir"
 msgstr "Open"
 
-#: plugins/veille/__init__.py:200
-msgid "Marquer comme lu"
-msgstr "Mark as read"
-
-#: plugins/veille/__init__.py:229
+#: plugins/veille/__init__.py:237
 msgid "Relève en cours…"
 msgstr "Checking…"
 
-#: plugins/veille/__init__.py:309
+#: plugins/veille/__init__.py:317
 msgid "Extension Veille"
 msgstr "Watch extension"
 
@@ -5662,36 +5658,44 @@ msgid "Mot-clé"
 msgstr "Keyword"
 
 #: plugins/veille/__init__.py:131
-msgid "Double-clic sur un article : l'ouvrir dans le navigateur (il est alors marqué lu). Clic droit sur une source : modifier ou retirer."
-msgstr "Double-click an article to open it in the browser (it is then marked as read). Right-click a source to edit or remove it."
+msgid "Double-clic sur un article : l'ouvrir dans le navigateur (il est alors marqué lu). Clic droit sur un article : le marquer lu ou non lu ; sur une source : la modifier ou la retirer."
+msgstr "Double-click an article to open it in the browser (it is then marked as read). Right-click an article to mark it read or unread; right-click a source to edit or remove it."
 
 #: plugins/veille/__init__.py:132
 msgid "Fiche non validée : relisez les sources, puis validez-la pour lancer la relève et la modifier."
 msgstr "Note not validated: review the sources, then validate it to start checking and to edit it."
 
-#: plugins/veille/__init__.py:290
+#: plugins/veille/__init__.py:201
+msgid "Marquer comme non lu"
+msgstr "Mark as unread"
+
+#: plugins/veille/__init__.py:203
+msgid "Marquer comme lu"
+msgstr "Mark as read"
+
+#: plugins/veille/__init__.py:298
 msgid "Ajoutez une source (flux RSS ou Atom)."
 msgstr "Add a source (RSS or Atom feed)."
 
-#: plugins/veille/__init__.py:374
-#: plugins/veille/logique.py:237
+#: plugins/veille/__init__.py:382
+#: plugins/veille/logique.py:243
 msgid "Veille"
 msgstr "Watch"
 
-#: plugins/veille/__init__.py:290
+#: plugins/veille/__init__.py:298
 msgid "%d non lu(s) sur %d"
 msgstr "%d unread of %d"
 
-#: plugins/veille/__init__.py:290
+#: plugins/veille/__init__.py:298
 msgid "Tout est lu (%d article(s) masqué(s))."
 msgstr "All read (%d article(s) hidden)."
 
-#: plugins/veille/__init__.py:292
+#: plugins/veille/__init__.py:300
 msgid "injoignable : %s"
 msgstr "unreachable: %s"
 
-#: plugins/veille/__init__.py:374
-#: plugins/veille/logique.py:198
+#: plugins/veille/__init__.py:382
+#: plugins/veille/logique.py:204
 msgid "%d nouveauté(s) à lire"
 msgstr "%d new item(s) to read"
 
@@ -5699,11 +5703,11 @@ msgstr "%d new item(s) to read"
 msgid "adresse refusée (http ou https seulement)"
 msgstr "address refused (http or https only)"
 
-#: plugins/veille/logique.py:234
+#: plugins/veille/logique.py:240
 msgid "Veille (exemples)"
 msgstr "Watch (examples)"
 
-#: plugins/veille/logique.py:234
+#: plugins/veille/logique.py:240
 msgid "Exemple · Veille informatique"
 msgstr "Example · IT watch"
 

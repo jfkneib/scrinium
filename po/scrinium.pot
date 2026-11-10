@@ -5297,7 +5297,7 @@ msgstr ""
 msgid "llama-server n'est pas prêt après %d s"
 msgstr ""
 
-#: plugins/veille/__init__.py:377
+#: plugins/veille/__init__.py:385
 msgid ""
 "Suivre des sites sans les ouvrir un par un : flux RSS ou Atom, avec un mot-clé facultatif.\n"
 "\n"
@@ -5353,15 +5353,11 @@ msgstr ""
 msgid "Ouvrir"
 msgstr ""
 
-#: plugins/veille/__init__.py:200
-msgid "Marquer comme lu"
-msgstr ""
-
-#: plugins/veille/__init__.py:229
+#: plugins/veille/__init__.py:237
 msgid "Relève en cours…"
 msgstr ""
 
-#: plugins/veille/__init__.py:309
+#: plugins/veille/__init__.py:317
 msgid "Extension Veille"
 msgstr ""
 
@@ -5382,36 +5378,44 @@ msgid "Mot-clé"
 msgstr ""
 
 #: plugins/veille/__init__.py:131
-msgid "Double-clic sur un article : l'ouvrir dans le navigateur (il est alors marqué lu). Clic droit sur une source : modifier ou retirer."
+msgid "Double-clic sur un article : l'ouvrir dans le navigateur (il est alors marqué lu). Clic droit sur un article : le marquer lu ou non lu ; sur une source : la modifier ou la retirer."
 msgstr ""
 
 #: plugins/veille/__init__.py:132
 msgid "Fiche non validée : relisez les sources, puis validez-la pour lancer la relève et la modifier."
 msgstr ""
 
-#: plugins/veille/__init__.py:290
+#: plugins/veille/__init__.py:201
+msgid "Marquer comme non lu"
+msgstr ""
+
+#: plugins/veille/__init__.py:203
+msgid "Marquer comme lu"
+msgstr ""
+
+#: plugins/veille/__init__.py:298
 msgid "Ajoutez une source (flux RSS ou Atom)."
 msgstr ""
 
-#: plugins/veille/__init__.py:374
-#: plugins/veille/logique.py:237
+#: plugins/veille/__init__.py:382
+#: plugins/veille/logique.py:243
 msgid "Veille"
 msgstr ""
 
-#: plugins/veille/__init__.py:290
+#: plugins/veille/__init__.py:298
 msgid "%d non lu(s) sur %d"
 msgstr ""
 
-#: plugins/veille/__init__.py:290
+#: plugins/veille/__init__.py:298
 msgid "Tout est lu (%d article(s) masqué(s))."
 msgstr ""
 
-#: plugins/veille/__init__.py:292
+#: plugins/veille/__init__.py:300
 msgid "injoignable : %s"
 msgstr ""
 
-#: plugins/veille/__init__.py:374
-#: plugins/veille/logique.py:198
+#: plugins/veille/__init__.py:382
+#: plugins/veille/logique.py:204
 msgid "%d nouveauté(s) à lire"
 msgstr ""
 
@@ -5419,11 +5423,11 @@ msgstr ""
 msgid "adresse refusée (http ou https seulement)"
 msgstr ""
 
-#: plugins/veille/logique.py:234
+#: plugins/veille/logique.py:240
 msgid "Veille (exemples)"
 msgstr ""
 
-#: plugins/veille/logique.py:234
+#: plugins/veille/logique.py:240
 msgid "Exemple · Veille informatique"
 msgstr ""
 

@@ -312,3 +312,16 @@ def test_veille_exemple_informatique():
     doc = lg.lire(texte)
     assert len(doc.sources) == 22 and all(lg.adresse_valide(s.adresse) for s in doc.sources)
     assert 0 < sum(s.afficher for s in doc.sources) < 8
+
+
+def test_veille_remettre_non_lu(fen):
+    lg = _charger("veille")
+    vue = fen.vues_types["veille"]
+    vue.charger(lg.ecrire(lg.Document([lg.Source("S", "https://x.org/f")])))
+    vue.articles = [lg.Article("S", "Un", "https://x.org/1", "2026-11-10 10:00", "aaaaaaaaaa")]
+    vue._lire_article(0)
+    assert vue.t_articles.rowCount() == 0
+    vue.c_lus.setChecked(True)
+    assert vue.t_articles.rowCount() == 1 and len(lg.non_lus(vue.articles, vue.doc)) == 0
+    vue._non_lire_article(0)
+    assert len(lg.non_lus(vue.articles, vue.doc)) == 1 and "aaaaaaaaaa" not in lg.ecrire(vue.doc)

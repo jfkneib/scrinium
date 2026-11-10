@@ -128,7 +128,7 @@ class VueVeille(QWidget):
     def actif(self, oui: bool) -> None:
         self._actif = bool(oui)
         self.b_actualiser.setEnabled(self._actif)
-        self.aide.setText(_("Double-clic sur un article : l'ouvrir dans le navigateur (il est alors marqué lu). Clic droit sur une source : modifier ou retirer.")
+        self.aide.setText(_("Double-clic sur un article : l'ouvrir dans le navigateur (il est alors marqué lu). Clic droit sur un article : le marquer lu ou non lu ; sur une source : la modifier ou la retirer.")
                           if self._actif else _("Fiche non validée : relisez les sources, puis validez-la pour lancer la relève et la modifier."))
 
     def fermer(self):
@@ -197,7 +197,10 @@ class VueVeille(QWidget):
             return
         m = QMenu(self)
         m.addAction(icone("internet-web-browser"), _("Ouvrir"), lambda: self._ouvrir(i))
-        m.addAction(icone("mail-mark-read"), _("Marquer comme lu"), lambda: self._lire_article(i))
+        if 0 <= i < len(self.affiches) and self.affiches[i].empreinte in set(self.doc.lus):
+            m.addAction(icone("mail-mark-unread"), _("Marquer comme non lu"), lambda: self._non_lire_article(i))
+        else:
+            m.addAction(icone("mail-mark-read"), _("Marquer comme lu"), lambda: self._lire_article(i))
         m.exec(self.t_articles.viewport().mapToGlobal(pos))
 
     def _ouvrir(self, i: int):
@@ -210,6 +213,11 @@ class VueVeille(QWidget):
     def _lire_article(self, i: int):
         if 0 <= i < len(self.affiches) and self._actif:
             logique.marquer_lus(self.doc, [self.affiches[i]])
+            self._enregistrer()
+
+    def _non_lire_article(self, i: int):
+        if 0 <= i < len(self.affiches) and self._actif:
+            logique.marquer_non_lus(self.doc, [self.affiches[i]])
             self._enregistrer()
 
     def _tout_lire(self):
