@@ -401,3 +401,44 @@ def test_vue_du_type_agenda():
     vue.liste.setCurrentRow(0)
     vue._supprimer()
     assert vue.liste.count() == 0 and recus and lg.fiche_depuis_texte(recus[-1]) == []
+
+
+def test_lien_de_reunion_valide_ecrit_dans_la_fiche_et_trouve_dans_le_titre():
+    assert lg.lien_valide("https://zoom.us/j/123?pwd=ab") == "https://zoom.us/j/123?pwd=ab"
+    for mauvais in ("javascript:alert(1)", "file:///etc/passwd", "ftp://x.org/a", "https://", "https://a b.org", "zoom", ""):
+        assert lg.lien_valide(mauvais) == ""
+    evs = []
+    e = lg.ajouter(evs, "Point équipe", T0, lien="https://meet.example.org/abc")
+    assert e["lien"] == "https://meet.example.org/abc"
+    relu = lg.fiche_depuis_texte(lg.fiche_en_texte([lg.definition(e)]))
+    assert relu[0]["lien"] == "https://meet.example.org/abc" and "lien: https://meet.example.org/abc" in lg.fiche_en_texte(relu)
+    assert lg.fiche_en_texte([lg.definition(lg.ajouter([], "Sans", T0))]).count("lien:") == 0
+    assert lg.lien_de(lg.normaliser({"titre": "Visio https://zoom.us/j/9, à 14 h", "quand": "2026-10-21 09:00"})) == "https://zoom.us/j/9"
+    assert lg.lien_de({"titre": "Rien", "lien": ""}) == ""
+    assert lg.ajouter([], "Piège", T0, lien="file:///etc/passwd")["lien"] == ""
+
+
+def test_ouvrir_le_lien_depuis_le_plugin_et_la_fenetre(monkeypatch):
+    app = QApplication.instance() or QApplication([])
+    assert app
+    ouverts = []
+    monkeypatch.setattr(mod.QDesktopServices, "openUrl", lambda u: ouverts.append(u.toString()) or True)
+    ctx, _n, _o = faux_ctx([fiche("Libre")], courante=fiche("Libre"))
+    p = mod.AgendaPlugin()
+    p.activer(ctx)
+    p.ajouter("Réunion", T0, lien="https://zoom.us/j/1")
+    p.ajouter("Avec lien dans le titre https://teams.example.org/x", T0 + timedelta(hours=1))
+    p.ajouter("Sans lien", T0 + timedelta(hours=2))
+    evs = {e["titre"]: e for e in p.evenements()}
+    assert p.ouvrir_lien(evs["Réunion"]) and p.ouvrir_lien(evs["Avec lien dans le titre https://teams.example.org/x"])
+    assert not p.ouvrir_lien(evs["Sans lien"]) and ouverts == ["https://zoom.us/j/1", "https://teams.example.org/x"]
+    dlg = mod.DialogueAgenda(p)
+    assert "🔗" in dlg.liste.item(0).text() and "🔗" not in dlg.liste.item(2).text()
+    d = mod.DialogueEvenement(None, evs["Réunion"])
+    assert d.lien() == "https://zoom.us/j/1"
+    d.lien_edit.setText("pas un lien")
+    assert d.lien() == ""
+    popup = mod.RappelPopup(p, dict(evs["Réunion"]))
+    assert any(b.text() == "Ouvrir le lien" for b in popup.findChildren(mod.QPushButton))
+    popup2 = mod.RappelPopup(p, dict(evs["Sans lien"]))
+    assert not any(b.text() == "Ouvrir le lien" for b in popup2.findChildren(mod.QPushButton))

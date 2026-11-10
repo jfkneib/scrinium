@@ -11,7 +11,8 @@
   rappels. L'état « déjà annoncé » reste local à chaque machine (réglages, clé « etat »)."""
 from datetime import datetime, timedelta
 
-from PyQt6.QtCore import QDate, QTime, Qt, pyqtSignal
+from PyQt6.QtCore import QDate, QTime, QUrl, Qt, pyqtSignal
+from PyQt6.QtGui import QDesktopServices
 from PyQt6.QtWidgets import (QApplication, QCheckBox, QComboBox, QDateEdit, QDialog, QDialogButtonBox, QFormLayout, QHBoxLayout,
                              QLabel, QLineEdit, QListWidget, QListWidgetItem, QMessageBox, QPushButton, QTimeEdit, QVBoxLayout,
                              QWidget)
@@ -59,6 +60,10 @@ class DialogueEvenement(QDialog):
         self.repete.setCurrentIndex(max(0, self.repete.findData((e or {}).get("repete", ""))))
         self.repete.setToolTip(_("La date ci-dessus est celle de départ ; Scrinium annonce ensuite chaque occurrence."))
         lay.addRow(_("Répéter"), self.repete)
+        self.lien_edit = QLineEdit((e or {}).get("lien", ""))
+        self.lien_edit.setPlaceholderText("https://…")
+        self.lien_edit.setToolTip(_("Lien de la réunion (Zoom, Teams, Meet…) : un bouton l'ouvre depuis le rappel et depuis l'Agenda."))
+        lay.addRow(_("Lien de la réunion"), self.lien_edit)
         self.son = QCheckBox(_("Jouer un son au rappel"))
         self.son.setChecked((e or {}).get("son", True))
         lay.addRow(self.son)
@@ -93,6 +98,9 @@ class DialogueEvenement(QDialog):
         d, t = self.date.date(), self.heure.time()
         return datetime(d.year(), d.month(), d.day(), t.hour(), t.minute())
 
+    def lien(self) -> str:
+        return logique.lien_valide(self.lien_edit.text())
+
     def resultat(self) -> tuple:
         fiche = self._fiche if self.lier is not None and self.lier.isChecked() else None
         return self.titre.text(), self.quand(), fiche, self.son.isChecked(), self.repete.currentData()
@@ -113,6 +121,10 @@ class RappelPopup(QDialog):
         lay.addWidget(t)
         lay.addWidget(QLabel(f"{e['quand']}   ({logique.delai_texte(logique.en_date(e['quand']), datetime.now())})"))
         rang = QHBoxLayout()
+        if logique.lien_de(e):
+            b = QPushButton(_("Ouvrir le lien"))
+            b.clicked.connect(lambda *_a: self.p.ouvrir_lien(self.e))
+            rang.addWidget(b)
         if e["fiche"]:
             b = QPushButton(_("Ouvrir la fiche"))
             b.clicked.connect(self._ouvrir)
@@ -130,7 +142,7 @@ class RappelPopup(QDialog):
     def _repousser(self):
         if self.e["repete"]:          # la série a déjà avancé : le report est un rappel isolé, la série n'est pas décalée
             self.p.ajouter(self.e["titre"], (datetime.now() + timedelta(minutes=10)).replace(second=0, microsecond=0),
-                           self.e["fiche"], self.e["son"])
+                           self.e["fiche"], self.e["son"], lien=self.e.get("lien", ""))
         else:
             self.p.repousser(self.e["id"], 10)
         self.close()
@@ -149,14 +161,14 @@ class DialogueAgenda(QDialog):
         self.resize(560, 380)
         lay = QVBoxLayout(self)
         self.liste = QListWidget()
-        self.liste.itemDoubleClicked.connect(lambda _i: self.ouvrir())
+        self.liste.itemDoubleClicked.connect(lambda _i: self.ouvrir_lien() if logique.lien_de(self._courant() or {}) else self.ouvrir())
         lay.addWidget(self.liste)
         self.vide = QLabel(_("Aucun événement. « Ajouter » en crée un ; la fiche affichée peut y être liée."))
         self.vide.setWordWrap(True)
         lay.addWidget(self.vide)
         rang = QHBoxLayout()
         for texte, fn in ((_("Ajouter…"), self.ajouter), (_("Modifier…"), self.modifier), (_("Supprimer"), self.supprimer),
-                          (_("Ouvrir la fiche"), self.ouvrir)):
+                          (_("Ouvrir le lien"), self.ouvrir_lien), (_("Ouvrir la fiche"), self.ouvrir)):
             b = QPushButton(texte)
             b.clicked.connect(fn)
             rang.addWidget(b)
@@ -175,7 +187,8 @@ class DialogueAgenda(QDialog):
             lien = f"   ·   {e['fiche']['theme']} / {e['fiche']['titre']}" if e["fiche"] else ""
             etat = "✓" if e["fait"] else logique.delai_texte(d, maintenant)
             serie = f"   ↻ {_(logique.REPETITIONS[e['repete']]).lower()}" if e["repete"] else ""
-            it = QListWidgetItem(f"{e['quand']}   ({etat})   {e['titre']}{serie}{lien}")
+            visio = "   🔗" if logique.lien_de(e) else ""
+            it = QListWidgetItem(f"{e['quand']}   ({etat})   {e['titre']}{serie}{visio}{lien}")
             it.setData(Qt.ItemDataRole.UserRole, e["id"])
             self.liste.addItem(it)
         self.vide.setVisible(self.liste.count() == 0)
@@ -187,7 +200,7 @@ class DialogueAgenda(QDialog):
     def ajouter(self):
         d = DialogueEvenement(self, fiche=self.p.fiche_liable())
         if d.exec():
-            self.p.ajouter(*d.resultat())
+            self.p.ajouter(*d.resultat(), lien=d.lien())
             self.rafraichir()
 
     def modifier(self):
@@ -196,7 +209,7 @@ class DialogueAgenda(QDialog):
             return
         d = DialogueEvenement(self, e)
         if d.exec():
-            self.p.remplacer(e["id"], *d.resultat())
+            self.p.remplacer(e["id"], *d.resultat(), lien=d.lien())
             self.rafraichir()
 
     def supprimer(self):
@@ -205,6 +218,11 @@ class DialogueAgenda(QDialog):
                 == QMessageBox.StandardButton.Yes:
             self.p.supprimer(e["id"])
             self.rafraichir()
+
+    def ouvrir_lien(self):
+        e = self._courant()
+        if e is not None and not self.p.ouvrir_lien(e):
+            QMessageBox.information(self, _("Agenda"), _("Cet événement n'a pas de lien de réunion."))
 
     def ouvrir(self):
         e = self._courant()
@@ -224,7 +242,8 @@ class VueAgenda(QWidget):
         self.liste.itemDoubleClicked.connect(lambda *_a: self._modifier())
         lay.addWidget(self.liste, 1)
         col = QVBoxLayout()
-        for texte, fn in ((_("Ajouter…"), self._ajouter), (_("Modifier…"), self._modifier), (_("Supprimer"), self._supprimer)):
+        for texte, fn in ((_("Ajouter…"), self._ajouter), (_("Modifier…"), self._modifier), (_("Supprimer"), self._supprimer),
+                          (_("Ouvrir le lien"), self._ouvrir_lien)):
             b = QPushButton(texte)
             b.clicked.connect(fn)
             col.addWidget(b)
@@ -246,7 +265,8 @@ class VueAgenda(QWidget):
             etat = "✓" if d["fait"] else logique.delai_texte(d_prochaine, maintenant)
             serie = f"   ↻ {_(logique.REPETITIONS[d['repete']]).lower()}" if d["repete"] else ""
             lien = f"   ·   {d['fiche']['theme']} / {d['fiche']['titre']}" if d["fiche"] else ""
-            self.liste.addItem(f"{d['ancre']}   ({etat})   {d['titre']}{serie}{lien}")
+            visio = "   🔗" if logique.lien_de(d) else ""
+            self.liste.addItem(f"{d['ancre']}   ({etat})   {d['titre']}{serie}{visio}{lien}")
         if self.defs:
             self.liste.setCurrentRow(min(max(ligne, 0), len(self.defs) - 1))
 
@@ -255,12 +275,20 @@ class VueAgenda(QWidget):
         self.modifie.emit(logique.fiche_en_texte(self.defs))
         self._remplir(ligne)
 
+    def _ouvrir_lien(self):
+        i = self.liste.currentRow()
+        lien = logique.lien_de(self.defs[i]) if 0 <= i < len(self.defs) else ""
+        if lien:
+            QDesktopServices.openUrl(QUrl(lien))
+        else:
+            QMessageBox.information(self, _("Agenda"), _("Cet événement n'a pas de lien de réunion."))
+
     def _ajouter(self):
         d = DialogueEvenement(self)
         if d.exec():
             evs = []
             titre, quand, fiche, son, repete = d.resultat()
-            logique.ajouter(evs, titre, quand, fiche, None, son, repete)
+            logique.ajouter(evs, titre, quand, fiche, None, son, repete, lien=d.lien())
             self.defs.append(logique.definition(evs[0]))
             self._changer(len(self.defs) - 1)
 
@@ -271,7 +299,7 @@ class VueAgenda(QWidget):
             if d.exec():
                 evs = []
                 titre, quand, fiche, son, repete = d.resultat()
-                logique.ajouter(evs, titre, quand, fiche, self.defs[i]["id"], son, repete)
+                logique.ajouter(evs, titre, quand, fiche, self.defs[i]["id"], son, repete, lien=d.lien())
                 self.defs[i] = logique.definition(evs[0])
                 self._changer(i)
 
@@ -353,14 +381,14 @@ class AgendaPlugin(Plugin):
                 self.ctx.ui.actualiser()
                 self.ctx.ui.notifier(_("Agenda"), _("Vos événements sont maintenant une fiche « Agenda » (thème « %s »).") % self.THEME)
 
-    def ajouter(self, titre, quand, fiche=None, son=True, repete=""):
+    def ajouter(self, titre, quand, fiche=None, son=True, repete="", lien=""):
         evs = self.evenements()
-        logique.ajouter(evs, titre, quand, fiche, son=son, repete=repete)
+        logique.ajouter(evs, titre, quand, fiche, son=son, repete=repete, lien=lien)
         self._sauver(evs)
 
-    def remplacer(self, id_, titre, quand, fiche=None, son=True, repete=""):
+    def remplacer(self, id_, titre, quand, fiche=None, son=True, repete="", lien=""):
         evs = [e for e in self.evenements() if e["id"] != id_]
-        logique.ajouter(evs, titre, quand, fiche, id_, son, repete)       # même identifiant ; « notifie » repart à zéro
+        logique.ajouter(evs, titre, quand, fiche, id_, son, repete, lien=lien)       # même identifiant ; « notifie » repart à zéro
         self._sauver(evs)
 
     def _modifier(self, id_, fn):
@@ -391,6 +419,13 @@ class AgendaPlugin(Plugin):
                 self.ctx.ui.afficher_fiche(v)
                 return True
         return False
+
+    def ouvrir_lien(self, e: dict) -> bool:
+        """Ouvre le lien de réunion de l'événement dans le navigateur (sur un clic de l'utilisateur seulement)."""
+        lien = logique.lien_de(e)
+        if lien:
+            QDesktopServices.openUrl(QUrl(lien))
+        return bool(lien)
 
     def _popup(self, e):
         if QApplication.instance() is None:
@@ -433,4 +468,7 @@ DOC = _(
     "• Bouton « Agenda » (barre d'outils) ou menu Extensions > « Agenda… » : ajouter, modifier, supprimer un événement, ouvrir la fiche liée.\n"
     '• Scrinium vérifie toutes les 30 secondes. Un événement manqué pendant que Scrinium était fermé est annoncé au démarrage, « en retard ».\n'
     '• Les événements sont écrits dans une fiche de type Agenda (thème « Agenda ») : elle se sauvegarde, se partage et se synchronise comme les autres.\n'
-    '• Aucun lien vers une fiche verrouillée (son titre resterait lisible dans les réglages).')
+    '• Aucun lien vers une fiche verrouillée (son titre resterait lisible dans les réglages).\n'
+    "• Réunion en visio (Zoom, Teams, Meet…) : collez son adresse dans « Lien de la réunion » (ou écrivez-la dans le titre). Un bouton « Ouvrir le lien » "
+    "apparaît dans la fenêtre de rappel et dans l'Agenda (🔗 = événement avec lien) ; un double-clic dans l'Agenda l'ouvre aussi. "
+    "Seuls les liens http et https sont acceptés, et rien ne s'ouvre sans un clic de votre part.")

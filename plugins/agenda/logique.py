@@ -18,11 +18,13 @@ alors la prochaine occurrence)}.
     fait: oui                  (facultatif, événement unique)
     fiche-theme: Perso         (facultatif : fiche liée, jamais une fiche verrouillée)
     fiche-titre: Dossier notaire
+    lien: https://zoom.us/j/123456  (facultatif : lien de réunion http ou https, ouvert par un bouton, jamais automatiquement)
 
 La fiche ne porte que la DÉFINITION. L'état « déjà annoncé » et la prochaine occurrence d'une série restent propres à chaque machine
 (réglages de l'extension, clé « etat ») : une fiche synchronisée n'est pas réécrite à chaque alerte, et chaque PC annonce pour lui.
 Le champ `id` rend la fusion événement par événement possible quand deux machines modifient la fiche."""
 import os
+import re
 import shutil
 import subprocess
 import sys
@@ -40,7 +42,8 @@ REPETITIONS = {"": N_("Jamais"), "jour": N_("Chaque jour"), "semaine": N_("Chaqu
 MAX_EVENEMENTS = 2000
 MARQUE = "#scrinium-agenda"
 TYPE = TypeFiche("agenda", N_("Agenda"), "view-calendar")
-_CLES = ("id", "quand", "repete", "son", "fait", "fiche-theme", "fiche-titre")
+_CLES = ("id", "quand", "repete", "son", "fait", "fiche-theme", "fiche-titre", "lien")
+_URL = re.compile(r"https?://[^\s<>\"']+", re.I)
 
 
 def en_date(texte: str) -> datetime | None:
@@ -52,6 +55,20 @@ def en_date(texte: str) -> datetime | None:
 
 def en_texte(d: datetime) -> str:
     return d.strftime(FORMAT)
+
+
+def lien_valide(texte) -> str:
+    """Lien http(s) propre ou « » : un autre schéma (file:, javascript:, commande…) n'est jamais gardé."""
+    t = str(texte or "").strip()
+    return t[:500] if _URL.fullmatch(t) and len(t) > 8 else ""
+
+
+def lien_de(e: dict) -> str:
+    """Le lien de réunion d'un événement : celui du champ « lien », sinon la première adresse http(s) écrite dans le titre."""
+    if e.get("lien"):
+        return e["lien"]
+    m = _URL.search(e.get("titre", ""))
+    return lien_valide(m.group(0).rstrip(".,;)")) if m else ""
 
 
 def normaliser(e) -> dict | None:
@@ -71,7 +88,7 @@ def normaliser(e) -> dict | None:
     ancre = en_date(e.get("ancre", "")) or quand
     return {"id": str(e.get("id") or uuid.uuid4().hex[:12]), "titre": titre[:200], "quand": en_texte(quand), "fiche": fiche,
             "notifie": bool(e.get("notifie")), "fait": bool(e.get("fait")), "son": e.get("son", True) is not False,
-            "repete": repete, "ancre": en_texte(ancre if repete else quand)}
+            "repete": repete, "ancre": en_texte(ancre if repete else quand), "lien": lien_valide(e.get("lien"))}
 
 
 def definition(e: dict) -> dict:
@@ -102,7 +119,7 @@ def fiche_depuis_texte(texte: str | None) -> list:
         e = normaliser({"id": ident, "titre": b["titre"], "quand": b.get("quand", ""), "ancre": b.get("quand", ""),
                         "repete": b.get("repete", ""), "son": not _non(b.get("son", "oui")),
                         "fait": str(b.get("fait", "")).lower() in ("oui", "yes", "true", "1"),
-                        "fiche": {"theme": b.get("fiche-theme"), "titre": b.get("fiche-titre")}})
+                        "lien": b.get("lien", ""), "fiche": {"theme": b.get("fiche-theme"), "titre": b.get("fiche-titre")}})
         if e is not None:
             res.append(e)
     return res
@@ -121,6 +138,8 @@ def fiche_en_texte(definitions: list) -> str:
             sortie.append("fait: oui")
         if e["fiche"]:
             sortie += ["fiche-theme: " + e["fiche"]["theme"], "fiche-titre: " + e["fiche"]["titre"]]
+        if e["lien"]:
+            sortie.append("lien: " + e["lien"])
     return "\n".join(sortie) + "\n"
 
 
@@ -198,13 +217,13 @@ def prochaine(ancre: datetime, repete: str, apres: datetime) -> datetime:
 
 
 def ajouter(evenements: list, titre: str, quand: datetime, fiche: dict | None = None, id_: str | None = None,
-            son: bool = True, repete: str = "", maintenant: datetime | None = None) -> dict:
+            son: bool = True, repete: str = "", maintenant: datetime | None = None, lien: str = "") -> dict:
     """Ajoute un événement (ValueError si le titre est vide ou la liste pleine) ; renvoie l'événement créé.
     Une série dont la date de départ est passée (anniversaire…) reçoit tout de suite sa prochaine occurrence, sans alerte."""
     if len(evenements) >= MAX_EVENEMENTS:
         raise ValueError("trop d'événements")
     n = normaliser({"titre": titre, "quand": en_texte(quand), "fiche": fiche, "id": id_, "son": son, "repete": repete,
-                    "ancre": en_texte(quand)})
+                    "ancre": en_texte(quand), "lien": lien})
     if n is None:
         raise ValueError("titre vide")
     if n["repete"] and quand <= (maintenant or datetime.now()):

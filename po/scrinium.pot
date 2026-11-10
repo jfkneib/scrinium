@@ -14,182 +14,202 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: plugins/agenda/__init__.py:430
+#: plugins/agenda/__init__.py:465
 msgid ""
 "Des rappels et des échéances, liés ou non à une fiche, annoncés par une notification à l'heure dite.\n"
 "\n"
 "• Bouton « Agenda » (barre d'outils) ou menu Extensions > « Agenda… » : ajouter, modifier, supprimer un événement, ouvrir la fiche liée.\n"
 "• Scrinium vérifie toutes les 30 secondes. Un événement manqué pendant que Scrinium était fermé est annoncé au démarrage, « en retard ».\n"
 "• Les événements sont écrits dans une fiche de type Agenda (thème « Agenda ») : elle se sauvegarde, se partage et se synchronise comme les autres.\n"
-"• Aucun lien vers une fiche verrouillée (son titre resterait lisible dans les réglages)."
+"• Aucun lien vers une fiche verrouillée (son titre resterait lisible dans les réglages).\n"
+"• Réunion en visio (Zoom, Teams, Meet…) : collez son adresse dans « Lien de la réunion » (ou écrivez-la dans le titre). Un bouton « Ouvrir le lien » apparaît dans la fenêtre de rappel et dans l'Agenda (🔗 = événement avec lien) ; un double-clic dans l'Agenda l'ouvre aussi. Seuls les liens http et https sont acceptés, et rien ne s'ouvre sans un clic de votre part."
 msgstr ""
 
-#: plugins/agenda/__init__.py:35
+#: plugins/agenda/__init__.py:36
 msgid "Événement"
 msgstr ""
 
-#: plugins/agenda/__init__.py:46
+#: plugins/agenda/__init__.py:47
 #: plugins/budget/__init__.py:164
 #: src/scrinium/ui/fenetre.py:266
 msgid "Titre"
 msgstr ""
 
-#: plugins/agenda/__init__.py:47
+#: plugins/agenda/__init__.py:48
 #: plugins/budget/__init__.py:149
 #: plugins/calc/logique.py:82
 msgid "Date"
 msgstr ""
 
-#: plugins/agenda/__init__.py:48
+#: plugins/agenda/__init__.py:49
 msgid "Heure (24 h, ex. 14:30)"
 msgstr ""
 
-#: plugins/agenda/__init__.py:60
+#: plugins/agenda/__init__.py:61
 msgid "La date ci-dessus est celle de départ ; Scrinium annonce ensuite chaque occurrence."
 msgstr ""
 
-#: plugins/agenda/__init__.py:61
+#: plugins/agenda/__init__.py:62
 msgid "Répéter"
 msgstr ""
 
-#: plugins/agenda/__init__.py:62
+#: plugins/agenda/__init__.py:65
+msgid "Lien de la réunion (Zoom, Teams, Meet…) : un bouton l'ouvre depuis le rappel et depuis l'Agenda."
+msgstr ""
+
+#: plugins/agenda/__init__.py:66
+msgid "Lien de la réunion"
+msgstr ""
+
+#: plugins/agenda/__init__.py:67
 msgid "Jouer un son au rappel"
 msgstr ""
 
-#: plugins/agenda/__init__.py:109
-#: plugins/agenda/__init__.py:418
+#: plugins/agenda/__init__.py:117
+#: plugins/agenda/__init__.py:453
 msgid "Rappel"
 msgstr ""
 
-#: plugins/agenda/__init__.py:148
-#: plugins/agenda/__init__.py:298
-#: plugins/agenda/__init__.py:128
+#: plugins/agenda/__init__.py:160
+#: plugins/agenda/__init__.py:326
+#: plugins/agenda/__init__.py:140
 msgid "Agenda"
 msgstr ""
 
-#: plugins/agenda/__init__.py:154
+#: plugins/agenda/__init__.py:166
 msgid "Aucun événement. « Ajouter » en crée un ; la fiche affichée peut y être liée."
 msgstr ""
 
-#: plugins/agenda/__init__.py:164
+#: plugins/agenda/__init__.py:176
 #: plugins/courriel/__init__.py:185
 #: plugins/ocr/__init__.py:115
 msgid "Fermer"
 msgstr ""
 
-#: plugins/agenda/__init__.py:291
+#: plugins/agenda/__init__.py:319
 msgid "Extension Agenda"
 msgstr ""
 
-#: plugins/agenda/__init__.py:297
+#: plugins/agenda/__init__.py:325
 msgid "Agenda…"
 msgstr ""
 
-#: plugins/agenda/__init__.py:299
+#: plugins/agenda/__init__.py:327
 msgid "Ouvrir la fenêtre Agenda…"
 msgstr ""
 
-#: plugins/agenda/__init__.py:50
+#: plugins/agenda/__init__.py:51
 msgid "+10 min"
 msgstr ""
 
-#: plugins/agenda/__init__.py:50
+#: plugins/agenda/__init__.py:51
 msgid "+1 h"
 msgstr ""
 
-#: plugins/agenda/__init__.py:51
+#: plugins/agenda/__init__.py:52
 msgid "Demain 9:00"
 msgstr ""
 
-#: plugins/agenda/__init__.py:117
-#: plugins/agenda/__init__.py:159
+#: plugins/agenda/__init__.py:125
+#: plugins/agenda/__init__.py:171
+#: plugins/agenda/__init__.py:246
+msgid "Ouvrir le lien"
+msgstr ""
+
+#: plugins/agenda/__init__.py:129
+#: plugins/agenda/__init__.py:171
 msgid "Ouvrir la fiche"
 msgstr ""
 
-#: plugins/agenda/__init__.py:120
+#: plugins/agenda/__init__.py:132
 msgid "Repousser de 10 min"
 msgstr ""
 
-#: plugins/agenda/__init__.py:120
+#: plugins/agenda/__init__.py:132
 msgid "Fait"
 msgstr ""
 
-#: plugins/agenda/__init__.py:128
-#: plugins/agenda/__init__.py:212
+#: plugins/agenda/__init__.py:140
+#: plugins/agenda/__init__.py:230
 msgid "Cette fiche n'existe plus ou est verrouillée."
 msgstr ""
 
-#: plugins/agenda/__init__.py:158
-#: plugins/agenda/__init__.py:227
+#: plugins/agenda/__init__.py:170
+#: plugins/agenda/__init__.py:245
 #: plugins/courriel/__init__.py:180
 msgid "Ajouter…"
 msgstr ""
 
-#: plugins/agenda/__init__.py:158
-#: plugins/agenda/__init__.py:227
+#: plugins/agenda/__init__.py:170
+#: plugins/agenda/__init__.py:245
 #: plugins/applications/__init__.py:232
 msgid "Modifier…"
 msgstr ""
 
-#: plugins/agenda/__init__.py:158
-#: plugins/agenda/__init__.py:227
-#: plugins/agenda/__init__.py:204
+#: plugins/agenda/__init__.py:170
+#: plugins/agenda/__init__.py:245
+#: plugins/agenda/__init__.py:217
 msgid "Supprimer"
 msgstr ""
 
-#: plugins/agenda/__init__.py:68
+#: plugins/agenda/__init__.py:225
+#: plugins/agenda/__init__.py:284
+msgid "Cet événement n'a pas de lien de réunion."
+msgstr ""
+
+#: plugins/agenda/__init__.py:73
 msgid "Lier à la fiche « %(theme)s / %(titre)s »"
 msgstr ""
 
-#: plugins/agenda/__init__.py:204
+#: plugins/agenda/__init__.py:217
 msgid "Supprimer « %s » ?"
 msgstr ""
 
-#: plugins/agenda/__init__.py:354
+#: plugins/agenda/__init__.py:382
 msgid "Vos événements sont maintenant une fiche « Agenda » (thème « %s »)."
 msgstr ""
 
-#: plugins/agenda/logique.py:38
+#: plugins/agenda/logique.py:40
 msgid "Jamais"
 msgstr ""
 
-#: plugins/agenda/logique.py:38
+#: plugins/agenda/logique.py:40
 msgid "Chaque jour"
 msgstr ""
 
-#: plugins/agenda/logique.py:38
+#: plugins/agenda/logique.py:40
 msgid "Chaque semaine"
 msgstr ""
 
-#: plugins/agenda/logique.py:38
+#: plugins/agenda/logique.py:40
 msgid "Chaque mois"
 msgstr ""
 
-#: plugins/agenda/logique.py:39
+#: plugins/agenda/logique.py:41
 msgid "Chaque année"
 msgstr ""
 
-#: plugins/agenda/logique.py:277
+#: plugins/agenda/logique.py:296
 msgid "dans %d j"
 msgstr ""
 
-#: plugins/agenda/logique.py:272
+#: plugins/agenda/logique.py:291
 msgid "en retard de %d j"
 msgstr ""
 
-#: plugins/agenda/logique.py:274
+#: plugins/agenda/logique.py:293
 msgid "dans %d min"
 msgstr ""
 
-#: plugins/agenda/logique.py:276
+#: plugins/agenda/logique.py:295
 msgid "dans %d h"
 msgstr ""
 
-#: plugins/agenda/logique.py:269
+#: plugins/agenda/logique.py:288
 msgid "en retard de %d min"
 msgstr ""
 
-#: plugins/agenda/logique.py:271
+#: plugins/agenda/logique.py:290
 msgid "en retard de %d h"
 msgstr ""
 
@@ -747,23 +767,23 @@ msgid "Aucun total"
 msgstr ""
 
 #: plugins/calc/__init__.py:23
-#: plugins/tableur/__init__.py:64
+#: plugins/tableur/__init__.py:71
 #: plugins/tableur/logique.py:413
 msgid "Somme"
 msgstr ""
 
 #: plugins/calc/__init__.py:23
-#: plugins/tableur/__init__.py:64
+#: plugins/tableur/__init__.py:71
 msgid "Moyenne"
 msgstr ""
 
 #: plugins/calc/__init__.py:23
-#: plugins/tableur/__init__.py:64
+#: plugins/tableur/__init__.py:71
 msgid "Minimum"
 msgstr ""
 
 #: plugins/calc/__init__.py:23
-#: plugins/tableur/__init__.py:64
+#: plugins/tableur/__init__.py:71
 msgid "Maximum"
 msgstr ""
 
@@ -772,17 +792,17 @@ msgid "Nombre"
 msgstr ""
 
 #: plugins/calc/__init__.py:40
-#: plugins/tableur/__init__.py:54
+#: plugins/tableur/__init__.py:61
 msgid "Ajouter une ligne"
 msgstr ""
 
 #: plugins/calc/__init__.py:42
-#: plugins/tableur/__init__.py:56
+#: plugins/tableur/__init__.py:63
 msgid "Ajouter une colonne"
 msgstr ""
 
 #: plugins/calc/__init__.py:46
-#: plugins/tableur/__init__.py:69
+#: plugins/tableur/__init__.py:76
 #: src/scrinium/ui/repertoire.py:134
 msgid "Importer un CSV…"
 msgstr ""
@@ -794,7 +814,7 @@ msgid "Importer un CSV"
 msgstr ""
 
 #: plugins/calc/__init__.py:235
-#: plugins/tableur/__init__.py:181
+#: plugins/tableur/__init__.py:244
 msgid "Fichiers CSV (*.csv *.txt);;Tous les fichiers (*)"
 msgstr ""
 
@@ -817,43 +837,43 @@ msgid "Copier"
 msgstr ""
 
 #: plugins/calc/__init__.py:215
-#: plugins/tableur/__init__.py:270
+#: plugins/tableur/__init__.py:333
 msgid "Coller"
 msgstr ""
 
 #: plugins/calc/__init__.py:217
-#: plugins/tableur/__init__.py:272
+#: plugins/tableur/__init__.py:335
 msgid "Insérer une ligne au-dessus"
 msgstr ""
 
 #: plugins/calc/__init__.py:218
-#: plugins/tableur/__init__.py:273
+#: plugins/tableur/__init__.py:336
 msgid "Insérer une ligne en dessous"
 msgstr ""
 
 #: plugins/calc/__init__.py:221
-#: plugins/tableur/__init__.py:276
+#: plugins/tableur/__init__.py:339
 msgid "Insérer une colonne à gauche"
 msgstr ""
 
 #: plugins/calc/__init__.py:222
-#: plugins/tableur/__init__.py:277
+#: plugins/tableur/__init__.py:340
 msgid "Insérer une colonne à droite"
 msgstr ""
 
 #: plugins/calc/__init__.py:223
-#: plugins/tableur/__init__.py:278
+#: plugins/tableur/__init__.py:341
 #: src/scrinium/ui/repertoire.py:90
 msgid "Supprimer la colonne"
 msgstr ""
 
 #: plugins/calc/__init__.py:245
-#: plugins/tableur/__init__.py:191
+#: plugins/tableur/__init__.py:254
 msgid "Ce fichier ne contient aucun tableau."
 msgstr ""
 
 #: plugins/calc/__init__.py:248
-#: plugins/tableur/__init__.py:194
+#: plugins/tableur/__init__.py:257
 msgid "Remplacer le contenu actuel de la fiche par ce fichier ?"
 msgstr ""
 
@@ -2928,7 +2948,7 @@ msgstr ""
 msgid "Cette fiche fait le point sur les plannings (fiches « Planning ») du même thème que celle-ci, ou sur tous si vous le choisissez en haut : avancement, retards, dates. Elle se met à jour quand on l'ouvre ou qu'on clique sur « Actualiser »."
 msgstr ""
 
-#: plugins/tableur/__init__.py:295
+#: plugins/tableur/__init__.py:358
 msgid ""
 "Un tableur pour des cellules et des formules, par exemple pour suivre des relevés (compteur, poids, dépenses…).\n"
 "\n"
@@ -2943,19 +2963,19 @@ msgid ""
 "• Pour une simple liste avec des totaux par colonne, voyez l'extension Calc."
 msgstr ""
 
-#: plugins/tableur/__init__.py:59
+#: plugins/tableur/__init__.py:66
 msgid "Totaux"
 msgstr ""
 
-#: plugins/tableur/__init__.py:80
+#: plugins/tableur/__init__.py:87
 msgid "Contenu de la cellule : un nombre, du texte, ou une formule comme =SOMME(A1:A5)"
 msgstr ""
 
-#: plugins/tableur/__init__.py:287
+#: plugins/tableur/__init__.py:350
 msgid "Extension Tableur"
 msgstr ""
 
-#: plugins/tableur/__init__.py:141
+#: plugins/tableur/__init__.py:204
 msgid "%(l)d lignes, %(c)d colonnes. Pour une formule : cliquez une cellule, tapez = puis la formule, par exemple =SOMME(A1:A5) ou =A1*B1, et Entrée."
 msgstr ""
 
