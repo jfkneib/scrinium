@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: scrinium 0.2.0\n"
 "Report-Msgid-Bugs-To: \n"
-"PO-Revision-Date: 2026-11-10 15:18+0100\n"
+"PO-Revision-Date: 2026-11-10 15:28+0100\n"
 "Last-Translator: Jean-François Kneib\n"
 "Language-Team: English\n"
 "Language: en\n"
@@ -133,7 +133,7 @@ msgid "Repousser de 10 min"
 msgstr "Snooze 10 min"
 
 #: plugins/agenda/__init__.py:132
-#: plugins/resolutions/__init__.py:99
+#: plugins/resolutions/__init__.py:102
 msgid "Fait"
 msgstr "Done"
 
@@ -183,7 +183,7 @@ msgstr "Never"
 
 #: plugins/agenda/logique.py:40
 #: plugins/resolutions/__init__.py:38
-#: plugins/resolutions/__init__.py:194
+#: plugins/resolutions/__init__.py:197
 msgid "Chaque jour"
 msgstr "Every day"
 
@@ -491,7 +491,7 @@ msgid "Catégorie"
 msgstr "Category"
 
 #: plugins/budget/__init__.py:137
-#: plugins/echeances/__init__.py:108
+#: plugins/echeances/__init__.py:111
 msgid "Montant"
 msgstr "Amount"
 
@@ -1696,7 +1696,7 @@ msgstr "The note can no longer be edited: text not inserted."
 msgid "Modèle indisponible : %s"
 msgstr "Model unavailable: %s"
 
-#: plugins/echeances/__init__.py:239
+#: plugins/echeances/__init__.py:242
 msgid ""
 "Assurances, noms de domaine, certificats, contrôle technique, garanties, abonnements : ne plus rater une date.\n"
 "\n"
@@ -1734,7 +1734,7 @@ msgid "Plus tard"
 msgstr "Later"
 
 #: plugins/echeances/__init__.py:42
-#: plugins/echeances/__init__.py:108
+#: plugins/echeances/__init__.py:111
 msgid "Échéance"
 msgstr "Deadline"
 
@@ -1774,85 +1774,90 @@ msgstr "Reminder:"
 msgid "Note :"
 msgstr "Note:"
 
-#: plugins/echeances/__init__.py:97
-#: plugins/echeances/__init__.py:164
+#: plugins/echeances/__init__.py:100
+#: plugins/echeances/__init__.py:167
 msgid "Ajouter une échéance…"
 msgstr "Add a deadline…"
 
-#: plugins/echeances/__init__.py:117
+#: plugins/echeances/__init__.py:120
 msgid "Une échéance qui se répète passe d'elle-même à la date suivante. Double-clic ou clic droit : modifier ou supprimer."
 msgstr "A repeating deadline moves to the next date by itself. Double-click or right-click: edit or delete."
 
-#: plugins/echeances/__init__.py:210
+#: plugins/echeances/__init__.py:213
 msgid "Extension Échéances"
 msgstr "Deadlines extension"
 
-#: plugins/echeances/__init__.py:100
+#: plugins/echeances/__init__.py:77
+#: plugins/resolutions/__init__.py:66
+msgid "Le nom est vide : saisissez-le avant de valider."
+msgstr "The name is empty: enter it before confirming."
+
+#: plugins/echeances/__init__.py:103
 msgid "Devise"
 msgstr "Currency"
 
-#: plugins/echeances/__init__.py:108
+#: plugins/echeances/__init__.py:111
 #: plugins/securite/__init__.py:68
 #: plugins/supervision/__init__.py:136
 msgid "État"
 msgstr "Status"
 
-#: plugins/echeances/__init__.py:108
+#: plugins/echeances/__init__.py:111
 msgid "Prochaine date"
 msgstr "Next date"
 
-#: plugins/echeances/__init__.py:108
+#: plugins/echeances/__init__.py:111
 msgid "Dans"
 msgstr "In"
 
-#: plugins/echeances/__init__.py:108
+#: plugins/echeances/__init__.py:111
 msgid "Répétition"
 msgstr "Repeat"
 
-#: plugins/echeances/__init__.py:108
+#: plugins/echeances/__init__.py:111
 #: plugins/suivi/__init__.py:187
 #: src/scrinium/ui/fenetre.py:284
 msgid "Note"
 msgstr "Text"
 
-#: plugins/echeances/__init__.py:180
+#: plugins/echeances/__init__.py:183
 msgid "aujourd'hui"
 msgstr "today"
 
-#: plugins/echeances/__init__.py:195
+#: plugins/echeances/__init__.py:198
 msgid "<b>%d</b> échéance(s) sous 30 jours"
 msgstr "<b>%d</b> deadline(s) within 30 days"
 
-#: plugins/echeances/__init__.py:202
+#: plugins/echeances/__init__.py:205
 msgid "Ajoutez une première échéance : assurance, domaine, garantie…"
 msgstr "Add a first deadline: insurance, domain, warranty…"
 
-#: plugins/echeances/__init__.py:236
+#: plugins/echeances/__init__.py:239
 msgid "Échéances"
 msgstr "Deadlines"
 
-#: plugins/echeances/__init__.py:199
+#: plugins/echeances/__init__.py:202
 msgid "à payer sous 30 jours : <b>%s</b>"
 msgstr "to pay within 30 days: <b>%s</b>"
 
-#: plugins/echeances/__init__.py:201
+#: plugins/echeances/__init__.py:204
 msgid "sur 12 mois : <b>%s</b>"
 msgstr "over 12 months: <b>%s</b>"
 
-#: plugins/echeances/__init__.py:235
+#: plugins/echeances/__init__.py:238
 #: plugins/securite/__init__.py:262
 msgid " … et %d autre(s)"
 msgstr " … and %d more"
 
-#: plugins/echeances/__init__.py:180
+#: plugins/echeances/__init__.py:183
 msgid "%d j"
 msgstr "%d d"
 
-#: plugins/echeances/__init__.py:180
+#: plugins/echeances/__init__.py:183
 msgid "il y a %d j"
 msgstr "%d d ago"
 
-#: plugins/echeances/__init__.py:197
+#: plugins/echeances/__init__.py:200
 msgid "%d en retard"
 msgstr "%d overdue"
 
@@ -3127,7 +3132,7 @@ msgid "Fin"
 msgstr "End"
 
 #: plugins/planning/__init__.py:275
-#: plugins/resolutions/__init__.py:193
+#: plugins/resolutions/__init__.py:196
 msgid "j"
 msgstr "d"
 
@@ -3353,7 +3358,7 @@ msgstr "Loop in the dependencies around \"%s\""
 msgid "Cette fiche fait le point sur les plannings (fiches « Planning ») du même thème que celle-ci, ou sur tous si vous le choisissez en haut : avancement, retards, dates. Elle se met à jour quand on l'ouvre ou qu'on clique sur « Actualiser »."
 msgstr "This note gives an overview of the plannings (\"Planning\" notes) of the same topic as itself, or of all of them if you choose so at the top: progress, delays, dates. It updates when you open it or click \"Refresh\"."
 
-#: plugins/resolutions/__init__.py:224
+#: plugins/resolutions/__init__.py:227
 msgid ""
 "Suivre ses bonnes résolutions, avec une note automatique et des encouragements.\n"
 "\n"
@@ -3372,7 +3377,7 @@ msgstr ""
 "• The text stays readable and editable by hand; nothing is executed. A notebook to motivate yourself, not a judgement."
 
 #: plugins/resolutions/__init__.py:33
-#: plugins/resolutions/__init__.py:99
+#: plugins/resolutions/__init__.py:102
 msgid "Résolution"
 msgstr "Resolution"
 
@@ -3401,60 +3406,60 @@ msgstr "Frequency:"
 msgid "Depuis le :"
 msgstr "Since:"
 
-#: plugins/resolutions/__init__.py:93
-#: plugins/resolutions/__init__.py:154
+#: plugins/resolutions/__init__.py:96
+#: plugins/resolutions/__init__.py:157
 msgid "Ajouter une résolution…"
 msgstr "Add a resolution…"
 
-#: plugins/resolutions/__init__.py:107
+#: plugins/resolutions/__init__.py:110
 msgid "Cochez le jour choisi ; la note compte les 14 derniers jours. Clic droit : modifier ou supprimer."
 msgstr "Tick the chosen day; the score counts the last 14 days. Right-click: edit or delete."
 
-#: plugins/resolutions/__init__.py:217
+#: plugins/resolutions/__init__.py:220
 msgid "Extension Résolutions"
 msgstr "Resolutions extension"
 
-#: plugins/resolutions/__init__.py:87
+#: plugins/resolutions/__init__.py:90
 msgid "Jour"
 msgstr "Day"
 
-#: plugins/resolutions/__init__.py:99
+#: plugins/resolutions/__init__.py:102
 msgid "Rythme"
 msgstr "Frequency"
 
-#: plugins/resolutions/__init__.py:99
+#: plugins/resolutions/__init__.py:102
 msgid "Série"
 msgstr "Streak"
 
-#: plugins/resolutions/__init__.py:99
+#: plugins/resolutions/__init__.py:102
 msgid "Record"
 msgstr "Best"
 
-#: plugins/resolutions/__init__.py:99
+#: plugins/resolutions/__init__.py:102
 msgid "14 derniers jours"
 msgstr "Last 14 days"
 
-#: plugins/resolutions/__init__.py:99
+#: plugins/resolutions/__init__.py:102
 msgid "Taux"
 msgstr "Rate"
 
-#: plugins/resolutions/__init__.py:193
+#: plugins/resolutions/__init__.py:196
 msgid "sem."
 msgstr "wk"
 
-#: plugins/resolutions/__init__.py:206
+#: plugins/resolutions/__init__.py:209
 msgid "Du plus ancien au plus récent ; le dernier carré est aujourd'hui."
 msgstr "Oldest to newest; the last square is today."
 
-#: plugins/resolutions/__init__.py:178
+#: plugins/resolutions/__init__.py:181
 msgid "Note : —"
 msgstr "Score: —"
 
-#: plugins/resolutions/__init__.py:194
+#: plugins/resolutions/__init__.py:197
 msgid "%d fois par semaine"
 msgstr "%d times a week"
 
-#: plugins/resolutions/__init__.py:178
+#: plugins/resolutions/__init__.py:181
 msgid "Note : %d / 100"
 msgstr "Score: %d / 100"
 

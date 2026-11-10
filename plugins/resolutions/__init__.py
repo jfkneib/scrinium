@@ -11,7 +11,7 @@ from datetime import date, timedelta
 from PyQt6.QtCore import QDate, Qt, pyqtSignal
 from PyQt6.QtGui import QColor
 from PyQt6.QtWidgets import (QAbstractItemView, QCheckBox, QComboBox, QDateEdit, QDialog, QDialogButtonBox, QFormLayout, QHBoxLayout,
-                             QHeaderView, QLabel, QLineEdit, QMenu, QPushButton, QSpinBox, QTableWidget, QTableWidgetItem, QVBoxLayout, QWidget)
+                             QHeaderView, QLabel, QLineEdit, QMenu, QMessageBox, QPushButton, QSpinBox, QTableWidget, QTableWidgetItem, QVBoxLayout, QWidget)
 
 from scrinium.core.plugins import Plugin
 from scrinium.i18n import _
@@ -61,6 +61,9 @@ class DialogueResolution(QDialog):
     def _valider(self):
         if self.nom.text().strip():
             self.accept()
+        else:
+            self.nom.setFocus()
+            QMessageBox.warning(self, self.windowTitle(), _("Le nom est vide : saisissez-le avant de valider."))
 
     def valeurs(self) -> tuple:
         return (" ".join(self.nom.text().split()), self.fois.value() if self.rythme.currentData() == 1 else 0,

@@ -144,3 +144,19 @@ def test_notifications_au_demarrage_une_seule_fois(fen, monkeypatch):
     p.verifier()
     assert len(notes) == 1                                                                    # déjà signalée : rien de plus
     assert p.ctx.reglages.get("notifie")                                                      # mémorisé pour le prochain démarrage
+
+
+def test_dialogue_ok_sans_nom_previent(monkeypatch, fen):
+    """Clic sur OK avec un nom vide : un message explique (au lieu de ne rien faire)."""
+    from PyQt6.QtWidgets import QDialogButtonBox, QMessageBox
+    vus = []
+    monkeypatch.setattr(QMessageBox, "warning", lambda *a, **k: vus.append(a))
+    import sys
+    import scrinium.core.plugins  # noqa: F401
+    mod = sys.modules["scrinium_plugin_echeances"]
+    d = mod.DialogueEcheance(None)
+    d.findChild(QDialogButtonBox).button(QDialogButtonBox.StandardButton.Ok).click()
+    assert vus and d.result() == 0
+    d.nom.setText("Assurance")
+    d.findChild(QDialogButtonBox).button(QDialogButtonBox.StandardButton.Ok).click()
+    assert d.result() == 1 and d.resultat().nom == "Assurance"

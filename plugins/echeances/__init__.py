@@ -13,7 +13,7 @@ from datetime import date
 from PyQt6.QtCore import QDate, Qt, pyqtSignal
 from PyQt6.QtGui import QBrush, QColor
 from PyQt6.QtWidgets import (QAbstractItemView, QComboBox, QDateEdit, QDialog, QDialogButtonBox, QFormLayout, QHBoxLayout, QHeaderView, QLabel,
-                             QLineEdit, QMenu, QPushButton, QSpinBox, QTableWidget, QTableWidgetItem, QVBoxLayout, QWidget)
+                             QLineEdit, QMenu, QMessageBox, QPushButton, QSpinBox, QTableWidget, QTableWidgetItem, QVBoxLayout, QWidget)
 
 from scrinium.core import types_fiche
 from scrinium.core.plugins import Plugin
@@ -72,6 +72,9 @@ class DialogueEcheance(QDialog):
     def _valider(self):
         if self.nom.text().strip():
             self.accept()
+        else:
+            self.nom.setFocus()
+            QMessageBox.warning(self, self.windowTitle(), _("Le nom est vide : saisissez-le avant de valider."))
 
     def resultat(self):
         return logique.normaliser(logique.Echeance(self.nom.text(), self.date.date().toString("yyyy-MM-dd"), self.rep.currentData(),
