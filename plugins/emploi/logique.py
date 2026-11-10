@@ -334,6 +334,9 @@ SOURCES_EXEMPLE = [
     ("CNRS (recherche, France)", "https://emploi.cnrs.fr/Rss/Offres.ashx"),
     ("Choisir le service public (France)", "https://place-ep-recrute.talent-soft.com/handlers/offerRss.ashx?LCID=1036"),
     ("Banque de Luxembourg", "https://jobs.banquedeluxembourg.com/handlers/offerRss.ashx?LCID=1036"),
+    ("Emploi LR (Occitanie)", "https://www.emploilr.com/rss/offre_emploi_lr.xml"),
+    ("Passerelles (ministère de l'Économie)", "https://passerelles.economie.gouv.fr/handlers/offerRss.ashx?LCID=1036"),
+    ("Air France", "https://recrutement.airfrance.com/handlers/offerRss.ashx?LCID=1036"),
 ]
 
 
