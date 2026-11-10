@@ -298,9 +298,19 @@ def test_veille_cases_par_source(fen):
     assert vue.t_articles.rowCount() == 1 and vue.t_articles.item(0, 0).text() == "ejabberd" and "| slixmpp | https://x.org/s |  | non |" in sortie[-1]
     assert len(lg.non_lus(vue.articles, vue.doc)) == 1
     assert lg.lire(sortie[-1]).sources[1].afficher is False and lg.lire("| S | https://x.org/f | |\n").sources[0].afficher is True
+    demandes = []
+    vue._pool.submit = lambda *a, **k: demandes.append(a)                              # pas de réseau dans le test
     vue.t_sources.item(0, 0).setCheckState(Qt.CheckState.Unchecked)
     vue.t_sources.item(1, 0).setCheckState(Qt.CheckState.Checked)
     assert vue.t_articles.rowCount() == 1 and vue.t_articles.item(0, 0).text() == "slixmpp"
+    assert len(demandes) == 0                                                         # slixmpp avait déjà ses articles : rien à relever
+    vue.articles = []
+    vue.t_sources.item(1, 0).setCheckState(Qt.CheckState.Unchecked)
+    vue.t_sources.item(1, 0).setCheckState(Qt.CheckState.Checked)
+    assert len(demandes) == 1 and demandes[0][2] == 1                                 # cochée sans articles : on ne relève que cette source
+    vue.actualiser()
+    assert len(demandes) == 2                                                         # ejabberd est décochée : seule slixmpp est interrogée
+    assert demandes[1][3].nom == "slixmpp"
     # le mot-clé regarde aussi l'adresse de l'article (un flux de versions a des titres comme « v2.7.0 »)
     flux = (b'<feed xmlns="http://www.w3.org/2005/Atom"><entry><title>v2.7.0</title><link rel="alternate" href="https://github.com/processone/ejabberd/releases/tag/v2.7.0"/><id>1</id></entry></feed>')
     assert lg.analyser(lg.Source("G", "https://x.org/f", "ejabberd"), flux) and not lg.analyser(lg.Source("G", "https://x.org/f", "slixmpp"), flux)

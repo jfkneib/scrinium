@@ -16,7 +16,7 @@ from scrinium.core.types_fiche import TypeFiche
 from scrinium.i18n import N_, _
 
 MARQUE = "#scrinium-veille"
-MAX_SOURCES = 40
+MAX_SOURCES = 100
 MAX_LUS = 3000
 MAX_ARTICLES = 60                                          # par source
 DELAI = 10

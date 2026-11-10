@@ -160,13 +160,19 @@ class VueVeille(QWidget):
             self.actualiser()
 
     def _case_source(self, it):
-        """Case « Afficher » d'une source : ne montrer que les sources cochées (enregistré dans la fiche, la liste se met à jour tout de suite)."""
-        if self._remplit or it.column() != 0 or not self._actif or not (0 <= it.row() < len(self.doc.sources)):
+        """Case « Afficher » d'une source : ne montrer (et ne relever) que les sources cochées ; enregistré dans la fiche."""
+        ligne = it.row()                                          # l'élément est détruit quand le tableau est refait
+        if self._remplit or it.column() != 0 or not self._actif or not (0 <= ligne < len(self.doc.sources)):
             return
         oui = it.checkState() == Qt.CheckState.Checked
-        if oui != self.doc.sources[it.row()].afficher:
-            self.doc.sources[it.row()].afficher = oui
+        s = self.doc.sources[ligne]
+        if oui != s.afficher:
+            s.afficher = oui
             self._enregistrer()
+            if oui and not any(a.source == s.nom for a in self.articles):
+                self._attendus += 1                               # source cochée à l'instant : on ne relève qu'elle
+                self.l_etat.setText(_("Relève en cours…"))
+                self._demander(ligne)
 
     def _modifier(self, i: int):
         if 0 <= i < len(self.doc.sources):
@@ -227,16 +233,22 @@ class VueVeille(QWidget):
 
     # ---------- relève ----------
     def actualiser(self):
-        """Relève toutes les sources (en arrière-plan). Sans effet pour une fiche non validée."""
+        """Relève les sources cochées (en arrière-plan) : une source décochée n'est pas interrogée. Sans effet pour une fiche non validée."""
         if not self._actif or not self.doc.sources:
             return
         self._gen += 1
-        gen = self._gen
         self.articles, self.erreurs = [], {}
-        self._attendus = len(self.doc.sources)
-        self.l_etat.setText(_("Relève en cours…"))
-        for i, s in enumerate(self.doc.sources):
-            self._pool.submit(self._travail, gen, i, logique.Source(s.nom, s.adresse, s.mot, s.afficher))
+        cochees = [i for i, s in enumerate(self.doc.sources) if s.afficher]
+        self._attendus = len(cochees)
+        self.l_etat.setText(_("Relève en cours…") if cochees else "")
+        for i in cochees:
+            self._demander(i)
+        if not cochees:
+            self._afficher()
+
+    def _demander(self, i: int):
+        s = self.doc.sources[i]
+        self._pool.submit(self._travail, self._gen, i, logique.Source(s.nom, s.adresse, s.mot, s.afficher))
 
     def _travail(self, gen: int, i: int, s):
         try:
@@ -364,7 +376,8 @@ class VeillePlugin(Plugin):
         articles = []
         try:
             for s in doc.sources:
-                articles += logique.recuperer(s)[0]
+                if s.afficher:                                      # une source décochée n'est pas interrogée
+                    articles += logique.recuperer(s)[0]
         except Exception:
             pass
         try:
@@ -389,7 +402,7 @@ DOC = _(
     "du plus récent au plus ancien, les non lus en gras. Double-clic : ouvrir l'article dans le navigateur (il est alors marqué lu) ; "
     "« Tout marquer comme lu » vide la liste des nouveautés.\n"
     "• Le mot-clé garde seulement les articles dont le titre, le résumé ou l'adresse le contient. La case « Afficher » de chaque source ne montre que les sources "
-    "cochées (le reste est masqué et non compté) : utile pour ne voir que ejabberd, puis que slixmpp. Les articles lus disparaissent ; « Afficher les lus » les remet.\n"
+    "cochées (le reste est masqué, non compté et n'est pas interrogé : on peut garder des dizaines de sources sans charger le réseau) : utile pour ne voir que ejabberd, puis que slixmpp. Les articles lus disparaissent ; « Afficher les lus » les remet.\n"
     "• Une pastille rouge sur l'icône de la fiche signale les nouveautés non lues ; « Surveiller en arrière-plan » relève toutes les 30 minutes, même "
     "fiche fermée, et notifie. Scrinium doit rester ouvert.\n"
     "• Sûreté : la fiche est inerte tant que vous ne l'avez pas validée (elle fait des requêtes réseau). Seules les adresses http et https sont "
