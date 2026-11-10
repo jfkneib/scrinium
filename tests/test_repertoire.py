@@ -314,3 +314,11 @@ def test_frappe_au_clavier_garde_le_curseur_et_l_ordre(fen, monkeypatch):  # noq
     r.entrees.setCurrentRow(0)
     QTest.keyClick(r._champs[0], "x")                          # éditer une entrée existante
     assert r._champs[0].toPlainText().replace("x", "") == "Jean Martin" and r.tableau.lignes[0][0].replace("x", "") == "Jean Martin"
+
+
+def test_modele_contacts_a_une_colonne_lien_dont_l_adresse_donne_un_bouton():
+    t = Tableau.depuis_texte(texte_modele(0))
+    assert "Lien" in t.colonnes
+    ligne = t.ligne_vide()
+    ligne[t.colonnes.index("Lien")] = "https://zoom.us/j/123"
+    assert actions(" ".join(ligne)) == [("web", "https://zoom.us/j/123", "https://zoom.us/j/123")]

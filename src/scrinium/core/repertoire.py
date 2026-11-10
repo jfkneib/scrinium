@@ -25,7 +25,7 @@ MAX_COLONNES = 30
 
 # Modèles proposés à la création : (titre du modèle, colonnes, numéro de la colonne d'index)
 MODELES = (
-    (N_("Contacts (nom, téléphones, adresse, courriel)"), ("Nom", "Prénom", "Téléphones", "Adresse", "Courriel", "Notes"), 0),
+    (N_("Contacts (nom, téléphones, adresse, courriel)"), ("Nom", "Prénom", "Téléphones", "Adresse", "Courriel", "Lien", "Notes"), 0),
     (N_("Livres (titre, auteur, année)"), ("Titre", "Auteur", "Année", "Notes"), 0),
     (N_("Vocabulaire (mot, traduction, exemple)"), ("Mot", "Traduction", "Exemple"), 0),
     (N_("Tableau libre (nom, détails)"), ("Nom", "Détails"), 0),
@@ -40,6 +40,7 @@ ALIAS = {
     "address": "Adresse", "adresse postale": "Adresse",
     "email": "Courriel", "e-mail": "Courriel", "e-mail 1 - value": "Courriel", "e-mail 2 - value": "Courriel", "mail": "Courriel", "e-mail address": "Courriel", "email 1 - value": "Courriel",
     "adresse email": "Courriel", "adresse e-mail": "Courriel",
+    "website": "Lien", "site web": "Lien", "site": "Lien", "url": "Lien", "web": "Lien", "page web": "Lien", "homepage": "Lien", "website 1 - value": "Lien",
     "note": "Notes", "commentaire": "Notes", "commentaires": "Notes", "comments": "Notes",
 }
 
