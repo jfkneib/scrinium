@@ -1709,6 +1709,7 @@ msgid "Devise"
 msgstr ""
 
 #: plugins/echeances/__init__.py:108
+#: plugins/securite/__init__.py:68
 #: plugins/supervision/__init__.py:136
 msgid "État"
 msgstr ""
@@ -1756,6 +1757,7 @@ msgid "sur 12 mois : <b>%s</b>"
 msgstr ""
 
 #: plugins/echeances/__init__.py:235
+#: plugins/securite/__init__.py:262
 msgid " … et %d autre(s)"
 msgstr ""
 
@@ -3345,6 +3347,170 @@ msgstr ""
 msgid "Recommencez doucement, sans vous juger : cochez une seule résolution aujourd'hui, c'est déjà gagné."
 msgstr ""
 
+#: plugins/securite/__init__.py:267
+msgid ""
+"Y a-t-il quelqu'un dans ma machine, et qui ? Une fiche qui regarde ce qui est connecté et ce qui est ouvert.\n"
+"\n"
+"• Nouvelle fiche > « Sécurité » : l'analyse lit l'état de la machine (Linux, Windows ou macOS) : sessions ouvertes, connexions récentes depuis une autre adresse, ports ouverts sur le réseau, programmes d'accès à distance (SSH, TeamViewer, AnyDesk, VNC, Bureau à distance…), comptes, clés SSH autorisées et tâches planifiées.\n"
+"• Ce sont des commandes de lecture du système, sans shell et sans droits d'administrateur : rien n'est modifié ni envoyé.\n"
+"• Au premier essai, tout est « Nouveau » : regardez la liste, puis « Tout accepter comme normal ». L'état accepté est enregistré dans la fiche (une section par machine). Ensuite, ce qui est nouveau est signalé, « À vérifier » si c'est joignable depuis le réseau. Clic droit : « C'est normal » ou « Ce n'est plus normal ».\n"
+"• « Surveiller en arrière-plan » (décoché par défaut) : toutes les 10 minutes, une notification pour ce qui est nouveau, une seule fois par élément. Scrinium doit rester ouvert.\n"
+"• Type exécutable : une fiche reçue d'un autre ne lit rien tant que vous ne l'avez pas validée.\n"
+"• Limite : c'est une vue depuis la machine elle-même, pas un antivirus. Quelqu'un qui a déjà les droits d'administrateur peut cacher ses traces. Si quelque chose vous inquiète, déconnectez la machine du réseau et faites-vous aider."
+msgstr ""
+
+#: plugins/securite/__init__.py:31
+msgid "À vérifier"
+msgstr ""
+
+#: plugins/securite/__init__.py:31
+msgid "Nouveau"
+msgstr ""
+
+#: plugins/securite/__init__.py:31
+msgid "Normal"
+msgstr ""
+
+#: plugins/securite/__init__.py:55
+msgid "Analyser maintenant"
+msgstr ""
+
+#: plugins/securite/__init__.py:57
+msgid "Tout accepter comme normal"
+msgstr ""
+
+#: plugins/securite/__init__.py:59
+#: plugins/supervision/__init__.py:126
+msgid "Surveiller en arrière-plan"
+msgstr ""
+
+#: plugins/securite/__init__.py:60
+msgid "Toutes les 10 minutes, une notification pour ce qui est nouveau. Scrinium doit rester ouvert."
+msgstr ""
+
+#: plugins/securite/__init__.py:76
+msgid "Vue depuis cette machine, lecture seule : ce n'est pas un antivirus, et quelqu'un qui a déjà les droits d'administrateur peut cacher ses traces. Si quelque chose vous inquiète, déconnectez la machine du réseau et faites-vous aider."
+msgstr ""
+
+#: plugins/securite/__init__.py:204
+msgid "Extension Sécurité"
+msgstr ""
+
+#: plugins/securite/__init__.py:68
+msgid "Type"
+msgstr ""
+
+#: plugins/securite/__init__.py:68
+msgid "Élément"
+msgstr ""
+
+#: plugins/securite/__init__.py:68
+#: plugins/supervision/__init__.py:137
+msgid "Détail"
+msgstr ""
+
+#: plugins/securite/__init__.py:155
+msgid "Ce n'est plus normal"
+msgstr ""
+
+#: plugins/securite/__init__.py:263
+#: plugins/securite/logique.py:354
+msgid "Sécurité"
+msgstr ""
+
+#: plugins/securite/__init__.py:157
+msgid "C'est normal"
+msgstr ""
+
+#: plugins/securite/__init__.py:179
+msgid "Fiche non validée : rien n'est lu. Validez-la pour analyser %s."
+msgstr ""
+
+#: plugins/securite/__init__.py:263
+msgid "Nouveau sur cette machine : "
+msgstr ""
+
+#: plugins/securite/__init__.py:181
+msgid "Analyse de %s…"
+msgstr ""
+
+#: plugins/securite/__init__.py:181
+msgid "Aucune analyse pour %s : cliquez sur « Analyser maintenant »."
+msgstr ""
+
+#: plugins/securite/__init__.py:183
+msgid "%(m)s : %(n)d éléments. Aucune référence : regardez la liste, puis « Tout accepter comme normal » ; ensuite, tout ce qui est nouveau sera signalé."
+msgstr ""
+
+#: plugins/securite/__init__.py:187
+msgid "%(m)s : %(n)d éléments, <span style='color:#c0392b'><b>%(k)d nouveau(x)</b></span>."
+msgstr ""
+
+#: plugins/securite/__init__.py:188
+msgid "%(m)s : %(n)d éléments, rien de nouveau."
+msgstr ""
+
+#: plugins/securite/logique.py:35
+msgid "Session"
+msgstr ""
+
+#: plugins/securite/logique.py:35
+msgid "Connexion récente"
+msgstr ""
+
+#: plugins/securite/logique.py:35
+msgid "Port ouvert"
+msgstr ""
+
+#: plugins/securite/logique.py:35
+msgid "Accès à distance"
+msgstr ""
+
+#: plugins/securite/logique.py:36
+msgid "Compte"
+msgstr ""
+
+#: plugins/securite/logique.py:36
+msgid "Clé SSH autorisée"
+msgstr ""
+
+#: plugins/securite/logique.py:36
+msgid "Tâche planifiée"
+msgstr ""
+
+#: plugins/securite/logique.py:278
+msgid "Programme en cours d'exécution"
+msgstr ""
+
+#: plugins/securite/logique.py:231
+msgid "Accessible depuis le réseau"
+msgstr ""
+
+#: plugins/securite/logique.py:231
+msgid "Seulement depuis cette machine"
+msgstr ""
+
+#: plugins/securite/logique.py:242
+#: plugins/securite/logique.py:250
+msgid "Session de %s (locale)"
+msgstr ""
+
+#: plugins/securite/logique.py:244
+msgid "Session de %(u)s depuis %(o)s"
+msgstr ""
+
+#: plugins/securite/logique.py:257
+msgid "Connexion de %(u)s depuis %(a)s"
+msgstr ""
+
+#: plugins/securite/logique.py:274
+msgid "Bureau à distance (RDP) activé"
+msgstr ""
+
+#: plugins/securite/logique.py:248
+msgid "Session de %(u)s à distance (%(s)s)"
+msgstr ""
+
 #: plugins/suivi/__init__.py:337
 msgid ""
 "Le poids et les calories au jour le jour, avec des courbes.\n"
@@ -3542,10 +3708,6 @@ msgstr ""
 msgid "Toutes les minutes"
 msgstr ""
 
-#: plugins/supervision/__init__.py:126
-msgid "Surveiller en arrière-plan"
-msgstr ""
-
 #: plugins/supervision/__init__.py:127
 msgid "Contrôle les fiches Supervision validées toutes les minutes, même quand elles ne sont pas affichées, et notifie quand une machine tombe. Scrinium doit rester ouvert."
 msgstr ""
@@ -3617,10 +3779,6 @@ msgstr ""
 
 #: plugins/supervision/__init__.py:137
 msgid "En marche depuis"
-msgstr ""
-
-#: plugins/supervision/__init__.py:137
-msgid "Détail"
 msgstr ""
 
 #: plugins/supervision/__init__.py:165
@@ -5016,7 +5174,7 @@ msgid ""
 msgstr ""
 
 #: src/scrinium/core/guide.py:11
-#: src/scrinium/core/guide.py:105
+#: src/scrinium/core/guide.py:106
 msgid "Guide"
 msgstr ""
 
@@ -5064,6 +5222,7 @@ msgid ""
 "• Agenda : des rappels et échéances (extension Agenda).\n"
 "• Calc : un petit éditeur de listes avec des totaux par colonne et l'export CSV, pour suivre des relevés (extension Calc).\n"
 "• Budget : de petits comptes (courses, argent de poche…) avec colonnes Débit et Crédit, un onglet par mois, un bilan, et une fiche « Budget — résultat » qui totalise tous les budgets (extension Budget).\n"
+"• Sécurité : qui est connecté à votre machine, ports ouverts, accès à distance, comptes et clés SSH ; vous acceptez l'état normal, Scrinium signale ce qui est nouveau (extension Sécurité).\n"
 "• Échéances : assurances, noms de domaine, certificats, garanties, abonnements, avec la prochaine date, un rappel et une notification (extension Échéances).\n"
 "• Résolutions : vos bonnes résolutions, une case par jour, des séries, une note automatique sur 100 et des encouragements (extension Résolutions).\n"
 "• Suivi : le poids et les calories au jour le jour, avec des courbes et vos objectifs (extension Suivi).\n"
@@ -5074,11 +5233,11 @@ msgid ""
 "Sécurité : un type qui LANCE des commandes (Applications, Actions CLI) reste inerte tant que vous n'avez pas validé la fiche vous-même. Une fiche reçue d'un autre n'exécute donc jamais rien toute seule."
 msgstr ""
 
-#: src/scrinium/core/guide.py:58
+#: src/scrinium/core/guide.py:59
 msgid "Guide 4 · Les extensions"
 msgstr ""
 
-#: src/scrinium/core/guide.py:58
+#: src/scrinium/core/guide.py:59
 msgid ""
 "Menu Extensions > Gérer les extensions… : cochez celles qui vous servent. Livrées avec Scrinium :\n"
 "\n"
@@ -5093,11 +5252,11 @@ msgid ""
 "Écrire la vôtre : menu Aide > « Documentation des extensions »."
 msgstr ""
 
-#: src/scrinium/core/guide.py:71
+#: src/scrinium/core/guide.py:72
 msgid "Guide 5 · Console et commandes"
 msgstr ""
 
-#: src/scrinium/core/guide.py:71
+#: src/scrinium/core/guide.py:72
 msgid ""
 "L'extension Capture relie vos fiches au terminal, sans jamais rien valider à votre place.\n"
 "\n"
@@ -5107,11 +5266,11 @@ msgid ""
 "• Depuis un terminal : « ls -al | scrinium ajouter -t Thème -f Fiche » ajoute la sortie à une fiche."
 msgstr ""
 
-#: src/scrinium/core/guide.py:83
+#: src/scrinium/core/guide.py:84
 msgid "Guide 6 · Verrouillage, secours et partage"
 msgstr ""
 
-#: src/scrinium/core/guide.py:83
+#: src/scrinium/core/guide.py:84
 msgid ""
 "• Verrouiller : bouton « Verrouiller… ». Le titre reste visible, le contenu est chiffré. Mot de passe oublié = fiche perdue, sauf avec le FICHIER DE SECOURS (menu Sécurité > Fichier de secours…) : faites-le dès le premier verrouillage, gardez-le hors de cet ordinateur.\n"
 "• Une fiche verrouillée n'est jamais envoyée, lue, traduite ni partagée tant qu'elle est fermée.\n"
@@ -5119,11 +5278,11 @@ msgid ""
 "• Inviter quelqu'un à INSTALLER Scrinium : menu Fichier > « Inviter à installer Scrinium… »."
 msgstr ""
 
-#: src/scrinium/core/guide.py:91
+#: src/scrinium/core/guide.py:92
 msgid "Guide 7 · Où sont mes données, sauvegarde"
 msgstr ""
 
-#: src/scrinium/core/guide.py:91
+#: src/scrinium/core/guide.py:92
 msgid ""
 "• Vos fiches : un dossier par thème, un fichier .md par fiche (.lock si verrouillée), avec un sous-dossier .pj pour les images jointes :\n"
 "\n"

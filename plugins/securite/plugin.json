@@ -1,0 +1,8 @@
+{
+  "titre": "Sécurité",
+  "version": "0.1",
+  "auteur": "Scrinium",
+  "description": "Un type de fiche « Sécurité » : qui est connecté à votre machine, quels ports sont ouverts, quels accès à distance sont installés, quels comptes et quelles clés SSH existent. Vous acceptez l'état actuel comme « normal », puis Scrinium signale tout ce qui est NOUVEAU. Linux, Windows et macOS ; lecture seule. Ce n'est pas un antivirus : une vue depuis la machine elle-même.",
+  "classe": "SecuritePlugin",
+  "api": 1
+}

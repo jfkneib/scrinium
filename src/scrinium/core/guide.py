@@ -46,6 +46,7 @@ def fiches(dossier_fiches) -> list:
             "• Agenda : des rappels et échéances (extension Agenda).\n"
             "• Calc : un petit éditeur de listes avec des totaux par colonne et l'export CSV, pour suivre des relevés (extension Calc).\n"
             "• Budget : de petits comptes (courses, argent de poche…) avec colonnes Débit et Crédit, un onglet par mois, un bilan, et une fiche « Budget — résultat » qui totalise tous les budgets (extension Budget).\n"
+            "• Sécurité : qui est connecté à votre machine, ports ouverts, accès à distance, comptes et clés SSH ; vous acceptez l'état normal, Scrinium signale ce qui est nouveau (extension Sécurité).\n"
             "• Échéances : assurances, noms de domaine, certificats, garanties, abonnements, avec la prochaine date, un rappel et une notification (extension Échéances).\n"
             "• Résolutions : vos bonnes résolutions, une case par jour, des séries, une note automatique sur 100 et des encouragements (extension Résolutions).\n"
             "• Suivi : le poids et les calories au jour le jour, avec des courbes et vos objectifs (extension Suivi).\n"
