@@ -5394,7 +5394,7 @@ msgid "Ajoutez une source (flux RSS ou Atom)."
 msgstr ""
 
 #: plugins/veille/__init__.py:374
-#: plugins/veille/logique.py:210
+#: plugins/veille/logique.py:237
 msgid "Veille"
 msgstr ""
 
@@ -5419,12 +5419,12 @@ msgstr ""
 msgid "adresse refusée (http ou https seulement)"
 msgstr ""
 
-#: plugins/veille/logique.py:207
+#: plugins/veille/logique.py:234
 msgid "Veille (exemples)"
 msgstr ""
 
-#: plugins/veille/logique.py:207
-msgid "Exemple · Ma veille"
+#: plugins/veille/logique.py:234
+msgid "Exemple · Veille informatique"
 msgstr ""
 
 #: plugins/veille/logique.py:154

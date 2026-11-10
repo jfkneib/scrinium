@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: scrinium 0.2.0\n"
 "Report-Msgid-Bugs-To: \n"
-"PO-Revision-Date: 2026-11-10 16:28+0100\n"
+"PO-Revision-Date: 2026-11-10 16:37+0100\n"
 "Last-Translator: Jean-François Kneib\n"
 "Language-Team: English\n"
 "Language: en\n"
@@ -5674,7 +5674,7 @@ msgid "Ajoutez une source (flux RSS ou Atom)."
 msgstr "Add a source (RSS or Atom feed)."
 
 #: plugins/veille/__init__.py:374
-#: plugins/veille/logique.py:210
+#: plugins/veille/logique.py:237
 msgid "Veille"
 msgstr "Watch"
 
@@ -5699,13 +5699,13 @@ msgstr "%d new item(s) to read"
 msgid "adresse refusée (http ou https seulement)"
 msgstr "address refused (http or https only)"
 
-#: plugins/veille/logique.py:207
+#: plugins/veille/logique.py:234
 msgid "Veille (exemples)"
 msgstr "Watch (examples)"
 
-#: plugins/veille/logique.py:207
-msgid "Exemple · Ma veille"
-msgstr "Example · My watch"
+#: plugins/veille/logique.py:234
+msgid "Exemple · Veille informatique"
+msgstr "Example · IT watch"
 
 #: plugins/veille/logique.py:154
 msgid "redirection refusée"

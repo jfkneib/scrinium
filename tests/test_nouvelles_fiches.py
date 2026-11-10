@@ -304,3 +304,11 @@ def test_veille_cases_par_source(fen):
     # le mot-clé regarde aussi l'adresse de l'article (un flux de versions a des titres comme « v2.7.0 »)
     flux = (b'<feed xmlns="http://www.w3.org/2005/Atom"><entry><title>v2.7.0</title><link rel="alternate" href="https://github.com/processone/ejabberd/releases/tag/v2.7.0"/><id>1</id></entry></feed>')
     assert lg.analyser(lg.Source("G", "https://x.org/f", "ejabberd"), flux) and not lg.analyser(lg.Source("G", "https://x.org/f", "slixmpp"), flux)
+
+
+def test_veille_exemple_informatique():
+    lg = _charger("veille")
+    (_theme, _titre, texte), = lg.exemples()
+    doc = lg.lire(texte)
+    assert len(doc.sources) == 22 and all(lg.adresse_valide(s.adresse) for s in doc.sources)
+    assert 0 < sum(s.afficher for s in doc.sources) < 8

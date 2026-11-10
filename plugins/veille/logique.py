@@ -202,9 +202,36 @@ def texte_neuf() -> str:
     return ecrire(Document())
 
 
+# Flux publics d'informatique : un exemple de départ. Seuls quelques-uns sont cochés (colonne « Afficher ») : on coche ce que l'on veut voir.
+EXEMPLES = [
+    ("slixmpp (Codeberg)", "https://codeberg.org/poezio/slixmpp/releases.rss", False),
+    ("ejabberd", "https://github.com/processone/ejabberd/releases.atom", False),
+    ("Prosody (tags)", "https://github.com/bjc/prosody/tags.atom", False),
+    ("XMPP Standards Foundation", "https://xmpp.org/feeds/all.atom.xml", False),
+    ("GLPI", "https://github.com/glpi-project/glpi/releases.atom", False),
+    ("Microsoft Security Update Guide", "https://api.msrc.microsoft.com/update-guide/rss", False),
+    ("CERT-FR (ANSSI)", "https://www.cert.ssi.gouv.fr/feed/", True),
+    ("Debian Security Advisories", "https://www.debian.org/security/dsa-long", True),
+    ("Ubuntu Security Notices", "https://ubuntu.com/security/notices/rss.xml", False),
+    ("libvirt (tags)", "https://gitlab.com/libvirt/libvirt/-/tags?format=atom", False),
+    ("QEMU (tags)", "https://gitlab.com/qemu-project/qemu/-/tags?format=atom", False),
+    ("Kubernetes blog", "https://kubernetes.io/feed.xml", False),
+    ("Ollama", "https://github.com/ollama/ollama/releases.atom", False),
+    ("llama.cpp", "https://github.com/ggml-org/llama.cpp/releases.atom", False),
+    ("Continue", "https://github.com/continuedev/continue/releases.atom", False),
+    ("MCP Python SDK", "https://github.com/modelcontextprotocol/python-sdk/releases.atom", False),
+    ("Simon Willison", "https://simonwillison.net/atom/everything/", False),
+    ("Django weblog", "https://www.djangoproject.com/rss/weblog/", False),
+    ("Python Insider", "https://blog.python.org/feeds/posts/default", False),
+    ("LinuxFr.org", "https://linuxfr.org/news.atom", True),
+    ("LWN.net", "https://lwn.net/headlines/rss", True),
+    ("Hacker News (200+ points)", "https://hnrss.org/frontpage?points=200", False),
+]
+
+
 def exemples() -> list:
-    doc = Document([Source("Scrinium (versions)", "https://github.com/jfkneib/scrinium/releases.atom")])
-    return [(_("Veille (exemples)"), _("Exemple · Ma veille"), ecrire(doc))]
+    doc = Document([Source(nom, adresse, "", coche) for nom, adresse, coche in EXEMPLES])
+    return [(_("Veille (exemples)"), _("Exemple · Veille informatique"), ecrire(doc))]
 
 
 TYPE = TypeFiche("veille", N_("Veille"), "news-subscribe", executable=True, modele=texte_neuf, a_faire=a_faire)
