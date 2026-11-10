@@ -196,3 +196,41 @@ def test_puissance_estimee_et_dite_estimee(fen):
     vue._arrive(vue._gen, 0, {"ping": True, "ports": {}, "mesures": {"charge": 2.0, "coeurs": 4}})
     assert vue.table.item(0, 6).text() == "≈ 120 W"
     assert "ESTIMATION" in vue.table.item(0, 6).toolTip() and "2880 Wh" in vue.table.item(0, 6).toolTip()
+
+
+def _attendre(app, cond):
+    import time
+    for _i in range(150):
+        app.processEvents()
+        if cond():
+            return True
+        time.sleep(0.02)
+    return False
+
+
+def test_surveillance_en_arriere_plan_seulement_fiches_validees(fen, monkeypatch, app):
+    p = fen.plugins.actifs["supervision"][0]
+    mod = sys.modules["scrinium_plugin_supervision"].logique
+    f = p.ctx.creer_fiche("Parc", "Mes machines", lg.en_texte([{"nom": "Srv", "adresse": "h"}]))
+    th = fen.store.theme("Parc")
+    assert p.machines_a_surveiller() == []                       # fiche reçue/créée par une extension : inerte, donc pas surveillée
+    fen.store.valider_fiche(th, th.fiches[0])
+    assert [m["nom"] for m in p.machines_a_surveiller()] == ["Srv"]
+    notes = []
+    monkeypatch.setattr(p.ctx.ui, "notifier", lambda t, m: notes.append(m))
+    reponse = {"ping": True, "ports": {}}
+    monkeypatch.setattr(mod, "sonder", lambda m: dict(reponse))
+    p._tour()                                                    # case décochée : rien ne part
+    app.processEvents()
+    assert p.etats == {} and not p.fond
+    p.regler_fond(True)
+    assert p.ctx.reglages.get("fond") is True
+    p._tour()
+    assert _attendre(app, lambda: p.etats.get("Srv|h") == "ok") and notes == []
+    reponse.update(ping=False)
+    p._tour()
+    assert _attendre(app, lambda: p.etats.get("Srv|h") == "panne") and len(notes) == 1 and "Srv" in notes[0]
+    p._tour()
+    assert _attendre(app, lambda: not p._en_cours) and len(notes) == 1               # pas de répétition
+    fen.store.enregistrer(th, th.fiches[0], "Mes machines", lg.en_texte([{"nom": "Srv", "adresse": "h"}, {"nom": "Autre", "adresse": "h2"}]))
+    assert p.machines_a_surveiller() == []                       # texte modifié : la validation tombe, plus de contrôle

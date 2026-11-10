@@ -88,6 +88,11 @@ def normaliser(m) -> dict | None:
             "seuil_disque": min(max(seuil, 1), 100), "watts": lire_watts(m.get("watts", ""))}
 
 
+def cle(m: dict) -> str:
+    """Identité d'une machine pour mémoriser son dernier état (un même nom sur deux adresses reste distinct)."""
+    return f"{m['nom']}|{m['adresse']}"
+
+
 def normaliser_liste(liste) -> list:
     if not isinstance(liste, list):
         return []

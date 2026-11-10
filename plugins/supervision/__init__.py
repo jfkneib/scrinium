@@ -10,11 +10,12 @@
   l'utilisateur ne l'a pas validée. SSH sans mot de passe (clés) ; la commande envoyée est fixe, en lecture seule."""
 from concurrent.futures import ThreadPoolExecutor
 
-from PyQt6.QtCore import Qt, QTimer, pyqtSignal
+from PyQt6.QtCore import QObject, Qt, QTimer, pyqtSignal
 from PyQt6.QtGui import QBrush, QColor
 from PyQt6.QtWidgets import (QAbstractItemView, QCheckBox, QDialog, QDialogButtonBox, QFormLayout, QHBoxLayout, QHeaderView, QLabel,
                              QLineEdit, QMessageBox, QPushButton, QSpinBox, QTableWidget, QTableWidgetItem, QVBoxLayout, QWidget)
 
+from scrinium.core import types_fiche
 from scrinium.core.plugins import Plugin
 from scrinium.i18n import _
 from scrinium.ui.icons import icone
@@ -102,7 +103,7 @@ class VueSupervision(QWidget):
         self.p = plugin
         self.machines: list = []
         self.resultats: dict = {}                        # indice -> résultat du dernier contrôle
-        self.etats: dict = {}                            # nom de la machine -> dernier état connu (pour ne notifier que les changements)
+        self.etats: dict = plugin.etats if plugin is not None else {}     # machine -> dernier état connu (pour ne notifier que les changements)
         self._actif = True
         self._gen = 0
         self._pool = ThreadPoolExecutor(max_workers=8, thread_name_prefix="supervision")
@@ -115,6 +116,12 @@ class VueSupervision(QWidget):
         self.c_auto = QCheckBox(_("Toutes les minutes"))
         self.c_auto.setChecked(True)
         haut.addWidget(self.c_auto)
+        self.c_fond = QCheckBox(_("Surveiller en arrière-plan"))
+        self.c_fond.setToolTip(_("Contrôle les fiches Supervision validées toutes les minutes, même quand elles ne sont pas affichées, et "
+                                 "notifie quand une machine tombe. Scrinium doit rester ouvert."))
+        self.c_fond.setChecked(bool(plugin is not None and plugin.fond))
+        self.c_fond.toggled.connect(lambda oui: plugin.regler_fond(oui) if plugin is not None else None)
+        haut.addWidget(self.c_fond)
         self.l_maj = QLabel()
         haut.addWidget(self.l_maj, 1)
         lay.addLayout(haut)
@@ -205,8 +212,9 @@ class VueSupervision(QWidget):
         self.resultats[i] = r
         m = self.machines[i]
         e, raisons = logique.etat(m, r)
-        avant = self.etats.get(m["nom"])
-        self.etats[m["nom"]] = e
+        cle = logique.cle(m)
+        avant = self.etats.get(cle)
+        self.etats[cle] = e
         if self.p is not None and avant == "ok" and e in ("alerte", "panne"):
             self.p.alerter(m["nom"], e, raisons)
         self._ligne(i)
@@ -303,22 +311,84 @@ class VueSupervision(QWidget):
         self._pool.shutdown(wait=False, cancel_futures=True)
 
 
+class _Pont(QObject):
+    """Rapporte au fil de l'interface les résultats des contrôles faits en arrière-plan (fils de travail)."""
+    arrive = pyqtSignal(object, object)                 # machine, résultat
+
+
 class SupervisionPlugin(Plugin):
     api = 1
 
     def activer(self, ctx):
         self.ctx = ctx
         self.vue = None
+        self.etats: dict = {}                            # machine -> dernier état (partagé avec la vue)
+        self.fond = bool(ctx.reglages.get("fond", False))
+        self._en_cours: set = set()
         ctx.ajouter_doc(_("Extension Supervision"), DOC)
         for theme, titre, texte in logique.exemples():
             ctx.ajouter_exemple(theme, titre, texte, "network-server")
         if ctx.ui is not None:
+            self.pont = _Pont()
+            self.pont.arrive.connect(self._fond_arrive)
+            self._pool = ThreadPoolExecutor(max_workers=8, thread_name_prefix="supervision-fond")
             self.vue = VueSupervision(self)
             ctx.ui.enregistrer_type(logique.TYPE, self.vue)
+            ctx.ui.planifier(INTERVALLE / 1000, self._tour, repeter=True)
 
     def desactiver(self):
+        self.fond = False
         if self.vue is not None:
             self.vue.fermer()
+        if getattr(self, "_pool", None) is not None:
+            self._pool.shutdown(wait=False, cancel_futures=True)
+
+    def regler_fond(self, oui: bool):
+        self.fond = bool(oui)
+        self.ctx.reglages.set("fond", self.fond)
+
+    # ---------- surveillance en arrière-plan ----------
+    def machines_a_surveiller(self) -> list:
+        """Machines des fiches Supervision VALIDÉES (une fiche inerte, verrouillée fermée ou illisible est ignorée), sans doublon.
+        Les machines de la fiche affichée sont laissées à sa vue."""
+        vues, vues_affichees = {}, set()
+        if self.vue is not None and self.vue.isVisible():
+            vues_affichees = {logique.cle(m) for m in self.vue.machines}
+        for f in self.ctx.fiches():
+            if f.texte is None or types_fiche.marque(f.texte) != logique.TYPE.nom or not self.ctx.fiche_active(f):
+                continue
+            for m in logique.depuis_texte(f.texte):
+                if logique.cle(m) not in vues_affichees:
+                    vues.setdefault(logique.cle(m), m)
+        return list(vues.values())
+
+    def _tour(self):
+        if not self.fond:
+            return
+        for m in self.machines_a_surveiller():
+            if logique.cle(m) not in self._en_cours:
+                self._en_cours.add(logique.cle(m))
+                self._pool.submit(self._travail, dict(m))
+
+    def _travail(self, m: dict):
+        try:
+            r = logique.sonder(m)
+        except Exception as ex:                          # un contrôle qui plante ne doit pas bloquer les autres
+            r = {"ping": False, "ports": {}, "erreur_ssh": str(ex)[:200]}
+        try:
+            self.pont.arrive.emit(m, r)
+        except RuntimeError:
+            pass
+
+    def _fond_arrive(self, m: dict, r: dict):
+        self._en_cours.discard(logique.cle(m))
+        if not self.fond:
+            return
+        e, raisons = logique.etat(m, r)
+        avant = self.etats.get(logique.cle(m))
+        self.etats[logique.cle(m)] = e
+        if avant == "ok" and e in ("alerte", "panne"):
+            self.alerter(m["nom"], e, raisons)
 
     def alerter(self, nom: str, etat: str, raisons: list):
         self.ctx.ui.notifier(_("Supervision"), (_("« %s » est en panne : elle ne répond plus.") if etat == "panne"
@@ -331,6 +401,7 @@ DOC = _(
     "• Nouvelle fiche > « Supervision » : une machine par section, avec son adresse. Clic droit : ajouter, modifier ou retirer une machine.\n"
     "• Le tableau montre si la machine répond au ping, quels ports sont ouverts, si sa page web répond et, avec une cible SSH, le disque, la mémoire, la charge et la durée de fonctionnement.\n"
     "• « Actualiser », ou automatiquement toutes les minutes tant que la fiche est affichée. Une notification prévient quand une machine passe en alerte ou en panne.\n"
+    "• « Surveiller en arrière-plan » (décoché par défaut) : les fiches Supervision validées sont aussi contrôlées quand elles ne sont pas affichées, tant que Scrinium reste ouvert.\n"
     "• Puissance (facultatif) : indiquez les watts de la machine au repos et à pleine charge (ex. 40-200) : Scrinium ESTIME la puissance d'après la charge, et le dit au survol. Ce n'est pas une mesure.\n"
     "• SSH : connexion par clé, sans mot de passe. Scrinium n'envoie qu'une commande fixe, en lecture seule (charge, mémoire, disque).\n"
     "• Type exécutable : une fiche reçue d'un autre ne lance aucun contrôle tant que vous ne l'avez pas validée (bandeau « Valider cette fiche »). "
