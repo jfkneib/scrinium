@@ -457,5 +457,5 @@ def test_emploi_exemple_a_de_vraies_sources():
     lg = _charger("emploi")
     (_theme, _titre, texte), = lg.exemples()
     p = lg.lire(texte)
-    assert len(p.sources) == 8 and all(s.afficher and lg.flux.adresse_valide(s.adresse) for s in p.sources) and p.indispensables == ["python", "linux"]
+    assert len(p.sources) == 15 and all(s.afficher and lg.flux.adresse_valide(s.adresse) for s in p.sources) and p.indispensables == ["python", "linux"]
     assert "remote | télétravail | teletravail" in lg.ecrire(p)

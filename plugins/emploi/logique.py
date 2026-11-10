@@ -317,7 +317,7 @@ def texte_neuf() -> str:
     return ecrire(Profil())
 
 
-# Flux publics d'offres d'emploi (vérifiés le 2026-11-11 : ils répondent et contiennent des offres). Sites en anglais pour la plupart (télétravail) ; France : Emploi Territorial.
+# Flux publics d'offres d'emploi (vérifiés le 2026-11-11 : ils répondent et contiennent des offres). Télétravail (en anglais) puis France et Luxembourg.
 SOURCES_EXEMPLE = [
     ("Remotive (télétravail)", "https://remotive.com/remote-jobs/feed"),
     ("We Work Remotely · programmation", "https://weworkremotely.com/categories/remote-programming-jobs.rss"),
@@ -327,6 +327,13 @@ SOURCES_EXEMPLE = [
     ("Jobicy (télétravail)", "https://jobicy.com/feed/job_feed"),
     ("Himalayas (télétravail)", "https://himalayas.app/jobs/rss"),
     ("Emploi Territorial (collectivités, France)", "https://www.emploi-territorial.fr/rss"),
+    ("Cadremploi (France)", "http://services.cadremploi.fr/services/search/rss"),
+    ("Codeur (freelance, France)", "https://www.codeur.com/?format=rss"),
+    ("Emploi Collectivités (France)", "https://www.emploi-collectivites.fr/rss.asp"),
+    ("Emploi Environnement (France)", "https://www.emploi-environnement.com/rss.xml"),
+    ("CNRS (recherche, France)", "https://emploi.cnrs.fr/Rss/Offres.ashx"),
+    ("Choisir le service public (France)", "https://place-ep-recrute.talent-soft.com/handlers/offerRss.ashx?LCID=1036"),
+    ("Banque de Luxembourg", "https://jobs.banquedeluxembourg.com/handlers/offerRss.ashx?LCID=1036"),
 ]
 
 
