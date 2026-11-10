@@ -1,3 +1,16 @@
+scrinium (0.8.1) unstable; urgency=medium
+
+  * Agenda : lien de réunion (Zoom, Teams, Meet…) par événement, ou adresse écrite dans le titre ;
+    bouton « Ouvrir le lien » dans le rappel et dans l'Agenda. Seuls les liens http et https
+    sont acceptés, et rien ne s'ouvre sans un clic.
+  * Tableur : export Excel (.xlsx) et LibreOffice (.ods) qui gardent les formules et leurs
+    résultats (clic droit, ou bouton « Excel / LibreOffice »).
+  * Répertoire : colonne « Lien » dans le modèle Contacts ; convention « app:nom paramètre » qui
+    lance une application déclarée sur l'ordinateur (fenêtre « Applications… », un seul argument,
+    sans shell) ; import de contacts vCard (.vcf), fichiers ou dossier (KDE Connect).
+
+ -- Jean-François Kneib <kneib.jean-francois@cegetel.net>  Tue, 10 Nov 2026 17:00:00 +0100
+
 scrinium (0.8.0) unstable; urgency=medium
 
   * Nouvelle extension Planning : un type de fiche « Planning » pour suivre des tâches
