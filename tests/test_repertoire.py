@@ -443,3 +443,14 @@ def test_nouveau_repertoire_depuis_un_import_les_colonnes_s_adaptent(fen, tmp_pa
     monkeypatch.setattr(QFileDialog, "getOpenFileNames", staticmethod(lambda *a, **k: ([str(csv_)], "")))
     fen.nouveau_repertoire()
     assert fen.repertoire.tableau.colonnes == ["Titre", "Auteur"] and fen.repertoire.tableau.lignes == [["Dune", "Herbert"]]
+
+
+def test_import_csv_thunderbird_vers_les_colonnes_du_modele():
+    t = Tableau.depuis_texte(texte_modele(0))
+    csv_ = ("First Name,Last Name,Display Name,Primary Email,Work Phone,Mobile Number,Web Page 1,Home Address,Notes\n"
+            "Léa,Martin,Léa Martin,lea@x.fr,0411111111,0622222222,https://lea.example.org,1 rue A,ok\n")
+    ajoutees, creees = t.importer(csv_.encode("utf-8"))
+    ligne = dict(zip(t.colonnes, t.lignes[0]))
+    assert ajoutees == 1 and creees == ["Display Name"]                      # seul le nom affiché n'a pas de colonne : il est ajouté, rien n'est perdu
+    assert ligne["Courriel"] == "lea@x.fr" and ligne["Téléphones"] == "0411111111\n0622222222" and ligne["Lien"] == "https://lea.example.org"
+    assert ligne["Adresse"] == "1 rue A" and ligne["Nom"] == "Martin"

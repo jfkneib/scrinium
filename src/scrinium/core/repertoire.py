@@ -44,6 +44,13 @@ ALIAS = {
     "email": "Courriel", "e-mail": "Courriel", "e-mail 1 - value": "Courriel", "e-mail 2 - value": "Courriel", "mail": "Courriel", "e-mail address": "Courriel", "email 1 - value": "Courriel",
     "adresse email": "Courriel", "adresse e-mail": "Courriel",
     "website": "Lien", "site web": "Lien", "site": "Lien", "url": "Lien", "web": "Lien", "page web": "Lien", "homepage": "Lien", "website 1 - value": "Lien",
+    # Thunderbird (export CSV du carnet d'adresses, en anglais ou en français)
+    "primary email": "Courriel", "secondary email": "Courriel", "adresse electronique principale": "Courriel",
+    "adresse electronique secondaire": "Courriel", "work phone": "Téléphones", "home phone": "Téléphones", "mobile number": "Téléphones",
+    "fax number": "Téléphones", "pager number": "Téléphones", "telephone professionnel": "Téléphones", "telephone personnel": "Téléphones",
+    "telephone portable": "Téléphones", "fax": "Téléphones",
+    "web page 1": "Lien", "web page 2": "Lien", "page web 1": "Lien", "page web 2": "Lien", "personal web page": "Lien", "work web page": "Lien",
+    "home address": "Adresse", "work address": "Adresse", "adresse personnelle": "Adresse", "adresse professionnelle": "Adresse",
     "note": "Notes", "commentaire": "Notes", "commentaires": "Notes", "comments": "Notes",
 }
 
