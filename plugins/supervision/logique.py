@@ -3,6 +3,7 @@
 """Partie sans interface de l'extension « Supervision » : la fiche (une section par machine), les contrôles (ping, ports, page web, mesures par
 SSH) et l'analyse des résultats. Aucun shell : chaque commande est une liste d'arguments, et une valeur qui pourrait passer pour une option
 (« -oProxyCommand=… ») est refusée."""
+import os
 import re
 import shutil
 import socket
@@ -22,7 +23,7 @@ _HOTE = re.compile(r"[A-Za-z0-9_][A-Za-z0-9._:\-\[\]]{0,252}")
 _CIBLE_SSH = re.compile(r"(?:[A-Za-z0-9_][A-Za-z0-9._\-]{0,63}@)?[A-Za-z0-9_][A-Za-z0-9._:\-\[\]]{0,252}")
 _CLES = ("adresse", "ports", "web", "ssh", "seuil_disque")
 # Commande envoyée par SSH : fixe, en lecture seule. Elle ne dépend d'aucune valeur de la fiche.
-COMMANDE_SSH = "cat /proc/loadavg /proc/uptime; grep -E '^(MemTotal|MemAvailable):' /proc/meminfo; df -P /"
+COMMANDE_SSH = "cat /proc/loadavg /proc/uptime; grep -E '^(MemTotal|MemAvailable):' /proc/meminfo; df -P /; nproc"
 
 
 def hote_valide(h: str) -> bool:
@@ -194,7 +195,16 @@ def analyser_mesures(texte: str) -> dict:
         m = re.search(r"\s(\d+)%\s+/\s*$", ligne)
         if m:
             r["disque_pct"] = int(m[1])
+    if lignes and re.fullmatch(r"\s*\d{1,4}\s*", lignes[-1]):
+        r["coeurs"] = max(1, int(lignes[-1]))
     return r
+
+
+def charge_pct(mesures: dict) -> int | None:
+    """Charge en % de la capacité (charge sur 1 minute / nombre de cœurs, 1 cœur si inconnu), plafonnée à 100 ; None sans mesure."""
+    if "charge" not in mesures:
+        return None
+    return min(100, round(100 * mesures["charge"] / mesures.get("coeurs", 1)))
 
 
 def mesures_ssh(cible: str) -> dict:
@@ -217,6 +227,7 @@ def mesures_locales() -> dict:
             r = analyser_mesures(f1.readline() + f2.readline() + f3.read())
         u = shutil.disk_usage("/")
         r["disque_pct"] = round(100 * u.used / u.total)
+        r["coeurs"] = max(1, os.cpu_count() or 1)
         return r
     except (OSError, ValueError, ZeroDivisionError):
         return {}

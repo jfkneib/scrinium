@@ -51,6 +51,9 @@ def test_valeurs_qui_ressemblent_a_des_options_sont_refusees():
 
 def test_analyse_des_mesures():
     assert lg.analyser_mesures(SORTIE) == {"charge": 0.52, "uptime_s": 12345, "memoire_pct": 75, "disque_pct": 91}
+    avec = lg.analyser_mesures(SORTIE + "4\n")
+    assert avec["coeurs"] == 4 and lg.charge_pct(avec) == 13 and lg.charge_pct({"charge": 9.0, "coeurs": 4}) == 100
+    assert lg.charge_pct({}) is None and lg.charge_pct({"charge": 0.5}) == 50
     assert lg.analyser_mesures("n'importe quoi") == {} and lg.analyser_mesures("") == {}
     assert lg.duree(90061) == "1 j 1 h" and lg.duree(3700) == "1 h 1 min"
 
@@ -164,3 +167,16 @@ def test_desactiver_retire_le_type(fen):
     assert types_fiche.type_de("#scrinium-supervision\n") is not None
     fen.plugins.desactiver("supervision")
     assert "supervision" not in fen.vues_types
+
+
+def test_couleurs_de_consommation_du_vert_au_rouge(fen):
+    mod = sys.modules["scrinium_plugin_supervision"]
+    assert mod.couleur_niveau(None) is None
+    vert, jaune, rouge = (mod.couleur_niveau(x) for x in (0, 50, 100))
+    assert vert.hue() == 120 and jaune.hue() == 60 and rouge.hue() == 0 and mod.couleur_niveau(250).hue() == 0
+    vue = fen.vues_types["supervision"]
+    vue.machines = lg.depuis_texte(lg.en_texte([{"nom": "A", "adresse": "h", "ssh": "u@h"}]))
+    vue._afficher()
+    vue._gen += 1
+    vue._arrive(vue._gen, 0, {"ping": True, "ports": {}, "mesures": {"disque_pct": 95, "memoire_pct": 10, "charge": 1.0, "coeurs": 4}})
+    assert vue.table.item(0, 3).background().color().hue() < 20 and vue.table.item(0, 4).background().color().hue() > 100

@@ -25,6 +25,13 @@ COULEURS = {"ok": "#2e7d32", "alerte": "#e08e0b", "panne": "#c0392b", None: "#88
 INTERVALLE = 60_000                                      # ms entre deux contrôles automatiques
 
 
+def couleur_niveau(pct):
+    """Fond d'une case de consommation : vert (0 %) -> jaune -> rouge (100 %), en teinte claire ; None sans mesure."""
+    if pct is None:
+        return None
+    return QColor.fromHsv(int(120 * (100 - min(max(pct, 0), 100)) / 100), 110, 240)
+
+
 def _libelle_etat(e) -> str:
     return {"ok": _("En ligne"), "alerte": _("Alerte"), "panne": _("Panne")}.get(e, _("…"))
 
@@ -228,6 +235,10 @@ class VueSupervision(QWidget):
             it = QTableWidgetItem(t)
             if c == 0:
                 it.setForeground(QBrush(QColor(COULEURS[e])))
+            niveau = {3: mes.get("disque_pct"), 4: mes.get("memoire_pct"), 5: logique.charge_pct(mes)}.get(c)
+            if niveau is not None:
+                it.setBackground(QBrush(couleur_niveau(niveau)))
+                it.setForeground(QBrush(QColor("#1b1b1b")))
             self.table.setItem(i, c, it)
         self.table.resizeColumnsToContents()
 
