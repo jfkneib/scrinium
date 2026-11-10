@@ -134,7 +134,7 @@ class VueSupervision(QWidget):
         lay.addLayout(haut)
         self.table = QTableWidget(0, 12)
         self.table.setHorizontalHeaderLabels([_("État"), _("Machine"), _("Réseau"), _("Disque"), _("Mémoire"), _("Charge"),
-                                              _("Puissance"), _("Cumul"), _("Semaine"), _("Mois"), _("En marche depuis"), _("Détail")])
+                                              _("Puissance"), _("Énergie cumulée"), _("Énergie semaine"), _("Énergie mois"), _("En marche depuis"), _("Détail")])
         self.table.verticalHeader().setVisible(False)
         self.table.horizontalHeader().setSectionResizeMode(11, QHeaderView.ResizeMode.Stretch)
         self.table.setEditTriggers(QAbstractItemView.EditTrigger.NoEditTriggers)

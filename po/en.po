@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: scrinium 0.2.0\n"
 "Report-Msgid-Bugs-To: \n"
-"PO-Revision-Date: 2026-11-10 14:47+0100\n"
+"PO-Revision-Date: 2026-11-10 14:51+0100\n"
 "Last-Translator: Jean-François Kneib\n"
 "Language-Team: English\n"
 "Language: en\n"
@@ -588,7 +588,6 @@ msgstr "Month by month"
 
 #: plugins/budget/__init__.py:164
 #: plugins/planning/__init__.py:308
-#: plugins/supervision/__init__.py:137
 msgid "Mois"
 msgstr "Month"
 
@@ -3254,12 +3253,16 @@ msgid "Puissance"
 msgstr "Power"
 
 #: plugins/supervision/__init__.py:137
-msgid "Cumul"
-msgstr "Total"
+msgid "Énergie cumulée"
+msgstr "Total energy"
 
 #: plugins/supervision/__init__.py:137
-msgid "Semaine"
-msgstr "Week"
+msgid "Énergie semaine"
+msgstr "Week energy"
+
+#: plugins/supervision/__init__.py:137
+msgid "Énergie mois"
+msgstr "Month energy"
 
 #: plugins/supervision/__init__.py:137
 msgid "En marche depuis"
