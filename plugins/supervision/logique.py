@@ -4,6 +4,7 @@
 SSH) et l'analyse des résultats. Aucun shell : chaque commande est une liste d'arguments, et une valeur qui pourrait passer pour une option
 (« -oProxyCommand=… ») est refusée."""
 import re
+import shutil
 import socket
 import subprocess
 import sys
@@ -204,12 +205,31 @@ def mesures_ssh(cible: str) -> dict:
     return analyser_mesures(p.stdout)
 
 
+def est_locale(adresse: str) -> bool:
+    return adresse.strip("[]").lower() in ("127.0.0.1", "localhost", "::1")
+
+
+def mesures_locales() -> dict:
+    """Mesures de CETTE machine (Linux), sans SSH : on lit directement /proc et le disque racine. {} ailleurs."""
+    try:
+        with open("/proc/loadavg", encoding="ascii") as f1, open("/proc/uptime", encoding="ascii") as f2, \
+                open("/proc/meminfo", encoding="ascii") as f3:
+            r = analyser_mesures(f1.readline() + f2.readline() + f3.read())
+        u = shutil.disk_usage("/")
+        r["disque_pct"] = round(100 * u.used / u.total)
+        return r
+    except (OSError, ValueError, ZeroDivisionError):
+        return {}
+
+
 def sonder(m: dict) -> dict:
     """Tous les contrôles demandés par la fiche pour cette machine (bloquant : à lancer hors du fil de l'interface).
     -> {"ping", "ports": {22: True}, "web": code|None (ou absent), "mesures": {...} (ou absent), "erreur_ssh": str (ou absent)}"""
     r = {"ping": ping(m["adresse"]), "ports": {p: port_ouvert(m["adresse"], p) for p in m["ports"]}}
     if m["web"]:
         r["web"] = page_web(m["web"])
+    if not m["ssh"] and est_locale(m["adresse"]):
+        r["mesures"] = mesures_locales()
     if m["ssh"]:
         try:
             r["mesures"] = mesures_ssh(m["ssh"])

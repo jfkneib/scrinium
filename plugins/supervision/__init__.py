@@ -156,6 +156,12 @@ class VueSupervision(QWidget):
         self.actualiser()
 
     # ---------- contrôles ----------
+    def showEvent(self, ev):
+        """Première apparition de la fiche : lance les contrôles tout de suite (sinon on attendrait la minute suivante)."""
+        super().showEvent(ev)
+        if self._actif and self.machines and not self.resultats:
+            QTimer.singleShot(0, self.actualiser)
+
     def _auto(self):
         if self._actif and self.c_auto.isChecked() and self.isVisible():
             self.actualiser()

@@ -69,6 +69,15 @@ def test_etat_ok_alerte_panne():
     assert lg.etat(m2, {"ping": True, "ports": {}, "erreur_ssh": "refusé"})[0] == "alerte"
 
 
+def test_machine_locale_sans_ssh_donne_des_mesures(monkeypatch):
+    monkeypatch.setattr(lg, "ping", lambda a, d=4: True)
+    m = lg.normaliser({"nom": "ici", "adresse": "127.0.0.1"})
+    mes = lg.sonder(m).get("mesures", {})
+    if Path("/proc/meminfo").exists():
+        assert {"charge", "uptime_s", "memoire_pct", "disque_pct"} <= set(mes)
+    assert lg.est_locale("localhost") and not lg.est_locale("192.168.1.2")
+
+
 def test_sonder_avec_ssh_simule(monkeypatch):
     monkeypatch.setattr(lg, "ping", lambda a, d=4: True)
     monkeypatch.setattr(lg, "port_ouvert", lambda a, p, d=4: p == 22)
