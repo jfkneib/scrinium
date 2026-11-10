@@ -21,6 +21,7 @@ from pathlib import Path
 from typing import Callable
 
 from ..i18n import _
+from . import types_fiche
 
 API_VERSION = 1
 MAX_ERREURS = 5     # au-delà, l'extension est désactivée automatiquement
@@ -312,6 +313,9 @@ class Gestionnaire:
                 continue
             f = self.store.nouvelle_fiche(th)
             self.store.enregistrer(th, f, titre, texte)
+            tf = types_fiche.type_de(texte)
+            if tf is not None and tf.executable:
+                self.store.valider_fiche(th, f)     # l'utilisateur vient d'activer l'extension : son exemple (fourni avec elle) est validé d'emblée
             creees.append((theme, titre))
         self.store.sauver_reglages(exemples_faits=sorted(faits | {nom}))
         return creees

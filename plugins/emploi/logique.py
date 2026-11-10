@@ -344,7 +344,12 @@ def exemples() -> list:
     p = Profil(14, ["python", "linux"], ["xmpp", "remote | télétravail | teletravail", "devops | sysadmin"], ["stage", "alternance", "internship"],
                _("Développeur Python, dix ans d'expérience, administration Linux, intérêt pour les messageries (XMPP)."),
                [Source(nom, adresse, True) for nom, adresse in SOURCES_EXEMPLE])
-    return [(_("Emploi (exemples)"), _("Exemple · Ma recherche d'emploi"), ecrire(p))]
+    lieu = "nancy | metz | lorraine | meurthe | moselle | vosges | meuse | thionville | epinal | luxembourg"
+    r = Profil(30, [lieu], ["python | cpp | c++", "linux | devops"], ["stage", "alternance"],
+               _("Exemple de recherche locale : les flux nationaux n'ont pas de filtre géographique, on met donc la région en mot indispensable (ici la Lorraine et le Luxembourg)."),
+               [Source(nom, adresse, True) for nom, adresse in SOURCES_EXEMPLE])
+    return [(_("Emploi (exemples)"), _("Exemple · Ma recherche d'emploi"), ecrire(p)),
+            (_("Emploi (exemples)"), _("Exemple · Recherche d'emploi dans une région"), ecrire(r))]
 
 
 TYPE = TypeFiche("emploi", N_("Recherche d'emploi"), "user-identity", executable=True, modele=texte_neuf, a_faire=a_faire)

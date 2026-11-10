@@ -179,9 +179,71 @@ EXEMPLES = [
 ]
 
 
+# Flux officiels français (Service-public, CNIL, Sénat, Légifrance...) : aucun n'est coché au départ.
+EXEMPLES_GOUV = [
+    ('Service-public.fr · actualités particuliers', 'https://www.service-public.fr/abonnements/rss/actu-actualites-particuliers.rss', False),
+    ('Service-public.fr · actualités professionnels', 'https://www.service-public.fr/abonnements/rss/actu-actu-pro.rss', False),
+    ('CNIL · actualités', 'https://www.cnil.fr/fr/rss.xml', False),
+    ('CERT-FR (ANSSI)', 'https://www.cert.ssi.gouv.fr/feed/', False),
+    ('Sénat · textes', 'https://www.senat.fr/rss/textes.rss', False),
+    ('Sénat · rapports', 'https://www.senat.fr/rss/rapports.rss', False),
+    ('Légifrance (legifrss) · lois', 'https://legifrss.org/latest?nature=loi', False),
+    ('Sénat · Affaires étrangères et coopération', 'https://www.senat.fr/themes/rss/therss4.rss', False),
+    ('Sénat · Agriculture et pêche', 'https://www.senat.fr/themes/rss/therss2.rss', False),
+    ('Sénat · Aménagement du territoire', 'https://www.senat.fr/themes/rss/therss30.rss', False),
+    ('Sénat · Anciens combattants', 'https://www.senat.fr/themes/rss/therss23.rss', False),
+    ('Sénat · Budget', 'https://www.senat.fr/themes/rss/therss10.rss', False),
+    ('Sénat · Collectivités territoriales', 'https://www.senat.fr/themes/rss/therss1.rss', False),
+    ('Sénat · Culture', 'https://www.senat.fr/themes/rss/therss12.rss', False),
+    ('Sénat · Défense', 'https://www.senat.fr/themes/rss/therss29.rss', False),
+    ('Sénat · Économie et finances, fiscalité', 'https://www.senat.fr/themes/rss/therss17.rss', False),
+    ('Sénat · Éducation', 'https://www.senat.fr/themes/rss/therss24.rss', False),
+    ('Sénat · Énergie', 'https://www.senat.fr/themes/rss/therss32.rss', False),
+    ('Sénat · Entreprises', 'https://www.senat.fr/themes/rss/therss33.rss', False),
+    ('Sénat · Environnement', 'https://www.senat.fr/themes/rss/therss7.rss', False),
+    ('Sénat · Famille', 'https://www.senat.fr/themes/rss/therss13.rss', False),
+    ('Sénat · Fonction publique', 'https://www.senat.fr/themes/rss/therss19.rss', False),
+    ('Sénat · Justice', 'https://www.senat.fr/themes/rss/therss14.rss', False),
+    ('Sénat · Logement et urbanisme', 'https://www.senat.fr/themes/rss/therss16.rss', False),
+    ('Sénat · Outre-mer', 'https://www.senat.fr/themes/rss/therss18.rss', False),
+    ('Sénat · PME, commerce et artisanat', 'https://www.senat.fr/themes/rss/therss28.rss', False),
+    ('Sénat · Police et sécurité', 'https://www.senat.fr/themes/rss/therss5.rss', False),
+    ('Sénat · Pouvoirs publics et Constitution', 'https://www.senat.fr/themes/rss/therss9.rss', False),
+    ('Sénat · Questions sociales et santé', 'https://www.senat.fr/themes/rss/therss20.rss', False),
+    ('Sénat · Recherches, sciences et techniques', 'https://www.senat.fr/themes/rss/therss15.rss', False),
+    ('Sénat · Sécurité sociale', 'https://www.senat.fr/themes/rss/therss25.rss', False),
+    ('Sénat · Société', 'https://www.senat.fr/themes/rss/therss3.rss', False),
+    ('Sénat · Sports', 'https://www.senat.fr/themes/rss/therss31.rss', False),
+    ('Sénat · Traités et conventions', 'https://www.senat.fr/themes/rss/therss11.rss', False),
+    ('Sénat · Transports', 'https://www.senat.fr/themes/rss/therss21.rss', False),
+    ('Sénat · Travail', 'https://www.senat.fr/themes/rss/therss22.rss', False),
+    ('Sénat · Union européenne', 'https://www.senat.fr/themes/rss/therss8.rss', False),
+    ("Conseil d'État · actualités", 'https://www.conseil-etat.fr/rss/actualites-rss', False),
+    ("Conseil d'État · colloques, séminaires et conférences", 'https://www.conseil-etat.fr/rss/colloques-seminaires-et-conferences-rss', False),
+    ("Conseil d'État · avis", 'https://www.conseil-etat.fr/rss/avis-rss', False),
+    ("Conseil d'État · études", 'https://www.conseil-etat.fr/rss/etudes-rss', False),
+    ("Conseil d'État · rapports d'activité", 'https://www.conseil-etat.fr/rss/rapports-d-activite-rss', False),
+    ("Conseil d'État · analyses de jurisprudence", 'https://www.conseil-etat.fr/rss/analyses-de-jurisprudence-rss', False),
+    ("Conseil d'État · discours et interventions", 'https://www.conseil-etat.fr/rss/discours-et-interventions-rss', False),
+    ("Conseil d'État · LJA", 'https://www.conseil-etat.fr/rss/lja-rss', False),
+    ('Fonction publique · la DGAFP', 'https://www.fonction-publique.gouv.fr/flux-rss-rubrique-la-dgafp', False),
+    ('Fonction publique · être agent public', 'https://www.fonction-publique.gouv.fr/flux-rss-rubrique-etre-agent-public', False),
+    ('Fonction publique · droit de la fonction publique', 'https://www.fonction-publique.gouv.fr/flux-rss-rubrique-droit-de-la-fonction-publique', False),
+    ('Fonction publique · publications', 'https://www.fonction-publique.gouv.fr/flux-rss-rubrique-publications-globales', False),
+    ('Fonction publique · publications de la DGAFP', 'https://www.fonction-publique.gouv.fr/flux-rss-rubrique-publication-dgafp', False),
+    ('Fonction publique · études et statistiques', 'https://www.fonction-publique.gouv.fr/flux-rss-rubrique-etudes-et-statistiques', False),
+    ('Fonction publique · rapport annuel', 'https://www.fonction-publique.gouv.fr/flux-rss-collection-etudes-et-statistiques-rapport-annuel', False),
+    ('Fonction publique · Point Stat', 'https://www.fonction-publique.gouv.fr/flux-rss-collection-etudes-et-statistiques-point-stat', False),
+    ('Fonction publique · Stats rapides', 'https://www.fonction-publique.gouv.fr/flux-rss-collection-etudes-et-statistiques-stats-rapides', False),
+    ('Fonction publique · études, recherche, débats', 'https://www.fonction-publique.gouv.fr/flux-rss-collection-etudes-et-statistiques-etudes-recherche-debats', False),
+]
+
+
 def exemples() -> list:
-    doc = Document([Source(nom, adresse, "", coche) for nom, adresse, coche in EXEMPLES])
-    return [(_("Veille (exemples)"), _("Exemple · Veille informatique"), ecrire(doc))]
+    def fiche(liste):
+        return ecrire(Document([Source(nom, adresse, "", coche) for nom, adresse, coche in liste]))
+    return [(_("Veille (exemples)"), _("Exemple · Veille informatique"), fiche(EXEMPLES)),
+            (_("Veille (exemples)"), _("Exemple · Veille gouvernement et droit"), fiche(EXEMPLES_GOUV))]
 
 
 TYPE = TypeFiche("veille", N_("Veille"), "news-subscribe", executable=True, modele=texte_neuf, a_faire=a_faire)

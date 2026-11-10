@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: scrinium 0.2.0\n"
 "Report-Msgid-Bugs-To: \n"
-"PO-Revision-Date: 2026-11-10 16:57+0100\n"
+"PO-Revision-Date: 2026-11-10 17:21+0100\n"
 "Last-Translator: Jean-François Kneib\n"
 "Language-Team: English\n"
 "Language: en\n"
@@ -2373,7 +2373,7 @@ msgstr "rejected"
 msgid "abandon"
 msgstr "dropped"
 
-#: plugins/emploi/logique.py:327
+#: plugins/emploi/logique.py:355
 msgid "Recherche d'emploi"
 msgstr "Job search"
 
@@ -2433,9 +2433,13 @@ msgstr "- If you are missing information, ask me before writing."
 msgid "- Signale ce qui, dans l'annonce, ne correspond pas à mon profil."
 msgstr "- Point out what in the ad does not match my profile."
 
-#: plugins/emploi/logique.py:322
+#: plugins/emploi/logique.py:345
 msgid "Développeur Python, dix ans d'expérience, administration Linux, intérêt pour les messageries (XMPP)."
 msgstr "Python developer, ten years of experience, Linux administration, interest in messaging (XMPP)."
+
+#: plugins/emploi/logique.py:349
+msgid "Exemple de recherche locale : les flux nationaux n'ont pas de filtre géographique, on met donc la région en mot indispensable (ici la Lorraine et le Luxembourg)."
+msgstr "Local search example: national feeds have no geographic filter, so the region is set as a required keyword (here Lorraine and Luxembourg)."
 
 #: plugins/emploi/logique.py:299
 msgid "Titre : %s"
@@ -2461,13 +2465,18 @@ msgstr "Found: %s"
 msgid "Indispensables manquants : %s"
 msgstr "Missing essentials: %s"
 
-#: plugins/emploi/logique.py:324
+#: plugins/emploi/logique.py:351
+#: plugins/emploi/logique.py:352
 msgid "Emploi (exemples)"
 msgstr "Job search (examples)"
 
-#: plugins/emploi/logique.py:324
+#: plugins/emploi/logique.py:351
 msgid "Exemple · Ma recherche d'emploi"
 msgstr "Example · My job search"
+
+#: plugins/emploi/logique.py:352
+msgid "Exemple · Recherche d'emploi dans une région"
+msgstr "Example · Job search in a region"
 
 #: plugins/emploi/logique.py:289
 msgid "%d candidature(s) à relancer"
@@ -6041,7 +6050,7 @@ msgid "Ajoutez une source (flux RSS ou Atom)."
 msgstr "Add a source (RSS or Atom feed)."
 
 #: plugins/veille/__init__.py:395
-#: plugins/veille/logique.py:187
+#: plugins/veille/logique.py:249
 msgid "Veille"
 msgstr "Watch"
 
@@ -6058,13 +6067,18 @@ msgstr "All read (%d article(s) hidden)."
 msgid "%d nouveauté(s) à lire"
 msgstr "%d new item(s) to read"
 
-#: plugins/veille/logique.py:184
+#: plugins/veille/logique.py:245
+#: plugins/veille/logique.py:246
 msgid "Veille (exemples)"
 msgstr "Watch (examples)"
 
-#: plugins/veille/logique.py:184
+#: plugins/veille/logique.py:245
 msgid "Exemple · Veille informatique"
 msgstr "Example · IT watch"
+
+#: plugins/veille/logique.py:246
+msgid "Exemple · Veille gouvernement et droit"
+msgstr "Example · Government and law watch"
 
 #: plugins/veille/logique.py:99
 msgid "adresse refusée (http ou https seulement)"

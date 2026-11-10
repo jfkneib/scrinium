@@ -318,7 +318,9 @@ def test_veille_cases_par_source(fen):
 
 def test_veille_exemple_informatique():
     lg = _charger("veille")
-    (_theme, _titre, texte), = lg.exemples()
+    (_theme, _titre, texte), (_t2, _titre2, gouv) = lg.exemples()
+    g = lg.lire(gouv)
+    assert len(g.sources) == 55 and all(lg.adresse_valide(s.adresse) for s in g.sources) and not any(s.afficher for s in g.sources)
     doc = lg.lire(texte)
     assert len(doc.sources) == 22 and all(lg.adresse_valide(s.adresse) for s in doc.sources)
     assert 0 < sum(s.afficher for s in doc.sources) < 8
@@ -455,7 +457,8 @@ def test_vue_emploi(fen, monkeypatch):
 
 def test_emploi_exemple_a_de_vraies_sources():
     lg = _charger("emploi")
-    (_theme, _titre, texte), = lg.exemples()
+    (_theme, _titre, texte), (_t2, _titre2, region) = lg.exemples()
+    assert "nancy | metz" in lg.lire(region).indispensables[0] and len(lg.lire(region).sources) == 18
     p = lg.lire(texte)
     assert len(p.sources) == 18 and all(s.afficher and lg.flux.adresse_valide(s.adresse) for s in p.sources) and p.indispensables == ["python", "linux"]
     assert "remote | télétravail | teletravail" in lg.ecrire(p)
