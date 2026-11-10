@@ -62,6 +62,7 @@ class VueVeille(QWidget):
         self.p = plugin
         self.doc = logique.Document()
         self.articles: list = []
+        self.affiches: list = []                                  # articles montrés dans le tableau (les lus sont masqués par défaut)
         self.erreurs: dict = {}
         self._actif = True
         self._gen = 0
@@ -77,12 +78,15 @@ class VueVeille(QWidget):
         self.b_lus.clicked.connect(self._tout_lire)
         self.b_ajouter = QPushButton(icone("list-add"), _("Ajouter une source…"))
         self.b_ajouter.clicked.connect(self._ajouter)
+        self.c_lus = QCheckBox(_("Afficher les lus"))
+        self.c_lus.setToolTip(_("Par défaut, un article lu disparaît de la liste."))
+        self.c_lus.toggled.connect(lambda *_a: self._afficher())
         self.c_fond = QCheckBox(_("Surveiller en arrière-plan"))
         self.c_fond.setToolTip(_("Relève les fiches Veille validées toutes les 30 minutes, même quand elles ne sont pas affichées, et notifie les "
                                  "nouveautés. Scrinium doit rester ouvert."))
         self.c_fond.setChecked(bool(plugin is not None and plugin.fond))
         self.c_fond.toggled.connect(lambda oui: plugin.regler_fond(oui) if plugin is not None else None)
-        for w in (self.b_actualiser, self.b_lus, self.b_ajouter, self.c_fond):
+        for w in (self.b_actualiser, self.b_lus, self.b_ajouter, self.c_lus, self.c_fond):
             haut.addWidget(w)
         self.l_etat = QLabel()
         haut.addWidget(self.l_etat, 1)
@@ -185,15 +189,15 @@ class VueVeille(QWidget):
         m.exec(self.t_articles.viewport().mapToGlobal(pos))
 
     def _ouvrir(self, i: int):
-        if 0 <= i < len(self.articles):
-            a = self.articles[i]
+        if 0 <= i < len(self.affiches):
+            a = self.affiches[i]
             if logique.adresse_valide(a.lien):                  # http et https seulement, et seulement sur clic
                 ouvrir_url(QUrl(a.lien), self.p.navigateur() if self.p is not None else "")
             self._lire_article(i)
 
     def _lire_article(self, i: int):
-        if 0 <= i < len(self.articles) and self._actif:
-            logique.marquer_lus(self.doc, [self.articles[i]])
+        if 0 <= i < len(self.affiches) and self._actif:
+            logique.marquer_lus(self.doc, [self.affiches[i]])
             self._enregistrer()
 
     def _tout_lire(self):
@@ -246,8 +250,9 @@ class VueVeille(QWidget):
         self.t_sources.resizeColumnsToContents()
         self.t_sources.horizontalHeader().setSectionResizeMode(1, QHeaderView.ResizeMode.Stretch)
         lus = set(d.lus)
-        self.t_articles.setRowCount(len(self.articles))
-        for i, a in enumerate(self.articles):
+        self.affiches = [a for a in self.articles if self.c_lus.isChecked() or a.empreinte not in lus]
+        self.t_articles.setRowCount(len(self.affiches))
+        for i, a in enumerate(self.affiches):
             gras = a.empreinte not in lus
             for c, v in enumerate((a.source, a.titre, a.date)):
                 it = QTableWidgetItem(v)
@@ -261,7 +266,7 @@ class VueVeille(QWidget):
         n = len(logique.non_lus(self.articles, d))
         if self.articles and not self._attendus:
             logique.NON_LUS[logique.cle_sources(d)] = n
-        etat = _("%d non lu(s) sur %d") % (n, len(self.articles)) if self.articles else (_("Ajoutez une source (flux RSS ou Atom).") if not d.sources else "")
+        etat = (_("%d non lu(s) sur %d") % (n, len(self.articles)) if n else _("Tout est lu (%d article(s) masqué(s)).") % len(self.articles)) if self.articles else (_("Ajoutez une source (flux RSS ou Atom).") if not d.sources else "")
         if self.erreurs:
             etat += "  ·  " + _("injoignable : %s") % ", ".join(sorted(self.erreurs))
         if not self._attendus:

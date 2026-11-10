@@ -263,3 +263,19 @@ def test_vue_sante_ajoute_une_mesure_et_coche_une_prise(fen, monkeypatch):
     n = len(vue.d.mesures)
     vue._ajouter_mesure()
     assert len(vue.d.mesures) == n
+
+
+def test_veille_les_lus_sont_masques(fen):
+    lg = _charger("veille")
+    vue = fen.vues_types["veille"]
+    vue.charger(lg.ecrire(lg.Document([lg.Source("S", "https://x.org/f")])))
+    vue.articles = [lg.Article("S", "Un", "https://x.org/1", "2026-11-10 10:00", "aaaaaaaaaa"), lg.Article("S", "Deux", "https://x.org/2", "2026-11-09 10:00", "bbbbbbbbbb")]
+    vue._afficher()
+    assert vue.t_articles.rowCount() == 2
+    vue._lire_article(0)
+    assert vue.t_articles.rowCount() == 1 and vue.t_articles.item(0, 1).text() == "Deux"
+    vue.c_lus.setChecked(True)
+    assert vue.t_articles.rowCount() == 2
+    vue.c_lus.setChecked(False)
+    vue._tout_lire()
+    assert vue.t_articles.rowCount() == 0 and "Tout est lu" in vue.l_etat.text()
