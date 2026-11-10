@@ -3,8 +3,8 @@
 """Icônes : thème du système d'abord (KDE/GNOME), sinon jeu embarqué (Breeze, LGPL) recoloré selon le thème clair/sombre."""
 from pathlib import Path
 
-from PyQt6.QtCore import QByteArray, Qt
-from PyQt6.QtGui import QGuiApplication, QIcon, QPainter, QPixmap
+from PyQt6.QtCore import QByteArray, QPointF, Qt
+from PyQt6.QtGui import QColor, QGuiApplication, QIcon, QPainter, QPixmap
 from PyQt6.QtSvg import QSvgRenderer
 
 DOSSIER = Path(__file__).resolve().parent.parent / "icons"
@@ -62,6 +62,34 @@ def avec_epingle(nom: str = "") -> QIcon:
             p.drawPixmap(taille * 2 - cote, taille * 2 - cote, punaise.pixmap(cote, cote))
         else:
             p.drawPixmap(0, 0, punaise.pixmap(taille * 2, taille * 2))
+        p.end()
+        pm.setDevicePixelRatio(2)
+        res.addPixmap(pm)
+    _cache[cle] = res
+    return res
+
+
+def avec_pastille(nom: str = "", epingle: bool = False) -> QIcon:
+    """Icône `nom` (ou la punaise seule si épinglée sans icône) avec une pastille rouge en haut à droite : « il y a quelque chose à faire »."""
+    cle = ("pastille", nom, epingle)
+    if cle in _cache:
+        return _cache[cle]
+    base = avec_epingle(nom) if epingle else (icone(nom) if nom else QIcon())
+    res = QIcon()
+    for taille in (16, 22, 32, 48):
+        pm = QPixmap(taille * 2, taille * 2)
+        pm.fill(Qt.GlobalColor.transparent)
+        p = QPainter(pm)
+        p.setRenderHint(QPainter.RenderHint.Antialiasing)
+        if not base.isNull():
+            p.drawPixmap(0, 0, base.pixmap(taille * 2, taille * 2))
+        r = taille * 2 * 0.26
+        c = taille * 2 - r - 1
+        p.setBrush(QColor("#ffffff"))
+        p.setPen(Qt.PenStyle.NoPen)
+        p.drawEllipse(QPointF(c, r + 1), r + 1.5, r + 1.5)
+        p.setBrush(QColor("#e53935"))
+        p.drawEllipse(QPointF(c, r + 1), r, r)
         p.end()
         pm.setDevicePixelRatio(2)
         res.addPixmap(pm)

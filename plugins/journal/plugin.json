@@ -1,0 +1,8 @@
+{
+  "titre": "Journal",
+  "version": "0.1",
+  "auteur": "Scrinium",
+  "description": "Un type de fiche « Journal » : une entrée par jour avec une humeur, un calendrier où les jours écrits sont marqués, « il y a un an » (ce que vous écriviez à la même date), série de jours écrits. À verrouiller : c'est personnel. Une pastille rappelle d'écrire le soir.",
+  "classe": "JournalPlugin",
+  "api": 1
+}

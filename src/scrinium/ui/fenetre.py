@@ -14,7 +14,7 @@ from PyQt6.QtWidgets import (QAbstractItemView, QApplication, QDialog, QFileDial
 from .. import __version__
 from ..core import autostart, capture, crypto, invitation
 from ..core.plugins import FicheVue, Gestionnaire
-from ..core import doc_extensions, guide, lien as lien_mod, repertoire, types_fiche
+from ..core import doc_extensions, guide, lien as lien_mod, liens_fiches, repertoire, types_fiche
 from ..core.store import ICONE_DEFAUT, Store, propre
 from ..i18n import _
 from .assistant import AssistantCle
@@ -23,7 +23,7 @@ from .extensions import DialogueExtensions, UiPlugin
 from . import export_pdf
 from .choix_icone import DialogueIcone
 from .entrees_menu import remplir as remplir_menu
-from .icons import avec_epingle, icone, icone_appli
+from .icons import avec_epingle, avec_pastille, icone, icone_appli
 from .images import BandePieces, Editeur
 from .markdown import Apercu, BarreFormat, entourer, navigateurs_installes
 from .lien_ajout import DialogueAjoutLien
@@ -109,6 +109,9 @@ class Fenetre(QMainWindow):
         self.tray = None
         self.timer = QTimer(self, singleShot=True, interval=700)
         self.timer.timeout.connect(self.sauver)
+        self.timer_pastilles = QTimer(self, interval=5 * 60 * 1000)      # le temps passe : une échéance arrive sans qu'on touche à la fiche
+        self.timer_pastilles.timeout.connect(self.maj_pastilles)
+        self.timer_pastilles.start()
         self.setWindowTitle(_("Scrinium"))
         self.setWindowIcon(icone_appli())
         self.resize(900, 540)
@@ -168,6 +171,7 @@ class Fenetre(QMainWindow):
         mf.addAction(self.a_fiche)
         mf.addMenu(self.menu_nouvelle)
         mf.addAction(self._action(_("Nouveau répertoire…"), "x-office-address-book", self.nouveau_repertoire, "Ctrl+Alt+R"))
+        mf.addAction(self._action(_("Fiches liées…"), "insert-link", self.fiches_liees, "Ctrl+Alt+L"))
         mf.addAction(self._action(_("Imprimer la fiche…"), "document-print", self.imprimer_fiche, "Ctrl+P"))
         mf.addAction(self._action(_("Capture rapide…"), "document-edit", self.capture_rapide, "Ctrl+Alt+N"))
         mf.addAction(self._action(_("Inviter à installer Scrinium…"), "mail-send", self.inviter))
@@ -296,6 +300,8 @@ class Fenetre(QMainWindow):
         self.apercu.pdf_demande.connect(self.exporter_pdf)
         self.apercu.impression_demandee.connect(self.imprimer_fiche)
         self.apercu.complements = self._entrees_clic_droit
+        self.apercu.fiche_existe = lambda cible: liens_fiches.resoudre(self.store, cible) is not None
+        self.apercu.fiche_demandee.connect(self.ouvrir_fiche_liee)
         self.format = BarreFormat(self.texte)
         self.format.apercu_demande.connect(self.basculer_apercu)
         self.pile = QStackedWidget()
@@ -628,6 +634,24 @@ class Fenetre(QMainWindow):
             lib += f"   [{t.nom}]"
         return lib
 
+    def _icone_fiche(self, t, f):
+        """(icône, raison) d'une fiche dans la liste : type, punaise si épinglée, pastille rouge s'il y a quelque chose à faire."""
+        nom_icone = "object-locked" if f.verrou else types_fiche.icone_de(f.texte)
+        epingle = self.store.fiche_epinglee(t, f)
+        raison = None if f.verrou else types_fiche.a_faire_de(f.texte)
+        if raison:
+            return avec_pastille(nom_icone, epingle), raison
+        return (avec_epingle(nom_icone) if epingle else (icone(nom_icone) if nom_icone else QIcon_vide())), None
+
+    def maj_pastilles(self):
+        """Remet à jour les seules icônes de la liste (le temps passe : une échéance arrive, un rappel tombe) sans la reconstruire."""
+        for row, (t, f) in enumerate(self.rows):
+            it = self.liste.item(row)
+            if it is not None:
+                ic, raison = self._icone_fiche(t, f)
+                it.setIcon(ic)
+                it.setToolTip(raison or "")
+
     def maj_fiches(self):
         q = self.recherche.text().strip().lower()
         self.liste.blockSignals(True)
@@ -645,9 +669,9 @@ class Fenetre(QMainWindow):
                 trouvees.append((t, f))
         trouvees.sort(key=lambda tf: not self.store.fiche_epinglee(*tf))          # fiches épinglées d'abord (tri stable)
         for t, f in trouvees:
-            nom_icone = "object-locked" if f.verrou else types_fiche.icone_de(f.texte)
-            ic = avec_epingle(nom_icone) if self.store.fiche_epinglee(t, f) else (icone(nom_icone) if nom_icone else QIcon_vide())
+            ic, raison = self._icone_fiche(t, f)
             it = QListWidgetItem(ic, self._libelle(t, f, self.theme == self.TOUS or q))
+            it.setToolTip(raison or "")
             it.setData(Qt.ItemDataRole.UserRole, f.path.name)
             self.liste.addItem(it)
             if f is self.fiche:
@@ -1060,6 +1084,7 @@ class Fenetre(QMainWindow):
             row = self.liste.currentRow()
             if 0 <= row < len(self.rows):   # libellé à jour sans perdre la sélection
                 self.liste.item(row).setText(self._libelle(t, f, self.theme == self.TOUS or self.recherche.text().strip()))
+            self.maj_pastilles()
         else:
             self._statut(f"{_('✔ Enregistré')}  ·  {t.nom}/{f.path.name}", VERT)
         if self._validation_en_attente:
@@ -1088,6 +1113,50 @@ class Fenetre(QMainWindow):
         QMessageBox.warning(self, _("Extension désactivée"),
                             _("L'extension « %(nom)s » a été désactivée après des erreurs répétées :\n%(erreur)s")
                             % {"nom": nom, "erreur": erreur})
+
+    def _aller_a(self, t, f):
+        """Affiche la fiche (t, f) : change de thème et vide la recherche si elle n'est pas dans la liste."""
+        self.quitter_fiche()
+        if self.recherche.text():
+            self.recherche.blockSignals(True)
+            self.recherche.clear()
+            self.recherche.blockSignals(False)
+        if self.theme not in (self.TOUS, t.nom):
+            self.theme = t.nom
+            self.maj_themes()
+        self.maj_fiches()
+        self.selectionner_fiche(FicheVue(t, f))
+
+    def ouvrir_fiche_liee(self, cible: str):
+        """Clic sur un lien [[fiche]] de l'aperçu : ouvre la fiche, ou propose de la créer si elle n'existe pas encore."""
+        r = liens_fiches.resoudre(self.store, cible)
+        if r is None:
+            titre = cible.partition("/")[2].strip() if "/" in cible and any(x.nom.casefold() == cible.partition("/")[0].strip().casefold()
+                                                                           for x in self.store.themes) else cible
+            t = self.fiche_theme or self._theme_courant()
+            if t is None or QMessageBox.question(self, _("Lien vers une fiche"),
+                                                 _("Aucune fiche ne s'appelle « %s ». La créer dans le thème « %s » ?") % (titre, t.nom)) \
+                    != QMessageBox.StandardButton.Yes:
+                return
+            f = self.store.nouvelle_fiche(t)
+            self.store.enregistrer(t, f, titre, "")
+            r = (t, f)
+        self._aller_a(*r)
+
+    def fiches_liees(self):
+        """Fiches vers lesquelles pointe la fiche courante (→) et fiches qui pointent vers elle (←) ; un choix ouvre la fiche."""
+        f, t = self.fiche, self.fiche_theme
+        if f is None:
+            return
+        entrees = [("→ ", x) for x in liens_fiches.liens_de(self.store, t, f)] + \
+                  [("← ", x) for x in liens_fiches.retroliens(self.store, t, f)]
+        if not entrees:
+            QMessageBox.information(self, _("Fiches liées"), _("Aucun lien avec cette fiche. Écrivez [[Titre d'une fiche]] dans le texte pour en créer un."))
+            return
+        noms = [f"{sens}{th.nom} / {fi.titre}" for sens, (th, fi) in entrees]
+        choix, ok = QInputDialog.getItem(self, _("Fiches liées"), _("→ cette fiche pointe vers · ← pointe vers cette fiche"), noms, 0, False)
+        if ok:
+            self._aller_a(*entrees[noms.index(choix)][1])
 
     def selectionner_fiche(self, vue):
         """Sélectionne dans la liste la fiche décrite par `vue` (utilisé par les extensions)."""

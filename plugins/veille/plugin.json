@@ -1,0 +1,8 @@
+{
+  "titre": "Veille",
+  "version": "0.1",
+  "auteur": "Scrinium",
+  "description": "Un type de fiche « Veille » : une liste de sources (flux RSS ou Atom, avec un mot-clé facultatif). Scrinium regarde les nouveautés, vous montre ce qui n'est pas lu et met une pastille sur la fiche. Lecture seule, http et https seulement ; la fiche reste inerte tant que vous ne l'avez pas validée.",
+  "classe": "VeillePlugin",
+  "api": 1
+}

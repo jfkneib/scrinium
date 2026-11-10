@@ -1,0 +1,8 @@
+{
+  "titre": "Collection",
+  "version": "0.1",
+  "auteur": "Scrinium",
+  "description": "Un type de fiche « Collection » pour un passionné : livres, disques, jeux, vins, timbres, figurines… avec série, état, statut (je l'ai, je le cherche, prêté), prix payé. Le résumé dit combien il en manque et combien vous avez prêtés ; une pastille signale ce qu'il faut récupérer.",
+  "classe": "CollectionPlugin",
+  "api": 1
+}

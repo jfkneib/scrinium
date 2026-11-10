@@ -1,0 +1,8 @@
+{
+  "titre": "Recettes",
+  "version": "0.1",
+  "auteur": "Scrinium",
+  "description": "Un type de fiche « Recette » : ingrédients, étapes, temps, étiquettes, note. Choisissez « pour N personnes » et les quantités se recalculent ; un bouton copie la liste de courses.",
+  "classe": "RecettesPlugin",
+  "api": 1
+}

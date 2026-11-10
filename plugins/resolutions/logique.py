@@ -101,7 +101,23 @@ def texte_neuf() -> str:
     return MARQUE + "\n"
 
 
-TYPE = TypeFiche("resolutions", N_("Résolutions"), "task-complete", modele=texte_neuf)
+def a_faire(texte: str, aujourdhui: date | None = None) -> str | None:
+    """Pastille de la liste : des résolutions en cours qui ne sont pas encore cochées aujourd'hui (celles « n par semaine » seulement si
+    la semaine n'est pas déjà remplie)."""
+    auj = aujourdhui or date.today()
+    jour = auj.isoformat()
+    lundi = (auj - timedelta(days=auj.weekday())).isoformat()
+    n = 0
+    for r in lire(texte, auj):
+        if r.debut > jour or (r.fin and r.fin < jour) or jour in r.faits:
+            continue
+        if r.par_semaine and sum(1 for j in r.faits if lundi <= j <= jour) >= r.par_semaine:
+            continue
+        n += 1
+    return _("%d résolution(s) à cocher aujourd'hui") % n if n else None
+
+
+TYPE = TypeFiche("resolutions", N_("Résolutions"), "task-complete", modele=texte_neuf, a_faire=a_faire)
 
 
 # ---------- jours et semaines ----------

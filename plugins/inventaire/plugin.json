@@ -1,0 +1,8 @@
+{
+  "titre": "Inventaire",
+  "version": "0.1",
+  "auteur": "Scrinium",
+  "description": "Un type de fiche « Inventaire » : ce que vous possédez (objet, catégorie, lieu, quantité, valeur, date d'achat, fin de garantie). Utile pour l'assurance, un déménagement ou pour retrouver un rangement ; totaux par lieu, recherche, et une pastille sur la fiche quand une garantie arrive à échéance.",
+  "classe": "InventairePlugin",
+  "api": 1
+}

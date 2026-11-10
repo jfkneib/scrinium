@@ -160,3 +160,29 @@ def test_dialogue_ok_sans_nom_previent(monkeypatch, fen):
     d.nom.setText("Assurance")
     d.findChild(QDialogButtonBox).button(QDialogButtonBox.StandardButton.Ok).click()
     assert d.result() == 1 and d.resultat().nom == "Assurance"
+
+
+def test_pastille_a_faire(fen):
+    from scrinium.core import types_fiche
+    auj = date.today()
+    texte = lg.ecrire(lg.Document("€", [lg.Echeance("Assurance", (auj + timedelta(days=3)).isoformat(), 0, None, 30, "")]))
+    assert "1 échéance" in lg.a_faire(texte, auj)
+    loin = lg.ecrire(lg.Document("€", [lg.Echeance("Assurance", (auj + timedelta(days=300)).isoformat(), 0, None, 30, "")]))
+    assert lg.a_faire(loin, auj) is None
+
+
+def test_pastille_dans_la_liste_des_fiches(fen):
+    """La fiche qui demande de l'attention a une pastille et une info-bulle ; sans échéance proche, rien."""
+    auj = date.today()
+    t = fen.store.themes[0] if fen.store.themes else fen.store.nouveau_theme("Divers")
+    f = fen.store.nouvelle_fiche(t)
+    fen.store.enregistrer(t, f, "Mes échéances", lg.ecrire(lg.Document("€", [lg.Echeance("Assurance", (auj + timedelta(days=2)).isoformat(), 0, None, 30, "")])))
+    fen.maj_themes()
+    fen.maj_fiches()
+    items = [fen.liste.item(i) for i in range(fen.liste.count())]
+    cible = next(it for it in items if it.text().startswith("Mes échéances"))
+    assert "échéance" in cible.toolTip()
+    fen.store.enregistrer(t, f, "Mes échéances", lg.ecrire(lg.Document("€", [])))
+    fen.maj_fiches()
+    cible = next(fen.liste.item(i) for i in range(fen.liste.count()) if fen.liste.item(i).text().startswith("Mes échéances"))
+    assert cible.toolTip() == ""

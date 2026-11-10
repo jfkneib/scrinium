@@ -31,6 +31,8 @@ class TypeFiche:
     executable: bool = False                          # la fiche déclenche des commandes : inerte tant qu'elle n'est pas validée
     en_markdown: Callable[[str], str] | None = None   # rendu texte pour l'impression et l'export PDF (sinon : le texte tel quel)
     modele: Callable[[], str] | None = None           # texte d'une fiche neuve de ce type (sinon : la marque seule) ; menu « Nouvelle fiche »
+    a_faire: Callable[[str], str | None] | None = None  # texte -> raison courte (déjà traduite) s'il y a quelque chose à faire dans la fiche,
+                                                        # sinon None : une pastille s'affiche sur son icône dans la liste
 
     @property
     def marque(self) -> str:
@@ -82,6 +84,17 @@ def type_de(texte: str | None) -> TypeFiche | None:
 def icone_de(texte: str | None) -> str:
     t = type_de(texte)
     return t.icone if t else ""
+
+
+def a_faire_de(texte: str | None) -> str | None:
+    """La raison pour laquelle la fiche demande de l'attention (pastille sur l'icône), ou None. Jamais d'exception : un type en panne n'abîme pas la liste."""
+    t = type_de(texte)
+    if t is None or t.a_faire is None:
+        return None
+    try:
+        return t.a_faire(texte or "") or None
+    except Exception:
+        return None
 
 
 def en_markdown(texte: str | None) -> str:

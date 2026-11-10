@@ -128,7 +128,18 @@ def texte_neuf() -> str:
     return ecrire(Document())
 
 
-TYPE = TypeFiche("echeances", N_("Échéances et abonnements"), "view-calendar-tasks", modele=texte_neuf)
+def a_faire(texte: str, aujourdhui: date | None = None) -> str | None:
+    """Pastille de la liste : des échéances en retard ou dans leur délai de rappel."""
+    auj = aujourdhui or date.today()
+    doc = lire(texte)
+    n = sum(1 for e in doc.echeances if statut(e, auj) != "ok")
+    if not n:
+        return None
+    r = sum(1 for e in doc.echeances if statut(e, auj) == "retard")
+    return _("%d échéance(s) à regarder") % n + (" · " + _("%d en retard") % r if r else "")
+
+
+TYPE = TypeFiche("echeances", N_("Échéances et abonnements"), "view-calendar-tasks", modele=texte_neuf, a_faire=a_faire)
 
 
 # ---------- dates ----------

@@ -1,0 +1,8 @@
+{
+  "titre": "Mots de passe",
+  "version": "0.1",
+  "auteur": "Scrinium",
+  "description": "Un type de fiche « Mots de passe » : site, identifiant, mot de passe masqué à l'écran, copie dans le presse-papiers effacé après 20 secondes. À verrouiller avec le mot de passe de la fiche. Attention : un gestionnaire dédié (KeePassXC, Bitwarden…) reste plus sûr ; ceci est un carnet pratique, pas un coffre-fort.",
+  "classe": "MotsDePassePlugin",
+  "api": 1
+}

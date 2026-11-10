@@ -158,3 +158,16 @@ def test_vue_cocher_note_et_encouragement(fen):
 def test_couleurs_du_taux(fen):
     m = sys.modules["scrinium_plugin_resolutions"]
     assert m.couleur_taux(0).hue() == 0 and m.couleur_taux(1).hue() == 120 and m.couleur_taux(0.5).hue() == 60
+
+
+def test_pastille_a_faire():
+    auj = date(2026, 11, 11)                      # mercredi
+    r = lg.Resolution("Marcher", 0, "2026-11-01", "", set())
+    assert "1 résolution" in lg.a_faire(lg.ecrire([r]), auj)
+    r.faits = {"2026-11-11"}
+    assert lg.a_faire(lg.ecrire([r]), auj) is None
+    s = lg.Resolution("Sport", 2, "2026-11-01", "", {"2026-11-09", "2026-11-10"})    # 2 fois cette semaine : semaine remplie
+    assert lg.a_faire(lg.ecrire([s]), auj) is None
+    s.faits = {"2026-11-09"}
+    assert lg.a_faire(lg.ecrire([s]), auj) is not None
+    assert lg.a_faire("#scrinium-resolutions\n", auj) is None

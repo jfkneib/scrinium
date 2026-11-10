@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: scrinium 0.2.0\n"
 "Report-Msgid-Bugs-To: \n"
-"PO-Revision-Date: 2026-11-10 15:28+0100\n"
+"PO-Revision-Date: 2026-11-10 16:01+0100\n"
 "Last-Translator: Jean-François Kneib\n"
 "Language-Team: English\n"
 "Language: en\n"
@@ -38,7 +38,7 @@ msgstr "Event"
 
 #: plugins/agenda/__init__.py:47
 #: plugins/budget/__init__.py:164
-#: src/scrinium/ui/fenetre.py:266
+#: plugins/collection/logique.py:12
 msgid "Titre"
 msgstr "Title"
 
@@ -344,7 +344,7 @@ msgstr "No more examples: they are already in the list, or not installed."
 
 #: plugins/applications/__init__.py:290
 #: plugins/capture/__init__.py:312
-#: src/scrinium/ui/fenetre.py:806
+#: src/scrinium/ui/fenetre.py:830
 msgid "Importer"
 msgstr "Import"
 
@@ -1298,6 +1298,140 @@ msgstr "Copy to the clipboard"
 msgid "qdbus a échoué (code %d)"
 msgstr "qdbus failed (code %d)"
 
+#: plugins/collection/__init__.py:11
+msgid ""
+"Pour un passionné : livres, disques, jeux, vins, timbres, figurines… savoir ce que l'on a, ce qui manque et à qui on l'a prêté.\n"
+"\n"
+"• Nouvelle fiche > « Collection » : « Ajouter à la collection… » (titre, auteur ou artiste, série ou numéro, état, statut, prix payé, note). Le statut est « Je l'ai », « Je le cherche » ou « Prêté » ; les lignes recherchées sont en jaune, les prêtées en bleu.\n"
+"• Pour compléter une série : triez par « Série ou numéro » et repérez les « Je le cherche ». En haut : combien vous en avez, combien il en manque, combien sont prêtés et ce que vous avez payé en tout.\n"
+"• Tant que quelque chose est prêté, une pastille rouge est posée sur l'icône de la fiche : c'est le rappel de le récupérer.\n"
+"• Le texte reste un tableau Markdown lisible, cherchable et partageable ; rien n'est exécuté."
+msgstr ""
+"For enthusiasts: books, records, games, wines, stamps, figurines… know what you have, what is missing and who you lent it to.\n"
+"\n"
+"• New note > \"Collection\": \"Add to the collection…\" (title, author or artist, series or number, condition, status, price paid, note). The status is \"I have it\", \"I'm looking for it\" or \"Lent out\"; wanted lines are yellow, lent ones blue.\n"
+"• To complete a series: sort by \"Series or number\" and spot the \"I'm looking for it\" ones. At the top: how many you have, how many are missing, how many are lent out and what you paid in total.\n"
+"• As long as something is lent out, a red dot sits on the note's icon: it is the reminder to get it back.\n"
+"• The text remains a readable, searchable and shareable Markdown table; nothing is executed."
+
+#: plugins/collection/__init__.py:26
+msgid "Extension Collection"
+msgstr "Collection extension"
+
+#: plugins/collection/__init__.py:30
+msgid "Ajouter à la collection…"
+msgstr "Add to the collection…"
+
+#: plugins/collection/logique.py:64
+msgid "Collection"
+msgstr "Collection"
+
+#: plugins/collection/logique.py:12
+msgid "Auteur ou artiste"
+msgstr "Author or artist"
+
+#: plugins/collection/logique.py:12
+msgid "Série ou numéro"
+msgstr "Series or number"
+
+#: plugins/collection/logique.py:13
+#: plugins/echeances/__init__.py:111
+#: plugins/securite/__init__.py:68
+msgid "État"
+msgstr "Status"
+
+#: plugins/collection/logique.py:14
+msgid "Statut"
+msgstr "Status"
+
+#: plugins/collection/logique.py:15
+msgid "Prix payé"
+msgstr "Price paid"
+
+#: plugins/collection/logique.py:15
+#: plugins/echeances/__init__.py:111
+#: plugins/inventaire/logique.py:15
+msgid "Note"
+msgstr "Text"
+
+#: plugins/collection/logique.py:16
+#: plugins/echeances/__init__.py:103
+#: plugins/inventaire/logique.py:16
+msgid "Devise"
+msgstr "Currency"
+
+#: plugins/collection/logique.py:31
+msgid "<b>%(a)d</b> dans la collection · <b>%(c)d</b> recherché(s)"
+msgstr "<b>%(a)d</b> in the collection · <b>%(c)d</b> wanted"
+
+#: plugins/collection/logique.py:13
+msgid "Neuf"
+msgstr "New"
+
+#: plugins/collection/logique.py:13
+msgid "Très bon"
+msgstr "Very good"
+
+#: plugins/collection/logique.py:13
+msgid "Bon"
+msgstr "Good"
+
+#: plugins/collection/logique.py:13
+msgid "Moyen"
+msgstr "Fair"
+
+#: plugins/collection/logique.py:13
+msgid "Abîmé"
+msgstr "Damaged"
+
+#: plugins/collection/logique.py:14
+msgid "Je l'ai"
+msgstr "I have it"
+
+#: plugins/collection/logique.py:14
+msgid "Je le cherche"
+msgstr "I'm looking for it"
+
+#: plugins/collection/logique.py:14
+msgid "Prêté"
+msgstr "Lent out"
+
+#: plugins/collection/logique.py:47
+msgid "%d prêté(s) à récupérer"
+msgstr "%d lent item(s) to get back"
+
+#: plugins/collection/logique.py:56
+msgid "Dune"
+msgstr "Dune"
+
+#: plugins/collection/logique.py:57
+msgid "Le Messie de Dune"
+msgstr "Dune Messiah"
+
+#: plugins/collection/logique.py:58
+msgid "Les Enfants de Dune"
+msgstr "Children of Dune"
+
+#: plugins/collection/logique.py:58
+msgid "prêté à un ami"
+msgstr "lent to a friend"
+
+#: plugins/collection/logique.py:60
+msgid "Collection (exemples)"
+msgstr "Collection (examples)"
+
+#: plugins/collection/logique.py:60
+msgid "Exemple · Ma collection"
+msgstr "Example · My collection"
+
+#: plugins/collection/logique.py:33
+msgid "%d prêté(s)"
+msgstr "%d lent out"
+
+#: plugins/collection/logique.py:36
+msgid "payé en tout : <b>%s</b>"
+msgstr "paid in total: <b>%s</b>"
+
 #: plugins/courriel/__init__.py:454
 msgid ""
 "Envoie la fiche affichée par courriel.\n"
@@ -1771,6 +1905,7 @@ msgid "Rappel :"
 msgstr "Reminder:"
 
 #: plugins/echeances/__init__.py:66
+#: plugins/sante/__init__.py:95
 msgid "Note :"
 msgstr "Note:"
 
@@ -1789,18 +1924,9 @@ msgstr "Deadlines extension"
 
 #: plugins/echeances/__init__.py:77
 #: plugins/resolutions/__init__.py:66
+#: plugins/sante/__init__.py:115
 msgid "Le nom est vide : saisissez-le avant de valider."
 msgstr "The name is empty: enter it before confirming."
-
-#: plugins/echeances/__init__.py:103
-msgid "Devise"
-msgstr "Currency"
-
-#: plugins/echeances/__init__.py:111
-#: plugins/securite/__init__.py:68
-#: plugins/supervision/__init__.py:136
-msgid "État"
-msgstr "Status"
 
 #: plugins/echeances/__init__.py:111
 msgid "Prochaine date"
@@ -1813,12 +1939,6 @@ msgstr "In"
 #: plugins/echeances/__init__.py:111
 msgid "Répétition"
 msgstr "Repeat"
-
-#: plugins/echeances/__init__.py:111
-#: plugins/suivi/__init__.py:187
-#: src/scrinium/ui/fenetre.py:284
-msgid "Note"
-msgstr "Text"
 
 #: plugins/echeances/__init__.py:183
 msgid "aujourd'hui"
@@ -1858,10 +1978,11 @@ msgid "il y a %d j"
 msgstr "%d d ago"
 
 #: plugins/echeances/__init__.py:200
+#: plugins/echeances/logique.py:139
 msgid "%d en retard"
 msgstr "%d overdue"
 
-#: plugins/echeances/logique.py:131
+#: plugins/echeances/logique.py:142
 msgid "Échéances et abonnements"
 msgstr "Deadlines and subscriptions"
 
@@ -1881,61 +2002,247 @@ msgstr "Every six months"
 msgid "Tous les 2 ans"
 msgstr "Every 2 years"
 
-#: plugins/echeances/logique.py:225
+#: plugins/echeances/logique.py:236
 msgid "« %(nom)s » : dans %(n)d jour(s) (%(date)s)%(m)s"
 msgstr "\"%(nom)s\": in %(n)d day(s) (%(date)s)%(m)s"
 
-#: plugins/echeances/logique.py:222
+#: plugins/echeances/logique.py:139
+msgid "%d échéance(s) à regarder"
+msgstr "%d deadline(s) to look at"
+
+#: plugins/echeances/logique.py:233
 msgid "« %(nom)s » : échéance dépassée depuis %(n)d jour(s) (%(date)s)%(m)s"
 msgstr "\"%(nom)s\": overdue for %(n)d day(s) (%(date)s)%(m)s"
 
-#: plugins/echeances/logique.py:224
+#: plugins/echeances/logique.py:235
 msgid "« %(nom)s » : c'est aujourd'hui (%(date)s)%(m)s"
 msgstr "\"%(nom)s\": it is today (%(date)s)%(m)s"
 
-#: plugins/echeances/logique.py:240
+#: plugins/echeances/logique.py:251
 msgid "Échéances (exemples)"
 msgstr "Deadlines (examples)"
 
-#: plugins/echeances/logique.py:240
+#: plugins/echeances/logique.py:251
 msgid "Exemple · Mes échéances"
 msgstr "Example · My deadlines"
 
-#: plugins/echeances/logique.py:233
+#: plugins/echeances/logique.py:244
 msgid "Assurance auto"
 msgstr "Car insurance"
 
-#: plugins/echeances/logique.py:233
+#: plugins/echeances/logique.py:244
 msgid "contrat à renouveler"
 msgstr "contract to renew"
 
-#: plugins/echeances/logique.py:234
+#: plugins/echeances/logique.py:245
 msgid "Abonnement vidéo"
 msgstr "Video subscription"
 
-#: plugins/echeances/logique.py:235
+#: plugins/echeances/logique.py:246
 msgid "Nom de domaine"
 msgstr "Domain name"
 
-#: plugins/echeances/logique.py:236
+#: plugins/echeances/logique.py:247
 msgid "Certificat du site"
 msgstr "Website certificate"
 
-#: plugins/echeances/logique.py:236
+#: plugins/echeances/logique.py:247
 msgid "à renouveler avant la date"
 msgstr "renew before the date"
 
-#: plugins/echeances/logique.py:237
+#: plugins/echeances/logique.py:248
 msgid "Contrôle technique"
 msgstr "Vehicle inspection"
 
-#: plugins/echeances/logique.py:238
+#: plugins/echeances/logique.py:249
 msgid "Garantie du lave-linge"
 msgstr "Washing machine warranty"
 
-#: plugins/echeances/logique.py:238
+#: plugins/echeances/logique.py:249
 msgid "garder la facture"
 msgstr "keep the invoice"
+
+#: plugins/inventaire/__init__.py:13
+msgid ""
+"Ce que vous possédez, où c'est rangé, ce que cela vaut : utile pour l'assurance, un déménagement ou pour retrouver quelque chose.\n"
+"\n"
+"• Nouvelle fiche > « Inventaire » : « Ajouter un objet… » (objet, catégorie, lieu, quantité, valeur unitaire, date d'achat, fin de garantie, note). Cliquez sur un titre de colonne pour trier ; la recherche filtre le tableau.\n"
+"• En haut : le nombre d'objets, la valeur totale et la valeur par lieu (la devise se règle à côté). Les valeurs sont celles que vous saisissez.\n"
+"• Une garantie qui se termine sous 60 jours (ou vient de se terminer) colore la ligne et met une pastille rouge sur l'icône de la fiche.\n"
+"• Le texte reste un tableau Markdown lisible, cherchable et partageable ; rien n'est exécuté. Photos : joignez-les à la fiche."
+msgstr ""
+"What you own, where it is stored, what it is worth: useful for insurance, a move or to find something again.\n"
+"\n"
+"• New note > \"Inventory\": \"Add an item…\" (item, category, place, quantity, unit value, purchase date, warranty end, note). Click a column title to sort; the search filters the table.\n"
+"• At the top: the number of items, the total value and the value per place (the currency is set next to it). Values are the ones you enter.\n"
+"• A warranty ending within 60 days (or just ended) colours the line and puts a red dot on the note's icon.\n"
+"• The text remains a readable, searchable and shareable Markdown table; nothing is executed. Photos: attach them to the note."
+
+#: plugins/inventaire/__init__.py:24
+msgid "Ajouter un objet…"
+msgstr "Add an item…"
+
+#: plugins/inventaire/__init__.py:31
+msgid "Extension Inventaire"
+msgstr "Inventory extension"
+
+#: plugins/inventaire/logique.py:91
+msgid "Inventaire"
+msgstr "Inventory"
+
+#: plugins/inventaire/logique.py:12
+msgid "Objet"
+msgstr "Item"
+
+#: plugins/inventaire/logique.py:12
+msgid "Lieu"
+msgstr "Place"
+
+#: plugins/inventaire/logique.py:13
+#: plugins/tableur/logique.py:543
+msgid "Quantité"
+msgstr "Quantity"
+
+#: plugins/inventaire/logique.py:13
+msgid "Valeur unitaire"
+msgstr "Unit value"
+
+#: plugins/inventaire/logique.py:14
+msgid "Acheté le"
+msgstr "Bought on"
+
+#: plugins/inventaire/logique.py:14
+msgid "Garantie jusqu'au"
+msgstr "Warranty until"
+
+#: plugins/inventaire/logique.py:53
+msgid "<b>%d</b> objet(s) · valeur totale <b>%s</b>"
+msgstr "<b>%d</b> item(s) · total value <b>%s</b>"
+
+#: plugins/inventaire/logique.py:72
+#: plugins/inventaire/logique.py:59
+msgid "%d garantie(s) à surveiller"
+msgstr "%d warranty(ies) to watch"
+
+#: plugins/inventaire/logique.py:83
+msgid "Téléviseur"
+msgstr "Television"
+
+#: plugins/inventaire/logique.py:83
+msgid "Image et son"
+msgstr "Picture and sound"
+
+#: plugins/inventaire/logique.py:83
+msgid "Salon"
+msgstr "Living room"
+
+#: plugins/inventaire/logique.py:84
+msgid "Lave-linge"
+msgstr "Washing machine"
+
+#: plugins/inventaire/logique.py:84
+msgid "Électroménager"
+msgstr "Appliances"
+
+#: plugins/inventaire/logique.py:84
+msgid "Cuisine"
+msgstr "Kitchen"
+
+#: plugins/inventaire/logique.py:85
+msgid "Chaises"
+msgstr "Chairs"
+
+#: plugins/inventaire/logique.py:85
+msgid "Mobilier"
+msgstr "Furniture"
+
+#: plugins/inventaire/logique.py:85
+msgid "Salle à manger"
+msgstr "Dining room"
+
+#: plugins/inventaire/logique.py:87
+msgid "Inventaire (exemples)"
+msgstr "Inventory (examples)"
+
+#: plugins/inventaire/logique.py:87
+msgid "Exemple · Mon inventaire"
+msgstr "Example · My inventory"
+
+#: plugins/inventaire/logique.py:56
+msgid "sans lieu"
+msgstr "no place"
+
+#: plugins/journal/__init__.py:127
+msgid ""
+"Un journal dans une seule fiche : une entrée par jour, avec une humeur de 1 à 5.\n"
+"\n"
+"• Nouvelle fiche > « Journal » : choisissez un jour dans le calendrier (les jours déjà écrits sont en gras et soulignés), notez votre humeur et écrivez. « Aujourd'hui » revient au jour courant.\n"
+"• En dessous : « Il y a N an(s) » montre ce que vous écriviez à la même date les années précédentes. À gauche : le nombre de jours écrits, la série de jours consécutifs et l'humeur moyenne des 30 derniers jours.\n"
+"• Après 18 h, une pastille rouge sur l'icône de la fiche rappelle qu'il n'y a encore rien pour aujourd'hui.\n"
+"• C'est personnel : verrouillez la fiche (bouton « Verrouiller… »). Le texte reste lisible en Markdown, entrée la plus récente en premier."
+msgstr ""
+"A journal in a single note: one entry per day, with a mood from 1 to 5.\n"
+"\n"
+"• New note > \"Journal\": pick a day in the calendar (days already written are bold and underlined), note your mood and write. \"Today\" goes back to the current day.\n"
+"• Below: \"N year(s) ago\" shows what you wrote on the same date in previous years. On the left: the number of days written, the streak of consecutive days and the average mood of the last 30 days.\n"
+"• After 6 pm, a red dot on the note's icon reminds you that nothing is written yet for today.\n"
+"• It is personal: lock the note (\"Lock…\" button). The text remains readable as Markdown, most recent entry first."
+
+#: plugins/journal/__init__.py:34
+msgid "Aujourd'hui"
+msgstr "Today"
+
+#: plugins/journal/__init__.py:55
+msgid "Écrivez ici votre journée…"
+msgstr "Write about your day here…"
+
+#: plugins/journal/__init__.py:142
+msgid "Extension Journal"
+msgstr "Journal extension"
+
+#: plugins/journal/__init__.py:46
+msgid "Humeur"
+msgstr "Mood"
+
+#: plugins/journal/__init__.py:106
+msgid "Jours écrits : %d"
+msgstr "Days written: %d"
+
+#: plugins/journal/__init__.py:108
+msgid "Série en cours : %d jour(s)"
+msgstr "Current streak: %d day(s)"
+
+#: plugins/journal/__init__.py:110
+msgid "Humeur moyenne (30 jours) : %s sur 5"
+msgstr "Average mood (30 days): %s out of 5"
+
+#: plugins/journal/__init__.py:113
+msgid "Il y a %d an(s), le %s :"
+msgstr "%d year(s) ago, on %s:"
+
+#: plugins/journal/logique.py:112
+msgid "Rien d'écrit pour aujourd'hui"
+msgstr "Nothing written for today"
+
+#: plugins/journal/logique.py:127
+msgid "Journal"
+msgstr "Journal"
+
+#: plugins/journal/logique.py:122
+msgid "Une bonne journée. Promenade et lecture."
+msgstr "A good day. A walk and some reading."
+
+#: plugins/journal/logique.py:123
+msgid "Journée calme. Du rangement."
+msgstr "A quiet day. Some tidying up."
+
+#: plugins/journal/logique.py:124
+msgid "Journal (exemples)"
+msgstr "Journal (examples)"
+
+#: plugins/journal/logique.py:124
+msgid "Exemple · Mon journal"
+msgstr "Example · My journal"
 
 #: plugins/lecture/__init__.py:421
 msgid ""
@@ -2226,6 +2533,80 @@ msgstr "the voice engine stopped with an error"
 msgid "fichier téléchargé incorrect (taille ou somme de contrôle) : supprimé"
 msgstr "downloaded file is incorrect (size or checksum): deleted"
 
+#: plugins/motsdepasse/__init__.py:11
+msgid ""
+"Un carnet de sites, identifiants et mots de passe, dans une fiche.\n"
+"\n"
+"• Nouvelle fiche > « Mots de passe » : « Ajouter une entrée… » (site, identifiant, mot de passe, adresse, note). Les mots de passe sont masqués à l'écran ; « Afficher les secrets » les montre. « Générer » propose un mot de passe aléatoire de 20 caractères.\n"
+"• Clic droit sur une ligne > « Copier : Mot de passe » : il est copié dans le presse-papiers, qui est vidé après 20 secondes.\n"
+"• IMPORTANT : verrouillez la fiche (chiffrement par Scrinium). Une fiche non verrouillée est un fichier lisible par quiconque accède au disque. Les fiches verrouillées et fermées ne sont ni lues ni cherchées.\n"
+"• Honnêtement : un gestionnaire dédié (KeePassXC, Bitwarden…) reste plus sûr et mieux éprouvé. Cette fiche est un carnet pratique, pas un coffre-fort."
+msgstr ""
+"A notebook of sites, usernames and passwords, in a note.\n"
+"\n"
+"• New note > \"Passwords\": \"Add an entry…\" (site, username, password, address, note). Passwords are hidden on screen; \"Show secrets\" displays them. \"Generate\" suggests a random 20-character password.\n"
+"• Right-click a line > \"Copy: Password\": it is copied to the clipboard, which is cleared after 20 seconds.\n"
+"• IMPORTANT: lock the note (encryption by Scrinium). An unlocked note is a file readable by anyone with access to the disk. Locked and closed notes are neither read nor searched.\n"
+"• Honestly: a dedicated manager (KeePassXC, Bitwarden…) remains safer and better proven. This note is a handy notebook, not a vault."
+
+#: plugins/motsdepasse/__init__.py:26
+msgid "Extension Mots de passe"
+msgstr "Passwords extension"
+
+#: plugins/motsdepasse/__init__.py:30
+msgid "Ajouter une entrée…"
+msgstr "Add an entry…"
+
+#: plugins/motsdepasse/logique.py:17
+msgid "⚠ Carnet pratique, pas un coffre-fort : verrouillez cette fiche (bouton « Verrouiller… ») pour qu'elle soit chiffrée. Un gestionnaire dédié (KeePassXC, Bitwarden…) reste plus sûr."
+msgstr "⚠ A handy notebook, not a vault: lock this note (\"Lock…\" button) so that it is encrypted. A dedicated manager (KeePassXC, Bitwarden…) remains safer."
+
+#: plugins/motsdepasse/logique.py:52
+msgid "Mots de passe"
+msgstr "Passwords"
+
+#: plugins/motsdepasse/logique.py:15
+msgid "Site ou service"
+msgstr "Site or service"
+
+#: plugins/motsdepasse/logique.py:15
+msgid "Identifiant"
+msgstr "Username"
+
+#: plugins/motsdepasse/logique.py:15
+#: src/scrinium/ui/assistant.py:88
+#: src/scrinium/ui/fenetre.py:1426
+msgid "Mot de passe"
+msgstr "Password"
+
+#: plugins/motsdepasse/logique.py:16
+msgid "Adresse"
+msgstr "Address"
+
+#: plugins/motsdepasse/logique.py:34
+msgid "<b>%d</b> entrée(s)"
+msgstr "<b>%d</b> entry(ies)"
+
+#: plugins/motsdepasse/logique.py:47
+msgid "Exemple de site"
+msgstr "Example site"
+
+#: plugins/motsdepasse/logique.py:48
+msgid "Mots de passe (exemples)"
+msgstr "Passwords (examples)"
+
+#: plugins/motsdepasse/logique.py:48
+msgid "Exemple · Mes mots de passe"
+msgstr "Example · My passwords"
+
+#: plugins/motsdepasse/logique.py:36
+msgid "%d mot(s) de passe court(s) (moins de 10 caractères)"
+msgstr "%d short password(s) (under 10 characters)"
+
+#: plugins/motsdepasse/logique.py:38
+msgid "%d mot(s) de passe utilisé(s) plusieurs fois"
+msgstr "%d password(s) used more than once"
+
 #: plugins/ocr/__init__.py:376
 msgid ""
 "Extrait le texte des images jointes à une fiche (Tesseract, en local : rien n'est envoyé sur Internet).\n"
@@ -2399,7 +2780,7 @@ msgstr "The fiche cannot be edited."
 
 #: plugins/ocr/__init__.py:328
 #: src/scrinium/ui/capture_rapide.py:41
-#: src/scrinium/ui/fenetre.py:147
+#: src/scrinium/ui/fenetre.py:150
 msgid "Fiche"
 msgstr "Note"
 
@@ -3358,6 +3739,137 @@ msgstr "Loop in the dependencies around \"%s\""
 msgid "Cette fiche fait le point sur les plannings (fiches « Planning ») du même thème que celle-ci, ou sur tous si vous le choisissez en haut : avancement, retards, dates. Elle se met à jour quand on l'ouvre ou qu'on clique sur « Actualiser »."
 msgstr "This note gives an overview of the plannings (\"Planning\" notes) of the same topic as itself, or of all of them if you choose so at the top: progress, delays, dates. It updates when you open it or click \"Refresh\"."
 
+#: plugins/recettes/__init__.py:120
+msgid ""
+"Une recette par fiche : ingrédients, étapes, temps, étiquettes et note.\n"
+"\n"
+"• Nouvelle fiche > « Recette » : indiquez pour combien de personnes elle est prévue, écrivez un ingrédient par ligne (la quantité d'abord : « 200 g de farine », « 1/2 litre de lait », « 1,5 kg ») et une étape par ligne.\n"
+"• En bas : « Pour N personnes » recalcule toutes les quantités (une ligne sans quantité au début, comme « sel », reste telle quelle) et « Copier la liste de courses » met la liste recalculée dans le presse-papiers. Les mots ne sont pas accordés (« 1 œuf » devient « 2 œuf »).\n"
+"• Le texte reste un document Markdown lisible, cherchable et partageable ; rien n'est exécuté."
+msgstr ""
+"One recipe per note: ingredients, steps, time, tags and rating.\n"
+"\n"
+"• New note > \"Recipe\": say how many people it serves, write one ingredient per line (quantity first: \"200 g flour\", \"1/2 litre milk\", \"1.5 kg\") and one step per line.\n"
+"• At the bottom: \"For N people\" recalculates all quantities (a line with no quantity at the start, like \"salt\", stays as it is) and \"Copy the shopping list\" puts the recalculated list on the clipboard. Words are not made to agree (\"1 egg\" becomes \"2 egg\").\n"
+"• The text remains a readable, searchable and shareable Markdown document; nothing is executed."
+
+#: plugins/recettes/__init__.py:28
+#: plugins/recettes/__init__.py:59
+msgid " personne(s)"
+msgstr " person(s)"
+
+#: plugins/recettes/__init__.py:30
+msgid "40 min"
+msgstr "40 min"
+
+#: plugins/recettes/__init__.py:33
+msgid "dessert, rapide"
+msgstr "dessert, quick"
+
+#: plugins/recettes/__init__.py:35
+msgid "sans note"
+msgstr "no rating"
+
+#: plugins/recettes/__init__.py:44
+msgid ""
+"Un ingrédient par ligne, la quantité d'abord :\n"
+"200 g de farine\n"
+"3 œufs\n"
+"1/2 litre de lait"
+msgstr ""
+"One ingredient per line, quantity first:\n"
+"200 g flour\n"
+"3 eggs\n"
+"1/2 litre milk"
+
+#: plugins/recettes/__init__.py:46
+msgid "Une étape par ligne."
+msgstr "One step per line."
+
+#: plugins/recettes/__init__.py:62
+msgid "Copier la liste de courses"
+msgstr "Copy the shopping list"
+
+#: plugins/recettes/__init__.py:113
+msgid "Extension Recettes"
+msgstr "Recipes extension"
+
+#: plugins/recettes/__init__.py:38
+msgid "Recette prévue pour"
+msgstr "Recipe serves"
+
+#: plugins/recettes/__init__.py:38
+msgid "Temps"
+msgstr "Time"
+
+#: plugins/recettes/__init__.py:38
+msgid "Étiquettes"
+msgstr "Tags"
+
+#: plugins/recettes/__init__.py:47
+msgid "Ingrédients"
+msgstr "Ingredients"
+
+#: plugins/recettes/__init__.py:47
+msgid "Étapes"
+msgstr "Steps"
+
+#: plugins/recettes/__init__.py:56
+msgid "Pour"
+msgstr "For"
+
+#: plugins/recettes/logique.py:133
+msgid "Recette"
+msgstr "Recipe"
+
+#: plugins/recettes/logique.py:127
+msgid "dessert"
+msgstr "dessert"
+
+#: plugins/recettes/logique.py:127
+msgid "rapide"
+msgstr "quick"
+
+#: plugins/recettes/logique.py:128
+msgid "200 g de farine"
+msgstr "200 g flour"
+
+#: plugins/recettes/logique.py:128
+msgid "3 œufs"
+msgstr "3 eggs"
+
+#: plugins/recettes/logique.py:128
+msgid "1/2 litre de lait"
+msgstr "1/2 litre milk"
+
+#: plugins/recettes/logique.py:128
+msgid "2 c. à soupe de sucre"
+msgstr "2 tbsp sugar"
+
+#: plugins/recettes/logique.py:128
+msgid "1 pincée de sel"
+msgstr "1 pinch of salt"
+
+#: plugins/recettes/logique.py:129
+msgid "Mélanger la farine, le sucre et le sel."
+msgstr "Mix the flour, sugar and salt."
+
+#: plugins/recettes/logique.py:129
+msgid "Ajouter les œufs puis le lait peu à peu."
+msgstr "Add the eggs, then the milk little by little."
+
+#: plugins/recettes/logique.py:129
+msgid "Laisser reposer 30 minutes, puis cuire à la poêle."
+msgstr "Let rest for 30 minutes, then cook in a pan."
+
+#: plugins/recettes/logique.py:130
+msgid "Recettes (exemples)"
+msgstr "Recipes (examples)"
+
+#: plugins/recettes/logique.py:130
+msgid "Exemple · Crêpes"
+msgstr "Example · Pancakes"
+
 #: plugins/resolutions/__init__.py:227
 msgid ""
 "Suivre ses bonnes résolutions, avec une note automatique et des encouragements.\n"
@@ -3382,7 +3894,7 @@ msgid "Résolution"
 msgstr "Resolution"
 
 #: plugins/resolutions/__init__.py:36
-#: plugins/resolutions/logique.py:261
+#: plugins/resolutions/logique.py:277
 msgid "Marcher 30 minutes"
 msgstr "Walk for 30 minutes"
 
@@ -3463,69 +3975,292 @@ msgstr "%d times a week"
 msgid "Note : %d / 100"
 msgstr "Score: %d / 100"
 
-#: plugins/resolutions/logique.py:104
+#: plugins/resolutions/logique.py:120
 msgid "Résolutions"
 msgstr "Resolutions"
 
-#: plugins/resolutions/logique.py:229
+#: plugins/resolutions/logique.py:117
+msgid "%d résolution(s) à cocher aujourd'hui"
+msgstr "%d resolution(s) to tick today"
+
+#: plugins/resolutions/logique.py:245
 msgid "Ajoutez une première résolution : une petite, que vous pouvez tenir tous les jours."
 msgstr "Add a first resolution: a small one you can keep every day."
 
-#: plugins/resolutions/logique.py:231
+#: plugins/resolutions/logique.py:247
 msgid "C'est parti ! Cochez votre première résolution : le premier jour est le plus important."
 msgstr "Off you go! Tick your first resolution: the first day is the most important."
 
-#: plugins/resolutions/logique.py:233
+#: plugins/resolutions/logique.py:249
 msgid "Excellent ! Vous tenez vos résolutions presque sans faute. Continuez comme ça."
 msgstr "Excellent! You keep your resolutions almost flawlessly. Keep it up."
 
-#: plugins/resolutions/logique.py:249
+#: plugins/resolutions/logique.py:265
 msgid "Série de %(n)d semaines sur « %(nom)s » : bravo !"
 msgstr "Streak of %(n)d weeks on \"%(nom)s\": well done!"
 
-#: plugins/resolutions/logique.py:249
+#: plugins/resolutions/logique.py:265
 msgid "Série de %(n)d jours sur « %(nom)s » : bravo !"
 msgstr "Streak of %(n)d days on \"%(nom)s\": well done!"
 
-#: plugins/resolutions/logique.py:262
+#: plugins/resolutions/logique.py:278
 msgid "Lire 3 fois par semaine"
 msgstr "Read 3 times a week"
 
-#: plugins/resolutions/logique.py:263
+#: plugins/resolutions/logique.py:279
 msgid "Boire de l'eau"
 msgstr "Drink water"
 
-#: plugins/resolutions/logique.py:264
+#: plugins/resolutions/logique.py:280
 msgid "Résolutions (exemples)"
 msgstr "Resolutions (examples)"
 
-#: plugins/resolutions/logique.py:264
+#: plugins/resolutions/logique.py:280
 msgid "Exemple · Mes résolutions"
 msgstr "Example · My resolutions"
 
-#: plugins/resolutions/logique.py:235
+#: plugins/resolutions/logique.py:251
 msgid "Très bien ! Vous êtes sur le bon rythme, il ne manque pas grand-chose."
 msgstr "Very good! You are on the right track, not much is missing."
 
-#: plugins/resolutions/logique.py:244
+#: plugins/resolutions/logique.py:260
 msgid "En hausse de %d points sur 14 jours : vos efforts paient."
 msgstr "Up %d points over 14 days: your efforts are paying off."
 
-#: plugins/resolutions/logique.py:237
+#: plugins/resolutions/logique.py:253
 msgid "Un bon début : plus de la moitié est tenue. Un petit effort et la série démarre."
 msgstr "A good start: more than half is kept. A little effort and the streak begins."
 
-#: plugins/resolutions/logique.py:246
+#: plugins/resolutions/logique.py:262
 msgid "En baisse de %d points : un petit effort aujourd'hui et la courbe repart."
 msgstr "Down %d points: a small effort today and the curve picks up again."
 
-#: plugins/resolutions/logique.py:239
+#: plugins/resolutions/logique.py:255
 msgid "Ce n'est pas grave : chaque jour est une nouvelle chance. Une petite victoire aujourd'hui relance tout."
 msgstr "No worries: every day is a new chance. One small win today restarts everything."
 
-#: plugins/resolutions/logique.py:241
+#: plugins/resolutions/logique.py:257
 msgid "Recommencez doucement, sans vous juger : cochez une seule résolution aujourd'hui, c'est déjà gagné."
 msgstr "Start again gently, without judging yourself: tick just one resolution today, that is already a win."
+
+#: plugins/sante/__init__.py:348
+msgid ""
+"Un carnet de tension et de traitement dans une fiche. Ce n'est pas un avis médical.\n"
+"\n"
+"• Onglet « Tension » : saisissez la date, l'heure, la haute, la basse et le pouls, puis « Mesure ». La courbe montre les 90 derniers jours (pointillés rouges : 140 et 90) ; la moyenne des 30 jours est en haut. Chaque mesure reçoit un repère de couleur (optimale, normale, normale haute, élevée grade 1, 2, 3) d'après les classes usuelles : indicatif, à discuter avec votre médecin.\n"
+"• Onglet « Traitement » : ajoutez chaque médicament avec sa dose et ses horaires (08:00, 20:00), éventuellement des dates de début et de fin. La liste du jour affiche une case « Pris » par prise ; une prise non cochée 30 minutes après son heure passe en rouge.\n"
+"• Une pastille rouge sur l'icône de la fiche signale une prise oubliée.\n"
+"• Ce sont des données de santé : verrouillez la fiche (bouton « Verrouiller… »). Le texte reste lisible en Markdown, rien n'est exécuté."
+msgstr ""
+"A blood pressure and treatment notebook in a note. This is not medical advice.\n"
+"\n"
+"• \"Blood pressure\" tab: enter the date, time, systolic, diastolic and pulse, then \"Reading\". The curve shows the last 90 days (red dotted lines: 140 and 90); the 30-day average is at the top. Each reading gets a colour guide (optimal, normal, high normal, high grade 1, 2, 3) based on the usual classes: indicative, to discuss with your doctor.\n"
+"• \"Treatment\" tab: add each medicine with its dose and times (08:00, 20:00), optionally start and end dates. Today's list shows a \"Taken\" box per dose; a dose not ticked 30 minutes after its time turns red.\n"
+"• A red dot on the note's icon signals a missed dose.\n"
+"• This is health data: lock the note (\"Lock…\" button). The text remains readable as Markdown, nothing is executed."
+
+#: plugins/sante/__init__.py:40
+msgid "Tension (haute et basse)"
+msgstr "Blood pressure (systolic and diastolic)"
+
+#: plugins/sante/__init__.py:83
+#: plugins/sante/__init__.py:219
+#: plugins/sante/__init__.py:232
+msgid "Médicament"
+msgstr "Medicine"
+
+#: plugins/sante/__init__.py:88
+#: plugins/sante/logique.py:194
+msgid "1 comprimé"
+msgstr "1 tablet"
+
+#: plugins/sante/__init__.py:135
+msgid "Tension"
+msgstr "Blood pressure"
+
+#: plugins/sante/__init__.py:136
+msgid "Traitement"
+msgstr "Treatment"
+
+#: plugins/sante/__init__.py:137
+msgid "Un carnet, pas un avis médical : les couleurs sont des repères indicatifs. Données de santé : verrouillez la fiche."
+msgstr "A notebook, not medical advice: the colours are indicative guides. Health data: lock the note."
+
+#: plugins/sante/__init__.py:160
+#: plugins/suivi/__init__.py:150
+msgid "note (facultatif)"
+msgstr "note (optional)"
+
+#: plugins/sante/__init__.py:165
+#: plugins/sante/__init__.py:189
+msgid "Mesure"
+msgstr "Reading"
+
+#: plugins/sante/__init__.py:227
+#: plugins/sante/__init__.py:274
+msgid "Ajouter un médicament…"
+msgstr "Add a medicine…"
+
+#: plugins/sante/__init__.py:364
+msgid "Extension Santé"
+msgstr "Health extension"
+
+#: plugins/sante/__init__.py:42
+msgid "Pas encore de mesures"
+msgstr "No readings yet"
+
+#: plugins/sante/__init__.py:94
+msgid "Médicament :"
+msgstr "Medicine:"
+
+#: plugins/sante/__init__.py:94
+msgid "Dose :"
+msgstr "Dose:"
+
+#: plugins/sante/__init__.py:94
+msgid "Horaires :"
+msgstr "Times:"
+
+#: plugins/sante/__init__.py:94
+msgid "Du :"
+msgstr "From:"
+
+#: plugins/sante/__init__.py:95
+msgid "Au (facultatif) :"
+msgstr "To (optional):"
+
+#: plugins/sante/__init__.py:161
+msgid "Le"
+msgstr "On"
+
+#: plugins/sante/__init__.py:161
+msgid "à"
+msgstr "at"
+
+#: plugins/sante/__init__.py:161
+#: plugins/sante/__init__.py:176
+msgid "Haute"
+msgstr "Systolic"
+
+#: plugins/sante/__init__.py:161
+#: plugins/sante/__init__.py:176
+msgid "Basse"
+msgstr "Diastolic"
+
+#: plugins/sante/__init__.py:161
+#: plugins/sante/__init__.py:176
+msgid "Pouls"
+msgstr "Pulse"
+
+#: plugins/sante/__init__.py:176
+#: plugins/sante/__init__.py:219
+msgid "Heure"
+msgstr "Time"
+
+#: plugins/sante/__init__.py:176
+msgid "Repère"
+msgstr "Guide"
+
+#: plugins/sante/__init__.py:189
+msgid "Saisissez une tension plausible : la haute (50 à 300) doit dépasser la basse (30 à 200)."
+msgstr "Enter a plausible blood pressure: the systolic (50 to 300) must exceed the diastolic (30 to 200)."
+
+#: plugins/sante/__init__.py:203
+msgid "Supprimer cette mesure"
+msgstr "Delete this reading"
+
+#: plugins/sante/__init__.py:219
+msgid "Pris"
+msgstr "Taken"
+
+#: plugins/sante/__init__.py:219
+#: plugins/sante/__init__.py:232
+msgid "Dose"
+msgstr "Dose"
+
+#: plugins/sante/__init__.py:232
+msgid "Horaires"
+msgstr "Times"
+
+#: plugins/sante/__init__.py:232
+msgid "Du"
+msgstr "From"
+
+#: plugins/sante/__init__.py:232
+msgid "Au"
+msgstr "To"
+
+#: plugins/sante/__init__.py:318
+msgid "Saisissez une première mesure ci-dessus."
+msgstr "Enter a first reading above."
+
+#: plugins/sante/__init__.py:226
+msgid "Médicaments"
+msgstr "Medicines"
+
+#: plugins/sante/__init__.py:313
+msgid "Dernière mesure : <b>%(h)d/%(b)d</b> (%(c)s)"
+msgstr "Last reading: <b>%(h)d/%(b)d</b> (%(c)s)"
+
+#: plugins/sante/__init__.py:321
+msgid "Aujourd'hui : %s"
+msgstr "Today: %s"
+
+#: plugins/sante/__init__.py:322
+msgid "aucune prise prévue (ajoutez un médicament avec ses horaires)."
+msgstr "no dose scheduled (add a medicine with its times)."
+
+#: plugins/sante/__init__.py:316
+msgid "moyenne sur 30 jours : <b>%(h)d/%(b)d</b>"
+msgstr "30-day average: <b>%(h)d/%(b)d</b>"
+
+#: plugins/sante/__init__.py:316
+msgid ", pouls %d"
+msgstr ", pulse %d"
+
+#: plugins/sante/logique.py:139
+msgid "optimale"
+msgstr "optimal"
+
+#: plugins/sante/logique.py:139
+msgid "normale"
+msgstr "normal"
+
+#: plugins/sante/logique.py:139
+msgid "normale haute"
+msgstr "high normal"
+
+#: plugins/sante/logique.py:139
+msgid "élevée (grade 1)"
+msgstr "high (grade 1)"
+
+#: plugins/sante/logique.py:140
+msgid "élevée (grade 2)"
+msgstr "high (grade 2)"
+
+#: plugins/sante/logique.py:140
+msgid "très élevée (grade 3)"
+msgstr "very high (grade 3)"
+
+#: plugins/sante/logique.py:198
+msgid "Santé (tension, traitement)"
+msgstr "Health (blood pressure, treatment)"
+
+#: plugins/sante/logique.py:182
+msgid "%d prise(s) de médicament à cocher"
+msgstr "%d medicine dose(s) to tick"
+
+#: plugins/sante/logique.py:194
+msgid "Médicament exemple"
+msgstr "Example medicine"
+
+#: plugins/sante/logique.py:195
+msgid "Santé (exemples)"
+msgstr "Health (examples)"
+
+#: plugins/sante/logique.py:195
+msgid "Exemple · Mon carnet de santé"
+msgstr "Example · My health notebook"
 
 #: plugins/securite/__init__.py:267
 msgid ""
@@ -3569,6 +4304,7 @@ msgstr "Accept everything as normal"
 
 #: plugins/securite/__init__.py:59
 #: plugins/supervision/__init__.py:126
+#: plugins/veille/__init__.py:80
 msgid "Surveiller en arrière-plan"
 msgstr "Monitor in the background"
 
@@ -3724,10 +4460,6 @@ msgstr "weight in kg"
 #: plugins/suivi/__init__.py:149
 msgid "calories à ajouter"
 msgstr "calories to add"
-
-#: plugins/suivi/__init__.py:150
-msgid "note (facultatif)"
-msgstr "note (optional)"
 
 #: plugins/suivi/__init__.py:153
 msgid "Poids"
@@ -4008,6 +4740,7 @@ msgid "Pour estimer la puissance, indiquez les watts de la machine au repos et �
 msgstr "To estimate the power, give the machine's watts at idle and at full load (right-click > Edit > \"Watts idle-max\", or a \"watts: 40-200\" line in the note)."
 
 #: plugins/supervision/__init__.py:314
+#: plugins/veille/__init__.py:175
 msgid "Retirer"
 msgstr "Remove"
 
@@ -4177,10 +4910,6 @@ msgstr "Spreadsheet"
 #: plugins/tableur/logique.py:543
 msgid "Article"
 msgstr "Item"
-
-#: plugins/tableur/logique.py:543
-msgid "Quantité"
-msgstr "Quantity"
 
 #: plugins/tableur/logique.py:543
 msgid "Prix"
@@ -4611,8 +5340,8 @@ msgid "Le serveur %s n'est pas local : le texte serait envoyé hors de cette mac
 msgstr "The server %s is not local: the text would be sent outside this machine. Tick the acceptance box in the settings to allow it."
 
 #: plugins/traduction/__init__.py:554
-#: src/scrinium/ui/fenetre.py:1325
-#: src/scrinium/ui/fenetre.py:1334
+#: src/scrinium/ui/fenetre.py:1394
+#: src/scrinium/ui/fenetre.py:1403
 msgid "Fiche verrouillée"
 msgstr "Locked note"
 
@@ -4840,6 +5569,131 @@ msgstr "llama-server stopped: %s"
 #: plugins/traduction/logique.py:487
 msgid "llama-server n'est pas prêt après %d s"
 msgstr "llama-server not ready after %d s"
+
+#: plugins/veille/__init__.py:351
+msgid ""
+"Suivre des sites sans les ouvrir un par un : flux RSS ou Atom, avec un mot-clé facultatif.\n"
+"\n"
+"• Nouvelle fiche > « Veille » : « Ajouter une source… » (nom, adresse du flux commençant par http:// ou https://, mot-clé). Les articles s'affichent du plus récent au plus ancien, les non lus en gras. Double-clic : ouvrir l'article dans le navigateur (il est alors marqué lu) ; « Tout marquer comme lu » vide la liste des nouveautés.\n"
+"• Le mot-clé garde seulement les articles dont le titre ou le résumé le contient.\n"
+"• Une pastille rouge sur l'icône de la fiche signale les nouveautés non lues ; « Surveiller en arrière-plan » relève toutes les 30 minutes, même fiche fermée, et notifie. Scrinium doit rester ouvert.\n"
+"• Sûreté : la fiche est inerte tant que vous ne l'avez pas validée (elle fait des requêtes réseau). Seules les adresses http et https sont suivies, 10 secondes et 2 Mo au plus par flux, rien n'est téléchargé ni exécuté en dehors du flux ; un lien ne s'ouvre que sur un clic.\n"
+"• Ce qui est lu est mémorisé dans la fiche (empreintes courtes)."
+msgstr ""
+"Follow sites without opening them one by one: RSS or Atom feeds, with an optional keyword.\n"
+"\n"
+"• New note > \"Watch\": \"Add a source…\" (name, feed address starting with http:// or https://, keyword). Articles are listed from newest to oldest, unread ones in bold. Double-click: open the article in the browser (it is then marked as read); \"Mark all as read\" clears the list of news.\n"
+"• The keyword only keeps articles whose title or summary contains it.\n"
+"• A red dot on the note's icon signals unread news; \"Monitor in the background\" checks every 30 minutes, even with the note closed, and notifies. Scrinium must stay open.\n"
+"• Safety: the note is inert until you validate it (it makes network requests). Only http and https addresses are followed, 10 seconds and 2 MB at most per feed, nothing is downloaded or executed outside the feed; a link opens only on a click.\n"
+"• What has been read is remembered in the note (short fingerprints)."
+
+#: plugins/veille/__init__.py:28
+#: plugins/veille/__init__.py:91
+#: plugins/veille/__init__.py:102
+msgid "Source"
+msgstr "Source"
+
+#: plugins/veille/__init__.py:35
+msgid "facultatif : ne garder que les articles qui contiennent ce mot"
+msgstr "optional: only keep articles containing this word"
+
+#: plugins/veille/__init__.py:37
+msgid "Adresse du flux :"
+msgstr "Feed address:"
+
+#: plugins/veille/__init__.py:38
+msgid "Mot-clé :"
+msgstr "Keyword:"
+
+#: plugins/veille/__init__.py:76
+msgid "Tout marquer comme lu"
+msgstr "Mark all as read"
+
+#: plugins/veille/__init__.py:78
+#: plugins/veille/__init__.py:172
+msgid "Ajouter une source…"
+msgstr "Add a source…"
+
+#: plugins/veille/__init__.py:81
+msgid "Relève les fiches Veille validées toutes les 30 minutes, même quand elles ne sont pas affichées, et notifie les nouveautés. Scrinium doit rester ouvert."
+msgstr "Checks validated Watch notes every 30 minutes, even when they are not displayed, and notifies about news. Scrinium must stay open."
+
+#: plugins/veille/__init__.py:183
+#: src/scrinium/ui/images.py:435
+#: src/scrinium/ui/repertoire.py:340
+msgid "Ouvrir"
+msgstr "Open"
+
+#: plugins/veille/__init__.py:184
+msgid "Marquer comme lu"
+msgstr "Mark as read"
+
+#: plugins/veille/__init__.py:213
+msgid "Relève en cours…"
+msgstr "Checking…"
+
+#: plugins/veille/__init__.py:283
+msgid "Extension Veille"
+msgstr "Watch extension"
+
+#: plugins/veille/__init__.py:49
+msgid "L'adresse doit commencer par http:// ou https://."
+msgstr "The address must start with http:// or https://."
+
+#: plugins/veille/__init__.py:91
+msgid "Adresse du flux"
+msgstr "Feed address"
+
+#: plugins/veille/__init__.py:91
+msgid "Mot-clé"
+msgstr "Keyword"
+
+#: plugins/veille/__init__.py:124
+msgid "Double-clic sur un article : l'ouvrir dans le navigateur (il est alors marqué lu). Clic droit sur une source : modifier ou retirer."
+msgstr "Double-click an article to open it in the browser (it is then marked as read). Right-click a source to edit or remove it."
+
+#: plugins/veille/__init__.py:125
+msgid "Fiche non validée : relisez les sources, puis validez-la pour lancer la relève et la modifier."
+msgstr "Note not validated: review the sources, then validate it to start checking and to edit it."
+
+#: plugins/veille/__init__.py:264
+msgid "%d non lu(s) sur %d"
+msgstr "%d unread of %d"
+
+#: plugins/veille/__init__.py:264
+msgid "Ajoutez une source (flux RSS ou Atom)."
+msgstr "Add a source (RSS or Atom feed)."
+
+#: plugins/veille/__init__.py:348
+#: plugins/veille/logique.py:201
+msgid "Veille"
+msgstr "Watch"
+
+#: plugins/veille/__init__.py:266
+msgid "injoignable : %s"
+msgstr "unreachable: %s"
+
+#: plugins/veille/__init__.py:348
+#: plugins/veille/logique.py:189
+msgid "%d nouveauté(s) à lire"
+msgstr "%d new item(s) to read"
+
+#: plugins/veille/logique.py:148
+msgid "adresse refusée (http ou https seulement)"
+msgstr "address refused (http or https only)"
+
+#: plugins/veille/logique.py:198
+msgid "Veille (exemples)"
+msgstr "Watch (examples)"
+
+#: plugins/veille/logique.py:198
+msgid "Exemple · Ma veille"
+msgstr "Example · My watch"
+
+#: plugins/veille/logique.py:152
+msgid "redirection refusée"
+msgstr "redirect refused"
 
 #: src/scrinium/cli.py:86
 msgid "Aucun texte reçu : utilisez un tube, par exemple :  ip a | scrinium ajouter -t Informatique -f Réseau"
@@ -5372,7 +6226,7 @@ msgstr ""
 
 #: src/scrinium/core/exemples.py:12
 #: src/scrinium/core/store.py:155
-#: src/scrinium/ui/fenetre.py:124
+#: src/scrinium/ui/fenetre.py:127
 msgid "Bienvenue"
 msgstr "Welcome"
 
@@ -5659,7 +6513,7 @@ msgstr ""
 "You can read them with any text editor. To back them up, copy this folder. Locked notes are .lock files, unreadable without their password."
 
 #: src/scrinium/core/guide.py:11
-#: src/scrinium/core/guide.py:106
+#: src/scrinium/core/guide.py:115
 msgid "Guide"
 msgstr "Guide"
 
@@ -5724,6 +6578,15 @@ msgid ""
 "• Échéances : assurances, noms de domaine, certificats, garanties, abonnements, avec la prochaine date, un rappel et une notification (extension Échéances).\n"
 "• Résolutions : vos bonnes résolutions, une case par jour, des séries, une note automatique sur 100 et des encouragements (extension Résolutions).\n"
 "• Suivi : le poids et les calories au jour le jour, avec des courbes et vos objectifs (extension Suivi).\n"
+"• Inventaire : ce que vous possédez, où, sa valeur et la fin des garanties (extension Inventaire).\n"
+"• Collection : livres, disques, jeux… ce que vous avez, cherchez ou avez prêté (extension Collection).\n"
+"• Recettes : ingrédients et étapes, quantités recalculées pour N personnes, liste de courses (extension Recettes).\n"
+"• Journal : une entrée par jour avec une humeur, un calendrier et « il y a un an » (extension Journal).\n"
+"• Veille : des flux RSS ou Atom et les nouveautés non lues (extension Veille).\n"
+"• Santé : la tension avec une courbe, et le traitement avec une case par prise (extension Santé).\n"
+"• Mots de passe : un carnet de sites et de mots de passe, masqués, à verrouiller (extension Mots de passe).\n"
+"• Liens entre fiches : écrivez [[Titre d'une fiche]] dans le texte ; dans l'aperçu (Ctrl+E) le lien est cliquable, et Fichier > Fiches liées… montre qui pointe vers la fiche.\n"
+"• Pastille rouge : sur l'icône d'une fiche, elle signale qu'il y a quelque chose à faire (échéance proche, résolution à cocher, garantie, prêt, prise oubliée, nouveautés…) ; survolez-la pour le détail.\n"
 "• Supervision : l'état de vos machines (ping, ports, page web, disque, mémoire et charge par SSH) dans une fiche, avec une notification quand l'une tombe (extension Supervision).\n"
 "• Planning : des tâches en couleurs sur un diagramme de Gantt, avec l'avancement, les retards et un rétroplanning à partir d'une date de fin (extension Planning).\n"
 "• Tableur : des cellules et des formules comme =SOMME(B2:B10), avec export et import CSV (extension Tableur).\n"
@@ -5743,17 +6606,26 @@ msgstr ""
 "• Deadlines: insurance, domain names, certificates, warranties, subscriptions, with the next date, a reminder and a notification (Deadlines extension).\n"
 "• Resolutions: your good resolutions, a tick per day, streaks, an automatic score out of 100 and encouragement (Resolutions extension).\n"
 "• Tracking: weight and calories day by day, with charts and your goals (Tracking extension).\n"
+"• Inventory: what you own, where, its value and the end of warranties (Inventory extension).\n"
+"• Collection: books, records, games… what you have, are looking for or lent out (Collection extension).\n"
+"• Recipes: ingredients and steps, quantities recalculated for N people, shopping list (Recipes extension).\n"
+"• Journal: one entry per day with a mood, a calendar and \"a year ago\" (Journal extension).\n"
+"• Watch: RSS or Atom feeds and unread news (Watch extension).\n"
+"• Health: blood pressure with a curve, and treatment with a box per dose (Health extension).\n"
+"• Passwords: a notebook of sites and passwords, hidden, to be locked (Passwords extension).\n"
+"• Links between notes: write [[Title of a note]] in the text; in the preview (Ctrl+E) the link is clickable, and File > Linked notes… shows what points to the note.\n"
+"• Red dot: on a note's icon, it signals that there is something to do (deadline close, resolution to tick, warranty, loan, missed dose, news…); hover it for details.\n"
 "• Monitoring: the state of your machines (ping, ports, web page, disk, memory and load over SSH) in a note, with a notification when one goes down (Monitoring extension).\n"
 "• Planning: tasks as a colour-coded Gantt chart, with progress, delays and a backward schedule from an end date (Planning extension).\n"
 "• Spreadsheet: cells and formulas such as =SOMME(B2:B10), with CSV export and import (Spreadsheet extension).\n"
 "\n"
 "Security: a type that RUNS commands (Applications, CLI actions) stays inert until you have validated the note yourself. A note received from someone else therefore never runs anything on its own."
 
-#: src/scrinium/core/guide.py:59
+#: src/scrinium/core/guide.py:68
 msgid "Guide 4 · Les extensions"
 msgstr "Guide 4 · Extensions"
 
-#: src/scrinium/core/guide.py:59
+#: src/scrinium/core/guide.py:68
 msgid ""
 "Menu Extensions > Gérer les extensions… : cochez celles qui vous servent. Livrées avec Scrinium :\n"
 "\n"
@@ -5779,11 +6651,11 @@ msgstr ""
 "\n"
 "Write your own: Help menu > \"Extensions documentation\"."
 
-#: src/scrinium/core/guide.py:72
+#: src/scrinium/core/guide.py:81
 msgid "Guide 5 · Console et commandes"
 msgstr "Guide 5 · Console and commands"
 
-#: src/scrinium/core/guide.py:72
+#: src/scrinium/core/guide.py:81
 msgid ""
 "L'extension Capture relie vos fiches au terminal, sans jamais rien valider à votre place.\n"
 "\n"
@@ -5799,11 +6671,11 @@ msgstr ""
 "• Extensions > \"Run a command and insert the output…\": the opposite, the command is run after confirmation and its output is inserted in the note, at the cursor.\n"
 "• From a terminal: \"ls -al | scrinium ajouter -t Topic -f Note\" adds the output to a note."
 
-#: src/scrinium/core/guide.py:84
+#: src/scrinium/core/guide.py:93
 msgid "Guide 6 · Verrouillage, secours et partage"
 msgstr "Guide 6 · Locking, recovery and sharing"
 
-#: src/scrinium/core/guide.py:84
+#: src/scrinium/core/guide.py:93
 msgid ""
 "• Verrouiller : bouton « Verrouiller… ». Le titre reste visible, le contenu est chiffré. Mot de passe oublié = fiche perdue, sauf avec le FICHIER DE SECOURS (menu Sécurité > Fichier de secours…) : faites-le dès le premier verrouillage, gardez-le hors de cet ordinateur.\n"
 "• Une fiche verrouillée n'est jamais envoyée, lue, traduite ni partagée tant qu'elle est fermée.\n"
@@ -5815,11 +6687,11 @@ msgstr ""
 "• Sharing: the Sharing extension synchronises notes with a Scrinium server. An invitation by email (valid 48 h) gives read or write access; in a conflict, both versions are kept.\n"
 "• Invite someone to INSTALL Scrinium: File menu > \"Invite to install Scrinium…\"."
 
-#: src/scrinium/core/guide.py:92
+#: src/scrinium/core/guide.py:101
 msgid "Guide 7 · Où sont mes données, sauvegarde"
 msgstr "Guide 7 · Where is my data, backup"
 
-#: src/scrinium/core/guide.py:92
+#: src/scrinium/core/guide.py:101
 msgid ""
 "• Vos fiches : un dossier par thème, un fichier .md par fiche (.lock si verrouillée), avec un sous-dossier .pj pour les images jointes :\n"
 "\n"
@@ -6022,7 +6894,7 @@ msgid "non disponible sous %(ici)s (réservée à : %(ou)s)"
 msgstr "not available on %(ici)s (only for: %(ou)s)"
 
 #: src/scrinium/core/repertoire.py:156
-#: src/scrinium/ui/fenetre.py:823
+#: src/scrinium/ui/fenetre.py:847
 msgid "Répertoire"
 msgstr "Directory"
 
@@ -6107,7 +6979,7 @@ msgid "Mot de passe du fichier (facultatif) :"
 msgstr "File password (optional):"
 
 #: src/scrinium/ui/assistant.py:67
-#: src/scrinium/ui/fenetre.py:1359
+#: src/scrinium/ui/fenetre.py:1428
 msgid "Confirmer le mot de passe :"
 msgstr "Confirm password:"
 
@@ -6116,7 +6988,7 @@ msgid "Un mot de passe sur le fichier ajoute une protection si on vous le vole :
 msgstr "A password on the file adds protection if it is stolen: that password will then be needed to use it. Write it down: it cannot be recovered either."
 
 #: src/scrinium/ui/assistant.py:75
-#: src/scrinium/ui/fenetre.py:1397
+#: src/scrinium/ui/fenetre.py:1466
 msgid "Créer le fichier de secours"
 msgstr "Create the rescue file"
 
@@ -6127,12 +6999,6 @@ msgstr "Rescue file folder"
 #: src/scrinium/ui/assistant.py:116
 msgid "Fichier de secours créé"
 msgstr "Rescue file created"
-
-#: src/scrinium/ui/assistant.py:88
-#: src/scrinium/ui/fenetre.py:1357
-#: src/scrinium/ui/fenetre.py:1361
-msgid "Mot de passe"
-msgstr "Password"
 
 #: src/scrinium/ui/assistant.py:88
 msgid "Les deux saisies sont différentes."
@@ -6181,8 +7047,8 @@ msgid "Fiche existante, ou tapez un titre pour en créer une."
 msgstr "Existing note, or type a title to create one."
 
 #: src/scrinium/ui/capture_rapide.py:40
-#: src/scrinium/ui/fenetre.py:149
-#: src/scrinium/ui/fenetre.py:551
+#: src/scrinium/ui/fenetre.py:152
+#: src/scrinium/ui/fenetre.py:557
 msgid "Thème"
 msgstr "Topic"
 
@@ -6207,7 +7073,7 @@ msgid "Choisissez ou tapez un titre de fiche."
 msgstr "Pick or type a note title."
 
 #: src/scrinium/ui/choix_icone.py:33
-#: src/scrinium/ui/fenetre.py:226
+#: src/scrinium/ui/fenetre.py:230
 msgid "Icône du thème"
 msgstr "Topic icon"
 
@@ -6282,351 +7148,364 @@ msgstr "Could not enable: %s"
 msgid "★ Toutes les fiches"
 msgstr "★ All notes"
 
-#: src/scrinium/ui/fenetre.py:683
+#: src/scrinium/ui/fenetre.py:707
 msgid "Navigateur du système (par défaut)"
 msgstr "System browser (default)"
 
-#: src/scrinium/ui/fenetre.py:112
-#: src/scrinium/ui/fenetre.py:1055
-#: src/scrinium/ui/fenetre.py:1120
+#: src/scrinium/ui/fenetre.py:115
+#: src/scrinium/ui/fenetre.py:1079
+#: src/scrinium/ui/fenetre.py:1189
 msgid "Scrinium"
 msgstr "Scrinium"
 
-#: src/scrinium/ui/fenetre.py:142
+#: src/scrinium/ui/fenetre.py:145
 msgid "Actions"
 msgstr "Actions"
 
-#: src/scrinium/ui/fenetre.py:148
+#: src/scrinium/ui/fenetre.py:151
 msgid "Nouvelle fiche (Ctrl+N)"
 msgstr "New note (Ctrl+N)"
 
-#: src/scrinium/ui/fenetre.py:150
+#: src/scrinium/ui/fenetre.py:153
 msgid "Nouveau thème (Ctrl+Maj+N)"
 msgstr "New topic (Ctrl+Shift+N)"
 
-#: src/scrinium/ui/fenetre.py:153
+#: src/scrinium/ui/fenetre.py:156
 msgid "Nouvelle fiche d'un type…"
 msgstr "New note of a type…"
 
-#: src/scrinium/ui/fenetre.py:159
+#: src/scrinium/ui/fenetre.py:162
 msgid "Chercher (Ctrl+F)…"
 msgstr "Search (Ctrl+F)…"
 
-#: src/scrinium/ui/fenetre.py:166
+#: src/scrinium/ui/fenetre.py:169
 msgid "&Fichier"
 msgstr "&File"
 
-#: src/scrinium/ui/fenetre.py:175
+#: src/scrinium/ui/fenetre.py:179
 msgid "Réduire dans la zone de notification"
 msgstr "Minimise to the notification area"
 
-#: src/scrinium/ui/fenetre.py:179
+#: src/scrinium/ui/fenetre.py:183
 msgid "Lancer au démarrage de la session"
 msgstr "Start at login"
 
-#: src/scrinium/ui/fenetre.py:186
+#: src/scrinium/ui/fenetre.py:190
 msgid "&Sécurité"
 msgstr "&Security"
 
-#: src/scrinium/ui/fenetre.py:189
+#: src/scrinium/ui/fenetre.py:193
 msgid "E&xtensions"
 msgstr "E&xtensions"
 
-#: src/scrinium/ui/fenetre.py:192
+#: src/scrinium/ui/fenetre.py:196
 msgid "&Aide"
 msgstr "&Help"
 
-#: src/scrinium/ui/fenetre.py:193
+#: src/scrinium/ui/fenetre.py:197
 msgid "&Langue"
 msgstr "&Language"
 
-#: src/scrinium/ui/fenetre.py:222
+#: src/scrinium/ui/fenetre.py:226
 msgid "Épingler le thème (il reste en haut de la liste)"
 msgstr "Pin the topic (it stays at the top of the list)"
 
-#: src/scrinium/ui/fenetre.py:250
+#: src/scrinium/ui/fenetre.py:254
 msgid "Supprimer la fiche"
 msgstr "Delete note"
 
-#: src/scrinium/ui/fenetre.py:254
+#: src/scrinium/ui/fenetre.py:258
 msgid "Épingler la fiche (elle reste en haut de la liste)"
 msgstr "Pin the note (it stays at the top of the list)"
 
-#: src/scrinium/ui/fenetre.py:271
-#: src/scrinium/ui/fenetre.py:1209
+#: src/scrinium/ui/fenetre.py:275
+#: src/scrinium/ui/fenetre.py:1278
 msgid "Copier la note"
 msgstr "Copy note"
 
-#: src/scrinium/ui/fenetre.py:273
-#: src/scrinium/ui/fenetre.py:1192
-#: src/scrinium/ui/fenetre.py:1198
+#: src/scrinium/ui/fenetre.py:277
+#: src/scrinium/ui/fenetre.py:1261
+#: src/scrinium/ui/fenetre.py:1267
 msgid "Verrouiller…"
 msgstr "Lock…"
 
-#: src/scrinium/ui/fenetre.py:275
+#: src/scrinium/ui/fenetre.py:279
 msgid "Refermer"
 msgstr "Lock again"
 
-#: src/scrinium/ui/fenetre.py:276
+#: src/scrinium/ui/fenetre.py:280
 msgid "Referme la fiche : le mot de passe sera redemandé (Ctrl+Maj+L)"
 msgstr "Locks the note again: the password will be asked again (Ctrl+Shift+L)"
 
-#: src/scrinium/ui/fenetre.py:315
+#: src/scrinium/ui/fenetre.py:321
 msgid "Cette fiche peut lancer des commandes. Elle est inerte tant que vous ne l'avez pas validée (elle n'a pas été créée ici, ou son contenu a changé)."
 msgstr "This note can run commands. It stays inactive until you validate it (it was not created here, or its content has changed)."
 
-#: src/scrinium/ui/fenetre.py:319
+#: src/scrinium/ui/fenetre.py:325
 msgid "Valider cette fiche"
 msgstr "Validate this note"
 
-#: src/scrinium/ui/fenetre.py:546
+#: src/scrinium/ui/fenetre.py:552
 msgid "Nouveau thème"
 msgstr "New topic"
 
-#: src/scrinium/ui/fenetre.py:546
+#: src/scrinium/ui/fenetre.py:552
 msgid "Nom du thème :"
 msgstr "Topic name:"
 
-#: src/scrinium/ui/fenetre.py:564
+#: src/scrinium/ui/fenetre.py:570
 msgid "Renommer"
 msgstr "Rename"
 
-#: src/scrinium/ui/fenetre.py:564
+#: src/scrinium/ui/fenetre.py:570
 msgid "Nouveau nom :"
 msgstr "New name:"
 
-#: src/scrinium/ui/fenetre.py:624
-#: src/scrinium/ui/fenetre.py:1028
-#: src/scrinium/ui/fenetre.py:1031
+#: src/scrinium/ui/fenetre.py:630
+#: src/scrinium/ui/fenetre.py:1052
+#: src/scrinium/ui/fenetre.py:1055
 msgid "(sans titre)"
 msgstr "(untitled)"
 
-#: src/scrinium/ui/fenetre.py:688
+#: src/scrinium/ui/fenetre.py:712
 msgid "Navigateur pour les liens"
 msgstr "Browser for links"
 
-#: src/scrinium/ui/fenetre.py:689
+#: src/scrinium/ui/fenetre.py:713
 msgid "Choisissez un navigateur, ou tapez une commande (ex. : firefox) :"
 msgstr "Pick a browser, or type a command (e.g. firefox):"
 
-#: src/scrinium/ui/fenetre.py:813
+#: src/scrinium/ui/fenetre.py:837
 msgid "Depuis un fichier (CSV, vCard) : les colonnes s'adaptent…"
 msgstr "From a file (CSV, vCard): the columns adapt…"
 
-#: src/scrinium/ui/fenetre.py:813
+#: src/scrinium/ui/fenetre.py:837
 msgid "Depuis un dossier de contacts (KDE Connect…) : les colonnes s'adaptent…"
 msgstr "From a contacts folder (KDE Connect…): the columns adapt…"
 
-#: src/scrinium/ui/fenetre.py:814
-#: src/scrinium/ui/fenetre.py:823
+#: src/scrinium/ui/fenetre.py:838
+#: src/scrinium/ui/fenetre.py:847
 msgid "Nouveau répertoire"
 msgstr "New directory"
 
-#: src/scrinium/ui/fenetre.py:814
+#: src/scrinium/ui/fenetre.py:838
 msgid "Modèle de colonnes (modifiables ensuite) :"
 msgstr "Column template (editable afterwards):"
 
-#: src/scrinium/ui/fenetre.py:823
+#: src/scrinium/ui/fenetre.py:847
 msgid "Titre du répertoire :"
 msgstr "Directory title:"
 
-#: src/scrinium/ui/fenetre.py:1014
+#: src/scrinium/ui/fenetre.py:1038
 msgid "Fiche ordinaire"
 msgstr "Plain note"
 
-#: src/scrinium/ui/fenetre.py:1043
+#: src/scrinium/ui/fenetre.py:1067
 msgid "● modification en cours…"
 msgstr "● editing…"
 
-#: src/scrinium/ui/fenetre.py:1088
+#: src/scrinium/ui/fenetre.py:1113
 msgid "Extension désactivée"
 msgstr "Extension disabled"
 
-#: src/scrinium/ui/fenetre.py:1101
+#: src/scrinium/ui/fenetre.py:1157
+#: src/scrinium/ui/fenetre.py:1154
+msgid "Fiches liées"
+msgstr "Linked notes"
+
+#: src/scrinium/ui/fenetre.py:1157
+msgid "→ cette fiche pointe vers · ← pointe vers cette fiche"
+msgstr "→ this note points to · ← points to this note"
+
+#: src/scrinium/ui/fenetre.py:1170
 msgid "Langue"
 msgstr "Language"
 
-#: src/scrinium/ui/fenetre.py:1101
+#: src/scrinium/ui/fenetre.py:1170
 msgid "Langue modifiée : redémarrez Scrinium pour l'appliquer."
 msgstr "Language changed: restart Scrinium to apply it."
 
-#: src/scrinium/ui/fenetre.py:1122
+#: src/scrinium/ui/fenetre.py:1191
 msgid "Ouvrir Scrinium"
 msgstr "Open Scrinium"
 
-#: src/scrinium/ui/fenetre.py:1123
+#: src/scrinium/ui/fenetre.py:1192
 msgid "Nouvelle fiche"
 msgstr "New note"
 
-#: src/scrinium/ui/fenetre.py:1124
-#: src/scrinium/ui/fenetre.py:172
+#: src/scrinium/ui/fenetre.py:1193
+#: src/scrinium/ui/fenetre.py:176
 msgid "Capture rapide…"
 msgstr "Quick capture…"
 
-#: src/scrinium/ui/fenetre.py:1126
-#: src/scrinium/ui/fenetre.py:185
+#: src/scrinium/ui/fenetre.py:1195
+#: src/scrinium/ui/fenetre.py:189
 msgid "Quitter"
 msgstr "Quit"
 
-#: src/scrinium/ui/fenetre.py:1225
+#: src/scrinium/ui/fenetre.py:1294
 #: src/scrinium/ui/images.py:126
-#: src/scrinium/ui/markdown.py:250
+#: src/scrinium/ui/markdown.py:254
 msgid "Imprimer…"
 msgstr "Print…"
 
-#: src/scrinium/ui/fenetre.py:1226
+#: src/scrinium/ui/fenetre.py:1295
 #: src/scrinium/ui/images.py:127
-#: src/scrinium/ui/markdown.py:251
+#: src/scrinium/ui/markdown.py:255
 msgid "Exporter la fiche en PDF…"
 msgstr "Export the note to PDF…"
 
-#: src/scrinium/ui/fenetre.py:1253
+#: src/scrinium/ui/fenetre.py:1322
 msgid "Imprimer"
 msgstr "Print"
 
-#: src/scrinium/ui/fenetre.py:1253
+#: src/scrinium/ui/fenetre.py:1322
 msgid "l'impression"
 msgstr "the printout"
 
-#: src/scrinium/ui/fenetre.py:1262
+#: src/scrinium/ui/fenetre.py:1331
 msgid "✔ Fiche envoyée à l'impression"
 msgstr "✔ Note sent to the printer"
 
-#: src/scrinium/ui/fenetre.py:1269
-#: src/scrinium/ui/fenetre.py:1274
-#: src/scrinium/ui/fenetre.py:1283
+#: src/scrinium/ui/fenetre.py:1338
+#: src/scrinium/ui/fenetre.py:1343
+#: src/scrinium/ui/fenetre.py:1352
 msgid "Exporter en PDF"
 msgstr "Export to PDF"
 
-#: src/scrinium/ui/fenetre.py:1269
+#: src/scrinium/ui/fenetre.py:1338
 msgid "le PDF"
 msgstr "the PDF"
 
-#: src/scrinium/ui/fenetre.py:1275
+#: src/scrinium/ui/fenetre.py:1344
 msgid "Documents PDF (*.pdf)"
 msgstr "PDF documents (*.pdf)"
 
-#: src/scrinium/ui/fenetre.py:1348
-#: src/scrinium/ui/fenetre.py:1344
+#: src/scrinium/ui/fenetre.py:1417
+#: src/scrinium/ui/fenetre.py:1413
 msgid "Mot de passe oublié : le fichier de secours permettra de rouvrir la fiche."
 msgstr "Forgotten password: the rescue file will let you reopen the note."
 
-#: src/scrinium/ui/fenetre.py:1353
-#: src/scrinium/ui/fenetre.py:1359
-#: src/scrinium/ui/fenetre.py:1366
+#: src/scrinium/ui/fenetre.py:1422
+#: src/scrinium/ui/fenetre.py:1428
+#: src/scrinium/ui/fenetre.py:1435
 msgid "Verrouiller"
 msgstr "Lock"
 
-#: src/scrinium/ui/fenetre.py:1353
+#: src/scrinium/ui/fenetre.py:1422
 msgid "Mot de passe (4 caractères minimum) :"
 msgstr "Password (4 characters minimum):"
 
-#: src/scrinium/ui/fenetre.py:1394
+#: src/scrinium/ui/fenetre.py:1463
 msgid "Avant de verrouiller : voulez-vous créer un fichier de secours ?"
 msgstr "Before locking: do you want to create a rescue file?"
 
-#: src/scrinium/ui/fenetre.py:1395
+#: src/scrinium/ui/fenetre.py:1464
 msgid "Si vous oubliez le mot de passe d'une fiche, le fichier de secours permet de la rouvrir. Sans lui, une fiche dont le mot de passe est oublié est perdue pour toujours."
 msgstr "If you forget a note's password, the rescue file lets you reopen it. Without it, a note whose password is forgotten is lost forever."
 
-#: src/scrinium/ui/fenetre.py:1398
+#: src/scrinium/ui/fenetre.py:1467
 msgid "Verrouiller sans fichier de secours"
 msgstr "Lock without a rescue file"
 
-#: src/scrinium/ui/fenetre.py:1453
-#: src/scrinium/ui/fenetre.py:204
+#: src/scrinium/ui/fenetre.py:1522
+#: src/scrinium/ui/fenetre.py:208
 msgid "À propos"
 msgstr "About"
 
-#: src/scrinium/ui/fenetre.py:170
+#: src/scrinium/ui/fenetre.py:173
 msgid "Nouveau répertoire…"
 msgstr "New directory…"
 
-#: src/scrinium/ui/fenetre.py:171
+#: src/scrinium/ui/fenetre.py:174
+msgid "Fiches liées…"
+msgstr "Linked notes…"
+
+#: src/scrinium/ui/fenetre.py:175
 msgid "Imprimer la fiche…"
 msgstr "Print note…"
 
-#: src/scrinium/ui/fenetre.py:173
+#: src/scrinium/ui/fenetre.py:177
 msgid "Inviter à installer Scrinium…"
 msgstr "Invite someone to install Scrinium…"
 
-#: src/scrinium/ui/fenetre.py:183
+#: src/scrinium/ui/fenetre.py:187
 msgid "Navigateur pour les liens…"
 msgstr "Browser for links…"
 
-#: src/scrinium/ui/fenetre.py:187
+#: src/scrinium/ui/fenetre.py:191
 msgid "Fichier de secours…"
 msgstr "Rescue file…"
 
-#: src/scrinium/ui/fenetre.py:188
+#: src/scrinium/ui/fenetre.py:192
 msgid "Rouvrir une fiche avec le fichier de secours…"
 msgstr "Reopen a note with the rescue file…"
 
-#: src/scrinium/ui/fenetre.py:190
+#: src/scrinium/ui/fenetre.py:194
 msgid "Gérer les extensions…"
 msgstr "Manage extensions…"
 
-#: src/scrinium/ui/fenetre.py:196
+#: src/scrinium/ui/fenetre.py:200
 msgid "Automatique"
 msgstr "Automatic"
 
-#: src/scrinium/ui/fenetre.py:202
+#: src/scrinium/ui/fenetre.py:206
 msgid "Guide de Scrinium"
 msgstr "Scrinium guide"
 
-#: src/scrinium/ui/fenetre.py:203
+#: src/scrinium/ui/fenetre.py:207
 msgid "Documentation des extensions"
 msgstr "Extensions documentation"
 
-#: src/scrinium/ui/fenetre.py:225
+#: src/scrinium/ui/fenetre.py:229
 msgid "Renommer le thème"
 msgstr "Rename topic"
 
-#: src/scrinium/ui/fenetre.py:227
-#: src/scrinium/ui/fenetre.py:605
+#: src/scrinium/ui/fenetre.py:231
+#: src/scrinium/ui/fenetre.py:611
 msgid "Supprimer le thème"
 msgstr "Delete topic"
 
-#: src/scrinium/ui/fenetre.py:476
+#: src/scrinium/ui/fenetre.py:482
 msgid "Remettre les fiches dans l'ordre alphabétique"
 msgstr "Put the notes back in alphabetical order"
 
-#: src/scrinium/ui/fenetre.py:479
+#: src/scrinium/ui/fenetre.py:485
 msgid "Déplacer vers le thème"
 msgstr "Move to topic"
 
-#: src/scrinium/ui/fenetre.py:483
-#: src/scrinium/ui/fenetre.py:532
+#: src/scrinium/ui/fenetre.py:489
+#: src/scrinium/ui/fenetre.py:538
 msgid "Supprimer…"
 msgstr "Delete…"
 
-#: src/scrinium/ui/fenetre.py:528
+#: src/scrinium/ui/fenetre.py:534
 #: src/scrinium/ui/repertoire.py:39
 msgid "Renommer…"
 msgstr "Rename…"
 
-#: src/scrinium/ui/fenetre.py:529
+#: src/scrinium/ui/fenetre.py:535
 msgid "Icône…"
 msgstr "Icon…"
 
-#: src/scrinium/ui/fenetre.py:531
+#: src/scrinium/ui/fenetre.py:537
 msgid "Remettre les thèmes dans l'ordre alphabétique"
 msgstr "Put the topics back in alphabetical order"
 
-#: src/scrinium/ui/fenetre.py:551
+#: src/scrinium/ui/fenetre.py:557
 msgid "Ce thème existe déjà."
 msgstr "This topic already exists."
 
-#: src/scrinium/ui/fenetre.py:609
+#: src/scrinium/ui/fenetre.py:615
 msgid "Supprimer les thèmes"
 msgstr "Delete topics"
 
-#: src/scrinium/ui/fenetre.py:626
-#: src/scrinium/ui/fenetre.py:1031
+#: src/scrinium/ui/fenetre.py:632
+#: src/scrinium/ui/fenetre.py:1055
 msgid "(verrouillée)"
 msgstr "(locked)"
 
-#: src/scrinium/ui/fenetre.py:716
+#: src/scrinium/ui/fenetre.py:740
 msgid ""
 "Fiche verrouillée.\n"
 "\n"
@@ -6636,31 +7515,31 @@ msgstr ""
 "\n"
 "Click \"Unlock…\" (or double-click the note) and enter the password."
 
-#: src/scrinium/ui/fenetre.py:784
+#: src/scrinium/ui/fenetre.py:808
 msgid "✔ Fiche validée : elle peut maintenant agir"
 msgstr "✔ Note validated: it can now act"
 
-#: src/scrinium/ui/fenetre.py:806
+#: src/scrinium/ui/fenetre.py:830
 msgid "Rien à importer dans ces fichiers."
 msgstr "Nothing to import in these files."
 
-#: src/scrinium/ui/fenetre.py:888
+#: src/scrinium/ui/fenetre.py:912
 msgid "Fiche d'invitation prête : relisez-la, puis activez l'extension Courriel (Extensions > Gérer les extensions…) pour l'envoyer."
 msgstr "Invitation note ready: read it through, then turn on the Email extension (Extensions > Manage extensions…) to send it."
 
-#: src/scrinium/ui/fenetre.py:936
+#: src/scrinium/ui/fenetre.py:960
 msgid "Lien de partage reçu : activez l'extension Partage (Extensions > Gérer les extensions…) pour le utiliser."
 msgstr "Sharing link received: enable the Sharing extension (Extensions > Manage extensions…) to use it."
 
-#: src/scrinium/ui/fenetre.py:966
+#: src/scrinium/ui/fenetre.py:990
 msgid "✔ Fiche ajoutée depuis un lien"
 msgstr "✔ Note added from a link"
 
-#: src/scrinium/ui/fenetre.py:1028
+#: src/scrinium/ui/fenetre.py:1052
 msgid "Mettre la fiche « %s » à la corbeille ?"
 msgstr "Move the note \"%s\" to the trash?"
 
-#: src/scrinium/ui/fenetre.py:1089
+#: src/scrinium/ui/fenetre.py:1114
 msgid ""
 "L'extension « %(nom)s » a été désactivée après des erreurs répétées :\n"
 "%(erreur)s"
@@ -6668,87 +7547,91 @@ msgstr ""
 "The extension \"%(nom)s\" was disabled after repeated errors:\n"
 "%(erreur)s"
 
-#: src/scrinium/ui/fenetre.py:1117
+#: src/scrinium/ui/fenetre.py:1154
+msgid "Aucun lien avec cette fiche. Écrivez [[Titre d'une fiche]] dans le texte pour en créer un."
+msgstr "No link with this note. Write [[Title of a note]] in the text to create one."
+
+#: src/scrinium/ui/fenetre.py:1186
 msgid "Pas de zone de notification sur ce bureau."
 msgstr "No notification area on this desktop."
 
-#: src/scrinium/ui/fenetre.py:1273
+#: src/scrinium/ui/fenetre.py:1342
 msgid "fiche"
 msgstr "note"
 
-#: src/scrinium/ui/fenetre.py:1285
+#: src/scrinium/ui/fenetre.py:1354
 msgid "✔ PDF écrit : %s"
 msgstr "✔ PDF written: %s"
 
-#: src/scrinium/ui/fenetre.py:1325
+#: src/scrinium/ui/fenetre.py:1394
 msgid "Mot de passe de « %s » :"
 msgstr "Password for \"%s\":"
 
-#: src/scrinium/ui/fenetre.py:1346
+#: src/scrinium/ui/fenetre.py:1415
 msgid "Pas de fichier de secours : mot de passe oublié = fiche perdue."
 msgstr "No rescue file: forgotten password = lost note."
 
-#: src/scrinium/ui/fenetre.py:1349
+#: src/scrinium/ui/fenetre.py:1418
 msgid "Verrouiller la fiche"
 msgstr "Lock the note"
 
-#: src/scrinium/ui/fenetre.py:1357
+#: src/scrinium/ui/fenetre.py:1426
 msgid "Trop court (4 caractères minimum)."
 msgstr "Too short (4 characters minimum)."
 
-#: src/scrinium/ui/fenetre.py:1361
+#: src/scrinium/ui/fenetre.py:1430
 msgid "Les deux saisies sont différentes, fiche non verrouillée."
 msgstr "The two entries differ, note not locked."
 
-#: src/scrinium/ui/fenetre.py:1374
-#: src/scrinium/ui/fenetre.py:1382
-#: src/scrinium/ui/fenetre.py:1196
+#: src/scrinium/ui/fenetre.py:1443
+#: src/scrinium/ui/fenetre.py:1451
+#: src/scrinium/ui/fenetre.py:1265
 msgid "Retirer le mot de passe"
 msgstr "Remove password"
 
-#: src/scrinium/ui/fenetre.py:1375
+#: src/scrinium/ui/fenetre.py:1444
 msgid "Le texte et les images de la fiche seront de nouveau stockés en clair. Continuer ?"
 msgstr "The text and images of the note will be stored in clear text again. Continue?"
 
-#: src/scrinium/ui/fenetre.py:1423
+#: src/scrinium/ui/fenetre.py:1492
 msgid "Sélectionnez d'abord une fiche verrouillée."
 msgstr "Select a locked note first."
 
-#: src/scrinium/ui/fenetre.py:1431
+#: src/scrinium/ui/fenetre.py:1500
 msgid "Mot de passe du fichier de secours :"
 msgstr "Rescue file password:"
 
-#: src/scrinium/ui/fenetre.py:1440
+#: src/scrinium/ui/fenetre.py:1509
 msgid "Fiche rouverte. La remettre en clair (retirer le mot de passe) ?"
 msgstr "Note reopened. Put it back in plain text (remove the password)?"
 
-#: src/scrinium/ui/fenetre.py:1446
+#: src/scrinium/ui/fenetre.py:1515
 msgid "Fiche toujours verrouillée."
 msgstr "Note still locked."
 
-#: src/scrinium/ui/fenetre.py:473
-#: src/scrinium/ui/fenetre.py:526
+#: src/scrinium/ui/fenetre.py:479
+#: src/scrinium/ui/fenetre.py:532
 msgid "Désépingler"
 msgstr "Unpin"
 
-#: src/scrinium/ui/fenetre.py:473
-#: src/scrinium/ui/fenetre.py:526
+#: src/scrinium/ui/fenetre.py:479
+#: src/scrinium/ui/fenetre.py:532
 msgid "Épingler"
 msgstr "Pin"
 
-#: src/scrinium/ui/fenetre.py:483
+#: src/scrinium/ui/fenetre.py:489
 msgid "Supprimer les %d fiches…"
 msgstr "Delete the %d notes…"
 
-#: src/scrinium/ui/fenetre.py:507
+#: src/scrinium/ui/fenetre.py:513
 msgid "✔ %(n)d fiche(s) déplacée(s) vers « %(theme)s »"
 msgstr "✔ %(n)d fiche(s) moved to “%(theme)s”"
 
-#: src/scrinium/ui/fenetre.py:532
+#: src/scrinium/ui/fenetre.py:538
 msgid "Supprimer les %d thèmes…"
 msgstr "Delete the %d topics…"
 
-#: src/scrinium/ui/fenetre.py:606
+#: src/scrinium/ui/fenetre.py:612
 msgid ""
 "Mettre « %(nom)s » et ses %(n)d fiche(s) à la corbeille ?\n"
 "(%(dossier)s)"
@@ -6756,7 +7639,7 @@ msgstr ""
 "Move \"%(nom)s\" and its %(n)d note(s) to the trash?\n"
 "(%(dossier)s)"
 
-#: src/scrinium/ui/fenetre.py:610
+#: src/scrinium/ui/fenetre.py:616
 msgid ""
 "Mettre ces %(t)d thèmes et leurs %(n)d fiche(s) à la corbeille ?\n"
 "\n"
@@ -6770,57 +7653,57 @@ msgstr ""
 "\n"
 "(%(dossier)s)"
 
-#: src/scrinium/ui/fenetre.py:718
+#: src/scrinium/ui/fenetre.py:742
 msgid "Verrouillée"
 msgstr "Locked"
 
-#: src/scrinium/ui/fenetre.py:721
+#: src/scrinium/ui/fenetre.py:745
 msgid "Verrouillée (ouverte)"
 msgstr "Locked (open)"
 
-#: src/scrinium/ui/fenetre.py:721
-#: src/scrinium/ui/fenetre.py:1064
+#: src/scrinium/ui/fenetre.py:745
+#: src/scrinium/ui/fenetre.py:1089
 msgid "✔ Enregistré"
 msgstr "✔ Saved"
 
-#: src/scrinium/ui/fenetre.py:725
+#: src/scrinium/ui/fenetre.py:749
 msgid "Aucune fiche : « Fiche » (Ctrl+N)"
 msgstr "No notes: \"Note\" (Ctrl+N)"
 
-#: src/scrinium/ui/fenetre.py:793
+#: src/scrinium/ui/fenetre.py:817
 #: src/scrinium/ui/repertoire.py:493
 msgid "Dossier de contacts"
 msgstr "Contacts folder"
 
-#: src/scrinium/ui/fenetre.py:796
+#: src/scrinium/ui/fenetre.py:820
 msgid "Contacts et tableaux (*.vcf *.csv *.txt);;Tous (*)"
 msgstr "Contacts and tables (*.vcf *.csv *.txt);;All (*)"
 
-#: src/scrinium/ui/fenetre.py:860
+#: src/scrinium/ui/fenetre.py:884
 msgid "Ajouté à « %(theme)s / %(fiche)s »"
 msgstr "Added to “%(theme)s / %(fiche)s”"
 
-#: src/scrinium/ui/fenetre.py:928
+#: src/scrinium/ui/fenetre.py:952
 msgid "Lien Scrinium"
 msgstr "Scrinium link"
 
-#: src/scrinium/ui/fenetre.py:1107
+#: src/scrinium/ui/fenetre.py:1176
 msgid "Démarrage de la session"
 msgstr "Login startup"
 
-#: src/scrinium/ui/fenetre.py:1194
+#: src/scrinium/ui/fenetre.py:1263
 msgid "Déverrouiller…"
 msgstr "Unlock…"
 
-#: src/scrinium/ui/fenetre.py:1292
+#: src/scrinium/ui/fenetre.py:1361
 msgid "✔ Note copiée dans le presse-papiers"
 msgstr "✔ Note copied to the clipboard"
 
-#: src/scrinium/ui/fenetre.py:1331
+#: src/scrinium/ui/fenetre.py:1400
 msgid "Mot de passe incorrect."
 msgstr "Wrong password."
 
-#: src/scrinium/ui/fenetre.py:1350
+#: src/scrinium/ui/fenetre.py:1419
 msgid ""
 "Le texte et les images de la fiche seront chiffrés avec un mot de passe (le titre reste visible).\n"
 "\n"
@@ -6828,7 +7711,7 @@ msgstr ""
 "The text and images of the note will be encrypted with a password (the title stays visible).\n"
 "\n"
 
-#: src/scrinium/ui/fenetre.py:1412
+#: src/scrinium/ui/fenetre.py:1481
 msgid ""
 "Un fichier de secours est déjà actif.\n"
 "\n"
@@ -6838,70 +7721,78 @@ msgstr ""
 "\n"
 "Create a new one? It will be used for notes locked from now on; notes already locked can only be opened with the old one."
 
-#: src/scrinium/ui/fenetre.py:1455
+#: src/scrinium/ui/fenetre.py:1524
 msgid "Fiches rangées par thème, verrouillables (AES-256-GCM)."
 msgstr "Notes organised by topic, lockable (AES-256-GCM)."
 
-#: src/scrinium/ui/fenetre.py:344
-#: src/scrinium/ui/markdown.py:198
+#: src/scrinium/ui/fenetre.py:350
+#: src/scrinium/ui/markdown.py:200
 msgid "gras"
 msgstr "bold"
 
-#: src/scrinium/ui/fenetre.py:345
-#: src/scrinium/ui/markdown.py:199
+#: src/scrinium/ui/fenetre.py:351
+#: src/scrinium/ui/markdown.py:201
 msgid "italique"
 msgstr "italic"
 
-#: src/scrinium/ui/fenetre.py:800
-#: src/scrinium/ui/fenetre.py:1334
+#: src/scrinium/ui/fenetre.py:824
+#: src/scrinium/ui/fenetre.py:1403
 #: src/scrinium/ui/repertoire.py:458
 msgid "Lecture impossible : %s"
 msgstr "Cannot read: %s"
 
-#: src/scrinium/ui/fenetre.py:981
+#: src/scrinium/ui/fenetre.py:1005
 msgid "✔ Images mises à jour"
 msgstr "✔ Images updated"
 
-#: src/scrinium/ui/fenetre.py:1030
+#: src/scrinium/ui/fenetre.py:1054
 msgid "Mettre ces %d fiches à la corbeille ?"
 msgstr "Move these %d notes to the trash?"
 
-#: src/scrinium/ui/fenetre.py:1058
+#: src/scrinium/ui/fenetre.py:1082
 msgid "✔ Enregistré à"
 msgstr "✔ Saved at"
 
-#: src/scrinium/ui/fenetre.py:1107
+#: src/scrinium/ui/fenetre.py:1137
+msgid "Lien vers une fiche"
+msgstr "Link to a note"
+
+#: src/scrinium/ui/fenetre.py:1176
 msgid "Impossible de modifier le lancement automatique : %s"
 msgstr "Could not change automatic startup: %s"
 
-#: src/scrinium/ui/fenetre.py:1238
+#: src/scrinium/ui/fenetre.py:1307
 msgid "Cette fiche est verrouillée : %s contiendra son texte et ses images EN CLAIR. Continuer ?"
 msgstr "This note is locked: %s will contain its text and images IN CLEAR. Continue?"
 
-#: src/scrinium/ui/fenetre.py:1283
+#: src/scrinium/ui/fenetre.py:1352
 #: src/scrinium/ui/repertoire.py:513
 msgid "Écriture impossible : %s"
 msgstr "Cannot write: %s"
 
-#: src/scrinium/ui/fenetre.py:1366
+#: src/scrinium/ui/fenetre.py:1435
 msgid "Fiche non verrouillée : %s"
 msgstr "Note not locked: %s"
 
-#: src/scrinium/ui/fenetre.py:1382
+#: src/scrinium/ui/fenetre.py:1451
 msgid "Verrou conservé : %s"
 msgstr "Lock kept: %s"
 
-#: src/scrinium/ui/fenetre.py:1437
+#: src/scrinium/ui/fenetre.py:1506
 msgid "Impossible de rouvrir la fiche : %s"
 msgstr "Could not reopen the note: %s"
 
-#: src/scrinium/ui/fenetre.py:501
+#: src/scrinium/ui/fenetre.py:507
 msgid "Déplacement impossible : %s"
 msgstr "Move impossible: %s"
 
-#: src/scrinium/ui/fenetre.py:722
+#: src/scrinium/ui/fenetre.py:746
 msgid "modifié le"
 msgstr "modified on"
+
+#: src/scrinium/ui/fenetre.py:1138
+msgid "Aucune fiche ne s'appelle « %s ». La créer dans le thème « %s » ?"
+msgstr "No note is called \"%s\". Create it in the theme \"%s\"?"
 
 #: src/scrinium/ui/images.py:104
 msgid "Image trop lourde, même compressée."
@@ -6952,11 +7843,6 @@ msgstr "Add an image…"
 #: src/scrinium/ui/images.py:389
 msgid "Ajouter une image"
 msgstr "Add an image"
-
-#: src/scrinium/ui/images.py:435
-#: src/scrinium/ui/repertoire.py:340
-msgid "Ouvrir"
-msgstr "Open"
 
 #: src/scrinium/ui/images.py:436
 msgid "Enregistrer sous…"
@@ -7026,59 +7912,59 @@ msgstr "(first line of the text)"
 msgid "Titre :"
 msgstr "Title:"
 
-#: src/scrinium/ui/markdown.py:130
+#: src/scrinium/ui/markdown.py:132
 msgid "texte"
 msgstr "text"
 
-#: src/scrinium/ui/markdown.py:219
+#: src/scrinium/ui/markdown.py:221
 msgid "Aperçu"
 msgstr "Preview"
 
-#: src/scrinium/ui/markdown.py:220
+#: src/scrinium/ui/markdown.py:222
 msgid "Afficher la fiche mise en forme (Ctrl+E) ; ne modifie rien"
 msgstr "Show the formatted note (Ctrl+E); changes nothing"
 
-#: src/scrinium/ui/markdown.py:198
+#: src/scrinium/ui/markdown.py:200
 msgid "Gras (Ctrl+B)"
 msgstr "Bold (Ctrl+B)"
 
-#: src/scrinium/ui/markdown.py:199
+#: src/scrinium/ui/markdown.py:201
 msgid "Italique (Ctrl+I)"
 msgstr "Italic (Ctrl+I)"
 
-#: src/scrinium/ui/markdown.py:200
+#: src/scrinium/ui/markdown.py:202
 msgid "Titre (clics successifs : #, ##, ###, aucun)"
 msgstr "Heading (repeated clicks: #, ##, ###, none)"
 
-#: src/scrinium/ui/markdown.py:201
+#: src/scrinium/ui/markdown.py:203
 msgid "Liste à puces"
 msgstr "Bulleted list"
 
-#: src/scrinium/ui/markdown.py:202
+#: src/scrinium/ui/markdown.py:204
 msgid "Liste numérotée"
 msgstr "Numbered list"
 
-#: src/scrinium/ui/markdown.py:203
+#: src/scrinium/ui/markdown.py:205
 msgid "Citation"
 msgstr "Quote"
 
-#: src/scrinium/ui/markdown.py:204
+#: src/scrinium/ui/markdown.py:206
 msgid "Code (dans la ligne)"
 msgstr "Inline code"
 
-#: src/scrinium/ui/markdown.py:205
+#: src/scrinium/ui/markdown.py:207
 msgid "Bloc de code"
 msgstr "Code block"
 
-#: src/scrinium/ui/markdown.py:206
+#: src/scrinium/ui/markdown.py:208
 msgid "Lien"
 msgstr "Link"
 
-#: src/scrinium/ui/markdown.py:207
+#: src/scrinium/ui/markdown.py:209
 msgid "Effacer la mise en forme (sélection ou ligne)"
 msgstr "Clear formatting (selection or line)"
 
-#: src/scrinium/ui/markdown.py:204
+#: src/scrinium/ui/markdown.py:206
 msgid "code"
 msgstr "code"
 
@@ -7233,3 +8119,31 @@ msgstr "Call"
 #: src/scrinium/ui/repertoire.py:340
 msgid "Écrire à"
 msgstr "Write to"
+
+#: src/scrinium/ui/table_fiche.py:132
+msgid "Rechercher…"
+msgstr "Search…"
+
+#: src/scrinium/ui/table_fiche.py:44
+msgid "Modifier"
+msgstr "Edit"
+
+#: src/scrinium/ui/table_fiche.py:145
+msgid "Afficher les secrets"
+msgstr "Show secrets"
+
+#: src/scrinium/ui/table_fiche.py:162
+msgid "Double-clic ou clic droit : modifier ou supprimer. Cliquez sur un titre de colonne pour trier."
+msgstr "Double-click or right-click: edit or delete. Click a column title to sort."
+
+#: src/scrinium/ui/table_fiche.py:274
+msgid "Ajoutez une première ligne avec le bouton ci-dessus."
+msgstr "Add a first line with the button above."
+
+#: src/scrinium/ui/table_fiche.py:72
+msgid "Générer"
+msgstr "Generate"
+
+#: src/scrinium/ui/table_fiche.py:222
+msgid "Copier : %s (effacé après 20 s)"
+msgstr "Copy: %s (cleared after 20 s)"

@@ -8,11 +8,13 @@ import re
 import shlex
 import shutil
 import subprocess
+from urllib.parse import unquote
 
 from PyQt6.QtCore import QUrl, pyqtSignal
 from PyQt6.QtGui import QDesktopServices, QTextCursor
 from PyQt6.QtWidgets import QHBoxLayout, QPlainTextEdit, QTextBrowser, QToolButton, QWidget
 
+from ..core import liens_fiches
 from ..i18n import _
 from .entrees_menu import remplir
 from .icons import icone
@@ -238,9 +240,11 @@ class Apercu(QTextBrowser):
         self.navigateur = lambda: ""             # renvoie la commande choisie (réglage « navigateur »), vide = système
         self.setOpenLinks(False)
         self.anchorClicked.connect(self._lien)
+        self.fiche_existe = None                 # cible -> bool : une fiche porte ce titre (sinon le lien est marqué ✚)
 
     pdf_demande = pyqtSignal()
     impression_demandee = pyqtSignal()
+    fiche_demandee = pyqtSignal(str)             # clic sur un lien [[fiche]] : la cible (titre ou « Thème/Titre »)
     complements = staticmethod(lambda: [])       # voir images.Editeur
 
     def contextMenuEvent(self, ev):
@@ -253,11 +257,14 @@ class Apercu(QTextBrowser):
         m.deleteLater()
 
     def _lien(self, url: QUrl) -> None:
+        if url.scheme().lower() == liens_fiches.SCHEMA:
+            self.fiche_demandee.emit(unquote(url.toString().partition(":")[2]))
+            return
         if url.scheme().lower() not in LIENS_AUTORISES:
             return
         ouvrir_url(url, self.navigateur() if url.scheme().lower() != "mailto" else "")
 
     def afficher(self, texte: str) -> None:
         barre = self.verticalScrollBar().value()
-        self.setMarkdown(texte)
+        self.setMarkdown(liens_fiches.vers_markdown(texte, self.fiche_existe))
         self.verticalScrollBar().setValue(barre)

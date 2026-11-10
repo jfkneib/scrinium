@@ -1,0 +1,8 @@
+{
+  "titre": "Santé",
+  "version": "0.1",
+  "auteur": "Scrinium",
+  "description": "Un type de fiche « Santé » : la tension (haute, basse, pouls) avec courbe, moyennes et repères de couleur, et le traitement (médicaments, doses, horaires) avec une case « pris » par prise. Une pastille signale une prise oubliée. Un carnet, pas un avis médical ; à verrouiller.",
+  "classe": "SantePlugin",
+  "api": 1
+}
