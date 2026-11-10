@@ -319,6 +319,7 @@ def test_veille_remettre_non_lu(fen):
     vue = fen.vues_types["veille"]
     vue.charger(lg.ecrire(lg.Document([lg.Source("S", "https://x.org/f")])))
     vue.articles = [lg.Article("S", "Un", "https://x.org/1", "2026-11-10 10:00", "aaaaaaaaaa")]
+    vue._afficher()
     vue._lire_article(0)
     assert vue.t_articles.rowCount() == 0
     vue.c_lus.setChecked(True)
