@@ -21,7 +21,7 @@ DELAI = 4.0                                              # secondes par contrôl
 SEUIL_DISQUE = 90                                        # % d'occupation au-delà duquel la machine est « en alerte »
 _HOTE = re.compile(r"[A-Za-z0-9_][A-Za-z0-9._:\-\[\]]{0,252}")
 _CIBLE_SSH = re.compile(r"(?:[A-Za-z0-9_][A-Za-z0-9._\-]{0,63}@)?[A-Za-z0-9_][A-Za-z0-9._:\-\[\]]{0,252}")
-_CLES = ("adresse", "ports", "web", "ssh", "seuil_disque")
+_CLES = ("adresse", "ports", "web", "ssh", "seuil_disque", "watts")
 # Commande envoyée par SSH : fixe, en lecture seule. Elle ne dépend d'aucune valeur de la fiche.
 COMMANDE_SSH = "cat /proc/loadavg /proc/uptime; grep -E '^(MemTotal|MemAvailable):' /proc/meminfo; df -P /; nproc"
 
@@ -51,6 +51,24 @@ def lire_ports(texte) -> list:
     return ports[:12]
 
 
+def lire_watts(texte) -> tuple | None:
+    """« 40-200 » (ou « 40 200 », ou un tuple) -> (40, 200) : watts au repos et à pleine charge. None si absent ou incohérent."""
+    if isinstance(texte, (list, tuple)):
+        texte = " ".join(str(x) for x in texte)
+    nombres = re.findall(r"\d+", str(texte or ""))
+    if len(nombres) != 2:
+        return None
+    repos, maxi = int(nombres[0]), int(nombres[1])
+    return (repos, maxi) if 1 <= repos <= maxi <= 5000 else None
+
+
+def puissance_estimee(m: dict, mesures: dict) -> int | None:
+    """Estimation en watts : repos + (max - repos) x charge. None sans valeurs « watts » dans la fiche ou sans mesure de charge.
+    C'est une ESTIMATION, jamais une mesure : l'interface le dit."""
+    w, c = m.get("watts"), charge_pct(mesures)
+    return None if not w or c is None else round(w[0] + (w[1] - w[0]) * c / 100)
+
+
 def normaliser(m) -> dict | None:
     """Machine valide (champs nettoyés, valeurs dangereuses ou incorrectes écartées) ou None sans nom ni adresse valides."""
     if not isinstance(m, dict):
@@ -67,7 +85,7 @@ def normaliser(m) -> dict | None:
         seuil = SEUIL_DISQUE
     return {"nom": nom, "adresse": adresse, "ports": lire_ports(m.get("ports", "")),
             "web": web if web_valide(web) else "", "ssh": ssh if cible_ssh_valide(ssh) else "",
-            "seuil_disque": min(max(seuil, 1), 100)}
+            "seuil_disque": min(max(seuil, 1), 100), "watts": lire_watts(m.get("watts", ""))}
 
 
 def normaliser_liste(liste) -> list:
@@ -108,6 +126,8 @@ def en_texte(machines: list) -> str:
             sortie.append("web: " + m["web"])
         if m["ssh"]:
             sortie.append("ssh: " + m["ssh"])
+        if m["watts"]:
+            sortie.append("watts: %d-%d" % m["watts"])
         if m["seuil_disque"] != SEUIL_DISQUE:
             sortie.append(f"seuil_disque: {m['seuil_disque']}")
     return "\n".join(sortie) + "\n"

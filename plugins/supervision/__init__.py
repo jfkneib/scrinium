@@ -41,7 +41,7 @@ class DialogueMachine(QDialog):
 
     def __init__(self, machine=None, parent=None):
         super().__init__(parent)
-        m = machine or {"nom": "", "adresse": "", "ports": [], "web": "", "ssh": "", "seuil_disque": logique.SEUIL_DISQUE}
+        m = machine or {"nom": "", "adresse": "", "ports": [], "web": "", "ssh": "", "seuil_disque": logique.SEUIL_DISQUE, "watts": None}
         self.setWindowTitle(_("Machine"))
         self.resize(460, 260)
         f = QFormLayout(self)
@@ -64,7 +64,12 @@ class DialogueMachine(QDialog):
         f.addRow(_("Ports à tester :"), self.ports)
         f.addRow(_("Page web :"), self.web)
         f.addRow(_("Cible SSH :"), self.ssh)
+        self.watts = QLineEdit("%d-%d" % m["watts"] if m.get("watts") else "")
+        self.watts.setPlaceholderText("40-200")
+        self.watts.setToolTip(_("Facultatif : consommation de la machine au repos et à pleine charge, en watts (ex. 40-200). Sert à ESTIMER la puissance "
+                                "d'après la charge : ce n'est pas une mesure."))
         f.addRow(_("Alerte disque à :"), self.seuil)
+        f.addRow(_("Watts repos-max :"), self.watts)
         b = QDialogButtonBox(QDialogButtonBox.StandardButton.Ok | QDialogButtonBox.StandardButton.Cancel)
         b.accepted.connect(self._valider)
         b.rejected.connect(self.reject)
@@ -72,7 +77,7 @@ class DialogueMachine(QDialog):
 
     def resultat(self) -> dict | None:
         return logique.normaliser({"nom": self.nom.text(), "adresse": self.adresse.text(), "ports": self.ports.text(),
-                                   "web": self.web.text(), "ssh": self.ssh.text(), "seuil_disque": self.seuil.value()})
+                                   "web": self.web.text(), "ssh": self.ssh.text(), "seuil_disque": self.seuil.value(), "watts": self.watts.text()})
 
     def _valider(self):
         if not self.nom.text().strip() or not logique.hote_valide(self.adresse.text().strip()):
@@ -113,11 +118,11 @@ class VueSupervision(QWidget):
         self.l_maj = QLabel()
         haut.addWidget(self.l_maj, 1)
         lay.addLayout(haut)
-        self.table = QTableWidget(0, 8)
+        self.table = QTableWidget(0, 9)
         self.table.setHorizontalHeaderLabels([_("État"), _("Machine"), _("Réseau"), _("Disque"), _("Mémoire"), _("Charge"),
-                                              _("En marche depuis"), _("Détail")])
+                                              _("Puissance"), _("En marche depuis"), _("Détail")])
         self.table.verticalHeader().setVisible(False)
-        self.table.horizontalHeader().setSectionResizeMode(7, QHeaderView.ResizeMode.Stretch)
+        self.table.horizontalHeader().setSectionResizeMode(8, QHeaderView.ResizeMode.Stretch)
         self.table.setEditTriggers(QAbstractItemView.EditTrigger.NoEditTriggers)
         self.table.setSelectionBehavior(QAbstractItemView.SelectionBehavior.SelectRows)
         self.table.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
@@ -227,9 +232,10 @@ class VueSupervision(QWidget):
             reseau += [f"{p} " + ("✓" if o else "✗") for p, o in r["ports"].items()]
             if "web" in r:
                 reseau.append("web " + (str(r["web"]) if r["web"] else "✗"))
+        watts = logique.puissance_estimee(m, mes)
         cases = ["● " + _libelle_etat(e), m["nom"] + "  (" + m["adresse"] + ")", "  ".join(reseau),
                  f"{mes['disque_pct']} %" if "disque_pct" in mes else "", f"{mes['memoire_pct']} %" if "memoire_pct" in mes else "",
-                 f"{mes['charge']:.2f}" if "charge" in mes else "", logique.duree(mes["uptime_s"]) if "uptime_s" in mes else "",
+                 f"{mes['charge']:.2f}" if "charge" in mes else "", f"≈ {watts} W" if watts is not None else "", logique.duree(mes["uptime_s"]) if "uptime_s" in mes else "",
                  ", ".join(raisons)]
         for c, t in enumerate(cases):
             it = QTableWidgetItem(t)
@@ -239,6 +245,11 @@ class VueSupervision(QWidget):
             if niveau is not None:
                 it.setBackground(QBrush(couleur_niveau(niveau)))
                 it.setForeground(QBrush(QColor("#1b1b1b")))
+            if c == 6 and watts is not None:
+                a, b = m["watts"]
+                it.setToolTip(_("ESTIMATION, pas une mesure : %(repos)d W au repos + (%(maxi)d − %(repos)d) W × charge %(charge)d %% = %(w)d W.\n"
+                                "Soit environ %(wh)d Wh par jour si cela dure (%(kwh).1f kWh par mois).") % {
+                    "repos": a, "maxi": b, "charge": logique.charge_pct(mes), "w": watts, "wh": watts * 24, "kwh": watts * 24 * 30 / 1000})
             self.table.setItem(i, c, it)
         self.table.resizeColumnsToContents()
 
@@ -317,6 +328,7 @@ DOC = _(
     "• Nouvelle fiche > « Supervision » : une machine par section, avec son adresse. Clic droit : ajouter, modifier ou retirer une machine.\n"
     "• Le tableau montre si la machine répond au ping, quels ports sont ouverts, si sa page web répond et, avec une cible SSH, le disque, la mémoire, la charge et la durée de fonctionnement.\n"
     "• « Actualiser », ou automatiquement toutes les minutes tant que la fiche est affichée. Une notification prévient quand une machine passe en alerte ou en panne.\n"
+    "• Puissance (facultatif) : indiquez les watts de la machine au repos et à pleine charge (ex. 40-200) : Scrinium ESTIME la puissance d'après la charge, et le dit au survol. Ce n'est pas une mesure.\n"
     "• SSH : connexion par clé, sans mot de passe. Scrinium n'envoie qu'une commande fixe, en lecture seule (charge, mémoire, disque).\n"
     "• Type exécutable : une fiche reçue d'un autre ne lance aucun contrôle tant que vous ne l'avez pas validée (bandeau « Valider cette fiche »). "
     "Les adresses sont écrites en clair dans la fiche.")

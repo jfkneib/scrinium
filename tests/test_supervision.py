@@ -180,3 +180,19 @@ def test_couleurs_de_consommation_du_vert_au_rouge(fen):
     vue._gen += 1
     vue._arrive(vue._gen, 0, {"ping": True, "ports": {}, "mesures": {"disque_pct": 95, "memoire_pct": 10, "charge": 1.0, "coeurs": 4}})
     assert vue.table.item(0, 3).background().color().hue() < 20 and vue.table.item(0, 4).background().color().hue() > 100
+
+
+def test_puissance_estimee_et_dite_estimee(fen):
+    assert lg.lire_watts("40-200") == (40, 200) and lg.lire_watts("40 200") == (40, 200)
+    assert lg.lire_watts("200-40") is None and lg.lire_watts("abc") is None and lg.lire_watts("") is None
+    m = lg.normaliser({"nom": "x", "adresse": "h", "watts": "40-200"})
+    assert "watts: 40-200" in lg.en_texte([m]) and lg.depuis_texte(lg.en_texte([m]))[0]["watts"] == (40, 200)
+    assert lg.puissance_estimee(m, {"charge": 2.0, "coeurs": 4}) == 120                 # 40 + 160 x 50 %
+    assert lg.puissance_estimee(m, {}) is None and lg.puissance_estimee(lg.normaliser({"nom": "x", "adresse": "h"}), {"charge": 1.0}) is None
+    vue = fen.vues_types["supervision"]
+    vue.machines = [m]
+    vue._afficher()
+    vue._gen += 1
+    vue._arrive(vue._gen, 0, {"ping": True, "ports": {}, "mesures": {"charge": 2.0, "coeurs": 4}})
+    assert vue.table.item(0, 6).text() == "≈ 120 W"
+    assert "ESTIMATION" in vue.table.item(0, 6).toolTip() and "2880 Wh" in vue.table.item(0, 6).toolTip()

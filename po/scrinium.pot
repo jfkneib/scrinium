@@ -2950,186 +2950,205 @@ msgstr ""
 msgid "Cette fiche fait le point sur les plannings (fiches « Planning ») du même thème que celle-ci, ou sur tous si vous le choisissez en haut : avancement, retards, dates. Elle se met à jour quand on l'ouvre ou qu'on clique sur « Actualiser »."
 msgstr ""
 
-#: plugins/supervision/__init__.py:297
+#: plugins/supervision/__init__.py:325
 msgid ""
 "L'état de vos machines (ordinateurs, serveurs, NAS, box) dans une fiche.\n"
 "\n"
 "• Nouvelle fiche > « Supervision » : une machine par section, avec son adresse. Clic droit : ajouter, modifier ou retirer une machine.\n"
 "• Le tableau montre si la machine répond au ping, quels ports sont ouverts, si sa page web répond et, avec une cible SSH, le disque, la mémoire, la charge et la durée de fonctionnement.\n"
 "• « Actualiser », ou automatiquement toutes les minutes tant que la fiche est affichée. Une notification prévient quand une machine passe en alerte ou en panne.\n"
+"• Puissance (facultatif) : indiquez les watts de la machine au repos et à pleine charge (ex. 40-200) : Scrinium ESTIME la puissance d'après la charge, et le dit au survol. Ce n'est pas une mesure.\n"
 "• SSH : connexion par clé, sans mot de passe. Scrinium n'envoie qu'une commande fixe, en lecture seule (charge, mémoire, disque).\n"
 "• Type exécutable : une fiche reçue d'un autre ne lance aucun contrôle tant que vous ne l'avez pas validée (bandeau « Valider cette fiche »). Les adresses sont écrites en clair dans la fiche."
 msgstr ""
 
-#: plugins/supervision/__init__.py:29
+#: plugins/supervision/__init__.py:36
 msgid "…"
 msgstr ""
 
-#: plugins/supervision/__init__.py:38
-#: plugins/supervision/__init__.py:72
-#: plugins/supervision/__init__.py:75
+#: plugins/supervision/__init__.py:45
+#: plugins/supervision/__init__.py:84
+#: plugins/supervision/__init__.py:87
 msgid "Machine"
 msgstr ""
 
-#: plugins/supervision/__init__.py:50
+#: plugins/supervision/__init__.py:57
 msgid "Pour lire disque, mémoire et charge. Connexion par clé (sans mot de passe) ; une commande fixe, en lecture seule."
 msgstr ""
 
-#: plugins/supervision/__init__.py:57
+#: plugins/supervision/__init__.py:64
 msgid "Ports à tester :"
 msgstr ""
 
-#: plugins/supervision/__init__.py:58
+#: plugins/supervision/__init__.py:65
 msgid "Page web :"
 msgstr ""
 
-#: plugins/supervision/__init__.py:59
+#: plugins/supervision/__init__.py:66
 msgid "Cible SSH :"
 msgstr ""
 
-#: plugins/supervision/__init__.py:60
+#: plugins/supervision/__init__.py:69
+msgid "Facultatif : consommation de la machine au repos et à pleine charge, en watts (ex. 40-200). Sert à ESTIMER la puissance d'après la charge : ce n'est pas une mesure."
+msgstr ""
+
+#: plugins/supervision/__init__.py:71
 msgid "Alerte disque à :"
 msgstr ""
 
-#: plugins/supervision/__init__.py:103
+#: plugins/supervision/__init__.py:72
+msgid "Watts repos-max :"
+msgstr ""
+
+#: plugins/supervision/__init__.py:115
 msgid "Toutes les minutes"
 msgstr ""
 
-#: plugins/supervision/__init__.py:281
+#: plugins/supervision/__init__.py:309
 msgid "Extension Supervision"
 msgstr ""
 
-#: plugins/supervision/__init__.py:293
-#: plugins/supervision/logique.py:118
+#: plugins/supervision/__init__.py:321
+#: plugins/supervision/logique.py:140
 msgid "Supervision"
 msgstr ""
 
-#: plugins/supervision/__init__.py:29
+#: plugins/supervision/__init__.py:36
 msgid "En ligne"
 msgstr ""
 
-#: plugins/supervision/__init__.py:29
+#: plugins/supervision/__init__.py:36
 msgid "Alerte"
 msgstr ""
 
-#: plugins/supervision/__init__.py:29
+#: plugins/supervision/__init__.py:36
 msgid "Panne"
 msgstr ""
 
-#: plugins/supervision/__init__.py:72
+#: plugins/supervision/__init__.py:84
 msgid "Un nom et une adresse valide sont obligatoires (l'adresse ne peut pas commencer par « - »)."
 msgstr ""
 
-#: plugins/supervision/__init__.py:75
+#: plugins/supervision/__init__.py:87
 msgid "La page web doit commencer par http:// ou https://."
 msgstr ""
 
-#: plugins/supervision/__init__.py:78
+#: plugins/supervision/__init__.py:90
 msgid "Cible SSH refusée : utilisez « utilisateur@machine »."
 msgstr ""
 
-#: plugins/supervision/__init__.py:110
+#: plugins/supervision/__init__.py:122
 msgid "État"
 msgstr ""
 
-#: plugins/supervision/__init__.py:110
+#: plugins/supervision/__init__.py:122
 msgid "Réseau"
 msgstr ""
 
-#: plugins/supervision/__init__.py:110
+#: plugins/supervision/__init__.py:122
 msgid "Disque"
 msgstr ""
 
-#: plugins/supervision/__init__.py:110
+#: plugins/supervision/__init__.py:122
 msgid "Mémoire"
 msgstr ""
 
-#: plugins/supervision/__init__.py:110
+#: plugins/supervision/__init__.py:122
 msgid "Charge"
 msgstr ""
 
-#: plugins/supervision/__init__.py:111
+#: plugins/supervision/__init__.py:123
+msgid "Puissance"
+msgstr ""
+
+#: plugins/supervision/__init__.py:123
 msgid "En marche depuis"
 msgstr ""
 
-#: plugins/supervision/__init__.py:111
+#: plugins/supervision/__init__.py:123
 msgid "Détail"
 msgstr ""
 
-#: plugins/supervision/__init__.py:139
+#: plugins/supervision/__init__.py:151
 msgid "Clic droit : ajouter, modifier ou retirer une machine."
 msgstr ""
 
-#: plugins/supervision/__init__.py:140
+#: plugins/supervision/__init__.py:152
 msgid "Fiche non validée : relisez les machines, puis validez-la pour lancer les contrôles et la modifier."
 msgstr ""
 
-#: plugins/supervision/__init__.py:245
+#: plugins/supervision/__init__.py:273
 msgid "Ajouter une machine…"
 msgstr ""
 
-#: plugins/supervision/__init__.py:198
+#: plugins/supervision/__init__.py:216
 msgid "Dernier contrôle : %s"
 msgstr ""
 
-#: plugins/supervision/__init__.py:248
+#: plugins/supervision/__init__.py:276
 msgid "Retirer"
 msgstr ""
 
-#: plugins/supervision/__init__.py:293
+#: plugins/supervision/__init__.py:321
 msgid "« %s » est en panne : elle ne répond plus."
 msgstr ""
 
-#: plugins/supervision/__init__.py:294
+#: plugins/supervision/__init__.py:250
+msgid ""
+"ESTIMATION, pas une mesure : %(repos)d W au repos + (%(maxi)d − %(repos)d) W × charge %(charge)d %% = %(w)d W.\n"
+"Soit environ %(wh)d Wh par jour si cela dure (%(kwh).1f kWh par mois)."
+msgstr ""
+
+#: plugins/supervision/__init__.py:322
 msgid "« %s » est en alerte : "
 msgstr ""
 
-#: plugins/supervision/logique.py:123
+#: plugins/supervision/logique.py:145
 msgid "Supervision (exemples)"
 msgstr ""
 
-#: plugins/supervision/logique.py:123
+#: plugins/supervision/logique.py:145
 msgid "Exemple · Mes machines"
 msgstr ""
 
-#: plugins/supervision/logique.py:169
+#: plugins/supervision/logique.py:191
 msgid "cible SSH refusée"
 msgstr ""
 
-#: plugins/supervision/logique.py:115
-#: plugins/supervision/logique.py:124
+#: plugins/supervision/logique.py:137
+#: plugins/supervision/logique.py:146
 msgid "Cette machine"
 msgstr ""
 
-#: plugins/supervision/logique.py:203
+#: plugins/supervision/logique.py:234
 msgid "SSH a échoué"
 msgstr ""
 
-#: plugins/supervision/logique.py:226
+#: plugins/supervision/logique.py:277
 msgid "ne répond pas"
 msgstr ""
 
-#: plugins/supervision/logique.py:231
+#: plugins/supervision/logique.py:282
 msgid "page web en erreur"
 msgstr ""
 
-#: plugins/supervision/logique.py:231
+#: plugins/supervision/logique.py:282
 msgid "page web muette"
 msgstr ""
 
-#: plugins/supervision/logique.py:233
+#: plugins/supervision/logique.py:284
 msgid "SSH : %s"
 msgstr ""
 
-#: plugins/supervision/logique.py:236
+#: plugins/supervision/logique.py:287
 msgid "disque à %d %%"
 msgstr ""
 
-#: plugins/supervision/logique.py:229
+#: plugins/supervision/logique.py:280
 msgid "port %d fermé"
 msgstr ""
 
-#: plugins/supervision/logique.py:125
+#: plugins/supervision/logique.py:147
 msgid "Exemple de serveur (à adapter)"
 msgstr ""
 
