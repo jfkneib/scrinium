@@ -1,0 +1,8 @@
+{
+  "titre": "Supervision",
+  "version": "0.1",
+  "auteur": "Scrinium",
+  "description": "Un type de fiche « Supervision » : une ligne par machine (ordinateur, serveur, NAS, box) avec son état : joignable ou non (ping), ports ouverts, page web, et, par SSH, disque, mémoire, charge et durée de fonctionnement. Notification quand une machine tombe. Les contrôles ne partent que d'une fiche que vous avez validée.",
+  "classe": "SupervisionPlugin",
+  "api": 1
+}

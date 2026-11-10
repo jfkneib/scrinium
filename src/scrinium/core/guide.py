@@ -46,6 +46,7 @@ def fiches(dossier_fiches) -> list:
             "• Agenda : des rappels et échéances (extension Agenda).\n"
             "• Calc : un petit éditeur de listes avec des totaux par colonne et l'export CSV, pour suivre des relevés (extension Calc).\n"
             "• Budget : de petits comptes (courses, argent de poche…) avec colonnes Débit et Crédit, un onglet par mois, un bilan, et une fiche « Budget — résultat » qui totalise tous les budgets (extension Budget).\n"
+            "• Supervision : l'état de vos machines (ping, ports, page web, disque, mémoire et charge par SSH) dans une fiche, avec une notification quand l'une tombe (extension Supervision).\n"
             "• Planning : des tâches en couleurs sur un diagramme de Gantt, avec l'avancement, les retards et un rétroplanning à partir d'une date de fin (extension Planning).\n"
             "• Tableur : des cellules et des formules comme =SOMME(B2:B10), avec export et import CSV (extension Tableur).\n"
             "\n"

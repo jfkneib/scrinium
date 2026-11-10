@@ -2950,6 +2950,189 @@ msgstr ""
 msgid "Cette fiche fait le point sur les plannings (fiches « Planning ») du même thème que celle-ci, ou sur tous si vous le choisissez en haut : avancement, retards, dates. Elle se met à jour quand on l'ouvre ou qu'on clique sur « Actualiser »."
 msgstr ""
 
+#: plugins/supervision/__init__.py:297
+msgid ""
+"L'état de vos machines (ordinateurs, serveurs, NAS, box) dans une fiche.\n"
+"\n"
+"• Nouvelle fiche > « Supervision » : une machine par section, avec son adresse. Clic droit : ajouter, modifier ou retirer une machine.\n"
+"• Le tableau montre si la machine répond au ping, quels ports sont ouverts, si sa page web répond et, avec une cible SSH, le disque, la mémoire, la charge et la durée de fonctionnement.\n"
+"• « Actualiser », ou automatiquement toutes les minutes tant que la fiche est affichée. Une notification prévient quand une machine passe en alerte ou en panne.\n"
+"• SSH : connexion par clé, sans mot de passe. Scrinium n'envoie qu'une commande fixe, en lecture seule (charge, mémoire, disque).\n"
+"• Type exécutable : une fiche reçue d'un autre ne lance aucun contrôle tant que vous ne l'avez pas validée (bandeau « Valider cette fiche »). Les adresses sont écrites en clair dans la fiche."
+msgstr ""
+
+#: plugins/supervision/__init__.py:29
+msgid "…"
+msgstr ""
+
+#: plugins/supervision/__init__.py:38
+#: plugins/supervision/__init__.py:72
+#: plugins/supervision/__init__.py:75
+msgid "Machine"
+msgstr ""
+
+#: plugins/supervision/__init__.py:50
+msgid "Pour lire disque, mémoire et charge. Connexion par clé (sans mot de passe) ; une commande fixe, en lecture seule."
+msgstr ""
+
+#: plugins/supervision/__init__.py:57
+msgid "Ports à tester :"
+msgstr ""
+
+#: plugins/supervision/__init__.py:58
+msgid "Page web :"
+msgstr ""
+
+#: plugins/supervision/__init__.py:59
+msgid "Cible SSH :"
+msgstr ""
+
+#: plugins/supervision/__init__.py:60
+msgid "Alerte disque à :"
+msgstr ""
+
+#: plugins/supervision/__init__.py:103
+msgid "Toutes les minutes"
+msgstr ""
+
+#: plugins/supervision/__init__.py:281
+msgid "Extension Supervision"
+msgstr ""
+
+#: plugins/supervision/__init__.py:293
+#: plugins/supervision/logique.py:118
+msgid "Supervision"
+msgstr ""
+
+#: plugins/supervision/__init__.py:29
+msgid "En ligne"
+msgstr ""
+
+#: plugins/supervision/__init__.py:29
+msgid "Alerte"
+msgstr ""
+
+#: plugins/supervision/__init__.py:29
+msgid "Panne"
+msgstr ""
+
+#: plugins/supervision/__init__.py:72
+msgid "Un nom et une adresse valide sont obligatoires (l'adresse ne peut pas commencer par « - »)."
+msgstr ""
+
+#: plugins/supervision/__init__.py:75
+msgid "La page web doit commencer par http:// ou https://."
+msgstr ""
+
+#: plugins/supervision/__init__.py:78
+msgid "Cible SSH refusée : utilisez « utilisateur@machine »."
+msgstr ""
+
+#: plugins/supervision/__init__.py:110
+msgid "État"
+msgstr ""
+
+#: plugins/supervision/__init__.py:110
+msgid "Réseau"
+msgstr ""
+
+#: plugins/supervision/__init__.py:110
+msgid "Disque"
+msgstr ""
+
+#: plugins/supervision/__init__.py:110
+msgid "Mémoire"
+msgstr ""
+
+#: plugins/supervision/__init__.py:110
+msgid "Charge"
+msgstr ""
+
+#: plugins/supervision/__init__.py:111
+msgid "En marche depuis"
+msgstr ""
+
+#: plugins/supervision/__init__.py:111
+msgid "Détail"
+msgstr ""
+
+#: plugins/supervision/__init__.py:139
+msgid "Clic droit : ajouter, modifier ou retirer une machine."
+msgstr ""
+
+#: plugins/supervision/__init__.py:140
+msgid "Fiche non validée : relisez les machines, puis validez-la pour lancer les contrôles et la modifier."
+msgstr ""
+
+#: plugins/supervision/__init__.py:245
+msgid "Ajouter une machine…"
+msgstr ""
+
+#: plugins/supervision/__init__.py:198
+msgid "Dernier contrôle : %s"
+msgstr ""
+
+#: plugins/supervision/__init__.py:248
+msgid "Retirer"
+msgstr ""
+
+#: plugins/supervision/__init__.py:293
+msgid "« %s » est en panne : elle ne répond plus."
+msgstr ""
+
+#: plugins/supervision/__init__.py:294
+msgid "« %s » est en alerte : "
+msgstr ""
+
+#: plugins/supervision/logique.py:123
+msgid "Supervision (exemples)"
+msgstr ""
+
+#: plugins/supervision/logique.py:123
+msgid "Exemple · Mes machines"
+msgstr ""
+
+#: plugins/supervision/logique.py:169
+msgid "cible SSH refusée"
+msgstr ""
+
+#: plugins/supervision/logique.py:115
+#: plugins/supervision/logique.py:124
+msgid "Cette machine"
+msgstr ""
+
+#: plugins/supervision/logique.py:203
+msgid "SSH a échoué"
+msgstr ""
+
+#: plugins/supervision/logique.py:226
+msgid "ne répond pas"
+msgstr ""
+
+#: plugins/supervision/logique.py:231
+msgid "page web en erreur"
+msgstr ""
+
+#: plugins/supervision/logique.py:231
+msgid "page web muette"
+msgstr ""
+
+#: plugins/supervision/logique.py:233
+msgid "SSH : %s"
+msgstr ""
+
+#: plugins/supervision/logique.py:236
+msgid "disque à %d %%"
+msgstr ""
+
+#: plugins/supervision/logique.py:229
+msgid "port %d fermé"
+msgstr ""
+
+#: plugins/supervision/logique.py:125
+msgid "Exemple de serveur (à adapter)"
+msgstr ""
+
 #: plugins/tableur/__init__.py:383
 msgid ""
 "Un tableur pour des cellules et des formules, par exemple pour suivre des relevés (compteur, poids, dépenses…).\n"
@@ -4245,7 +4428,7 @@ msgid ""
 msgstr ""
 
 #: src/scrinium/core/guide.py:11
-#: src/scrinium/core/guide.py:101
+#: src/scrinium/core/guide.py:102
 msgid "Guide"
 msgstr ""
 
@@ -4293,17 +4476,18 @@ msgid ""
 "• Agenda : des rappels et échéances (extension Agenda).\n"
 "• Calc : un petit éditeur de listes avec des totaux par colonne et l'export CSV, pour suivre des relevés (extension Calc).\n"
 "• Budget : de petits comptes (courses, argent de poche…) avec colonnes Débit et Crédit, un onglet par mois, un bilan, et une fiche « Budget — résultat » qui totalise tous les budgets (extension Budget).\n"
+"• Supervision : l'état de vos machines (ping, ports, page web, disque, mémoire et charge par SSH) dans une fiche, avec une notification quand l'une tombe (extension Supervision).\n"
 "• Planning : des tâches en couleurs sur un diagramme de Gantt, avec l'avancement, les retards et un rétroplanning à partir d'une date de fin (extension Planning).\n"
 "• Tableur : des cellules et des formules comme =SOMME(B2:B10), avec export et import CSV (extension Tableur).\n"
 "\n"
 "Sécurité : un type qui LANCE des commandes (Applications, Actions CLI) reste inerte tant que vous n'avez pas validé la fiche vous-même. Une fiche reçue d'un autre n'exécute donc jamais rien toute seule."
 msgstr ""
 
-#: src/scrinium/core/guide.py:54
+#: src/scrinium/core/guide.py:55
 msgid "Guide 4 · Les extensions"
 msgstr ""
 
-#: src/scrinium/core/guide.py:54
+#: src/scrinium/core/guide.py:55
 msgid ""
 "Menu Extensions > Gérer les extensions… : cochez celles qui vous servent. Livrées avec Scrinium :\n"
 "\n"
@@ -4318,11 +4502,11 @@ msgid ""
 "Écrire la vôtre : menu Aide > « Documentation des extensions »."
 msgstr ""
 
-#: src/scrinium/core/guide.py:67
+#: src/scrinium/core/guide.py:68
 msgid "Guide 5 · Console et commandes"
 msgstr ""
 
-#: src/scrinium/core/guide.py:67
+#: src/scrinium/core/guide.py:68
 msgid ""
 "L'extension Capture relie vos fiches au terminal, sans jamais rien valider à votre place.\n"
 "\n"
@@ -4332,11 +4516,11 @@ msgid ""
 "• Depuis un terminal : « ls -al | scrinium ajouter -t Thème -f Fiche » ajoute la sortie à une fiche."
 msgstr ""
 
-#: src/scrinium/core/guide.py:79
+#: src/scrinium/core/guide.py:80
 msgid "Guide 6 · Verrouillage, secours et partage"
 msgstr ""
 
-#: src/scrinium/core/guide.py:79
+#: src/scrinium/core/guide.py:80
 msgid ""
 "• Verrouiller : bouton « Verrouiller… ». Le titre reste visible, le contenu est chiffré. Mot de passe oublié = fiche perdue, sauf avec le FICHIER DE SECOURS (menu Sécurité > Fichier de secours…) : faites-le dès le premier verrouillage, gardez-le hors de cet ordinateur.\n"
 "• Une fiche verrouillée n'est jamais envoyée, lue, traduite ni partagée tant qu'elle est fermée.\n"
@@ -4344,11 +4528,11 @@ msgid ""
 "• Inviter quelqu'un à INSTALLER Scrinium : menu Fichier > « Inviter à installer Scrinium… »."
 msgstr ""
 
-#: src/scrinium/core/guide.py:87
+#: src/scrinium/core/guide.py:88
 msgid "Guide 7 · Où sont mes données, sauvegarde"
 msgstr ""
 
-#: src/scrinium/core/guide.py:87
+#: src/scrinium/core/guide.py:88
 msgid ""
 "• Vos fiches : un dossier par thème, un fichier .md par fiche (.lock si verrouillée), avec un sous-dossier .pj pour les images jointes :\n"
 "\n"
@@ -4487,7 +4671,7 @@ msgstr ""
 msgid "non disponible sous %(ici)s (réservée à : %(ou)s)"
 msgstr ""
 
-#: src/scrinium/core/repertoire.py:149
+#: src/scrinium/core/repertoire.py:156
 #: src/scrinium/ui/fenetre.py:823
 msgid "Répertoire"
 msgstr ""

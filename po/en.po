@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: scrinium 0.2.0\n"
 "Report-Msgid-Bugs-To: \n"
-"PO-Revision-Date: 2026-11-10 09:49+0100\n"
+"PO-Revision-Date: 2026-11-10 14:26+0100\n"
 "Last-Translator: Jean-François Kneib\n"
 "Language-Team: English\n"
 "Language: en\n"
@@ -3111,6 +3111,196 @@ msgstr "Loop in the dependencies around \"%s\""
 msgid "Cette fiche fait le point sur les plannings (fiches « Planning ») du même thème que celle-ci, ou sur tous si vous le choisissez en haut : avancement, retards, dates. Elle se met à jour quand on l'ouvre ou qu'on clique sur « Actualiser »."
 msgstr "This note gives an overview of the plannings (\"Planning\" notes) of the same topic as itself, or of all of them if you choose so at the top: progress, delays, dates. It updates when you open it or click \"Refresh\"."
 
+#: plugins/supervision/__init__.py:297
+msgid ""
+"L'état de vos machines (ordinateurs, serveurs, NAS, box) dans une fiche.\n"
+"\n"
+"• Nouvelle fiche > « Supervision » : une machine par section, avec son adresse. Clic droit : ajouter, modifier ou retirer une machine.\n"
+"• Le tableau montre si la machine répond au ping, quels ports sont ouverts, si sa page web répond et, avec une cible SSH, le disque, la mémoire, la charge et la durée de fonctionnement.\n"
+"• « Actualiser », ou automatiquement toutes les minutes tant que la fiche est affichée. Une notification prévient quand une machine passe en alerte ou en panne.\n"
+"• SSH : connexion par clé, sans mot de passe. Scrinium n'envoie qu'une commande fixe, en lecture seule (charge, mémoire, disque).\n"
+"• Type exécutable : une fiche reçue d'un autre ne lance aucun contrôle tant que vous ne l'avez pas validée (bandeau « Valider cette fiche »). Les adresses sont écrites en clair dans la fiche."
+msgstr ""
+"The state of your machines (computers, servers, NAS, router) in a note.\n"
+"\n"
+"• New note > \"Monitoring\": one machine per section, with its address. Right-click: add, edit or remove a machine.\n"
+"• The table shows whether the machine answers ping, which ports are open, whether its web page answers and, with an SSH target, disk, memory, load and uptime.\n"
+"• \"Refresh\", or automatically every minute while the note is shown. A notification warns you when a machine goes on alert or down.\n"
+"• SSH: key-based login, no password. Scrinium sends only one fixed, read-only command (load, memory, disk).\n"
+"• Executable type: a note received from someone else runs no check until you validate it (\"Validate this note\" banner). Addresses are written in clear text in the note."
+
+#: plugins/supervision/__init__.py:29
+msgid "…"
+msgstr "…"
+
+#: plugins/supervision/__init__.py:38
+#: plugins/supervision/__init__.py:72
+#: plugins/supervision/__init__.py:75
+msgid "Machine"
+msgstr "Machine"
+
+#: plugins/supervision/__init__.py:50
+msgid "Pour lire disque, mémoire et charge. Connexion par clé (sans mot de passe) ; une commande fixe, en lecture seule."
+msgstr "To read disk, memory and load. Key-based login (no password); one fixed, read-only command."
+
+#: plugins/supervision/__init__.py:57
+msgid "Ports à tester :"
+msgstr "Ports to test:"
+
+#: plugins/supervision/__init__.py:58
+msgid "Page web :"
+msgstr "Web page:"
+
+#: plugins/supervision/__init__.py:59
+msgid "Cible SSH :"
+msgstr "SSH target:"
+
+#: plugins/supervision/__init__.py:60
+msgid "Alerte disque à :"
+msgstr "Disk alert at:"
+
+#: plugins/supervision/__init__.py:103
+msgid "Toutes les minutes"
+msgstr "Every minute"
+
+#: plugins/supervision/__init__.py:281
+msgid "Extension Supervision"
+msgstr "Monitoring extension"
+
+#: plugins/supervision/__init__.py:293
+#: plugins/supervision/logique.py:118
+msgid "Supervision"
+msgstr "Monitoring"
+
+#: plugins/supervision/__init__.py:29
+msgid "En ligne"
+msgstr "Online"
+
+#: plugins/supervision/__init__.py:29
+msgid "Alerte"
+msgstr "Alert"
+
+#: plugins/supervision/__init__.py:29
+msgid "Panne"
+msgstr "Down"
+
+#: plugins/supervision/__init__.py:72
+msgid "Un nom et une adresse valide sont obligatoires (l'adresse ne peut pas commencer par « - »)."
+msgstr "A name and a valid address are required (the address cannot start with \"-\")."
+
+#: plugins/supervision/__init__.py:75
+msgid "La page web doit commencer par http:// ou https://."
+msgstr "The web page must start with http:// or https://."
+
+#: plugins/supervision/__init__.py:78
+msgid "Cible SSH refusée : utilisez « utilisateur@machine »."
+msgstr "SSH target refused: use \"user@machine\"."
+
+#: plugins/supervision/__init__.py:110
+msgid "État"
+msgstr "Status"
+
+#: plugins/supervision/__init__.py:110
+msgid "Réseau"
+msgstr "Network"
+
+#: plugins/supervision/__init__.py:110
+msgid "Disque"
+msgstr "Disk"
+
+#: plugins/supervision/__init__.py:110
+msgid "Mémoire"
+msgstr "Memory"
+
+#: plugins/supervision/__init__.py:110
+msgid "Charge"
+msgstr "Load"
+
+#: plugins/supervision/__init__.py:111
+msgid "En marche depuis"
+msgstr "Up for"
+
+#: plugins/supervision/__init__.py:111
+msgid "Détail"
+msgstr "Details"
+
+#: plugins/supervision/__init__.py:139
+msgid "Clic droit : ajouter, modifier ou retirer une machine."
+msgstr "Right-click: add, edit or remove a machine."
+
+#: plugins/supervision/__init__.py:140
+msgid "Fiche non validée : relisez les machines, puis validez-la pour lancer les contrôles et la modifier."
+msgstr "Note not validated: review the machines, then validate it to run the checks and edit it."
+
+#: plugins/supervision/__init__.py:245
+msgid "Ajouter une machine…"
+msgstr "Add a machine…"
+
+#: plugins/supervision/__init__.py:198
+msgid "Dernier contrôle : %s"
+msgstr "Last check: %s"
+
+#: plugins/supervision/__init__.py:248
+msgid "Retirer"
+msgstr "Remove"
+
+#: plugins/supervision/__init__.py:293
+msgid "« %s » est en panne : elle ne répond plus."
+msgstr "\"%s\" is down: it no longer answers."
+
+#: plugins/supervision/__init__.py:294
+msgid "« %s » est en alerte : "
+msgstr "\"%s\" is on alert: "
+
+#: plugins/supervision/logique.py:123
+msgid "Supervision (exemples)"
+msgstr "Monitoring (examples)"
+
+#: plugins/supervision/logique.py:123
+msgid "Exemple · Mes machines"
+msgstr "Example · My machines"
+
+#: plugins/supervision/logique.py:169
+msgid "cible SSH refusée"
+msgstr "SSH target refused"
+
+#: plugins/supervision/logique.py:115
+#: plugins/supervision/logique.py:124
+msgid "Cette machine"
+msgstr "This machine"
+
+#: plugins/supervision/logique.py:203
+msgid "SSH a échoué"
+msgstr "SSH failed"
+
+#: plugins/supervision/logique.py:226
+msgid "ne répond pas"
+msgstr "not answering"
+
+#: plugins/supervision/logique.py:231
+msgid "page web en erreur"
+msgstr "web page in error"
+
+#: plugins/supervision/logique.py:231
+msgid "page web muette"
+msgstr "web page not answering"
+
+#: plugins/supervision/logique.py:233
+msgid "SSH : %s"
+msgstr "SSH: %s"
+
+#: plugins/supervision/logique.py:236
+msgid "disque à %d %%"
+msgstr "disk at %d %%"
+
+#: plugins/supervision/logique.py:229
+msgid "port %d fermé"
+msgstr "port %d closed"
+
+#: plugins/supervision/logique.py:125
+msgid "Exemple de serveur (à adapter)"
+msgstr "Example server (adapt it)"
+
 #: plugins/tableur/__init__.py:383
 msgid ""
 "Un tableur pour des cellules et des formules, par exemple pour suivre des relevés (compteur, poids, dépenses…).\n"
@@ -4683,7 +4873,7 @@ msgstr ""
 "You can read them with any text editor. To back them up, copy this folder. Locked notes are .lock files, unreadable without their password."
 
 #: src/scrinium/core/guide.py:11
-#: src/scrinium/core/guide.py:101
+#: src/scrinium/core/guide.py:102
 msgid "Guide"
 msgstr "Guide"
 
@@ -4744,6 +4934,7 @@ msgid ""
 "• Agenda : des rappels et échéances (extension Agenda).\n"
 "• Calc : un petit éditeur de listes avec des totaux par colonne et l'export CSV, pour suivre des relevés (extension Calc).\n"
 "• Budget : de petits comptes (courses, argent de poche…) avec colonnes Débit et Crédit, un onglet par mois, un bilan, et une fiche « Budget — résultat » qui totalise tous les budgets (extension Budget).\n"
+"• Supervision : l'état de vos machines (ping, ports, page web, disque, mémoire et charge par SSH) dans une fiche, avec une notification quand l'une tombe (extension Supervision).\n"
 "• Planning : des tâches en couleurs sur un diagramme de Gantt, avec l'avancement, les retards et un rétroplanning à partir d'une date de fin (extension Planning).\n"
 "• Tableur : des cellules et des formules comme =SOMME(B2:B10), avec export et import CSV (extension Tableur).\n"
 "\n"
@@ -4758,16 +4949,17 @@ msgstr ""
 "• Agenda: reminders and deadlines (Agenda extension).\n"
 "• Calc: a small list editor with totals per column and CSV export, to track readings (Calc extension).\n"
 "• Budget: small accounts (groceries, pocket money…) with Debit and Credit columns, one tab per month, a summary, and a \"Budget — result\" note that totals all the budgets (Budget extension).\n"
+"• Monitoring: the state of your machines (ping, ports, web page, disk, memory and load over SSH) in a note, with a notification when one goes down (Monitoring extension).\n"
 "• Planning: tasks as a colour-coded Gantt chart, with progress, delays and a backward schedule from an end date (Planning extension).\n"
 "• Spreadsheet: cells and formulas such as =SOMME(B2:B10), with CSV export and import (Spreadsheet extension).\n"
 "\n"
 "Security: a type that RUNS commands (Applications, CLI actions) stays inert until you have validated the note yourself. A note received from someone else therefore never runs anything on its own."
 
-#: src/scrinium/core/guide.py:54
+#: src/scrinium/core/guide.py:55
 msgid "Guide 4 · Les extensions"
 msgstr "Guide 4 · Extensions"
 
-#: src/scrinium/core/guide.py:54
+#: src/scrinium/core/guide.py:55
 msgid ""
 "Menu Extensions > Gérer les extensions… : cochez celles qui vous servent. Livrées avec Scrinium :\n"
 "\n"
@@ -4793,11 +4985,11 @@ msgstr ""
 "\n"
 "Write your own: Help menu > \"Extensions documentation\"."
 
-#: src/scrinium/core/guide.py:67
+#: src/scrinium/core/guide.py:68
 msgid "Guide 5 · Console et commandes"
 msgstr "Guide 5 · Console and commands"
 
-#: src/scrinium/core/guide.py:67
+#: src/scrinium/core/guide.py:68
 msgid ""
 "L'extension Capture relie vos fiches au terminal, sans jamais rien valider à votre place.\n"
 "\n"
@@ -4813,11 +5005,11 @@ msgstr ""
 "• Extensions > \"Run a command and insert the output…\": the opposite, the command is run after confirmation and its output is inserted in the note, at the cursor.\n"
 "• From a terminal: \"ls -al | scrinium ajouter -t Topic -f Note\" adds the output to a note."
 
-#: src/scrinium/core/guide.py:79
+#: src/scrinium/core/guide.py:80
 msgid "Guide 6 · Verrouillage, secours et partage"
 msgstr "Guide 6 · Locking, recovery and sharing"
 
-#: src/scrinium/core/guide.py:79
+#: src/scrinium/core/guide.py:80
 msgid ""
 "• Verrouiller : bouton « Verrouiller… ». Le titre reste visible, le contenu est chiffré. Mot de passe oublié = fiche perdue, sauf avec le FICHIER DE SECOURS (menu Sécurité > Fichier de secours…) : faites-le dès le premier verrouillage, gardez-le hors de cet ordinateur.\n"
 "• Une fiche verrouillée n'est jamais envoyée, lue, traduite ni partagée tant qu'elle est fermée.\n"
@@ -4829,11 +5021,11 @@ msgstr ""
 "• Sharing: the Sharing extension synchronises notes with a Scrinium server. An invitation by email (valid 48 h) gives read or write access; in a conflict, both versions are kept.\n"
 "• Invite someone to INSTALL Scrinium: File menu > \"Invite to install Scrinium…\"."
 
-#: src/scrinium/core/guide.py:87
+#: src/scrinium/core/guide.py:88
 msgid "Guide 7 · Où sont mes données, sauvegarde"
 msgstr "Guide 7 · Where is my data, backup"
 
-#: src/scrinium/core/guide.py:87
+#: src/scrinium/core/guide.py:88
 msgid ""
 "• Vos fiches : un dossier par thème, un fichier .md par fiche (.lock si verrouillée), avec un sous-dossier .pj pour les images jointes :\n"
 "\n"
@@ -5035,7 +5227,7 @@ msgstr "unrecognised Scrinium link: « %s »"
 msgid "non disponible sous %(ici)s (réservée à : %(ou)s)"
 msgstr "not available on %(ici)s (only for: %(ou)s)"
 
-#: src/scrinium/core/repertoire.py:149
+#: src/scrinium/core/repertoire.py:156
 #: src/scrinium/ui/fenetre.py:823
 msgid "Répertoire"
 msgstr "Directory"
