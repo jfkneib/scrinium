@@ -143,9 +143,9 @@ TYPE = TypeFiche("supervision", N_("Supervision"), "network-server", executable=
 def exemples() -> list:
     """[(thème, titre, texte)] : une fiche d'exemple qui ne regarde que cette machine."""
     return [(_("Supervision (exemples)"), _("Exemple · Mes machines"), en_texte(
-        [{"nom": _("Cette machine"), "adresse": "127.0.0.1", "ports": []},
+        [{"nom": _("Cette machine"), "adresse": "127.0.0.1", "ports": [], "watts": "40-150"},
          {"nom": _("Exemple de serveur (à adapter)"), "adresse": "192.168.1.10", "ports": [22, 80], "web": "http://192.168.1.10/",
-          "ssh": "root@192.168.1.10"}]))]
+          "ssh": "root@192.168.1.10", "watts": "30-120"}]))]
 
 
 # ---------- contrôles ----------

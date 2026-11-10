@@ -235,7 +235,7 @@ class VueSupervision(QWidget):
         watts = logique.puissance_estimee(m, mes)
         cases = ["● " + _libelle_etat(e), m["nom"] + "  (" + m["adresse"] + ")", "  ".join(reseau),
                  f"{mes['disque_pct']} %" if "disque_pct" in mes else "", f"{mes['memoire_pct']} %" if "memoire_pct" in mes else "",
-                 f"{mes['charge']:.2f}" if "charge" in mes else "", f"≈ {watts} W" if watts is not None else "", logique.duree(mes["uptime_s"]) if "uptime_s" in mes else "",
+                 f"{mes['charge']:.2f}" if "charge" in mes else "", f"≈ {watts} W" if watts is not None else ("—" if mes else ""), logique.duree(mes["uptime_s"]) if "uptime_s" in mes else "",
                  ", ".join(raisons)]
         for c, t in enumerate(cases):
             it = QTableWidgetItem(t)
@@ -245,6 +245,9 @@ class VueSupervision(QWidget):
             if niveau is not None:
                 it.setBackground(QBrush(couleur_niveau(niveau)))
                 it.setForeground(QBrush(QColor("#1b1b1b")))
+            if c == 6 and watts is None and mes:
+                it.setToolTip(_("Pour estimer la puissance, indiquez les watts de la machine au repos et à pleine charge (clic droit > Modifier > « Watts repos-max », "
+                                "ou une ligne « watts: 40-200 » dans la fiche)."))
             if c == 6 and watts is not None:
                 a, b = m["watts"]
                 it.setToolTip(_("ESTIMATION, pas une mesure : %(repos)d W au repos + (%(maxi)d − %(repos)d) W × charge %(charge)d %% = %(w)d W.\n"

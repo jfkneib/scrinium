@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: scrinium 0.2.0\n"
 "Report-Msgid-Bugs-To: \n"
-"PO-Revision-Date: 2026-11-10 14:38+0100\n"
+"PO-Revision-Date: 2026-11-10 14:39+0100\n"
 "Last-Translator: Jean-François Kneib\n"
 "Language-Team: English\n"
 "Language: en\n"
@@ -3111,7 +3111,7 @@ msgstr "Loop in the dependencies around \"%s\""
 msgid "Cette fiche fait le point sur les plannings (fiches « Planning ») du même thème que celle-ci, ou sur tous si vous le choisissez en haut : avancement, retards, dates. Elle se met à jour quand on l'ouvre ou qu'on clique sur « Actualiser »."
 msgstr "This note gives an overview of the plannings (\"Planning\" notes) of the same topic as itself, or of all of them if you choose so at the top: progress, delays, dates. It updates when you open it or click \"Refresh\"."
 
-#: plugins/supervision/__init__.py:325
+#: plugins/supervision/__init__.py:328
 msgid ""
 "L'état de vos machines (ordinateurs, serveurs, NAS, box) dans une fiche.\n"
 "\n"
@@ -3173,11 +3173,11 @@ msgstr "Watts idle-max:"
 msgid "Toutes les minutes"
 msgstr "Every minute"
 
-#: plugins/supervision/__init__.py:309
+#: plugins/supervision/__init__.py:312
 msgid "Extension Supervision"
 msgstr "Monitoring extension"
 
-#: plugins/supervision/__init__.py:321
+#: plugins/supervision/__init__.py:324
 #: plugins/supervision/logique.py:140
 msgid "Supervision"
 msgstr "Monitoring"
@@ -3246,7 +3246,7 @@ msgstr "Right-click: add, edit or remove a machine."
 msgid "Fiche non validée : relisez les machines, puis validez-la pour lancer les contrôles et la modifier."
 msgstr "Note not validated: review the machines, then validate it to run the checks and edit it."
 
-#: plugins/supervision/__init__.py:273
+#: plugins/supervision/__init__.py:276
 msgid "Ajouter une machine…"
 msgstr "Add a machine…"
 
@@ -3254,15 +3254,19 @@ msgstr "Add a machine…"
 msgid "Dernier contrôle : %s"
 msgstr "Last check: %s"
 
-#: plugins/supervision/__init__.py:276
+#: plugins/supervision/__init__.py:249
+msgid "Pour estimer la puissance, indiquez les watts de la machine au repos et à pleine charge (clic droit > Modifier > « Watts repos-max », ou une ligne « watts: 40-200 » dans la fiche)."
+msgstr "To estimate the power, give the machine's watts at idle and at full load (right-click > Edit > \"Watts idle-max\", or a \"watts: 40-200\" line in the note)."
+
+#: plugins/supervision/__init__.py:279
 msgid "Retirer"
 msgstr "Remove"
 
-#: plugins/supervision/__init__.py:321
+#: plugins/supervision/__init__.py:324
 msgid "« %s » est en panne : elle ne répond plus."
 msgstr "\"%s\" is down: it no longer answers."
 
-#: plugins/supervision/__init__.py:250
+#: plugins/supervision/__init__.py:253
 msgid ""
 "ESTIMATION, pas une mesure : %(repos)d W au repos + (%(maxi)d − %(repos)d) W × charge %(charge)d %% = %(w)d W.\n"
 "Soit environ %(wh)d Wh par jour si cela dure (%(kwh).1f kWh par mois)."
@@ -3270,7 +3274,7 @@ msgstr ""
 "ESTIMATE, not a measurement: %(repos)d W idle + (%(maxi)d − %(repos)d) W × load %(charge)d %% = %(w)d W.\n"
 "About %(wh)d Wh per day if it lasts (%(kwh).1f kWh per month)."
 
-#: plugins/supervision/__init__.py:322
+#: plugins/supervision/__init__.py:325
 msgid "« %s » est en alerte : "
 msgstr "\"%s\" is on alert: "
 

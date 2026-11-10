@@ -2950,7 +2950,7 @@ msgstr ""
 msgid "Cette fiche fait le point sur les plannings (fiches « Planning ») du même thème que celle-ci, ou sur tous si vous le choisissez en haut : avancement, retards, dates. Elle se met à jour quand on l'ouvre ou qu'on clique sur « Actualiser »."
 msgstr ""
 
-#: plugins/supervision/__init__.py:325
+#: plugins/supervision/__init__.py:328
 msgid ""
 "L'état de vos machines (ordinateurs, serveurs, NAS, box) dans une fiche.\n"
 "\n"
@@ -3004,11 +3004,11 @@ msgstr ""
 msgid "Toutes les minutes"
 msgstr ""
 
-#: plugins/supervision/__init__.py:309
+#: plugins/supervision/__init__.py:312
 msgid "Extension Supervision"
 msgstr ""
 
-#: plugins/supervision/__init__.py:321
+#: plugins/supervision/__init__.py:324
 #: plugins/supervision/logique.py:140
 msgid "Supervision"
 msgstr ""
@@ -3077,7 +3077,7 @@ msgstr ""
 msgid "Fiche non validée : relisez les machines, puis validez-la pour lancer les contrôles et la modifier."
 msgstr ""
 
-#: plugins/supervision/__init__.py:273
+#: plugins/supervision/__init__.py:276
 msgid "Ajouter une machine…"
 msgstr ""
 
@@ -3085,21 +3085,25 @@ msgstr ""
 msgid "Dernier contrôle : %s"
 msgstr ""
 
-#: plugins/supervision/__init__.py:276
+#: plugins/supervision/__init__.py:249
+msgid "Pour estimer la puissance, indiquez les watts de la machine au repos et à pleine charge (clic droit > Modifier > « Watts repos-max », ou une ligne « watts: 40-200 » dans la fiche)."
+msgstr ""
+
+#: plugins/supervision/__init__.py:279
 msgid "Retirer"
 msgstr ""
 
-#: plugins/supervision/__init__.py:321
+#: plugins/supervision/__init__.py:324
 msgid "« %s » est en panne : elle ne répond plus."
 msgstr ""
 
-#: plugins/supervision/__init__.py:250
+#: plugins/supervision/__init__.py:253
 msgid ""
 "ESTIMATION, pas une mesure : %(repos)d W au repos + (%(maxi)d − %(repos)d) W × charge %(charge)d %% = %(w)d W.\n"
 "Soit environ %(wh)d Wh par jour si cela dure (%(kwh).1f kWh par mois)."
 msgstr ""
 
-#: plugins/supervision/__init__.py:322
+#: plugins/supervision/__init__.py:325
 msgid "« %s » est en alerte : "
 msgstr ""
 
