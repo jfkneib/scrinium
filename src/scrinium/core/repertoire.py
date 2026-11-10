@@ -353,7 +353,7 @@ def lire_vcards(fichiers) -> tuple[list, list]:
                     lignes.append(ligne_csv)
                 carte = None
                 if len(lignes) >= MAX_CONTACTS:
-                    return ENTETE_VCARD, lignes
+                    return _vc_utiles(lignes)
             elif carte is not None and ":" in ligne:
                 cle, _sep, valeur = ligne.partition(":")
                 parties = cle.split(";")
@@ -364,7 +364,14 @@ def lire_vcards(fichiers) -> tuple[list, list]:
                     except (ValueError, UnicodeError):
                         pass
                 _vc_noter(carte, nom, valeur.strip())
-    return ENTETE_VCARD, lignes
+    return _vc_utiles(lignes)
+
+
+def _vc_utiles(lignes: list) -> tuple[list, list]:
+    """Ne garde que les colonnes où au moins un contact a une valeur (« Nom » toujours) : un répertoire reçoit ainsi seulement les colonnes
+    dont l'import a besoin, sans colonne vide ajoutée."""
+    garde = [k for k, nom in enumerate(ENTETE_VCARD) if k == 0 or any(l[k] for l in lignes)]
+    return [ENTETE_VCARD[k] for k in garde], [[l[k] for k in garde] for l in lignes]
 
 
 def _vc_noter(carte: dict, nom: str, valeur: str) -> None:

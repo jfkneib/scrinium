@@ -407,3 +407,11 @@ def test_import_vcard_dans_la_fenetre(tmp_path, monkeypatch):
     v.importer_vcf()
     assert len(v.tableau.lignes) == 3 and messages[-1] == "0 entrée(s) ajoutée(s)."
     assert [a.text() for a in v.b_importer.menu().actions()][1].startswith("Importer des contacts")
+
+
+def test_import_vcard_dans_un_tableau_libre_ajoute_seulement_les_colonnes_utiles():
+    t = Tableau.depuis_texte(texte_modele(3))                       # « Tableau libre » : Nom, Détails
+    simple = "BEGIN:VCARD\nVERSION:3.0\nN:Martin;Léa;;;\nTEL:0611111111\nEMAIL:lea@x.fr\nEND:VCARD\n"
+    ajoutees, creees = t.importer_vcf([simple.encode()])
+    assert ajoutees == 1 and creees == ["Prénom", "Téléphones", "Courriel"]          # ni Adresse, ni Lien, ni Notes : personne n'en a
+    assert t.colonnes == ["Nom", "Détails", "Prénom", "Téléphones", "Courriel"]
