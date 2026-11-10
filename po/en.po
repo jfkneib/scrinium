@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: scrinium 0.2.0\n"
 "Report-Msgid-Bugs-To: \n"
-"PO-Revision-Date: 2026-11-10 09:17+0100\n"
+"PO-Revision-Date: 2026-11-10 09:49+0100\n"
 "Last-Translator: Jean-François Kneib\n"
 "Language-Team: English\n"
 "Language: en\n"
@@ -339,6 +339,7 @@ msgstr "No more examples: they are already in the list, or not installed."
 
 #: plugins/applications/__init__.py:290
 #: plugins/capture/__init__.py:312
+#: src/scrinium/ui/fenetre.py:806
 msgid "Importer"
 msgstr "Import"
 
@@ -3634,8 +3635,8 @@ msgid "Le serveur %s n'est pas local : le texte serait envoyé hors de cette mac
 msgstr "The server %s is not local: the text would be sent outside this machine. Tick the acceptance box in the settings to allow it."
 
 #: plugins/traduction/__init__.py:554
-#: src/scrinium/ui/fenetre.py:1295
-#: src/scrinium/ui/fenetre.py:1304
+#: src/scrinium/ui/fenetre.py:1325
+#: src/scrinium/ui/fenetre.py:1334
 msgid "Fiche verrouillée"
 msgstr "Locked note"
 
@@ -5035,7 +5036,7 @@ msgid "non disponible sous %(ici)s (réservée à : %(ou)s)"
 msgstr "not available on %(ici)s (only for: %(ou)s)"
 
 #: src/scrinium/core/repertoire.py:149
-#: src/scrinium/ui/fenetre.py:793
+#: src/scrinium/ui/fenetre.py:823
 msgid "Répertoire"
 msgstr "Directory"
 
@@ -5120,7 +5121,7 @@ msgid "Mot de passe du fichier (facultatif) :"
 msgstr "File password (optional):"
 
 #: src/scrinium/ui/assistant.py:67
-#: src/scrinium/ui/fenetre.py:1329
+#: src/scrinium/ui/fenetre.py:1359
 msgid "Confirmer le mot de passe :"
 msgstr "Confirm password:"
 
@@ -5129,7 +5130,7 @@ msgid "Un mot de passe sur le fichier ajoute une protection si on vous le vole :
 msgstr "A password on the file adds protection if it is stolen: that password will then be needed to use it. Write it down: it cannot be recovered either."
 
 #: src/scrinium/ui/assistant.py:75
-#: src/scrinium/ui/fenetre.py:1367
+#: src/scrinium/ui/fenetre.py:1397
 msgid "Créer le fichier de secours"
 msgstr "Create the rescue file"
 
@@ -5142,8 +5143,8 @@ msgid "Fichier de secours créé"
 msgstr "Rescue file created"
 
 #: src/scrinium/ui/assistant.py:88
-#: src/scrinium/ui/fenetre.py:1327
-#: src/scrinium/ui/fenetre.py:1331
+#: src/scrinium/ui/fenetre.py:1357
+#: src/scrinium/ui/fenetre.py:1361
 msgid "Mot de passe"
 msgstr "Password"
 
@@ -5300,8 +5301,8 @@ msgid "Navigateur du système (par défaut)"
 msgstr "System browser (default)"
 
 #: src/scrinium/ui/fenetre.py:112
-#: src/scrinium/ui/fenetre.py:1025
-#: src/scrinium/ui/fenetre.py:1090
+#: src/scrinium/ui/fenetre.py:1055
+#: src/scrinium/ui/fenetre.py:1120
 msgid "Scrinium"
 msgstr "Scrinium"
 
@@ -5366,13 +5367,13 @@ msgid "Épingler la fiche (elle reste en haut de la liste)"
 msgstr "Pin the note (it stays at the top of the list)"
 
 #: src/scrinium/ui/fenetre.py:271
-#: src/scrinium/ui/fenetre.py:1179
+#: src/scrinium/ui/fenetre.py:1209
 msgid "Copier la note"
 msgstr "Copy note"
 
 #: src/scrinium/ui/fenetre.py:273
-#: src/scrinium/ui/fenetre.py:1162
-#: src/scrinium/ui/fenetre.py:1168
+#: src/scrinium/ui/fenetre.py:1192
+#: src/scrinium/ui/fenetre.py:1198
 msgid "Verrouiller…"
 msgstr "Lock…"
 
@@ -5413,8 +5414,8 @@ msgid "Nouveau nom :"
 msgstr "New name:"
 
 #: src/scrinium/ui/fenetre.py:624
-#: src/scrinium/ui/fenetre.py:998
-#: src/scrinium/ui/fenetre.py:1001
+#: src/scrinium/ui/fenetre.py:1028
+#: src/scrinium/ui/fenetre.py:1031
 msgid "(sans titre)"
 msgstr "(untitled)"
 
@@ -5426,123 +5427,131 @@ msgstr "Browser for links"
 msgid "Choisissez un navigateur, ou tapez une commande (ex. : firefox) :"
 msgstr "Pick a browser, or type a command (e.g. firefox):"
 
-#: src/scrinium/ui/fenetre.py:790
-#: src/scrinium/ui/fenetre.py:793
+#: src/scrinium/ui/fenetre.py:813
+msgid "Depuis un fichier (CSV, vCard) : les colonnes s'adaptent…"
+msgstr "From a file (CSV, vCard): the columns adapt…"
+
+#: src/scrinium/ui/fenetre.py:813
+msgid "Depuis un dossier de contacts (KDE Connect…) : les colonnes s'adaptent…"
+msgstr "From a contacts folder (KDE Connect…): the columns adapt…"
+
+#: src/scrinium/ui/fenetre.py:814
+#: src/scrinium/ui/fenetre.py:823
 msgid "Nouveau répertoire"
 msgstr "New directory"
 
-#: src/scrinium/ui/fenetre.py:790
+#: src/scrinium/ui/fenetre.py:814
 msgid "Modèle de colonnes (modifiables ensuite) :"
 msgstr "Column template (editable afterwards):"
 
-#: src/scrinium/ui/fenetre.py:793
+#: src/scrinium/ui/fenetre.py:823
 msgid "Titre du répertoire :"
 msgstr "Directory title:"
 
-#: src/scrinium/ui/fenetre.py:984
+#: src/scrinium/ui/fenetre.py:1014
 msgid "Fiche ordinaire"
 msgstr "Plain note"
 
-#: src/scrinium/ui/fenetre.py:1013
+#: src/scrinium/ui/fenetre.py:1043
 msgid "● modification en cours…"
 msgstr "● editing…"
 
-#: src/scrinium/ui/fenetre.py:1058
+#: src/scrinium/ui/fenetre.py:1088
 msgid "Extension désactivée"
 msgstr "Extension disabled"
 
-#: src/scrinium/ui/fenetre.py:1071
+#: src/scrinium/ui/fenetre.py:1101
 msgid "Langue"
 msgstr "Language"
 
-#: src/scrinium/ui/fenetre.py:1071
+#: src/scrinium/ui/fenetre.py:1101
 msgid "Langue modifiée : redémarrez Scrinium pour l'appliquer."
 msgstr "Language changed: restart Scrinium to apply it."
 
-#: src/scrinium/ui/fenetre.py:1092
+#: src/scrinium/ui/fenetre.py:1122
 msgid "Ouvrir Scrinium"
 msgstr "Open Scrinium"
 
-#: src/scrinium/ui/fenetre.py:1093
+#: src/scrinium/ui/fenetre.py:1123
 msgid "Nouvelle fiche"
 msgstr "New note"
 
-#: src/scrinium/ui/fenetre.py:1094
+#: src/scrinium/ui/fenetre.py:1124
 #: src/scrinium/ui/fenetre.py:172
 msgid "Capture rapide…"
 msgstr "Quick capture…"
 
-#: src/scrinium/ui/fenetre.py:1096
+#: src/scrinium/ui/fenetre.py:1126
 #: src/scrinium/ui/fenetre.py:185
 msgid "Quitter"
 msgstr "Quit"
 
-#: src/scrinium/ui/fenetre.py:1195
+#: src/scrinium/ui/fenetre.py:1225
 #: src/scrinium/ui/images.py:126
 #: src/scrinium/ui/markdown.py:250
 msgid "Imprimer…"
 msgstr "Print…"
 
-#: src/scrinium/ui/fenetre.py:1196
+#: src/scrinium/ui/fenetre.py:1226
 #: src/scrinium/ui/images.py:127
 #: src/scrinium/ui/markdown.py:251
 msgid "Exporter la fiche en PDF…"
 msgstr "Export the note to PDF…"
 
-#: src/scrinium/ui/fenetre.py:1223
+#: src/scrinium/ui/fenetre.py:1253
 msgid "Imprimer"
 msgstr "Print"
 
-#: src/scrinium/ui/fenetre.py:1223
+#: src/scrinium/ui/fenetre.py:1253
 msgid "l'impression"
 msgstr "the printout"
 
-#: src/scrinium/ui/fenetre.py:1232
+#: src/scrinium/ui/fenetre.py:1262
 msgid "✔ Fiche envoyée à l'impression"
 msgstr "✔ Note sent to the printer"
 
-#: src/scrinium/ui/fenetre.py:1239
-#: src/scrinium/ui/fenetre.py:1244
-#: src/scrinium/ui/fenetre.py:1253
+#: src/scrinium/ui/fenetre.py:1269
+#: src/scrinium/ui/fenetre.py:1274
+#: src/scrinium/ui/fenetre.py:1283
 msgid "Exporter en PDF"
 msgstr "Export to PDF"
 
-#: src/scrinium/ui/fenetre.py:1239
+#: src/scrinium/ui/fenetre.py:1269
 msgid "le PDF"
 msgstr "the PDF"
 
-#: src/scrinium/ui/fenetre.py:1245
+#: src/scrinium/ui/fenetre.py:1275
 msgid "Documents PDF (*.pdf)"
 msgstr "PDF documents (*.pdf)"
 
-#: src/scrinium/ui/fenetre.py:1318
-#: src/scrinium/ui/fenetre.py:1314
+#: src/scrinium/ui/fenetre.py:1348
+#: src/scrinium/ui/fenetre.py:1344
 msgid "Mot de passe oublié : le fichier de secours permettra de rouvrir la fiche."
 msgstr "Forgotten password: the rescue file will let you reopen the note."
 
-#: src/scrinium/ui/fenetre.py:1323
-#: src/scrinium/ui/fenetre.py:1329
-#: src/scrinium/ui/fenetre.py:1336
+#: src/scrinium/ui/fenetre.py:1353
+#: src/scrinium/ui/fenetre.py:1359
+#: src/scrinium/ui/fenetre.py:1366
 msgid "Verrouiller"
 msgstr "Lock"
 
-#: src/scrinium/ui/fenetre.py:1323
+#: src/scrinium/ui/fenetre.py:1353
 msgid "Mot de passe (4 caractères minimum) :"
 msgstr "Password (4 characters minimum):"
 
-#: src/scrinium/ui/fenetre.py:1364
+#: src/scrinium/ui/fenetre.py:1394
 msgid "Avant de verrouiller : voulez-vous créer un fichier de secours ?"
 msgstr "Before locking: do you want to create a rescue file?"
 
-#: src/scrinium/ui/fenetre.py:1365
+#: src/scrinium/ui/fenetre.py:1395
 msgid "Si vous oubliez le mot de passe d'une fiche, le fichier de secours permet de la rouvrir. Sans lui, une fiche dont le mot de passe est oublié est perdue pour toujours."
 msgstr "If you forget a note's password, the rescue file lets you reopen it. Without it, a note whose password is forgotten is lost forever."
 
-#: src/scrinium/ui/fenetre.py:1368
+#: src/scrinium/ui/fenetre.py:1398
 msgid "Verrouiller sans fichier de secours"
 msgstr "Lock without a rescue file"
 
-#: src/scrinium/ui/fenetre.py:1423
+#: src/scrinium/ui/fenetre.py:1453
 #: src/scrinium/ui/fenetre.py:204
 msgid "À propos"
 msgstr "About"
@@ -5631,7 +5640,7 @@ msgid "Supprimer les thèmes"
 msgstr "Delete topics"
 
 #: src/scrinium/ui/fenetre.py:626
-#: src/scrinium/ui/fenetre.py:1001
+#: src/scrinium/ui/fenetre.py:1031
 msgid "(verrouillée)"
 msgstr "(locked)"
 
@@ -5649,23 +5658,27 @@ msgstr ""
 msgid "✔ Fiche validée : elle peut maintenant agir"
 msgstr "✔ Note validated: it can now act"
 
-#: src/scrinium/ui/fenetre.py:858
+#: src/scrinium/ui/fenetre.py:806
+msgid "Rien à importer dans ces fichiers."
+msgstr "Nothing to import in these files."
+
+#: src/scrinium/ui/fenetre.py:888
 msgid "Fiche d'invitation prête : relisez-la, puis activez l'extension Courriel (Extensions > Gérer les extensions…) pour l'envoyer."
 msgstr "Invitation note ready: read it through, then turn on the Email extension (Extensions > Manage extensions…) to send it."
 
-#: src/scrinium/ui/fenetre.py:906
+#: src/scrinium/ui/fenetre.py:936
 msgid "Lien de partage reçu : activez l'extension Partage (Extensions > Gérer les extensions…) pour le utiliser."
 msgstr "Sharing link received: enable the Sharing extension (Extensions > Manage extensions…) to use it."
 
-#: src/scrinium/ui/fenetre.py:936
+#: src/scrinium/ui/fenetre.py:966
 msgid "✔ Fiche ajoutée depuis un lien"
 msgstr "✔ Note added from a link"
 
-#: src/scrinium/ui/fenetre.py:998
+#: src/scrinium/ui/fenetre.py:1028
 msgid "Mettre la fiche « %s » à la corbeille ?"
 msgstr "Move the note \"%s\" to the trash?"
 
-#: src/scrinium/ui/fenetre.py:1059
+#: src/scrinium/ui/fenetre.py:1089
 msgid ""
 "L'extension « %(nom)s » a été désactivée après des erreurs répétées :\n"
 "%(erreur)s"
@@ -5673,61 +5686,61 @@ msgstr ""
 "The extension \"%(nom)s\" was disabled after repeated errors:\n"
 "%(erreur)s"
 
-#: src/scrinium/ui/fenetre.py:1087
+#: src/scrinium/ui/fenetre.py:1117
 msgid "Pas de zone de notification sur ce bureau."
 msgstr "No notification area on this desktop."
 
-#: src/scrinium/ui/fenetre.py:1243
+#: src/scrinium/ui/fenetre.py:1273
 msgid "fiche"
 msgstr "note"
 
-#: src/scrinium/ui/fenetre.py:1255
+#: src/scrinium/ui/fenetre.py:1285
 msgid "✔ PDF écrit : %s"
 msgstr "✔ PDF written: %s"
 
-#: src/scrinium/ui/fenetre.py:1295
+#: src/scrinium/ui/fenetre.py:1325
 msgid "Mot de passe de « %s » :"
 msgstr "Password for \"%s\":"
 
-#: src/scrinium/ui/fenetre.py:1316
+#: src/scrinium/ui/fenetre.py:1346
 msgid "Pas de fichier de secours : mot de passe oublié = fiche perdue."
 msgstr "No rescue file: forgotten password = lost note."
 
-#: src/scrinium/ui/fenetre.py:1319
+#: src/scrinium/ui/fenetre.py:1349
 msgid "Verrouiller la fiche"
 msgstr "Lock the note"
 
-#: src/scrinium/ui/fenetre.py:1327
+#: src/scrinium/ui/fenetre.py:1357
 msgid "Trop court (4 caractères minimum)."
 msgstr "Too short (4 characters minimum)."
 
-#: src/scrinium/ui/fenetre.py:1331
+#: src/scrinium/ui/fenetre.py:1361
 msgid "Les deux saisies sont différentes, fiche non verrouillée."
 msgstr "The two entries differ, note not locked."
 
-#: src/scrinium/ui/fenetre.py:1344
-#: src/scrinium/ui/fenetre.py:1352
-#: src/scrinium/ui/fenetre.py:1166
+#: src/scrinium/ui/fenetre.py:1374
+#: src/scrinium/ui/fenetre.py:1382
+#: src/scrinium/ui/fenetre.py:1196
 msgid "Retirer le mot de passe"
 msgstr "Remove password"
 
-#: src/scrinium/ui/fenetre.py:1345
+#: src/scrinium/ui/fenetre.py:1375
 msgid "Le texte et les images de la fiche seront de nouveau stockés en clair. Continuer ?"
 msgstr "The text and images of the note will be stored in clear text again. Continue?"
 
-#: src/scrinium/ui/fenetre.py:1393
+#: src/scrinium/ui/fenetre.py:1423
 msgid "Sélectionnez d'abord une fiche verrouillée."
 msgstr "Select a locked note first."
 
-#: src/scrinium/ui/fenetre.py:1401
+#: src/scrinium/ui/fenetre.py:1431
 msgid "Mot de passe du fichier de secours :"
 msgstr "Rescue file password:"
 
-#: src/scrinium/ui/fenetre.py:1410
+#: src/scrinium/ui/fenetre.py:1440
 msgid "Fiche rouverte. La remettre en clair (retirer le mot de passe) ?"
 msgstr "Note reopened. Put it back in plain text (remove the password)?"
 
-#: src/scrinium/ui/fenetre.py:1416
+#: src/scrinium/ui/fenetre.py:1446
 msgid "Fiche toujours verrouillée."
 msgstr "Note still locked."
 
@@ -5784,7 +5797,7 @@ msgid "Verrouillée (ouverte)"
 msgstr "Locked (open)"
 
 #: src/scrinium/ui/fenetre.py:721
-#: src/scrinium/ui/fenetre.py:1034
+#: src/scrinium/ui/fenetre.py:1064
 msgid "✔ Enregistré"
 msgstr "✔ Saved"
 
@@ -5792,31 +5805,40 @@ msgstr "✔ Saved"
 msgid "Aucune fiche : « Fiche » (Ctrl+N)"
 msgstr "No notes: \"Note\" (Ctrl+N)"
 
-#: src/scrinium/ui/fenetre.py:830
+#: src/scrinium/ui/fenetre.py:793
+#: src/scrinium/ui/repertoire.py:493
+msgid "Dossier de contacts"
+msgstr "Contacts folder"
+
+#: src/scrinium/ui/fenetre.py:796
+msgid "Contacts et tableaux (*.vcf *.csv *.txt);;Tous (*)"
+msgstr "Contacts and tables (*.vcf *.csv *.txt);;All (*)"
+
+#: src/scrinium/ui/fenetre.py:860
 msgid "Ajouté à « %(theme)s / %(fiche)s »"
 msgstr "Added to “%(theme)s / %(fiche)s”"
 
-#: src/scrinium/ui/fenetre.py:898
+#: src/scrinium/ui/fenetre.py:928
 msgid "Lien Scrinium"
 msgstr "Scrinium link"
 
-#: src/scrinium/ui/fenetre.py:1077
+#: src/scrinium/ui/fenetre.py:1107
 msgid "Démarrage de la session"
 msgstr "Login startup"
 
-#: src/scrinium/ui/fenetre.py:1164
+#: src/scrinium/ui/fenetre.py:1194
 msgid "Déverrouiller…"
 msgstr "Unlock…"
 
-#: src/scrinium/ui/fenetre.py:1262
+#: src/scrinium/ui/fenetre.py:1292
 msgid "✔ Note copiée dans le presse-papiers"
 msgstr "✔ Note copied to the clipboard"
 
-#: src/scrinium/ui/fenetre.py:1301
+#: src/scrinium/ui/fenetre.py:1331
 msgid "Mot de passe incorrect."
 msgstr "Wrong password."
 
-#: src/scrinium/ui/fenetre.py:1320
+#: src/scrinium/ui/fenetre.py:1350
 msgid ""
 "Le texte et les images de la fiche seront chiffrés avec un mot de passe (le titre reste visible).\n"
 "\n"
@@ -5824,7 +5846,7 @@ msgstr ""
 "The text and images of the note will be encrypted with a password (the title stays visible).\n"
 "\n"
 
-#: src/scrinium/ui/fenetre.py:1382
+#: src/scrinium/ui/fenetre.py:1412
 msgid ""
 "Un fichier de secours est déjà actif.\n"
 "\n"
@@ -5834,7 +5856,7 @@ msgstr ""
 "\n"
 "Create a new one? It will be used for notes locked from now on; notes already locked can only be opened with the old one."
 
-#: src/scrinium/ui/fenetre.py:1425
+#: src/scrinium/ui/fenetre.py:1455
 msgid "Fiches rangées par thème, verrouillables (AES-256-GCM)."
 msgstr "Notes organised by topic, lockable (AES-256-GCM)."
 
@@ -5848,46 +5870,46 @@ msgstr "bold"
 msgid "italique"
 msgstr "italic"
 
-#: src/scrinium/ui/fenetre.py:951
+#: src/scrinium/ui/fenetre.py:800
+#: src/scrinium/ui/fenetre.py:1334
+#: src/scrinium/ui/repertoire.py:458
+msgid "Lecture impossible : %s"
+msgstr "Cannot read: %s"
+
+#: src/scrinium/ui/fenetre.py:981
 msgid "✔ Images mises à jour"
 msgstr "✔ Images updated"
 
-#: src/scrinium/ui/fenetre.py:1000
+#: src/scrinium/ui/fenetre.py:1030
 msgid "Mettre ces %d fiches à la corbeille ?"
 msgstr "Move these %d notes to the trash?"
 
-#: src/scrinium/ui/fenetre.py:1028
+#: src/scrinium/ui/fenetre.py:1058
 msgid "✔ Enregistré à"
 msgstr "✔ Saved at"
 
-#: src/scrinium/ui/fenetre.py:1077
+#: src/scrinium/ui/fenetre.py:1107
 msgid "Impossible de modifier le lancement automatique : %s"
 msgstr "Could not change automatic startup: %s"
 
-#: src/scrinium/ui/fenetre.py:1208
+#: src/scrinium/ui/fenetre.py:1238
 msgid "Cette fiche est verrouillée : %s contiendra son texte et ses images EN CLAIR. Continuer ?"
 msgstr "This note is locked: %s will contain its text and images IN CLEAR. Continue?"
 
-#: src/scrinium/ui/fenetre.py:1253
+#: src/scrinium/ui/fenetre.py:1283
 #: src/scrinium/ui/repertoire.py:513
 msgid "Écriture impossible : %s"
 msgstr "Cannot write: %s"
 
-#: src/scrinium/ui/fenetre.py:1304
-#: src/scrinium/ui/repertoire.py:458
-#: src/scrinium/ui/repertoire.py:489
-msgid "Lecture impossible : %s"
-msgstr "Cannot read: %s"
-
-#: src/scrinium/ui/fenetre.py:1336
+#: src/scrinium/ui/fenetre.py:1366
 msgid "Fiche non verrouillée : %s"
 msgstr "Note not locked: %s"
 
-#: src/scrinium/ui/fenetre.py:1352
+#: src/scrinium/ui/fenetre.py:1382
 msgid "Verrou conservé : %s"
 msgstr "Lock kept: %s"
 
-#: src/scrinium/ui/fenetre.py:1407
+#: src/scrinium/ui/fenetre.py:1437
 msgid "Impossible de rouvrir la fiche : %s"
 msgstr "Could not reopen the note: %s"
 
@@ -6145,10 +6167,6 @@ msgstr "Import contacts"
 #: src/scrinium/ui/repertoire.py:485
 msgid "Contacts vCard (*.vcf);;Tous (*)"
 msgstr "vCard contacts (*.vcf);;All (*)"
-
-#: src/scrinium/ui/repertoire.py:493
-msgid "Dossier de contacts"
-msgstr "Contacts folder"
 
 #: src/scrinium/ui/repertoire.py:503
 msgid "CSV, séparateur virgule (*.csv)"

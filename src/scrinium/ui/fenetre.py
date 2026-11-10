@@ -784,12 +784,42 @@ class Fenetre(QMainWindow):
         self._statut(_("✔ Fiche validée : elle peut maintenant agir") + f"  ·  {t.nom}/{f.path.name}", VERT)
         self.plugins.emettre("fiche_validee", fiche=FicheVue(t, f))
 
+    def _texte_repertoire_importe(self, dossier: bool):
+        """Texte d'un répertoire dont les colonnes viennent du fichier (CSV ou vCard) ou du dossier de contacts choisi ; None si annulé."""
+        kde = Path.home() / ".local/share/kpeoplevcard"
+        depart = str(kde if kde.is_dir() else Path.home())
+        try:
+            if dossier:
+                d = QFileDialog.getExistingDirectory(self, _("Dossier de contacts"), depart)
+                chemins = sorted(Path(d).rglob("*.vcf"))[:5000] if d else []
+            else:
+                choisis, _f = QFileDialog.getOpenFileNames(self, _("Importer"), depart, _("Contacts et tableaux (*.vcf *.csv *.txt);;Tous (*)"))
+                chemins = [Path(c) for c in choisis]
+            fichiers = [c.read_bytes() for c in chemins]
+        except OSError as ex:
+            QMessageBox.critical(self, _("Importer"), _("Lecture impossible : %s") % ex)
+            return None
+        if not fichiers:
+            return None
+        t = repertoire.Tableau.depuis_fichiers(fichiers)
+        if not t.lignes:
+            QMessageBox.information(self, _("Importer"), _("Rien à importer dans ces fichiers."))
+            return None
+        return t.en_texte()
+
     def nouveau_repertoire(self):
         """Crée une fiche répertoire dans le thème courant, à partir d'un modèle de colonnes (modifiables ensuite)."""
         modeles = [_(m[0]) for m in repertoire.MODELES]
-        choix, ok = QInputDialog.getItem(self, _("Nouveau répertoire"), _("Modèle de colonnes (modifiables ensuite) :"), modeles, 0, False)
+        depuis_fichier, depuis_dossier = _("Depuis un fichier (CSV, vCard) : les colonnes s'adaptent…"), _("Depuis un dossier de contacts (KDE Connect…) : les colonnes s'adaptent…")
+        choix, ok = QInputDialog.getItem(self, _("Nouveau répertoire"), _("Modèle de colonnes (modifiables ensuite) :"),
+                                         modeles + [depuis_fichier, depuis_dossier], 0, False)
         if not ok:
             return
+        texte_initial = None
+        if choix in (depuis_fichier, depuis_dossier):
+            texte_initial = self._texte_repertoire_importe(choix == depuis_dossier)
+            if texte_initial is None:
+                return
         titre, ok = QInputDialog.getText(self, _("Nouveau répertoire"), _("Titre du répertoire :"), text=_("Répertoire"))
         if not ok or not titre.strip():
             return
@@ -801,7 +831,7 @@ class Fenetre(QMainWindow):
             if t is None:
                 return
         f = self.store.nouvelle_fiche(t)
-        self.store.enregistrer(t, f, titre.strip(), repertoire.texte_modele(modeles.index(choix)))
+        self.store.enregistrer(t, f, titre.strip(), texte_initial if texte_initial is not None else repertoire.texte_modele(modeles.index(choix)))
         self.recherche.blockSignals(True)
         self.recherche.clear()
         self.recherche.blockSignals(False)

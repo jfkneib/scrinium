@@ -287,6 +287,18 @@ class Tableau:
         return ajoutees, creees
 
     @classmethod
+    def depuis_fichiers(cls, fichiers: list) -> "Tableau":
+        """Nouveau tableau qui s'adapte à l'import : vCard (.vcf, un ou plusieurs fichiers) ou CSV (le premier) ; les colonnes sont celles du
+        fichier (pour les vCard, seulement celles que les contacts utilisent)."""
+        vcards = [f for f in fichiers if b"BEGIN:VCARD" in f[:4000].upper()]
+        if vcards:
+            entete, lignes = lire_vcards(vcards)
+            t = cls(entete, [], 0)
+            t.importer_lignes(entete, lignes)
+            return t
+        return cls.depuis_csv(fichiers[0]) if fichiers else cls(["Nom"], [], 0)
+
+    @classmethod
     def depuis_csv(cls, octets: bytes, index: int = 0) -> "Tableau":
         """Nouveau tableau dont les colonnes et les lignes sont celles du fichier."""
         entete, lignes = lire_csv(octets)

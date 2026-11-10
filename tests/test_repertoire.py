@@ -421,3 +421,25 @@ def test_import_vcard_prenom_seul_devient_le_nom_pour_le_classement():
     t = Tableau.depuis_texte(texte_modele(0))
     t.importer_vcf([b"BEGIN:VCARD\nVERSION:3.0\nN:;Maman;;;\nFN:Maman\nTEL:0600000000\nEND:VCARD\n"])
     assert t.lignes[0][0] == "Maman" and t.lignes[0][1] == ""
+
+
+def test_nouveau_repertoire_depuis_un_import_les_colonnes_s_adaptent(fen, tmp_path, monkeypatch):  # noqa: F811
+    from PyQt6.QtWidgets import QFileDialog, QInputDialog
+    d = tmp_path / "kdeconnect-x"
+    d.mkdir()
+    (d / "1.vcf").write_text("BEGIN:VCARD\nVERSION:3.0\nN:;Maman;;;\nTEL:0600000000\nEND:VCARD\n", encoding="utf-8")
+    (d / "2.vcf").write_text("BEGIN:VCARD\nVERSION:3.0\nN:Durand;Paul;;;\nTEL:0611111111\nURL:https://paul.example.org\nEND:VCARD\n", encoding="utf-8")
+    monkeypatch.setattr(QInputDialog, "getItem", staticmethod(lambda parent, titre, label, items, *a, **k: (items[-1], True)))
+    monkeypatch.setattr(QInputDialog, "getText", staticmethod(lambda *a, **k: ("Samsung", True)))
+    monkeypatch.setattr(QFileDialog, "getExistingDirectory", staticmethod(lambda *a, **k: str(tmp_path)))
+    fen.nouveau_repertoire()
+    t = fen.repertoire.tableau
+    assert fen.fiche.titre == "Samsung" and t.colonnes == ["Nom", "Prénom", "Téléphones", "Lien"]        # ni Adresse, ni Courriel, ni Notes
+    assert sorted(l[0] for l in t.lignes) == ["Durand", "Maman"]
+    # un CSV adapte aussi les colonnes
+    csv_ = tmp_path / "x.csv"
+    csv_.write_text("Titre;Auteur\nDune;Herbert\n", encoding="utf-8")
+    monkeypatch.setattr(QInputDialog, "getItem", staticmethod(lambda parent, titre, label, items, *a, **k: (items[-2], True)))
+    monkeypatch.setattr(QFileDialog, "getOpenFileNames", staticmethod(lambda *a, **k: ([str(csv_)], "")))
+    fen.nouveau_repertoire()
+    assert fen.repertoire.tableau.colonnes == ["Titre", "Auteur"] and fen.repertoire.tableau.lignes == [["Dune", "Herbert"]]
