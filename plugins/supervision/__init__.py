@@ -8,7 +8,9 @@
 - Notification quand une machine passe de « bon état » à « alerte » ou « panne ».
 - « Tout est fiche » : type EXÉCUTABLE (`#scrinium-supervision`, voir `logique.py`). Une fiche reçue de l'extérieur ne contrôle rien tant que
   l'utilisateur ne l'a pas validée. SSH sans mot de passe (clés) ; la commande envoyée est fixe, en lecture seule."""
+import time
 from concurrent.futures import ThreadPoolExecutor
+from datetime import datetime
 
 from PyQt6.QtCore import QObject, Qt, QTimer, pyqtSignal
 from PyQt6.QtGui import QBrush, QColor
@@ -42,7 +44,7 @@ class DialogueMachine(QDialog):
 
     def __init__(self, machine=None, parent=None):
         super().__init__(parent)
-        m = machine or {"nom": "", "adresse": "", "ports": [], "web": "", "ssh": "", "seuil_disque": logique.SEUIL_DISQUE, "watts": None}
+        m = machine or {"nom": "", "adresse": "", "ports": [], "web": "", "ssh": "", "seuil_disque": logique.SEUIL_DISQUE, "watts": None, "depuis": ""}
         self.setWindowTitle(_("Machine"))
         self.resize(460, 260)
         f = QFormLayout(self)
@@ -69,8 +71,13 @@ class DialogueMachine(QDialog):
         self.watts.setPlaceholderText("40-200")
         self.watts.setToolTip(_("Facultatif : consommation de la machine au repos et à pleine charge, en watts (ex. 40-200). Sert à ESTIMER la puissance "
                                 "d'après la charge : ce n'est pas une mesure."))
+        self.depuis = QLineEdit(m.get("depuis", ""))
+        self.depuis.setPlaceholderText("2026-11-10")
+        self.depuis.setToolTip(_("Facultatif : date de mise en service. Scrinium cumule l'énergie ESTIMÉE (Wh) depuis cette date, tant que « Surveiller en "
+                                 "arrière-plan » est coché. Changer la date remet le cumul à zéro."))
         f.addRow(_("Alerte disque à :"), self.seuil)
         f.addRow(_("Watts repos-max :"), self.watts)
+        f.addRow(_("Cumul depuis le :"), self.depuis)
         b = QDialogButtonBox(QDialogButtonBox.StandardButton.Ok | QDialogButtonBox.StandardButton.Cancel)
         b.accepted.connect(self._valider)
         b.rejected.connect(self.reject)
@@ -78,7 +85,7 @@ class DialogueMachine(QDialog):
 
     def resultat(self) -> dict | None:
         return logique.normaliser({"nom": self.nom.text(), "adresse": self.adresse.text(), "ports": self.ports.text(),
-                                   "web": self.web.text(), "ssh": self.ssh.text(), "seuil_disque": self.seuil.value(), "watts": self.watts.text()})
+                                   "web": self.web.text(), "ssh": self.ssh.text(), "seuil_disque": self.seuil.value(), "watts": self.watts.text(), "depuis": self.depuis.text()})
 
     def _valider(self):
         if not self.nom.text().strip() or not logique.hote_valide(self.adresse.text().strip()):
@@ -125,11 +132,11 @@ class VueSupervision(QWidget):
         self.l_maj = QLabel()
         haut.addWidget(self.l_maj, 1)
         lay.addLayout(haut)
-        self.table = QTableWidget(0, 9)
+        self.table = QTableWidget(0, 10)
         self.table.setHorizontalHeaderLabels([_("État"), _("Machine"), _("Réseau"), _("Disque"), _("Mémoire"), _("Charge"),
-                                              _("Puissance"), _("En marche depuis"), _("Détail")])
+                                              _("Puissance"), _("Cumul"), _("En marche depuis"), _("Détail")])
         self.table.verticalHeader().setVisible(False)
-        self.table.horizontalHeader().setSectionResizeMode(8, QHeaderView.ResizeMode.Stretch)
+        self.table.horizontalHeader().setSectionResizeMode(9, QHeaderView.ResizeMode.Stretch)
         self.table.setEditTriggers(QAbstractItemView.EditTrigger.NoEditTriggers)
         self.table.setSelectionBehavior(QAbstractItemView.SelectionBehavior.SelectRows)
         self.table.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
@@ -212,6 +219,8 @@ class VueSupervision(QWidget):
         self.resultats[i] = r
         m = self.machines[i]
         e, raisons = logique.etat(m, r)
+        if self.p is not None:
+            self.p.cumuler(m, r)
         cle = logique.cle(m)
         avant = self.etats.get(cle)
         self.etats[cle] = e
@@ -241,9 +250,11 @@ class VueSupervision(QWidget):
             if "web" in r:
                 reseau.append("web " + (str(r["web"]) if r["web"] else "✗"))
         watts = logique.puissance_estimee(m, mes)
+        cumul = self.p.cumul_de(m) if self.p is not None else None
+        texte_cumul = logique.formater_energie(cumul["wh"]) if cumul else ""
         cases = ["● " + _libelle_etat(e), m["nom"] + "  (" + m["adresse"] + ")", "  ".join(reseau),
                  f"{mes['disque_pct']} %" if "disque_pct" in mes else "", f"{mes['memoire_pct']} %" if "memoire_pct" in mes else "",
-                 f"{mes['charge']:.2f}" if "charge" in mes else "", f"≈ {watts} W" if watts is not None else ("—" if mes else ""), logique.duree(mes["uptime_s"]) if "uptime_s" in mes else "",
+                 f"{mes['charge']:.2f}" if "charge" in mes else "", f"≈ {watts} W" if watts is not None else ("—" if mes else ""), texte_cumul, logique.duree(mes["uptime_s"]) if "uptime_s" in mes else "",
                  ", ".join(raisons)]
         for c, t in enumerate(cases):
             it = QTableWidgetItem(t)
@@ -253,6 +264,12 @@ class VueSupervision(QWidget):
             if niveau is not None:
                 it.setBackground(QBrush(couleur_niveau(niveau)))
                 it.setForeground(QBrush(QColor("#1b1b1b")))
+            if c == 7 and cumul:
+                it.setToolTip(_("Énergie ESTIMÉE cumulée depuis le %(date)s : %(duree)s de suivi continu comptées. Ce n'est pas une mesure : seules les "
+                                "périodes où « Surveiller en arrière-plan » était coché et où Scrinium était ouvert sont comptées.")
+                              % {"date": datetime.strptime(cumul["depuis"], "%Y-%m-%d").strftime("%d/%m/%Y"),
+                                 "duree": logique.duree(int(cumul["secondes"]))}
+                              + ("" if self.p.fond else "\n" + _("Suivi continu désactivé : le cumul est à l'arrêt.")))
             if c == 6 and watts is None and mes:
                 it.setToolTip(_("Pour estimer la puissance, indiquez les watts de la machine au repos et à pleine charge (clic droit > Modifier > « Watts repos-max », "
                                 "ou une ligne « watts: 40-200 » dans la fiche)."))
@@ -324,6 +341,8 @@ class SupervisionPlugin(Plugin):
         self.vue = None
         self.etats: dict = {}                            # machine -> dernier état (partagé avec la vue)
         self.fond = bool(ctx.reglages.get("fond", False))
+        cumuls = ctx.reglages.get("cumul", {})
+        self.cumuls: dict = dict(cumuls) if isinstance(cumuls, dict) else {}        # machine -> cumul d'énergie estimée (propre à cette machine)
         self._en_cours: set = set()
         ctx.ajouter_doc(_("Extension Supervision"), DOC)
         for theme, titre, texte in logique.exemples():
@@ -346,6 +365,21 @@ class SupervisionPlugin(Plugin):
     def regler_fond(self, oui: bool):
         self.fond = bool(oui)
         self.ctx.reglages.set("fond", self.fond)
+
+    # ---------- cumul d'énergie estimée ----------
+    def cumul_de(self, m: dict) -> dict | None:
+        c = self.cumuls.get(logique.cle(m))
+        return c if c and m.get("depuis") and c.get("depuis") == m["depuis"] else None
+
+    def cumuler(self, m: dict, r: dict, maintenant: float | None = None):
+        """Ajoute au cumul l'énergie estimée depuis le contrôle précédent. Seulement en suivi continu : sinon les trous fausseraient le total."""
+        if not self.fond or not m.get("depuis"):
+            return
+        nouveau = logique.cumuler(self.cumuls.get(logique.cle(m)), m["depuis"], logique.puissance_estimee(m, r.get("mesures", {})),
+                                  time.time() if maintenant is None else maintenant)
+        if nouveau is not None:
+            self.cumuls[logique.cle(m)] = nouveau
+            self.ctx.reglages.set("cumul", self.cumuls)
 
     # ---------- surveillance en arrière-plan ----------
     def machines_a_surveiller(self) -> list:
@@ -384,6 +418,7 @@ class SupervisionPlugin(Plugin):
         self._en_cours.discard(logique.cle(m))
         if not self.fond:
             return
+        self.cumuler(m, r)
         e, raisons = logique.etat(m, r)
         avant = self.etats.get(logique.cle(m))
         self.etats[logique.cle(m)] = e
@@ -403,6 +438,7 @@ DOC = _(
     "• « Actualiser », ou automatiquement toutes les minutes tant que la fiche est affichée. Une notification prévient quand une machine passe en alerte ou en panne.\n"
     "• « Surveiller en arrière-plan » (décoché par défaut) : les fiches Supervision validées sont aussi contrôlées quand elles ne sont pas affichées, tant que Scrinium reste ouvert.\n"
     "• Puissance (facultatif) : indiquez les watts de la machine au repos et à pleine charge (ex. 40-200) : Scrinium ESTIME la puissance d'après la charge, et le dit au survol. Ce n'est pas une mesure.\n"
+    "• Cumul (facultatif) : avec « depuis: 2026-11-10 » (date de mise en service) et les watts, Scrinium cumule l'énergie ESTIMÉE en Wh depuis cette date, seulement en suivi continu (« Surveiller en arrière-plan » coché, Scrinium ouvert). Les périodes sans suivi ne sont pas comptées ; changer la date remet le cumul à zéro.\n"
     "• SSH : connexion par clé, sans mot de passe. Scrinium n'envoie qu'une commande fixe, en lecture seule (charge, mémoire, disque).\n"
     "• Type exécutable : une fiche reçue d'un autre ne lance aucun contrôle tant que vous ne l'avez pas validée (bandeau « Valider cette fiche »). "
     "Les adresses sont écrites en clair dans la fiche.")

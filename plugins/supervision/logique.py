@@ -9,7 +9,9 @@ import shutil
 import socket
 import subprocess
 import sys
+import time
 import urllib.request
+from datetime import date, datetime
 from urllib.parse import urlparse
 
 from scrinium.core.types_fiche import TypeFiche
@@ -21,7 +23,7 @@ DELAI = 4.0                                              # secondes par contrôl
 SEUIL_DISQUE = 90                                        # % d'occupation au-delà duquel la machine est « en alerte »
 _HOTE = re.compile(r"[A-Za-z0-9_][A-Za-z0-9._:\-\[\]]{0,252}")
 _CIBLE_SSH = re.compile(r"(?:[A-Za-z0-9_][A-Za-z0-9._\-]{0,63}@)?[A-Za-z0-9_][A-Za-z0-9._:\-\[\]]{0,252}")
-_CLES = ("adresse", "ports", "web", "ssh", "seuil_disque", "watts")
+_CLES = ("adresse", "ports", "web", "ssh", "seuil_disque", "watts", "depuis")
 # Commande envoyée par SSH : fixe, en lecture seule. Elle ne dépend d'aucune valeur de la fiche.
 COMMANDE_SSH = "cat /proc/loadavg /proc/uptime; grep -E '^(MemTotal|MemAvailable):' /proc/meminfo; df -P /; nproc"
 
@@ -62,6 +64,46 @@ def lire_watts(texte) -> tuple | None:
     return (repos, maxi) if 1 <= repos <= maxi <= 5000 else None
 
 
+def lire_date(texte) -> str:
+    """« 2026-11-10 » ou « 10/11/2026 » -> « 2026-11-10 » ; chaîne vide si absente ou invalide."""
+    t = str(texte or "").strip()
+    for fmt in ("%Y-%m-%d", "%d/%m/%Y"):
+        try:
+            return datetime.strptime(t, fmt).date().isoformat()
+        except ValueError:
+            pass
+    return ""
+
+
+PLAFOND = 180                                            # secondes : au-delà, l'intervalle entre deux contrôles n'est pas compté
+
+
+def cumuler(etat: dict | None, depuis: str, watts: int | None, maintenant: float, plafond: float = PLAFOND) -> dict | None:
+    """Cumul d'énergie ESTIMÉE (Wh) depuis la date de mise en service : puissance estimée x temps écoulé depuis le contrôle précédent.
+    Un intervalle plus long que `plafond` (Scrinium fermé, ordinateur en veille…) n'est PAS compté. Changer la date remet le cumul à zéro.
+    -> {"depuis", "wh", "secondes", "dernier"} ; None sans date."""
+    if not depuis:
+        return None
+    try:
+        debut = datetime.strptime(depuis, "%Y-%m-%d").timestamp()
+    except ValueError:
+        return None
+    if not etat or etat.get("depuis") != depuis:
+        etat = {"depuis": depuis, "wh": 0.0, "secondes": 0.0, "dernier": None}
+    nouveau = dict(etat, dernier=maintenant)
+    dernier = etat.get("dernier")
+    if watts is not None and dernier is not None and maintenant >= debut:
+        dt = maintenant - max(dernier, debut)
+        if 0 < dt <= plafond:
+            nouveau["wh"] = etat["wh"] + watts * dt / 3600
+            nouveau["secondes"] = etat["secondes"] + dt
+    return nouveau
+
+
+def formater_energie(wh: float) -> str:
+    return f"{wh:.0f} Wh" if wh < 1000 else f"{wh / 1000:.2f} kWh"
+
+
 def puissance_estimee(m: dict, mesures: dict) -> int | None:
     """Estimation en watts : repos + (max - repos) x charge. None sans valeurs « watts » dans la fiche ou sans mesure de charge.
     C'est une ESTIMATION, jamais une mesure : l'interface le dit."""
@@ -85,7 +127,8 @@ def normaliser(m) -> dict | None:
         seuil = SEUIL_DISQUE
     return {"nom": nom, "adresse": adresse, "ports": lire_ports(m.get("ports", "")),
             "web": web if web_valide(web) else "", "ssh": ssh if cible_ssh_valide(ssh) else "",
-            "seuil_disque": min(max(seuil, 1), 100), "watts": lire_watts(m.get("watts", ""))}
+            "seuil_disque": min(max(seuil, 1), 100), "watts": lire_watts(m.get("watts", "")),
+            "depuis": lire_date(m.get("depuis", ""))}
 
 
 def cle(m: dict) -> str:
@@ -133,6 +176,8 @@ def en_texte(machines: list) -> str:
             sortie.append("ssh: " + m["ssh"])
         if m["watts"]:
             sortie.append("watts: %d-%d" % m["watts"])
+        if m["depuis"]:
+            sortie.append("depuis: " + m["depuis"])
         if m["seuil_disque"] != SEUIL_DISQUE:
             sortie.append(f"seuil_disque: {m['seuil_disque']}")
     return "\n".join(sortie) + "\n"
@@ -148,7 +193,7 @@ TYPE = TypeFiche("supervision", N_("Supervision"), "network-server", executable=
 def exemples() -> list:
     """[(thème, titre, texte)] : une fiche d'exemple qui ne regarde que cette machine."""
     return [(_("Supervision (exemples)"), _("Exemple · Mes machines"), en_texte(
-        [{"nom": _("Cette machine"), "adresse": "127.0.0.1", "ports": [], "watts": "40-150"},
+        [{"nom": _("Cette machine"), "adresse": "127.0.0.1", "ports": [], "watts": "40-150", "depuis": date.today().isoformat()},
          {"nom": _("Exemple de serveur (à adapter)"), "adresse": "192.168.1.10", "ports": [22, 80], "web": "http://192.168.1.10/",
           "ssh": "root@192.168.1.10", "watts": "30-120"}]))]
 

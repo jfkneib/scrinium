@@ -234,3 +234,48 @@ def test_surveillance_en_arriere_plan_seulement_fiches_validees(fen, monkeypatch
     assert _attendre(app, lambda: not p._en_cours) and len(notes) == 1               # pas de répétition
     fen.store.enregistrer(th, th.fiches[0], "Mes machines", lg.en_texte([{"nom": "Srv", "adresse": "h"}, {"nom": "Autre", "adresse": "h2"}]))
     assert p.machines_a_surveiller() == []                       # texte modifié : la validation tombe, plus de contrôle
+
+
+def test_cumul_d_energie_estimee_pur():
+    import time
+    from datetime import datetime
+    debut = datetime(2026, 11, 10).timestamp()
+    assert lg.cumuler(None, "", 100, debut) is None and lg.cumuler(None, "pas une date", 100, debut) is None
+    e = lg.cumuler(None, "2026-11-10", 100, debut + 3600)                       # premier contrôle : rien à compter encore
+    assert e["wh"] == 0 and e["dernier"] == debut + 3600
+    e = lg.cumuler(e, "2026-11-10", 100, debut + 3600 + 60)                     # 100 W pendant 60 s
+    assert round(e["wh"], 3) == round(100 * 60 / 3600, 3) and e["secondes"] == 60
+    e2 = lg.cumuler(e, "2026-11-10", 100, debut + 3600 + 60 + 3600)             # trou d'une heure : Scrinium fermé, non compté
+    assert e2["wh"] == e["wh"] and e2["secondes"] == 60
+    assert lg.cumuler(e, "2026-11-10", None, debut + 3600 + 120)["wh"] == e["wh"]    # pas de watts : rien ajouté
+    assert lg.cumuler(e, "2026-11-11", 100, debut + 3600 + 120)["wh"] == 0           # autre date : remis à zéro
+    futur = lg.cumuler(lg.cumuler(None, "2030-01-01", 100, debut), "2030-01-01", 100, debut + 60)
+    assert futur["wh"] == 0                                                          # avant la date de mise en service : rien
+    assert lg.formater_energie(850) == "850 Wh" and lg.formater_energie(12345) == "12.35 kWh"
+    assert lg.lire_date("10/11/2026") == "2026-11-10" and lg.lire_date("2026-11-10") == "2026-11-10" and lg.lire_date("x") == ""
+    m = lg.normaliser({"nom": "x", "adresse": "h", "watts": "40-200", "depuis": "10/11/2026"})
+    assert "depuis: 2026-11-10" in lg.en_texte([m]) and lg.depuis_texte(lg.en_texte([m]))[0]["depuis"] == "2026-11-10"
+    assert time.time() > 0
+
+
+def test_cumul_seulement_en_suivi_continu_et_affiche(fen):
+    p = fen.plugins.actifs["supervision"][0]
+    m = lg.normaliser({"nom": "Srv", "adresse": "h", "watts": "100-100", "depuis": "2026-01-01"})
+    r = {"ping": True, "ports": {}, "mesures": {"charge": 1.0, "coeurs": 1}}
+    t0 = 1_800_000_000.0
+    p.cumuler(m, r, t0)
+    p.cumuler(m, r, t0 + 60)
+    assert p.cumul_de(m) is None                                                     # suivi continu coché ? non : rien n'est compté
+    p.regler_fond(True)
+    p.cumuler(m, r, t0 + 120)
+    p.cumuler(m, r, t0 + 180)
+    assert round(p.cumul_de(m)["wh"], 2) == round(100 * 60 / 3600, 2)
+    assert p.ctx.reglages.get("cumul")["Srv|h"]["secondes"] == 60                    # mémorisé sur cette machine
+    vue = fen.vues_types["supervision"]
+    vue.machines = [m]
+    vue._afficher()
+    vue._gen += 1
+    vue._arrive(vue._gen, 0, r)
+    item = vue.table.item(0, 7)
+    assert item.text().endswith("Wh") and "ESTIMÉE" in item.toolTip() and "01/01/2026" in item.toolTip()
+    assert vue.table.item(0, 6).text() == "≈ 100 W"
