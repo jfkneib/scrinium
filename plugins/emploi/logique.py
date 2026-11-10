@@ -317,10 +317,23 @@ def texte_neuf() -> str:
     return ecrire(Profil())
 
 
+# Flux publics d'offres d'emploi (vérifiés le 2026-11-11 : ils répondent et contiennent des offres). Sites en anglais pour la plupart (télétravail) ; France : Emploi Territorial.
+SOURCES_EXEMPLE = [
+    ("Remotive (télétravail)", "https://remotive.com/remote-jobs/feed"),
+    ("We Work Remotely · programmation", "https://weworkremotely.com/categories/remote-programming-jobs.rss"),
+    ("We Work Remotely · devops et sysadmin", "https://weworkremotely.com/categories/remote-devops-sysadmin-jobs.rss"),
+    ("Python.org · offres", "https://www.python.org/jobs/feed/rss/"),
+    ("Hacker News · offres", "https://hnrss.org/jobs"),
+    ("Jobicy (télétravail)", "https://jobicy.com/feed/job_feed"),
+    ("Himalayas (télétravail)", "https://himalayas.app/jobs/rss"),
+    ("Emploi Territorial (collectivités, France)", "https://www.emploi-territorial.fr/rss"),
+]
+
+
 def exemples() -> list:
-    p = Profil(14, ["python", "linux"], ["xmpp", "télétravail", "devops | sysadmin"], ["stage", "alternance"],
+    p = Profil(14, ["python", "linux"], ["xmpp", "remote | télétravail | teletravail", "devops | sysadmin"], ["stage", "alternance", "internship"],
                _("Développeur Python, dix ans d'expérience, administration Linux, intérêt pour les messageries (XMPP)."),
-               [Source("Exemple · flux d'offres", "https://example.org/offres.rss", False)])
+               [Source(nom, adresse, True) for nom, adresse in SOURCES_EXEMPLE])
     return [(_("Emploi (exemples)"), _("Exemple · Ma recherche d'emploi"), ecrire(p))]
 
 
