@@ -401,6 +401,8 @@ def _vc_en_ligne(c: dict) -> list:
     nom, prenom = c.get("nom", ""), c.get("prenom", "")
     if not nom and not prenom:
         nom = c.get("fn", "")                    # pas de nom structuré : le nom affiché va dans « Nom »
+    elif not nom:
+        nom, prenom = prenom, ""                 # un seul nom (prénom seul, surnom…) : il sert d'index, dans « Nom »
     notes = c["autres"] + c["notes"]
     return [nom, prenom, "\n".join(dict.fromkeys(c["tel"])), "\n".join(c["adr"]), "\n".join(dict.fromkeys(c["mail"])),
             "\n".join(dict.fromkeys(c["web"])), "\n".join(notes)]

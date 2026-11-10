@@ -415,3 +415,9 @@ def test_import_vcard_dans_un_tableau_libre_ajoute_seulement_les_colonnes_utiles
     ajoutees, creees = t.importer_vcf([simple.encode()])
     assert ajoutees == 1 and creees == ["Prénom", "Téléphones", "Courriel"]          # ni Adresse, ni Lien, ni Notes : personne n'en a
     assert t.colonnes == ["Nom", "Détails", "Prénom", "Téléphones", "Courriel"]
+
+
+def test_import_vcard_prenom_seul_devient_le_nom_pour_le_classement():
+    t = Tableau.depuis_texte(texte_modele(0))
+    t.importer_vcf([b"BEGIN:VCARD\nVERSION:3.0\nN:;Maman;;;\nFN:Maman\nTEL:0600000000\nEND:VCARD\n"])
+    assert t.lignes[0][0] == "Maman" and t.lignes[0][1] == ""
