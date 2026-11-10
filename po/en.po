@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: scrinium 0.2.0\n"
 "Report-Msgid-Bugs-To: \n"
-"PO-Revision-Date: 2026-11-10 14:57+0100\n"
+"PO-Revision-Date: 2026-11-10 15:03+0100\n"
 "Last-Translator: Jean-François Kneib\n"
 "Language-Team: English\n"
 "Language: en\n"
@@ -133,6 +133,7 @@ msgid "Repousser de 10 min"
 msgstr "Snooze 10 min"
 
 #: plugins/agenda/__init__.py:132
+#: plugins/resolutions/__init__.py:99
 msgid "Fait"
 msgstr "Done"
 
@@ -181,6 +182,8 @@ msgid "Jamais"
 msgstr "Never"
 
 #: plugins/agenda/logique.py:40
+#: plugins/resolutions/__init__.py:38
+#: plugins/resolutions/__init__.py:194
 msgid "Chaque jour"
 msgstr "Every day"
 
@@ -2885,6 +2888,7 @@ msgid "Fin"
 msgstr "End"
 
 #: plugins/planning/__init__.py:275
+#: plugins/resolutions/__init__.py:193
 msgid "j"
 msgstr "d"
 
@@ -3113,6 +3117,175 @@ msgstr "Loop in the dependencies around \"%s\""
 #: plugins/planning/logique.py:393
 msgid "Cette fiche fait le point sur les plannings (fiches « Planning ») du même thème que celle-ci, ou sur tous si vous le choisissez en haut : avancement, retards, dates. Elle se met à jour quand on l'ouvre ou qu'on clique sur « Actualiser »."
 msgstr "This note gives an overview of the plannings (\"Planning\" notes) of the same topic as itself, or of all of them if you choose so at the top: progress, delays, dates. It updates when you open it or click \"Refresh\"."
+
+#: plugins/resolutions/__init__.py:224
+msgid ""
+"Suivre ses bonnes résolutions, avec une note automatique et des encouragements.\n"
+"\n"
+"• Nouvelle fiche > « Résolutions » : « Ajouter une résolution… ». Chaque résolution est « chaque jour » (marcher, boire de l'eau…) ou « N fois par semaine » (lire, faire du sport…), depuis une date.\n"
+"• Une case à cocher par jour. Le jour se choisit en haut : on peut cocher hier. Le jour en cours, pas encore coché, n'est pas compté contre vous.\n"
+"• La série est le nombre de jours (ou de semaines) d'affilée réussis ; le record garde la plus belle. Un carré par jour pour les 14 derniers jours.\n"
+"• La note sur 100 est la moyenne des taux de réussite des 14 derniers jours, avec des étoiles. Le message d'encouragement suit la note, la tendance (par rapport aux 14 jours précédents) et vos séries.\n"
+"• Le texte reste lisible et modifiable à la main ; rien n'est exécuté. Un carnet pour se motiver, pas un jugement."
+msgstr ""
+"Follow your good resolutions, with an automatic score and encouragement.\n"
+"\n"
+"• New note > \"Resolutions\": \"Add a resolution…\". Each resolution is \"every day\" (walking, drinking water…) or \"N times a week\" (reading, sport…), from a date.\n"
+"• One tick box per day. The day is chosen at the top: you can tick yesterday. The current day, not yet ticked, is not counted against you.\n"
+"• The streak is the number of days (or weeks) in a row achieved; the best keeps the finest one. One square per day for the last 14 days.\n"
+"• The score out of 100 is the average success rate over the last 14 days, with stars. The encouraging message follows the score, the trend (compared with the previous 14 days) and your streaks.\n"
+"• The text stays readable and editable by hand; nothing is executed. A notebook to motivate yourself, not a judgement."
+
+#: plugins/resolutions/__init__.py:33
+#: plugins/resolutions/__init__.py:99
+msgid "Résolution"
+msgstr "Resolution"
+
+#: plugins/resolutions/__init__.py:36
+#: plugins/resolutions/logique.py:261
+msgid "Marcher 30 minutes"
+msgstr "Walk for 30 minutes"
+
+#: plugins/resolutions/__init__.py:39
+msgid "Plusieurs fois par semaine"
+msgstr "Several times a week"
+
+#: plugins/resolutions/__init__.py:42
+msgid " fois par semaine"
+msgstr " times a week"
+
+#: plugins/resolutions/__init__.py:52
+msgid "Résolution :"
+msgstr "Resolution:"
+
+#: plugins/resolutions/__init__.py:53
+msgid "Rythme :"
+msgstr "Frequency:"
+
+#: plugins/resolutions/__init__.py:55
+msgid "Depuis le :"
+msgstr "Since:"
+
+#: plugins/resolutions/__init__.py:93
+#: plugins/resolutions/__init__.py:154
+msgid "Ajouter une résolution…"
+msgstr "Add a resolution…"
+
+#: plugins/resolutions/__init__.py:107
+msgid "Cochez le jour choisi ; la note compte les 14 derniers jours. Clic droit : modifier ou supprimer."
+msgstr "Tick the chosen day; the score counts the last 14 days. Right-click: edit or delete."
+
+#: plugins/resolutions/__init__.py:217
+msgid "Extension Résolutions"
+msgstr "Resolutions extension"
+
+#: plugins/resolutions/__init__.py:87
+msgid "Jour"
+msgstr "Day"
+
+#: plugins/resolutions/__init__.py:99
+msgid "Rythme"
+msgstr "Frequency"
+
+#: plugins/resolutions/__init__.py:99
+msgid "Série"
+msgstr "Streak"
+
+#: plugins/resolutions/__init__.py:99
+msgid "Record"
+msgstr "Best"
+
+#: plugins/resolutions/__init__.py:99
+msgid "14 derniers jours"
+msgstr "Last 14 days"
+
+#: plugins/resolutions/__init__.py:99
+msgid "Taux"
+msgstr "Rate"
+
+#: plugins/resolutions/__init__.py:193
+msgid "sem."
+msgstr "wk"
+
+#: plugins/resolutions/__init__.py:206
+msgid "Du plus ancien au plus récent ; le dernier carré est aujourd'hui."
+msgstr "Oldest to newest; the last square is today."
+
+#: plugins/resolutions/__init__.py:178
+msgid "Note : —"
+msgstr "Score: —"
+
+#: plugins/resolutions/__init__.py:194
+msgid "%d fois par semaine"
+msgstr "%d times a week"
+
+#: plugins/resolutions/__init__.py:178
+msgid "Note : %d / 100"
+msgstr "Score: %d / 100"
+
+#: plugins/resolutions/logique.py:104
+msgid "Résolutions"
+msgstr "Resolutions"
+
+#: plugins/resolutions/logique.py:229
+msgid "Ajoutez une première résolution : une petite, que vous pouvez tenir tous les jours."
+msgstr "Add a first resolution: a small one you can keep every day."
+
+#: plugins/resolutions/logique.py:231
+msgid "C'est parti ! Cochez votre première résolution : le premier jour est le plus important."
+msgstr "Off you go! Tick your first resolution: the first day is the most important."
+
+#: plugins/resolutions/logique.py:233
+msgid "Excellent ! Vous tenez vos résolutions presque sans faute. Continuez comme ça."
+msgstr "Excellent! You keep your resolutions almost flawlessly. Keep it up."
+
+#: plugins/resolutions/logique.py:249
+msgid "Série de %(n)d semaines sur « %(nom)s » : bravo !"
+msgstr "Streak of %(n)d weeks on \"%(nom)s\": well done!"
+
+#: plugins/resolutions/logique.py:249
+msgid "Série de %(n)d jours sur « %(nom)s » : bravo !"
+msgstr "Streak of %(n)d days on \"%(nom)s\": well done!"
+
+#: plugins/resolutions/logique.py:262
+msgid "Lire 3 fois par semaine"
+msgstr "Read 3 times a week"
+
+#: plugins/resolutions/logique.py:263
+msgid "Boire de l'eau"
+msgstr "Drink water"
+
+#: plugins/resolutions/logique.py:264
+msgid "Résolutions (exemples)"
+msgstr "Resolutions (examples)"
+
+#: plugins/resolutions/logique.py:264
+msgid "Exemple · Mes résolutions"
+msgstr "Example · My resolutions"
+
+#: plugins/resolutions/logique.py:235
+msgid "Très bien ! Vous êtes sur le bon rythme, il ne manque pas grand-chose."
+msgstr "Very good! You are on the right track, not much is missing."
+
+#: plugins/resolutions/logique.py:244
+msgid "En hausse de %d points sur 14 jours : vos efforts paient."
+msgstr "Up %d points over 14 days: your efforts are paying off."
+
+#: plugins/resolutions/logique.py:237
+msgid "Un bon début : plus de la moitié est tenue. Un petit effort et la série démarre."
+msgstr "A good start: more than half is kept. A little effort and the streak begins."
+
+#: plugins/resolutions/logique.py:246
+msgid "En baisse de %d points : un petit effort aujourd'hui et la courbe repart."
+msgstr "Down %d points: a small effort today and the curve picks up again."
+
+#: plugins/resolutions/logique.py:239
+msgid "Ce n'est pas grave : chaque jour est une nouvelle chance. Une petite victoire aujourd'hui relance tout."
+msgstr "No worries: every day is a new chance. One small win today restarts everything."
+
+#: plugins/resolutions/logique.py:241
+msgid "Recommencez doucement, sans vous juger : cochez une seule résolution aujourd'hui, c'est déjà gagné."
+msgstr "Start again gently, without judging yourself: tick just one resolution today, that is already a win."
 
 #: plugins/suivi/__init__.py:337
 msgid ""
@@ -5096,7 +5269,7 @@ msgstr ""
 "You can read them with any text editor. To back them up, copy this folder. Locked notes are .lock files, unreadable without their password."
 
 #: src/scrinium/core/guide.py:11
-#: src/scrinium/core/guide.py:103
+#: src/scrinium/core/guide.py:104
 msgid "Guide"
 msgstr "Guide"
 
@@ -5157,6 +5330,7 @@ msgid ""
 "• Agenda : des rappels et échéances (extension Agenda).\n"
 "• Calc : un petit éditeur de listes avec des totaux par colonne et l'export CSV, pour suivre des relevés (extension Calc).\n"
 "• Budget : de petits comptes (courses, argent de poche…) avec colonnes Débit et Crédit, un onglet par mois, un bilan, et une fiche « Budget — résultat » qui totalise tous les budgets (extension Budget).\n"
+"• Résolutions : vos bonnes résolutions, une case par jour, des séries, une note automatique sur 100 et des encouragements (extension Résolutions).\n"
 "• Suivi : le poids et les calories au jour le jour, avec des courbes et vos objectifs (extension Suivi).\n"
 "• Supervision : l'état de vos machines (ping, ports, page web, disque, mémoire et charge par SSH) dans une fiche, avec une notification quand l'une tombe (extension Supervision).\n"
 "• Planning : des tâches en couleurs sur un diagramme de Gantt, avec l'avancement, les retards et un rétroplanning à partir d'une date de fin (extension Planning).\n"
@@ -5173,6 +5347,7 @@ msgstr ""
 "• Agenda: reminders and deadlines (Agenda extension).\n"
 "• Calc: a small list editor with totals per column and CSV export, to track readings (Calc extension).\n"
 "• Budget: small accounts (groceries, pocket money…) with Debit and Credit columns, one tab per month, a summary, and a \"Budget — result\" note that totals all the budgets (Budget extension).\n"
+"• Resolutions: your good resolutions, a tick per day, streaks, an automatic score out of 100 and encouragement (Resolutions extension).\n"
 "• Tracking: weight and calories day by day, with charts and your goals (Tracking extension).\n"
 "• Monitoring: the state of your machines (ping, ports, web page, disk, memory and load over SSH) in a note, with a notification when one goes down (Monitoring extension).\n"
 "• Planning: tasks as a colour-coded Gantt chart, with progress, delays and a backward schedule from an end date (Planning extension).\n"
@@ -5180,11 +5355,11 @@ msgstr ""
 "\n"
 "Security: a type that RUNS commands (Applications, CLI actions) stays inert until you have validated the note yourself. A note received from someone else therefore never runs anything on its own."
 
-#: src/scrinium/core/guide.py:56
+#: src/scrinium/core/guide.py:57
 msgid "Guide 4 · Les extensions"
 msgstr "Guide 4 · Extensions"
 
-#: src/scrinium/core/guide.py:56
+#: src/scrinium/core/guide.py:57
 msgid ""
 "Menu Extensions > Gérer les extensions… : cochez celles qui vous servent. Livrées avec Scrinium :\n"
 "\n"
@@ -5210,11 +5385,11 @@ msgstr ""
 "\n"
 "Write your own: Help menu > \"Extensions documentation\"."
 
-#: src/scrinium/core/guide.py:69
+#: src/scrinium/core/guide.py:70
 msgid "Guide 5 · Console et commandes"
 msgstr "Guide 5 · Console and commands"
 
-#: src/scrinium/core/guide.py:69
+#: src/scrinium/core/guide.py:70
 msgid ""
 "L'extension Capture relie vos fiches au terminal, sans jamais rien valider à votre place.\n"
 "\n"
@@ -5230,11 +5405,11 @@ msgstr ""
 "• Extensions > \"Run a command and insert the output…\": the opposite, the command is run after confirmation and its output is inserted in the note, at the cursor.\n"
 "• From a terminal: \"ls -al | scrinium ajouter -t Topic -f Note\" adds the output to a note."
 
-#: src/scrinium/core/guide.py:81
+#: src/scrinium/core/guide.py:82
 msgid "Guide 6 · Verrouillage, secours et partage"
 msgstr "Guide 6 · Locking, recovery and sharing"
 
-#: src/scrinium/core/guide.py:81
+#: src/scrinium/core/guide.py:82
 msgid ""
 "• Verrouiller : bouton « Verrouiller… ». Le titre reste visible, le contenu est chiffré. Mot de passe oublié = fiche perdue, sauf avec le FICHIER DE SECOURS (menu Sécurité > Fichier de secours…) : faites-le dès le premier verrouillage, gardez-le hors de cet ordinateur.\n"
 "• Une fiche verrouillée n'est jamais envoyée, lue, traduite ni partagée tant qu'elle est fermée.\n"
@@ -5246,11 +5421,11 @@ msgstr ""
 "• Sharing: the Sharing extension synchronises notes with a Scrinium server. An invitation by email (valid 48 h) gives read or write access; in a conflict, both versions are kept.\n"
 "• Invite someone to INSTALL Scrinium: File menu > \"Invite to install Scrinium…\"."
 
-#: src/scrinium/core/guide.py:89
+#: src/scrinium/core/guide.py:90
 msgid "Guide 7 · Où sont mes données, sauvegarde"
 msgstr "Guide 7 · Where is my data, backup"
 
-#: src/scrinium/core/guide.py:89
+#: src/scrinium/core/guide.py:90
 msgid ""
 "• Vos fiches : un dossier par thème, un fichier .md par fiche (.lock si verrouillée), avec un sous-dossier .pj pour les images jointes :\n"
 "\n"

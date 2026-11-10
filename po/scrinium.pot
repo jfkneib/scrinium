@@ -126,6 +126,7 @@ msgid "Repousser de 10 min"
 msgstr ""
 
 #: plugins/agenda/__init__.py:132
+#: plugins/resolutions/__init__.py:99
 msgid "Fait"
 msgstr ""
 
@@ -174,6 +175,8 @@ msgid "Jamais"
 msgstr ""
 
 #: plugins/agenda/logique.py:40
+#: plugins/resolutions/__init__.py:38
+#: plugins/resolutions/__init__.py:194
 msgid "Chaque jour"
 msgstr ""
 
@@ -2724,6 +2727,7 @@ msgid "Fin"
 msgstr ""
 
 #: plugins/planning/__init__.py:275
+#: plugins/resolutions/__init__.py:193
 msgid "j"
 msgstr ""
 
@@ -2951,6 +2955,168 @@ msgstr ""
 
 #: plugins/planning/logique.py:393
 msgid "Cette fiche fait le point sur les plannings (fiches « Planning ») du même thème que celle-ci, ou sur tous si vous le choisissez en haut : avancement, retards, dates. Elle se met à jour quand on l'ouvre ou qu'on clique sur « Actualiser »."
+msgstr ""
+
+#: plugins/resolutions/__init__.py:224
+msgid ""
+"Suivre ses bonnes résolutions, avec une note automatique et des encouragements.\n"
+"\n"
+"• Nouvelle fiche > « Résolutions » : « Ajouter une résolution… ». Chaque résolution est « chaque jour » (marcher, boire de l'eau…) ou « N fois par semaine » (lire, faire du sport…), depuis une date.\n"
+"• Une case à cocher par jour. Le jour se choisit en haut : on peut cocher hier. Le jour en cours, pas encore coché, n'est pas compté contre vous.\n"
+"• La série est le nombre de jours (ou de semaines) d'affilée réussis ; le record garde la plus belle. Un carré par jour pour les 14 derniers jours.\n"
+"• La note sur 100 est la moyenne des taux de réussite des 14 derniers jours, avec des étoiles. Le message d'encouragement suit la note, la tendance (par rapport aux 14 jours précédents) et vos séries.\n"
+"• Le texte reste lisible et modifiable à la main ; rien n'est exécuté. Un carnet pour se motiver, pas un jugement."
+msgstr ""
+
+#: plugins/resolutions/__init__.py:33
+#: plugins/resolutions/__init__.py:99
+msgid "Résolution"
+msgstr ""
+
+#: plugins/resolutions/__init__.py:36
+#: plugins/resolutions/logique.py:261
+msgid "Marcher 30 minutes"
+msgstr ""
+
+#: plugins/resolutions/__init__.py:39
+msgid "Plusieurs fois par semaine"
+msgstr ""
+
+#: plugins/resolutions/__init__.py:42
+msgid " fois par semaine"
+msgstr ""
+
+#: plugins/resolutions/__init__.py:52
+msgid "Résolution :"
+msgstr ""
+
+#: plugins/resolutions/__init__.py:53
+msgid "Rythme :"
+msgstr ""
+
+#: plugins/resolutions/__init__.py:55
+msgid "Depuis le :"
+msgstr ""
+
+#: plugins/resolutions/__init__.py:93
+#: plugins/resolutions/__init__.py:154
+msgid "Ajouter une résolution…"
+msgstr ""
+
+#: plugins/resolutions/__init__.py:107
+msgid "Cochez le jour choisi ; la note compte les 14 derniers jours. Clic droit : modifier ou supprimer."
+msgstr ""
+
+#: plugins/resolutions/__init__.py:217
+msgid "Extension Résolutions"
+msgstr ""
+
+#: plugins/resolutions/__init__.py:87
+msgid "Jour"
+msgstr ""
+
+#: plugins/resolutions/__init__.py:99
+msgid "Rythme"
+msgstr ""
+
+#: plugins/resolutions/__init__.py:99
+msgid "Série"
+msgstr ""
+
+#: plugins/resolutions/__init__.py:99
+msgid "Record"
+msgstr ""
+
+#: plugins/resolutions/__init__.py:99
+msgid "14 derniers jours"
+msgstr ""
+
+#: plugins/resolutions/__init__.py:99
+msgid "Taux"
+msgstr ""
+
+#: plugins/resolutions/__init__.py:193
+msgid "sem."
+msgstr ""
+
+#: plugins/resolutions/__init__.py:206
+msgid "Du plus ancien au plus récent ; le dernier carré est aujourd'hui."
+msgstr ""
+
+#: plugins/resolutions/__init__.py:178
+msgid "Note : —"
+msgstr ""
+
+#: plugins/resolutions/__init__.py:194
+msgid "%d fois par semaine"
+msgstr ""
+
+#: plugins/resolutions/__init__.py:178
+msgid "Note : %d / 100"
+msgstr ""
+
+#: plugins/resolutions/logique.py:104
+msgid "Résolutions"
+msgstr ""
+
+#: plugins/resolutions/logique.py:229
+msgid "Ajoutez une première résolution : une petite, que vous pouvez tenir tous les jours."
+msgstr ""
+
+#: plugins/resolutions/logique.py:231
+msgid "C'est parti ! Cochez votre première résolution : le premier jour est le plus important."
+msgstr ""
+
+#: plugins/resolutions/logique.py:233
+msgid "Excellent ! Vous tenez vos résolutions presque sans faute. Continuez comme ça."
+msgstr ""
+
+#: plugins/resolutions/logique.py:249
+msgid "Série de %(n)d semaines sur « %(nom)s » : bravo !"
+msgstr ""
+
+#: plugins/resolutions/logique.py:249
+msgid "Série de %(n)d jours sur « %(nom)s » : bravo !"
+msgstr ""
+
+#: plugins/resolutions/logique.py:262
+msgid "Lire 3 fois par semaine"
+msgstr ""
+
+#: plugins/resolutions/logique.py:263
+msgid "Boire de l'eau"
+msgstr ""
+
+#: plugins/resolutions/logique.py:264
+msgid "Résolutions (exemples)"
+msgstr ""
+
+#: plugins/resolutions/logique.py:264
+msgid "Exemple · Mes résolutions"
+msgstr ""
+
+#: plugins/resolutions/logique.py:235
+msgid "Très bien ! Vous êtes sur le bon rythme, il ne manque pas grand-chose."
+msgstr ""
+
+#: plugins/resolutions/logique.py:244
+msgid "En hausse de %d points sur 14 jours : vos efforts paient."
+msgstr ""
+
+#: plugins/resolutions/logique.py:237
+msgid "Un bon début : plus de la moitié est tenue. Un petit effort et la série démarre."
+msgstr ""
+
+#: plugins/resolutions/logique.py:246
+msgid "En baisse de %d points : un petit effort aujourd'hui et la courbe repart."
+msgstr ""
+
+#: plugins/resolutions/logique.py:239
+msgid "Ce n'est pas grave : chaque jour est une nouvelle chance. Une petite victoire aujourd'hui relance tout."
+msgstr ""
+
+#: plugins/resolutions/logique.py:241
+msgid "Recommencez doucement, sans vous juger : cochez une seule résolution aujourd'hui, c'est déjà gagné."
 msgstr ""
 
 #: plugins/suivi/__init__.py:337
@@ -4638,7 +4804,7 @@ msgid ""
 msgstr ""
 
 #: src/scrinium/core/guide.py:11
-#: src/scrinium/core/guide.py:103
+#: src/scrinium/core/guide.py:104
 msgid "Guide"
 msgstr ""
 
@@ -4686,6 +4852,7 @@ msgid ""
 "• Agenda : des rappels et échéances (extension Agenda).\n"
 "• Calc : un petit éditeur de listes avec des totaux par colonne et l'export CSV, pour suivre des relevés (extension Calc).\n"
 "• Budget : de petits comptes (courses, argent de poche…) avec colonnes Débit et Crédit, un onglet par mois, un bilan, et une fiche « Budget — résultat » qui totalise tous les budgets (extension Budget).\n"
+"• Résolutions : vos bonnes résolutions, une case par jour, des séries, une note automatique sur 100 et des encouragements (extension Résolutions).\n"
 "• Suivi : le poids et les calories au jour le jour, avec des courbes et vos objectifs (extension Suivi).\n"
 "• Supervision : l'état de vos machines (ping, ports, page web, disque, mémoire et charge par SSH) dans une fiche, avec une notification quand l'une tombe (extension Supervision).\n"
 "• Planning : des tâches en couleurs sur un diagramme de Gantt, avec l'avancement, les retards et un rétroplanning à partir d'une date de fin (extension Planning).\n"
@@ -4694,11 +4861,11 @@ msgid ""
 "Sécurité : un type qui LANCE des commandes (Applications, Actions CLI) reste inerte tant que vous n'avez pas validé la fiche vous-même. Une fiche reçue d'un autre n'exécute donc jamais rien toute seule."
 msgstr ""
 
-#: src/scrinium/core/guide.py:56
+#: src/scrinium/core/guide.py:57
 msgid "Guide 4 · Les extensions"
 msgstr ""
 
-#: src/scrinium/core/guide.py:56
+#: src/scrinium/core/guide.py:57
 msgid ""
 "Menu Extensions > Gérer les extensions… : cochez celles qui vous servent. Livrées avec Scrinium :\n"
 "\n"
@@ -4713,11 +4880,11 @@ msgid ""
 "Écrire la vôtre : menu Aide > « Documentation des extensions »."
 msgstr ""
 
-#: src/scrinium/core/guide.py:69
+#: src/scrinium/core/guide.py:70
 msgid "Guide 5 · Console et commandes"
 msgstr ""
 
-#: src/scrinium/core/guide.py:69
+#: src/scrinium/core/guide.py:70
 msgid ""
 "L'extension Capture relie vos fiches au terminal, sans jamais rien valider à votre place.\n"
 "\n"
@@ -4727,11 +4894,11 @@ msgid ""
 "• Depuis un terminal : « ls -al | scrinium ajouter -t Thème -f Fiche » ajoute la sortie à une fiche."
 msgstr ""
 
-#: src/scrinium/core/guide.py:81
+#: src/scrinium/core/guide.py:82
 msgid "Guide 6 · Verrouillage, secours et partage"
 msgstr ""
 
-#: src/scrinium/core/guide.py:81
+#: src/scrinium/core/guide.py:82
 msgid ""
 "• Verrouiller : bouton « Verrouiller… ». Le titre reste visible, le contenu est chiffré. Mot de passe oublié = fiche perdue, sauf avec le FICHIER DE SECOURS (menu Sécurité > Fichier de secours…) : faites-le dès le premier verrouillage, gardez-le hors de cet ordinateur.\n"
 "• Une fiche verrouillée n'est jamais envoyée, lue, traduite ni partagée tant qu'elle est fermée.\n"
@@ -4739,11 +4906,11 @@ msgid ""
 "• Inviter quelqu'un à INSTALLER Scrinium : menu Fichier > « Inviter à installer Scrinium… »."
 msgstr ""
 
-#: src/scrinium/core/guide.py:89
+#: src/scrinium/core/guide.py:90
 msgid "Guide 7 · Où sont mes données, sauvegarde"
 msgstr ""
 
-#: src/scrinium/core/guide.py:89
+#: src/scrinium/core/guide.py:90
 msgid ""
 "• Vos fiches : un dossier par thème, un fichier .md par fiche (.lock si verrouillée), avec un sous-dossier .pj pour les images jointes :\n"
 "\n"

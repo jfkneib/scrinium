@@ -1,0 +1,8 @@
+{
+  "titre": "Résolutions",
+  "version": "0.1",
+  "auteur": "Scrinium",
+  "description": "Un type de fiche « Résolutions » pour suivre vos bonnes résolutions : une case à cocher par jour, des séries (jours ou semaines d'affilée), une note automatique sur 100 avec des étoiles, et un message d'encouragement qui suit vos progrès. Chaque résolution est « chaque jour » ou « N fois par semaine ».",
+  "classe": "ResolutionsPlugin",
+  "api": 1
+}
