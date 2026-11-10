@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: scrinium 0.2.0\n"
 "Report-Msgid-Bugs-To: \n"
-"PO-Revision-Date: 2026-11-10 14:51+0100\n"
+"PO-Revision-Date: 2026-11-10 14:57+0100\n"
 "Last-Translator: Jean-François Kneib\n"
 "Language-Team: English\n"
 "Language: en\n"
@@ -652,6 +652,7 @@ msgid "Budgets"
 msgstr "Budgets"
 
 #: plugins/budget/__init__.py:391
+#: plugins/suivi/__init__.py:173
 msgid "Période"
 msgstr "Period"
 
@@ -934,6 +935,8 @@ msgid "Exemple · Relevé de poids"
 msgstr "Example · Weight log"
 
 #: plugins/calc/logique.py:93
+#: plugins/suivi/__init__.py:181
+#: plugins/suivi/__init__.py:187
 msgid "Poids (kg)"
 msgstr "Weight (kg)"
 
@@ -3111,6 +3114,150 @@ msgstr "Loop in the dependencies around \"%s\""
 msgid "Cette fiche fait le point sur les plannings (fiches « Planning ») du même thème que celle-ci, ou sur tous si vous le choisissez en haut : avancement, retards, dates. Elle se met à jour quand on l'ouvre ou qu'on clique sur « Actualiser »."
 msgstr "This note gives an overview of the plannings (\"Planning\" notes) of the same topic as itself, or of all of them if you choose so at the top: progress, delays, dates. It updates when you open it or click \"Refresh\"."
 
+#: plugins/suivi/__init__.py:337
+msgid ""
+"Le poids et les calories au jour le jour, avec des courbes.\n"
+"\n"
+"• Nouvelle fiche > « Suivi poids et calories » : une fiche = un suivi. Saisie rapide en haut : la date (aujourd'hui par défaut), le poids, les calories, une note facultative.\n"
+"• Les calories s'AJOUTENT au total du jour (petit-déjeuner, déjeuner, en-cas…) ; un nombre négatif corrige. Le poids du jour est remplacé. Les cellules du tableau se modifient directement ; clic droit : supprimer des jours.\n"
+"• Taille et objectifs (poids, calories par jour) sont facultatifs. Le bilan donne le dernier poids, sa variation sur 7 et 30 jours, ce qu'il reste pour atteindre l'objectif, l'indice de masse corporelle et la moyenne des calories sur 7 jours.\n"
+"• Deux graphiques : le poids (avec la ligne d'objectif en pointillés) et les calories (barres du vert au rouge selon l'objectif). La période se choisit.\n"
+"• C'est un carnet, pas un avis médical. Ce sont des données de santé : verrouillez la fiche (clic droit > Verrouiller). Le texte reste un tableau Markdown lisible, cherchable et partageable ; rien n'est exécuté."
+msgstr ""
+"Weight and calories day by day, with charts.\n"
+"\n"
+"• New note > \"Weight and calorie tracking\": one note = one log. Quick entry at the top: the date (today by default), the weight, the calories, an optional note.\n"
+"• Calories are ADDED to the day's total (breakfast, lunch, snacks…); a negative number corrects. The day's weight is replaced. Table cells can be edited directly; right-click: delete days.\n"
+"• Height and goals (weight, calories per day) are optional. The summary gives the latest weight, its change over 7 and 30 days, what is left to reach the goal, the body mass index and the average calories over 7 days.\n"
+"• Two charts: weight (with the goal as a dashed line) and calories (bars from green to red against the goal). You choose the period.\n"
+"• It is a notebook, not medical advice. This is health data: lock the note (right-click > Lock). The text stays a readable, searchable, shareable Markdown table; nothing is executed."
+
+#: plugins/suivi/__init__.py:148
+msgid "poids en kg"
+msgstr "weight in kg"
+
+#: plugins/suivi/__init__.py:149
+msgid "calories à ajouter"
+msgstr "calories to add"
+
+#: plugins/suivi/__init__.py:150
+msgid "note (facultatif)"
+msgstr "note (optional)"
+
+#: plugins/suivi/__init__.py:153
+msgid "Poids"
+msgstr "Weight"
+
+#: plugins/suivi/__init__.py:154
+#: plugins/suivi/__init__.py:187
+msgid "Calories"
+msgstr "Calories"
+
+#: plugins/suivi/__init__.py:182
+msgid "Calories par jour"
+msgstr "Calories per day"
+
+#: plugins/suivi/__init__.py:196
+msgid "Un carnet, pas un avis médical. Données de santé : verrouillez la fiche."
+msgstr "A notebook, not medical advice. Health data: lock the note."
+
+#: plugins/suivi/__init__.py:259
+msgid "Supprimer ces jours"
+msgstr "Delete these days"
+
+#: plugins/suivi/__init__.py:330
+msgid "Extension Suivi"
+msgstr "Tracking extension"
+
+#: plugins/suivi/__init__.py:72
+msgid "Pas encore de données"
+msgstr "No data yet"
+
+#: plugins/suivi/__init__.py:134
+msgid "Taille (cm)"
+msgstr "Height (cm)"
+
+#: plugins/suivi/__init__.py:134
+msgid "Objectif poids (kg)"
+msgstr "Weight goal (kg)"
+
+#: plugins/suivi/__init__.py:135
+msgid "Objectif calories / jour"
+msgstr "Calorie goal / day"
+
+#: plugins/suivi/__init__.py:187
+#: src/scrinium/ui/fenetre.py:284
+msgid "Note"
+msgstr "Text"
+
+#: plugins/suivi/__init__.py:223
+msgid "Poids non reconnu : entre 20 et 400 kg (virgule ou point)."
+msgstr "Weight not recognised: between 20 and 400 kg (comma or point)."
+
+#: plugins/suivi/__init__.py:231
+msgid "Calories non reconnues : un nombre (négatif pour corriger)."
+msgstr "Calories not recognised: a number (negative to correct)."
+
+#: plugins/suivi/__init__.py:293
+msgid "Dernier poids : <b>%(kg)s kg</b> (%(jour)s)"
+msgstr "Latest weight: <b>%(kg)s kg</b> (%(jour)s)"
+
+#: plugins/suivi/__init__.py:309
+msgid "Saisissez un poids ou des calories pour commencer."
+msgstr "Enter a weight or some calories to start."
+
+#: plugins/suivi/__init__.py:308
+msgid "Moyenne des calories sur 7 jours : %d par jour"
+msgstr "Average calories over 7 days: %d per day"
+
+#: plugins/suivi/__init__.py:316
+msgid "Aujourd'hui : %(c)d / %(o)d kcal"
+msgstr "Today: %(c)d / %(o)d kcal"
+
+#: plugins/suivi/__init__.py:176
+msgid "30 jours"
+msgstr "30 days"
+
+#: plugins/suivi/__init__.py:176
+msgid "90 jours"
+msgstr "90 days"
+
+#: plugins/suivi/__init__.py:176
+msgid "1 an"
+msgstr "1 year"
+
+#: plugins/suivi/__init__.py:176
+msgid "Tout"
+msgstr "All"
+
+#: plugins/suivi/__init__.py:305
+msgid "Indice de masse corporelle : %.1f"
+msgstr "Body mass index: %.1f"
+
+#: plugins/suivi/__init__.py:297
+msgid "%(n)d j : %(v)+.1f kg"
+msgstr "%(n)d d: %(v)+.1f kg"
+
+#: plugins/suivi/__init__.py:301
+msgid "Objectif %(obj)s kg : il reste %(e).1f kg à perdre."
+msgstr "Goal %(obj)s kg: %(e).1f kg left to lose."
+
+#: plugins/suivi/__init__.py:302
+msgid "Objectif %(obj)s kg atteint (%(e).1f kg sous l'objectif)."
+msgstr "Goal %(obj)s kg reached (%(e).1f kg below the goal)."
+
+#: plugins/suivi/logique.py:161
+msgid "Suivi poids et calories"
+msgstr "Weight and calorie tracking"
+
+#: plugins/suivi/logique.py:214
+msgid "Suivi (exemples)"
+msgstr "Tracking (examples)"
+
+#: plugins/suivi/logique.py:214
+msgid "Exemple · Poids et calories"
+msgstr "Example · Weight and calories"
+
 #: plugins/supervision/__init__.py:443
 msgid ""
 "L'état de vos machines (ordinateurs, serveurs, NAS, box) dans une fiche.\n"
@@ -4949,7 +5096,7 @@ msgstr ""
 "You can read them with any text editor. To back them up, copy this folder. Locked notes are .lock files, unreadable without their password."
 
 #: src/scrinium/core/guide.py:11
-#: src/scrinium/core/guide.py:102
+#: src/scrinium/core/guide.py:103
 msgid "Guide"
 msgstr "Guide"
 
@@ -5010,6 +5157,7 @@ msgid ""
 "• Agenda : des rappels et échéances (extension Agenda).\n"
 "• Calc : un petit éditeur de listes avec des totaux par colonne et l'export CSV, pour suivre des relevés (extension Calc).\n"
 "• Budget : de petits comptes (courses, argent de poche…) avec colonnes Débit et Crédit, un onglet par mois, un bilan, et une fiche « Budget — résultat » qui totalise tous les budgets (extension Budget).\n"
+"• Suivi : le poids et les calories au jour le jour, avec des courbes et vos objectifs (extension Suivi).\n"
 "• Supervision : l'état de vos machines (ping, ports, page web, disque, mémoire et charge par SSH) dans une fiche, avec une notification quand l'une tombe (extension Supervision).\n"
 "• Planning : des tâches en couleurs sur un diagramme de Gantt, avec l'avancement, les retards et un rétroplanning à partir d'une date de fin (extension Planning).\n"
 "• Tableur : des cellules et des formules comme =SOMME(B2:B10), avec export et import CSV (extension Tableur).\n"
@@ -5025,17 +5173,18 @@ msgstr ""
 "• Agenda: reminders and deadlines (Agenda extension).\n"
 "• Calc: a small list editor with totals per column and CSV export, to track readings (Calc extension).\n"
 "• Budget: small accounts (groceries, pocket money…) with Debit and Credit columns, one tab per month, a summary, and a \"Budget — result\" note that totals all the budgets (Budget extension).\n"
+"• Tracking: weight and calories day by day, with charts and your goals (Tracking extension).\n"
 "• Monitoring: the state of your machines (ping, ports, web page, disk, memory and load over SSH) in a note, with a notification when one goes down (Monitoring extension).\n"
 "• Planning: tasks as a colour-coded Gantt chart, with progress, delays and a backward schedule from an end date (Planning extension).\n"
 "• Spreadsheet: cells and formulas such as =SOMME(B2:B10), with CSV export and import (Spreadsheet extension).\n"
 "\n"
 "Security: a type that RUNS commands (Applications, CLI actions) stays inert until you have validated the note yourself. A note received from someone else therefore never runs anything on its own."
 
-#: src/scrinium/core/guide.py:55
+#: src/scrinium/core/guide.py:56
 msgid "Guide 4 · Les extensions"
 msgstr "Guide 4 · Extensions"
 
-#: src/scrinium/core/guide.py:55
+#: src/scrinium/core/guide.py:56
 msgid ""
 "Menu Extensions > Gérer les extensions… : cochez celles qui vous servent. Livrées avec Scrinium :\n"
 "\n"
@@ -5061,11 +5210,11 @@ msgstr ""
 "\n"
 "Write your own: Help menu > \"Extensions documentation\"."
 
-#: src/scrinium/core/guide.py:68
+#: src/scrinium/core/guide.py:69
 msgid "Guide 5 · Console et commandes"
 msgstr "Guide 5 · Console and commands"
 
-#: src/scrinium/core/guide.py:68
+#: src/scrinium/core/guide.py:69
 msgid ""
 "L'extension Capture relie vos fiches au terminal, sans jamais rien valider à votre place.\n"
 "\n"
@@ -5081,11 +5230,11 @@ msgstr ""
 "• Extensions > \"Run a command and insert the output…\": the opposite, the command is run after confirmation and its output is inserted in the note, at the cursor.\n"
 "• From a terminal: \"ls -al | scrinium ajouter -t Topic -f Note\" adds the output to a note."
 
-#: src/scrinium/core/guide.py:80
+#: src/scrinium/core/guide.py:81
 msgid "Guide 6 · Verrouillage, secours et partage"
 msgstr "Guide 6 · Locking, recovery and sharing"
 
-#: src/scrinium/core/guide.py:80
+#: src/scrinium/core/guide.py:81
 msgid ""
 "• Verrouiller : bouton « Verrouiller… ». Le titre reste visible, le contenu est chiffré. Mot de passe oublié = fiche perdue, sauf avec le FICHIER DE SECOURS (menu Sécurité > Fichier de secours…) : faites-le dès le premier verrouillage, gardez-le hors de cet ordinateur.\n"
 "• Une fiche verrouillée n'est jamais envoyée, lue, traduite ni partagée tant qu'elle est fermée.\n"
@@ -5097,11 +5246,11 @@ msgstr ""
 "• Sharing: the Sharing extension synchronises notes with a Scrinium server. An invitation by email (valid 48 h) gives read or write access; in a conflict, both versions are kept.\n"
 "• Invite someone to INSTALL Scrinium: File menu > \"Invite to install Scrinium…\"."
 
-#: src/scrinium/core/guide.py:88
+#: src/scrinium/core/guide.py:89
 msgid "Guide 7 · Où sont mes données, sauvegarde"
 msgstr "Guide 7 · Where is my data, backup"
 
-#: src/scrinium/core/guide.py:88
+#: src/scrinium/core/guide.py:89
 msgid ""
 "• Vos fiches : un dossier par thème, un fichier .md par fiche (.lock si verrouillée), avec un sous-dossier .pj pour les images jointes :\n"
 "\n"
@@ -5652,10 +5801,6 @@ msgstr "Lock again"
 #: src/scrinium/ui/fenetre.py:276
 msgid "Referme la fiche : le mot de passe sera redemandé (Ctrl+Maj+L)"
 msgstr "Locks the note again: the password will be asked again (Ctrl+Shift+L)"
-
-#: src/scrinium/ui/fenetre.py:284
-msgid "Note"
-msgstr "Text"
 
 #: src/scrinium/ui/fenetre.py:315
 msgid "Cette fiche peut lancer des commandes. Elle est inerte tant que vous ne l'avez pas validée (elle n'a pas été créée ici, ou son contenu a changé)."

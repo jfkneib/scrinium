@@ -1,0 +1,8 @@
+{
+  "titre": "Suivi",
+  "version": "0.1",
+  "auteur": "Scrinium",
+  "description": "Un type de fiche « Suivi poids et calories » : une saisie rapide (poids du jour, calories ajoutées au fil de la journée), des courbes de poids et de calories avec vos objectifs, les moyennes et la variation sur 7 et 30 jours. Pas un avis médical : un simple carnet, verrouillable comme toute fiche.",
+  "classe": "SuiviPlugin",
+  "api": 1
+}

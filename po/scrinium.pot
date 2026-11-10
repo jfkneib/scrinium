@@ -628,6 +628,7 @@ msgid "Budgets"
 msgstr ""
 
 #: plugins/budget/__init__.py:391
+#: plugins/suivi/__init__.py:173
 msgid "Période"
 msgstr ""
 
@@ -900,6 +901,8 @@ msgid "Exemple · Relevé de poids"
 msgstr ""
 
 #: plugins/calc/logique.py:93
+#: plugins/suivi/__init__.py:181
+#: plugins/suivi/__init__.py:187
 msgid "Poids (kg)"
 msgstr ""
 
@@ -2950,6 +2953,143 @@ msgstr ""
 msgid "Cette fiche fait le point sur les plannings (fiches « Planning ») du même thème que celle-ci, ou sur tous si vous le choisissez en haut : avancement, retards, dates. Elle se met à jour quand on l'ouvre ou qu'on clique sur « Actualiser »."
 msgstr ""
 
+#: plugins/suivi/__init__.py:337
+msgid ""
+"Le poids et les calories au jour le jour, avec des courbes.\n"
+"\n"
+"• Nouvelle fiche > « Suivi poids et calories » : une fiche = un suivi. Saisie rapide en haut : la date (aujourd'hui par défaut), le poids, les calories, une note facultative.\n"
+"• Les calories s'AJOUTENT au total du jour (petit-déjeuner, déjeuner, en-cas…) ; un nombre négatif corrige. Le poids du jour est remplacé. Les cellules du tableau se modifient directement ; clic droit : supprimer des jours.\n"
+"• Taille et objectifs (poids, calories par jour) sont facultatifs. Le bilan donne le dernier poids, sa variation sur 7 et 30 jours, ce qu'il reste pour atteindre l'objectif, l'indice de masse corporelle et la moyenne des calories sur 7 jours.\n"
+"• Deux graphiques : le poids (avec la ligne d'objectif en pointillés) et les calories (barres du vert au rouge selon l'objectif). La période se choisit.\n"
+"• C'est un carnet, pas un avis médical. Ce sont des données de santé : verrouillez la fiche (clic droit > Verrouiller). Le texte reste un tableau Markdown lisible, cherchable et partageable ; rien n'est exécuté."
+msgstr ""
+
+#: plugins/suivi/__init__.py:148
+msgid "poids en kg"
+msgstr ""
+
+#: plugins/suivi/__init__.py:149
+msgid "calories à ajouter"
+msgstr ""
+
+#: plugins/suivi/__init__.py:150
+msgid "note (facultatif)"
+msgstr ""
+
+#: plugins/suivi/__init__.py:153
+msgid "Poids"
+msgstr ""
+
+#: plugins/suivi/__init__.py:154
+#: plugins/suivi/__init__.py:187
+msgid "Calories"
+msgstr ""
+
+#: plugins/suivi/__init__.py:182
+msgid "Calories par jour"
+msgstr ""
+
+#: plugins/suivi/__init__.py:196
+msgid "Un carnet, pas un avis médical. Données de santé : verrouillez la fiche."
+msgstr ""
+
+#: plugins/suivi/__init__.py:259
+msgid "Supprimer ces jours"
+msgstr ""
+
+#: plugins/suivi/__init__.py:330
+msgid "Extension Suivi"
+msgstr ""
+
+#: plugins/suivi/__init__.py:72
+msgid "Pas encore de données"
+msgstr ""
+
+#: plugins/suivi/__init__.py:134
+msgid "Taille (cm)"
+msgstr ""
+
+#: plugins/suivi/__init__.py:134
+msgid "Objectif poids (kg)"
+msgstr ""
+
+#: plugins/suivi/__init__.py:135
+msgid "Objectif calories / jour"
+msgstr ""
+
+#: plugins/suivi/__init__.py:187
+#: src/scrinium/ui/fenetre.py:284
+msgid "Note"
+msgstr ""
+
+#: plugins/suivi/__init__.py:223
+msgid "Poids non reconnu : entre 20 et 400 kg (virgule ou point)."
+msgstr ""
+
+#: plugins/suivi/__init__.py:231
+msgid "Calories non reconnues : un nombre (négatif pour corriger)."
+msgstr ""
+
+#: plugins/suivi/__init__.py:293
+msgid "Dernier poids : <b>%(kg)s kg</b> (%(jour)s)"
+msgstr ""
+
+#: plugins/suivi/__init__.py:309
+msgid "Saisissez un poids ou des calories pour commencer."
+msgstr ""
+
+#: plugins/suivi/__init__.py:308
+msgid "Moyenne des calories sur 7 jours : %d par jour"
+msgstr ""
+
+#: plugins/suivi/__init__.py:316
+msgid "Aujourd'hui : %(c)d / %(o)d kcal"
+msgstr ""
+
+#: plugins/suivi/__init__.py:176
+msgid "30 jours"
+msgstr ""
+
+#: plugins/suivi/__init__.py:176
+msgid "90 jours"
+msgstr ""
+
+#: plugins/suivi/__init__.py:176
+msgid "1 an"
+msgstr ""
+
+#: plugins/suivi/__init__.py:176
+msgid "Tout"
+msgstr ""
+
+#: plugins/suivi/__init__.py:305
+msgid "Indice de masse corporelle : %.1f"
+msgstr ""
+
+#: plugins/suivi/__init__.py:297
+msgid "%(n)d j : %(v)+.1f kg"
+msgstr ""
+
+#: plugins/suivi/__init__.py:301
+msgid "Objectif %(obj)s kg : il reste %(e).1f kg à perdre."
+msgstr ""
+
+#: plugins/suivi/__init__.py:302
+msgid "Objectif %(obj)s kg atteint (%(e).1f kg sous l'objectif)."
+msgstr ""
+
+#: plugins/suivi/logique.py:161
+msgid "Suivi poids et calories"
+msgstr ""
+
+#: plugins/suivi/logique.py:214
+msgid "Suivi (exemples)"
+msgstr ""
+
+#: plugins/suivi/logique.py:214
+msgid "Exemple · Poids et calories"
+msgstr ""
+
 #: plugins/supervision/__init__.py:443
 msgid ""
 "L'état de vos machines (ordinateurs, serveurs, NAS, box) dans une fiche.\n"
@@ -4498,7 +4638,7 @@ msgid ""
 msgstr ""
 
 #: src/scrinium/core/guide.py:11
-#: src/scrinium/core/guide.py:102
+#: src/scrinium/core/guide.py:103
 msgid "Guide"
 msgstr ""
 
@@ -4546,6 +4686,7 @@ msgid ""
 "• Agenda : des rappels et échéances (extension Agenda).\n"
 "• Calc : un petit éditeur de listes avec des totaux par colonne et l'export CSV, pour suivre des relevés (extension Calc).\n"
 "• Budget : de petits comptes (courses, argent de poche…) avec colonnes Débit et Crédit, un onglet par mois, un bilan, et une fiche « Budget — résultat » qui totalise tous les budgets (extension Budget).\n"
+"• Suivi : le poids et les calories au jour le jour, avec des courbes et vos objectifs (extension Suivi).\n"
 "• Supervision : l'état de vos machines (ping, ports, page web, disque, mémoire et charge par SSH) dans une fiche, avec une notification quand l'une tombe (extension Supervision).\n"
 "• Planning : des tâches en couleurs sur un diagramme de Gantt, avec l'avancement, les retards et un rétroplanning à partir d'une date de fin (extension Planning).\n"
 "• Tableur : des cellules et des formules comme =SOMME(B2:B10), avec export et import CSV (extension Tableur).\n"
@@ -4553,11 +4694,11 @@ msgid ""
 "Sécurité : un type qui LANCE des commandes (Applications, Actions CLI) reste inerte tant que vous n'avez pas validé la fiche vous-même. Une fiche reçue d'un autre n'exécute donc jamais rien toute seule."
 msgstr ""
 
-#: src/scrinium/core/guide.py:55
+#: src/scrinium/core/guide.py:56
 msgid "Guide 4 · Les extensions"
 msgstr ""
 
-#: src/scrinium/core/guide.py:55
+#: src/scrinium/core/guide.py:56
 msgid ""
 "Menu Extensions > Gérer les extensions… : cochez celles qui vous servent. Livrées avec Scrinium :\n"
 "\n"
@@ -4572,11 +4713,11 @@ msgid ""
 "Écrire la vôtre : menu Aide > « Documentation des extensions »."
 msgstr ""
 
-#: src/scrinium/core/guide.py:68
+#: src/scrinium/core/guide.py:69
 msgid "Guide 5 · Console et commandes"
 msgstr ""
 
-#: src/scrinium/core/guide.py:68
+#: src/scrinium/core/guide.py:69
 msgid ""
 "L'extension Capture relie vos fiches au terminal, sans jamais rien valider à votre place.\n"
 "\n"
@@ -4586,11 +4727,11 @@ msgid ""
 "• Depuis un terminal : « ls -al | scrinium ajouter -t Thème -f Fiche » ajoute la sortie à une fiche."
 msgstr ""
 
-#: src/scrinium/core/guide.py:80
+#: src/scrinium/core/guide.py:81
 msgid "Guide 6 · Verrouillage, secours et partage"
 msgstr ""
 
-#: src/scrinium/core/guide.py:80
+#: src/scrinium/core/guide.py:81
 msgid ""
 "• Verrouiller : bouton « Verrouiller… ». Le titre reste visible, le contenu est chiffré. Mot de passe oublié = fiche perdue, sauf avec le FICHIER DE SECOURS (menu Sécurité > Fichier de secours…) : faites-le dès le premier verrouillage, gardez-le hors de cet ordinateur.\n"
 "• Une fiche verrouillée n'est jamais envoyée, lue, traduite ni partagée tant qu'elle est fermée.\n"
@@ -4598,11 +4739,11 @@ msgid ""
 "• Inviter quelqu'un à INSTALLER Scrinium : menu Fichier > « Inviter à installer Scrinium… »."
 msgstr ""
 
-#: src/scrinium/core/guide.py:88
+#: src/scrinium/core/guide.py:89
 msgid "Guide 7 · Où sont mes données, sauvegarde"
 msgstr ""
 
-#: src/scrinium/core/guide.py:88
+#: src/scrinium/core/guide.py:89
 msgid ""
 "• Vos fiches : un dossier par thème, un fichier .md par fiche (.lock si verrouillée), avec un sous-dossier .pj pour les images jointes :\n"
 "\n"
@@ -5068,10 +5209,6 @@ msgstr ""
 
 #: src/scrinium/ui/fenetre.py:276
 msgid "Referme la fiche : le mot de passe sera redemandé (Ctrl+Maj+L)"
-msgstr ""
-
-#: src/scrinium/ui/fenetre.py:284
-msgid "Note"
 msgstr ""
 
 #: src/scrinium/ui/fenetre.py:315
