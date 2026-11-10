@@ -1,3 +1,21 @@
+scrinium (0.9.0) unstable; urgency=medium
+
+  * Nouvelle extension Supervision : état des machines (ping, ports, web, SSH), couleurs vert à
+    rouge, puissance estimée (au survol : estimation), énergie cumulée estimée en Wh depuis une
+    date, par semaine et par mois, surveillance en arrière plan facultative.
+  * Nouvelle extension Suivi : poids et calories au jour le jour, bilan, variation, IMC,
+    courbe de poids et barres de calories avec objectifs.
+  * Nouvelle extension Résolutions : une case par jour, séries, note automatique sur 100 avec
+    étoiles et encouragements.
+  * Nouvelle extension Échéances : assurances, domaines, certificats, garanties, abonnements,
+    avec répétition, rappel, notification et totaux. OK avec un nom vide affiche maintenant un message.
+  * Nouvelle extension Sécurité : qui est connecté, ports ouverts, outils d'accès à distance,
+    comptes, clés SSH (Linux, Windows, macOS ; lecture seule) ; « accepter comme normal », puis
+    seules les nouveautés sont signalées.
+  * Répertoire : améliorations (voir l'historique git).
+
+ -- Jean-François Kneib <kneib.jean-francois@cegetel.net>  Tue, 10 Nov 2026 20:00:00 +0100
+
 scrinium (0.8.1) unstable; urgency=medium
 
   * Agenda : lien de réunion (Zoom, Teams, Meet…) par événement, ou adresse écrite dans le titre ;
