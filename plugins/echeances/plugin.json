@@ -1,0 +1,8 @@
+{
+  "titre": "Échéances",
+  "version": "0.1",
+  "auteur": "Scrinium",
+  "description": "Un type de fiche « Échéances et abonnements » : assurances, noms de domaine, certificats, contrôle technique, garanties, abonnements… avec leur date, leur répétition (mensuelle, annuelle, tous les 2 ans…), leur montant et un rappel avant la date. Une notification vous prévient à l'approche de chaque échéance, et la fiche chiffre ce que vous aurez à payer sur 30 jours et sur l'année.",
+  "classe": "EcheancesPlugin",
+  "api": 1
+}

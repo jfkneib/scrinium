@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: scrinium 0.2.0\n"
 "Report-Msgid-Bugs-To: \n"
-"PO-Revision-Date: 2026-11-10 15:03+0100\n"
+"PO-Revision-Date: 2026-11-10 15:10+0100\n"
 "Last-Translator: Jean-François Kneib\n"
 "Language-Team: English\n"
 "Language: en\n"
@@ -192,10 +192,12 @@ msgid "Chaque semaine"
 msgstr "Every week"
 
 #: plugins/agenda/logique.py:40
+#: plugins/echeances/logique.py:28
 msgid "Chaque mois"
 msgstr "Every month"
 
 #: plugins/agenda/logique.py:41
+#: plugins/echeances/logique.py:29
 msgid "Chaque année"
 msgstr "Every year"
 
@@ -489,6 +491,7 @@ msgid "Catégorie"
 msgstr "Category"
 
 #: plugins/budget/__init__.py:137
+#: plugins/echeances/__init__.py:108
 msgid "Montant"
 msgstr "Amount"
 
@@ -1692,6 +1695,240 @@ msgstr "The note can no longer be edited: text not inserted."
 #: plugins/dictee/__init__.py:244
 msgid "Modèle indisponible : %s"
 msgstr "Model unavailable: %s"
+
+#: plugins/echeances/__init__.py:239
+msgid ""
+"Assurances, noms de domaine, certificats, contrôle technique, garanties, abonnements : ne plus rater une date.\n"
+"\n"
+"• Nouvelle fiche > « Échéances et abonnements » : « Ajouter une échéance… » (nom, date, répétition, montant, rappel, note). Le tableau est trié par prochaine date et coloré : rouge (en retard), orange (urgent, 7 jours ou moins), jaune (dans le rappel), vert (plus tard).\n"
+"• Répétition : une fois, chaque mois, trimestre, semestre, année ou tous les 2 ans. Une échéance qui se répète passe d'elle-même à la date suivante ; une échéance « une fois » dépassée reste « en retard » jusqu'à ce que vous la modifiiez ou la supprimiez.\n"
+"• Le rappel est le nombre de jours avant la date où Scrinium vous prévient. En haut : les échéances sous 30 jours, les retards, ce qu'il y a à payer sous 30 jours et sur les 12 mois à venir (la devise se règle à côté).\n"
+"• Notification du bureau à l'approche de chaque échéance et pour un retard, une seule fois par date : au démarrage de l'extension, puis toutes les heures. Elle lit toutes vos fiches « Échéances » (une fiche verrouillée et fermée est ignorée). Scrinium doit être ouvert.\n"
+"• Le texte reste un tableau Markdown lisible, cherchable et partageable ; rien n'est exécuté."
+msgstr ""
+"Insurance, domain names, certificates, vehicle inspection, warranties, subscriptions: never miss a date again.\n"
+"\n"
+"• New note > \"Deadlines and subscriptions\": \"Add a deadline…\" (name, date, repeat, amount, reminder, note). The table is sorted by next date and coloured: red (overdue), orange (urgent, 7 days or less), yellow (within the reminder), green (later).\n"
+"• Repeat: once, every month, quarter, six months, year or every 2 years. A repeating deadline moves to the next date by itself; a \"once\" deadline that has passed stays \"overdue\" until you edit or delete it.\n"
+"• The reminder is the number of days before the date when Scrinium warns you. At the top: the deadlines within 30 days, the overdue ones, what is to be paid within 30 days and over the next 12 months (the currency is set next to it).\n"
+"• Desktop notification as each deadline approaches and for an overdue one, once per date: when the extension starts, then every hour. It reads all your \"Deadlines\" notes (a locked, closed note is ignored). Scrinium must be open.\n"
+"• The text stays a readable, searchable, shareable Markdown table; nothing is executed."
+
+#: plugins/echeances/__init__.py:30
+#: plugins/planning/__init__.py:608
+msgid "En retard"
+msgstr "Late"
+
+#: plugins/echeances/__init__.py:30
+msgid "Urgent"
+msgstr "Urgent"
+
+#: plugins/echeances/__init__.py:30
+msgid "Bientôt"
+msgstr "Soon"
+
+#: plugins/echeances/__init__.py:30
+#: plugins/traduction/__init__.py:179
+#: src/scrinium/ui/assistant.py:76
+msgid "Plus tard"
+msgstr "Later"
+
+#: plugins/echeances/__init__.py:42
+#: plugins/echeances/__init__.py:108
+msgid "Échéance"
+msgstr "Deadline"
+
+#: plugins/echeances/__init__.py:46
+msgid "Assurance habitation"
+msgstr "Home insurance"
+
+#: plugins/echeances/__init__.py:55
+msgid "facultatif"
+msgstr "optional"
+
+#: plugins/echeances/__init__.py:58
+msgid " jours avant"
+msgstr " days before"
+
+#: plugins/echeances/__init__.py:61
+msgid "Échéance :"
+msgstr "Deadline:"
+
+#: plugins/echeances/__init__.py:62
+msgid "Date :"
+msgstr "Date:"
+
+#: plugins/echeances/__init__.py:63
+msgid "Répétition :"
+msgstr "Repeat:"
+
+#: plugins/echeances/__init__.py:64
+msgid "Montant :"
+msgstr "Amount:"
+
+#: plugins/echeances/__init__.py:65
+msgid "Rappel :"
+msgstr "Reminder:"
+
+#: plugins/echeances/__init__.py:66
+msgid "Note :"
+msgstr "Note:"
+
+#: plugins/echeances/__init__.py:97
+#: plugins/echeances/__init__.py:164
+msgid "Ajouter une échéance…"
+msgstr "Add a deadline…"
+
+#: plugins/echeances/__init__.py:117
+msgid "Une échéance qui se répète passe d'elle-même à la date suivante. Double-clic ou clic droit : modifier ou supprimer."
+msgstr "A repeating deadline moves to the next date by itself. Double-click or right-click: edit or delete."
+
+#: plugins/echeances/__init__.py:210
+msgid "Extension Échéances"
+msgstr "Deadlines extension"
+
+#: plugins/echeances/__init__.py:100
+msgid "Devise"
+msgstr "Currency"
+
+#: plugins/echeances/__init__.py:108
+#: plugins/supervision/__init__.py:136
+msgid "État"
+msgstr "Status"
+
+#: plugins/echeances/__init__.py:108
+msgid "Prochaine date"
+msgstr "Next date"
+
+#: plugins/echeances/__init__.py:108
+msgid "Dans"
+msgstr "In"
+
+#: plugins/echeances/__init__.py:108
+msgid "Répétition"
+msgstr "Repeat"
+
+#: plugins/echeances/__init__.py:108
+#: plugins/suivi/__init__.py:187
+#: src/scrinium/ui/fenetre.py:284
+msgid "Note"
+msgstr "Text"
+
+#: plugins/echeances/__init__.py:180
+msgid "aujourd'hui"
+msgstr "today"
+
+#: plugins/echeances/__init__.py:195
+msgid "<b>%d</b> échéance(s) sous 30 jours"
+msgstr "<b>%d</b> deadline(s) within 30 days"
+
+#: plugins/echeances/__init__.py:202
+msgid "Ajoutez une première échéance : assurance, domaine, garantie…"
+msgstr "Add a first deadline: insurance, domain, warranty…"
+
+#: plugins/echeances/__init__.py:236
+msgid "Échéances"
+msgstr "Deadlines"
+
+#: plugins/echeances/__init__.py:199
+msgid "à payer sous 30 jours : <b>%s</b>"
+msgstr "to pay within 30 days: <b>%s</b>"
+
+#: plugins/echeances/__init__.py:201
+msgid "sur 12 mois : <b>%s</b>"
+msgstr "over 12 months: <b>%s</b>"
+
+#: plugins/echeances/__init__.py:235
+msgid " … et %d autre(s)"
+msgstr " … and %d more"
+
+#: plugins/echeances/__init__.py:180
+msgid "%d j"
+msgstr "%d d"
+
+#: plugins/echeances/__init__.py:180
+msgid "il y a %d j"
+msgstr "%d d ago"
+
+#: plugins/echeances/__init__.py:197
+msgid "%d en retard"
+msgstr "%d overdue"
+
+#: plugins/echeances/logique.py:131
+msgid "Échéances et abonnements"
+msgstr "Deadlines and subscriptions"
+
+#: plugins/echeances/logique.py:28
+msgid "Une fois"
+msgstr "Once"
+
+#: plugins/echeances/logique.py:28
+msgid "Chaque trimestre"
+msgstr "Every quarter"
+
+#: plugins/echeances/logique.py:29
+msgid "Chaque semestre"
+msgstr "Every six months"
+
+#: plugins/echeances/logique.py:29
+msgid "Tous les 2 ans"
+msgstr "Every 2 years"
+
+#: plugins/echeances/logique.py:225
+msgid "« %(nom)s » : dans %(n)d jour(s) (%(date)s)%(m)s"
+msgstr "\"%(nom)s\": in %(n)d day(s) (%(date)s)%(m)s"
+
+#: plugins/echeances/logique.py:222
+msgid "« %(nom)s » : échéance dépassée depuis %(n)d jour(s) (%(date)s)%(m)s"
+msgstr "\"%(nom)s\": overdue for %(n)d day(s) (%(date)s)%(m)s"
+
+#: plugins/echeances/logique.py:224
+msgid "« %(nom)s » : c'est aujourd'hui (%(date)s)%(m)s"
+msgstr "\"%(nom)s\": it is today (%(date)s)%(m)s"
+
+#: plugins/echeances/logique.py:240
+msgid "Échéances (exemples)"
+msgstr "Deadlines (examples)"
+
+#: plugins/echeances/logique.py:240
+msgid "Exemple · Mes échéances"
+msgstr "Example · My deadlines"
+
+#: plugins/echeances/logique.py:233
+msgid "Assurance auto"
+msgstr "Car insurance"
+
+#: plugins/echeances/logique.py:233
+msgid "contrat à renouveler"
+msgstr "contract to renew"
+
+#: plugins/echeances/logique.py:234
+msgid "Abonnement vidéo"
+msgstr "Video subscription"
+
+#: plugins/echeances/logique.py:235
+msgid "Nom de domaine"
+msgstr "Domain name"
+
+#: plugins/echeances/logique.py:236
+msgid "Certificat du site"
+msgstr "Website certificate"
+
+#: plugins/echeances/logique.py:236
+msgid "à renouveler avant la date"
+msgstr "renew before the date"
+
+#: plugins/echeances/logique.py:237
+msgid "Contrôle technique"
+msgstr "Vehicle inspection"
+
+#: plugins/echeances/logique.py:238
+msgid "Garantie du lave-linge"
+msgstr "Washing machine warranty"
+
+#: plugins/echeances/logique.py:238
+msgid "garder la facture"
+msgstr "keep the invoice"
 
 #: plugins/lecture/__init__.py:421
 msgid ""
@@ -2948,10 +3185,6 @@ msgid "En cours"
 msgstr "In progress"
 
 #: plugins/planning/__init__.py:608
-msgid "En retard"
-msgstr "Late"
-
-#: plugins/planning/__init__.py:608
 msgid "À venir"
 msgstr "Upcoming"
 
@@ -3358,11 +3591,6 @@ msgstr "Weight goal (kg)"
 msgid "Objectif calories / jour"
 msgstr "Calorie goal / day"
 
-#: plugins/suivi/__init__.py:187
-#: src/scrinium/ui/fenetre.py:284
-msgid "Note"
-msgstr "Text"
-
 #: plugins/suivi/__init__.py:223
 msgid "Poids non reconnu : entre 20 et 400 kg (virgule ou point)."
 msgstr "Weight not recognised: between 20 and 400 kg (comma or point)."
@@ -3547,10 +3775,6 @@ msgstr "The web page must start with http:// or https://."
 #: plugins/supervision/__init__.py:98
 msgid "Cible SSH refusée : utilisez « utilisateur@machine »."
 msgstr "SSH target refused: use \"user@machine\"."
-
-#: plugins/supervision/__init__.py:136
-msgid "État"
-msgstr "Status"
 
 #: plugins/supervision/__init__.py:136
 msgid "Réseau"
@@ -3882,11 +4106,6 @@ msgstr "Translation runs on your machine: nothing is sent over the Internet. The
 #: plugins/traduction/__init__.py:178
 msgid "Choisir"
 msgstr "Choose"
-
-#: plugins/traduction/__init__.py:179
-#: src/scrinium/ui/assistant.py:76
-msgid "Plus tard"
-msgstr "Later"
 
 #: plugins/traduction/__init__.py:204
 msgid "Réglages de la traduction"
@@ -5269,7 +5488,7 @@ msgstr ""
 "You can read them with any text editor. To back them up, copy this folder. Locked notes are .lock files, unreadable without their password."
 
 #: src/scrinium/core/guide.py:11
-#: src/scrinium/core/guide.py:104
+#: src/scrinium/core/guide.py:105
 msgid "Guide"
 msgstr "Guide"
 
@@ -5330,6 +5549,7 @@ msgid ""
 "• Agenda : des rappels et échéances (extension Agenda).\n"
 "• Calc : un petit éditeur de listes avec des totaux par colonne et l'export CSV, pour suivre des relevés (extension Calc).\n"
 "• Budget : de petits comptes (courses, argent de poche…) avec colonnes Débit et Crédit, un onglet par mois, un bilan, et une fiche « Budget — résultat » qui totalise tous les budgets (extension Budget).\n"
+"• Échéances : assurances, noms de domaine, certificats, garanties, abonnements, avec la prochaine date, un rappel et une notification (extension Échéances).\n"
 "• Résolutions : vos bonnes résolutions, une case par jour, des séries, une note automatique sur 100 et des encouragements (extension Résolutions).\n"
 "• Suivi : le poids et les calories au jour le jour, avec des courbes et vos objectifs (extension Suivi).\n"
 "• Supervision : l'état de vos machines (ping, ports, page web, disque, mémoire et charge par SSH) dans une fiche, avec une notification quand l'une tombe (extension Supervision).\n"
@@ -5347,6 +5567,7 @@ msgstr ""
 "• Agenda: reminders and deadlines (Agenda extension).\n"
 "• Calc: a small list editor with totals per column and CSV export, to track readings (Calc extension).\n"
 "• Budget: small accounts (groceries, pocket money…) with Debit and Credit columns, one tab per month, a summary, and a \"Budget — result\" note that totals all the budgets (Budget extension).\n"
+"• Deadlines: insurance, domain names, certificates, warranties, subscriptions, with the next date, a reminder and a notification (Deadlines extension).\n"
 "• Resolutions: your good resolutions, a tick per day, streaks, an automatic score out of 100 and encouragement (Resolutions extension).\n"
 "• Tracking: weight and calories day by day, with charts and your goals (Tracking extension).\n"
 "• Monitoring: the state of your machines (ping, ports, web page, disk, memory and load over SSH) in a note, with a notification when one goes down (Monitoring extension).\n"
@@ -5355,11 +5576,11 @@ msgstr ""
 "\n"
 "Security: a type that RUNS commands (Applications, CLI actions) stays inert until you have validated the note yourself. A note received from someone else therefore never runs anything on its own."
 
-#: src/scrinium/core/guide.py:57
+#: src/scrinium/core/guide.py:58
 msgid "Guide 4 · Les extensions"
 msgstr "Guide 4 · Extensions"
 
-#: src/scrinium/core/guide.py:57
+#: src/scrinium/core/guide.py:58
 msgid ""
 "Menu Extensions > Gérer les extensions… : cochez celles qui vous servent. Livrées avec Scrinium :\n"
 "\n"
@@ -5385,11 +5606,11 @@ msgstr ""
 "\n"
 "Write your own: Help menu > \"Extensions documentation\"."
 
-#: src/scrinium/core/guide.py:70
+#: src/scrinium/core/guide.py:71
 msgid "Guide 5 · Console et commandes"
 msgstr "Guide 5 · Console and commands"
 
-#: src/scrinium/core/guide.py:70
+#: src/scrinium/core/guide.py:71
 msgid ""
 "L'extension Capture relie vos fiches au terminal, sans jamais rien valider à votre place.\n"
 "\n"
@@ -5405,11 +5626,11 @@ msgstr ""
 "• Extensions > \"Run a command and insert the output…\": the opposite, the command is run after confirmation and its output is inserted in the note, at the cursor.\n"
 "• From a terminal: \"ls -al | scrinium ajouter -t Topic -f Note\" adds the output to a note."
 
-#: src/scrinium/core/guide.py:82
+#: src/scrinium/core/guide.py:83
 msgid "Guide 6 · Verrouillage, secours et partage"
 msgstr "Guide 6 · Locking, recovery and sharing"
 
-#: src/scrinium/core/guide.py:82
+#: src/scrinium/core/guide.py:83
 msgid ""
 "• Verrouiller : bouton « Verrouiller… ». Le titre reste visible, le contenu est chiffré. Mot de passe oublié = fiche perdue, sauf avec le FICHIER DE SECOURS (menu Sécurité > Fichier de secours…) : faites-le dès le premier verrouillage, gardez-le hors de cet ordinateur.\n"
 "• Une fiche verrouillée n'est jamais envoyée, lue, traduite ni partagée tant qu'elle est fermée.\n"
@@ -5421,11 +5642,11 @@ msgstr ""
 "• Sharing: the Sharing extension synchronises notes with a Scrinium server. An invitation by email (valid 48 h) gives read or write access; in a conflict, both versions are kept.\n"
 "• Invite someone to INSTALL Scrinium: File menu > \"Invite to install Scrinium…\"."
 
-#: src/scrinium/core/guide.py:90
+#: src/scrinium/core/guide.py:91
 msgid "Guide 7 · Où sont mes données, sauvegarde"
 msgstr "Guide 7 · Where is my data, backup"
 
-#: src/scrinium/core/guide.py:90
+#: src/scrinium/core/guide.py:91
 msgid ""
 "• Vos fiches : un dossier par thème, un fichier .md par fiche (.lock si verrouillée), avec un sous-dossier .pj pour les images jointes :\n"
 "\n"
