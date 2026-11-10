@@ -6,12 +6,9 @@ Sûreté : http et https seulement, délai de 10 s, 2 Mo au plus par flux, rien 
 des entités XML est refusé. La fiche est de type exécutable (elle fait des requêtes réseau) : inerte tant que l'utilisateur ne l'a pas validée."""
 import hashlib
 import re
-import urllib.request
-import xml.etree.ElementTree as ET
 from dataclasses import dataclass, field
-from datetime import datetime, timezone
-from email.utils import parsedate_to_datetime
 
+from scrinium.core import flux
 from scrinium.core.types_fiche import TypeFiche
 from scrinium.i18n import N_, _
 
@@ -19,8 +16,6 @@ MARQUE = "#scrinium-veille"
 MAX_SOURCES = 100
 MAX_LUS = 3000
 MAX_ARTICLES = 60                                          # par source
-DELAI = 10
-MAX_OCTETS = 2_000_000
 _LIGNE = re.compile(r"^\|(.*)\|\s*$")
 
 
@@ -47,9 +42,7 @@ class Article:
     empreinte: str
 
 
-def adresse_valide(a: str) -> bool:
-    m = re.fullmatch(r"https?://[^\s<>\"']{3,500}", (a or "").strip(), re.I)
-    return bool(m)
+adresse_valide = flux.adresse_valide
 
 
 def lire(texte: str | None) -> Document:
@@ -86,59 +79,13 @@ def empreinte(source: str, cle: str) -> str:
     return hashlib.sha256((source + "\n" + cle).encode("utf-8")).hexdigest()[:10]
 
 
-def _jour(texte: str) -> str:
-    texte = (texte or "").strip()
-    if not texte:
-        return ""
-    try:
-        d = parsedate_to_datetime(texte)
-    except (TypeError, ValueError):
-        try:
-            d = datetime.fromisoformat(texte.replace("Z", "+00:00"))
-        except ValueError:
-            return ""
-    if d.tzinfo is not None:
-        d = d.astimezone(timezone.utc)
-    return d.strftime("%Y-%m-%d %H:%M")
-
-
-def _nom(e) -> str:
-    return e.tag.rsplit("}", 1)[-1]
-
-
-def _texte(e, *noms) -> str:
-    for enfant in e:
-        if _nom(enfant) in noms and (enfant.text or "").strip():
-            return " ".join(enfant.text.split())
-    return ""
-
-
 def analyser(source: Source, contenu: bytes) -> list:
     """Articles d'un flux RSS 2.0 ou Atom (liste vide si le contenu n'en est pas un ou déclare des entités)."""
-    if b"<!ENTITY" in contenu[:20000] or b"<!entity" in contenu[:20000]:
-        return []
-    try:
-        racine = ET.fromstring(contenu)
-    except ET.ParseError:
-        return []
     res = []
-    for e in racine.iter():
-        if _nom(e) not in ("item", "entry"):
+    for e in flux.entrees(contenu):
+        if source.mot and source.mot.casefold() not in (e.titre + " " + e.resume + " " + e.lien).casefold():
             continue
-        titre = _texte(e, "title")
-        lien = _texte(e, "link")
-        if not lien:                                       # Atom : <link href="…" />
-            for enfant in e:
-                if _nom(enfant) == "link" and enfant.get("href") and enfant.get("rel", "alternate") == "alternate":
-                    lien = enfant.get("href", "").strip()
-                    break
-        if not titre or not adresse_valide(lien):
-            continue
-        resume = _texte(e, "description", "summary", "content")
-        if source.mot and source.mot.casefold() not in (titre + " " + resume + " " + lien).casefold():
-            continue
-        cle = _texte(e, "guid", "id") or lien
-        res.append(Article(source.nom, titre[:300], lien, _jour(_texte(e, "pubDate", "updated", "published", "date")), empreinte(source.nom, cle)))
+        res.append(Article(source.nom, e.titre, e.lien, e.date, empreinte(source.nom, e.cle)))
         if len(res) >= MAX_ARTICLES:
             break
     return res
@@ -146,13 +93,10 @@ def analyser(source: Source, contenu: bytes) -> list:
 
 def telecharger(source: Source) -> bytes:
     """Contenu du flux (2 Mo au plus). Lève OSError / ValueError : l'appelant montre l'erreur."""
-    if not adresse_valide(source.adresse):
-        raise ValueError(_("adresse refusée (http ou https seulement)"))
-    req = urllib.request.Request(source.adresse, headers={"User-Agent": "Scrinium", "Accept": "application/rss+xml, application/atom+xml, application/xml, */*"})
-    with urllib.request.urlopen(req, timeout=DELAI) as r:                      # noqa: S310 (schéma vérifié ci-dessus)
-        if not r.geturl().lower().startswith(("http://", "https://")):
-            raise ValueError(_("redirection refusée"))
-        return r.read(MAX_OCTETS)
+    try:
+        return flux.telecharger(source.adresse)
+    except ValueError:
+        raise ValueError(_("adresse refusée (http ou https seulement)")) from None
 
 
 def recuperer(source: Source, ouvrir=telecharger) -> tuple:

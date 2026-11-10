@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: scrinium 0.2.0\n"
 "Report-Msgid-Bugs-To: \n"
-"PO-Revision-Date: 2026-11-10 16:43+0100\n"
+"PO-Revision-Date: 2026-11-10 16:57+0100\n"
 "Last-Translator: Jean-François Kneib\n"
 "Language-Team: English\n"
 "Language: en\n"
@@ -457,7 +457,8 @@ msgstr ""
 "• A budget is a Markdown table: readable anywhere, searchable, shareable (Sharing extension) and lockable (advised for accounts). Nothing is executed."
 
 #: plugins/budget/__init__.py:78
-#: src/scrinium/core/capture.py:40
+#: plugins/emploi/logique.py:303
+#: plugins/emploi/logique.py:304
 msgid "aucun"
 msgstr "none"
 
@@ -550,8 +551,8 @@ msgid "Tous les thèmes"
 msgstr "All topics"
 
 #: plugins/budget/__init__.py:395
+#: plugins/emploi/__init__.py:118
 #: plugins/photos/__init__.py:185
-#: plugins/planning/__init__.py:603
 msgid "Actualiser"
 msgstr "Refresh"
 
@@ -1341,6 +1342,7 @@ msgid "État"
 msgstr "Status"
 
 #: plugins/collection/logique.py:14
+#: plugins/emploi/__init__.py:162
 msgid "Statut"
 msgstr "Status"
 
@@ -1350,7 +1352,7 @@ msgstr "Price paid"
 
 #: plugins/collection/logique.py:15
 #: plugins/echeances/__init__.py:111
-#: plugins/inventaire/logique.py:15
+#: plugins/emploi/__init__.py:162
 msgid "Note"
 msgstr "Text"
 
@@ -1905,6 +1907,7 @@ msgid "Rappel :"
 msgstr "Reminder:"
 
 #: plugins/echeances/__init__.py:66
+#: plugins/emploi/__init__.py:373
 #: plugins/sante/__init__.py:95
 msgid "Note :"
 msgstr "Note:"
@@ -2061,6 +2064,418 @@ msgstr "Washing machine warranty"
 #: plugins/echeances/logique.py:249
 msgid "garder la facture"
 msgstr "keep the invoice"
+
+#: plugins/emploi/__init__.py:568
+msgid ""
+"Une aide pour qui cherche un emploi : Scrinium relève des annonces récentes, les compare à vos mots-clés et vous dit si le lien est FORT ou FAIBLE.\n"
+"\n"
+"• Nouvelle fiche > « Recherche d'emploi », onglet « Ma recherche » : écrivez vos listes de mots-clés séparés par des virgules. Mots INDISPENSABLES : tous doivent figurer dans l'annonce pour un lien fort. Mots SOUHAITÉS : ils améliorent le classement (sans mot indispensable, deux mots souhaités donnent un lien fort). Mots à EXCLURE : une annonce qui en contient un est écartée. Variantes d'un même mot avec « | » (« admin système | sysadmin »). Les majuscules et les accents ne comptent pas. Réglez aussi l'âge maximal des annonces (14 jours par défaut) et ajoutez votre profil.\n"
+"• Sources : des flux RSS ou Atom d'offres (sites carrière d'entreprises, sites d'offres qui en publient, alertes e-mail converties en flux). France Travail et l'Apec n'ont pas de flux : pour eux, voir la suite (une source API est prévue). Décochez « Afficher » pour mettre une source de côté sans la supprimer.\n"
+"• Onglet « Annonces » : ● fort (vert) et ◐ faible (orange), les plus fortes d'abord puis les plus récentes, avec les mots trouvés et les indispensables manquants. « Retenir » met l'annonce dans l'onglet « Suivi » ; « Écarter » la fait disparaître ; « Préparer ma candidature » compose un texte (votre profil, l'annonce, les mots trouvés et manquants, des consignes) à relire et à copier dans l'assistant de votre choix. Rien n'est envoyé ni postulé automatiquement.\n"
+"• Onglet « Suivi » : statut de chaque candidature (retenue, postulée, relancée, entretien, refus, abandon). Une candidature sans nouvelle depuis 7 jours est signalée à relancer.\n"
+"• Une pastille rouge sur l'icône de la fiche signale de nouvelles annonces à lien fort et les relances ; « Surveiller en arrière-plan » relève toutes les 30 minutes et notifie.\n"
+"• Sûreté : la fiche est inerte tant que vous ne l'avez pas validée (elle fait des requêtes réseau) ; seules les adresses http et https sont suivies ; un lien ne s'ouvre que sur un clic. Votre profil est une donnée personnelle : verrouillez la fiche (bouton « Verrouiller… »)."
+msgstr ""
+"Job search help: Scrinium fetches recent ads, compares them to your keywords and tells you whether the match is STRONG or WEAK.\n"
+"\n"
+"• New note > \"Job search\", \"My search\" tab: write your keyword lists separated by commas. ESSENTIAL words: all of them must appear in the ad for a strong match. DESIRED words: they improve the ranking (with no essential word, two desired words give a strong match). Words to EXCLUDE: an ad containing one is dismissed. Variants of the same word with \"|\" (\"system admin | sysadmin\"). Upper/lower case and accents do not matter. Also set the maximum age of ads (14 days by default) and add your profile.\n"
+"• Sources: RSS or Atom feeds of job offers (company career sites, job sites that still publish them, e-mail alerts converted to feeds). France Travail and Apec have no feed: for them, see what follows (an API source is planned). Untick \"Show\" to set a source aside without deleting it.\n"
+"• \"Job ads\" tab: ● strong (green) and ◐ weak (orange), strongest first then most recent, with the words found and the missing essentials. \"Keep\" puts the ad in the \"Tracking\" tab; \"Dismiss\" makes it disappear; \"Prepare my application\" composes a text (your profile, the ad, the words found and missing, instructions) to review and copy into the assistant of your choice. Nothing is sent or applied for automatically.\n"
+"• \"Tracking\" tab: status of each application (kept, applied, followed up, interview, rejected, dropped). An application with no news for 7 days is flagged to follow up.\n"
+"• A red dot on the note's icon signals new strong-match ads and follow-ups; \"Monitor in the background\" checks every 30 minutes and notifies.\n"
+"• Safety: the note is inert until you validate it (it makes network requests); only http and https addresses are followed; a link opens only on a click. Your profile is personal data: lock the note (\"Lock…\" button)."
+
+#: plugins/emploi/__init__.py:39
+msgid "Préparer ma candidature"
+msgstr "Prepare my application"
+
+#: plugins/emploi/__init__.py:42
+msgid "Relisez et complétez ce texte, puis copiez-le dans l'assistant de votre choix (il ne part nulle part tout seul). Relisez aussi ce que l'IA vous répond avant d'envoyer quoi que ce soit."
+msgstr "Review and complete this text, then copy it into the assistant of your choice (it is not sent anywhere by itself). Also review the AI's answer before sending anything."
+
+#: plugins/emploi/__init__.py:49
+msgid "Copier la demande"
+msgstr "Copy the request"
+
+#: plugins/emploi/__init__.py:59
+msgid "Source d'annonces"
+msgstr "Job ad source"
+
+#: plugins/emploi/__init__.py:66
+#: plugins/veille/__init__.py:38
+msgid "Adresse du flux :"
+msgstr "Feed address:"
+
+#: plugins/emploi/__init__.py:105
+msgid "Annonces"
+msgstr "Job ads"
+
+#: plugins/emploi/__init__.py:106
+msgid "Suivi"
+msgstr "Tracking"
+
+#: plugins/emploi/__init__.py:107
+msgid "Ma recherche"
+msgstr "My search"
+
+#: plugins/emploi/__init__.py:120
+#: plugins/emploi/__init__.py:343
+msgid "Retenir"
+msgstr "Keep"
+
+#: plugins/emploi/__init__.py:122
+#: plugins/emploi/__init__.py:344
+msgid "Préparer ma candidature…"
+msgstr "Prepare my application…"
+
+#: plugins/emploi/__init__.py:124
+#: plugins/emploi/__init__.py:345
+msgid "Écarter"
+msgstr "Dismiss"
+
+#: plugins/emploi/__init__.py:126
+msgid "Montrer les liens faibles"
+msgstr "Show weak matches"
+
+#: plugins/emploi/__init__.py:129
+#: plugins/securite/__init__.py:59
+#: plugins/supervision/__init__.py:126
+msgid "Surveiller en arrière-plan"
+msgstr "Monitor in the background"
+
+#: plugins/emploi/__init__.py:130
+msgid "Relève les fiches Emploi validées toutes les 30 minutes, même quand elles ne sont pas affichées, et notifie les nouvelles annonces à lien fort. Scrinium doit rester ouvert."
+msgstr "Checks validated Job search notes every 30 minutes, even when they are not displayed, and notifies about new strong-match ads. Scrinium must stay open."
+
+#: plugins/emploi/__init__.py:178
+msgid "python, linux, admin système | sysadmin"
+msgstr "python, linux, system admin | sysadmin"
+
+#: plugins/emploi/__init__.py:179
+msgid "Tous ces mots doivent figurer dans l'annonce pour un lien FORT. Variantes : « admin système | sysadmin »."
+msgstr "All these words must appear in the ad for a STRONG match. Variants: \"system admin | sysadmin\"."
+
+#: plugins/emploi/__init__.py:181
+msgid "xmpp, télétravail"
+msgstr "xmpp, remote work"
+
+#: plugins/emploi/__init__.py:182
+msgid "Ces mots améliorent le classement ; sans mot indispensable, deux d'entre eux donnent un lien fort."
+msgstr "These words improve the ranking; with no essential word, two of them give a strong match."
+
+#: plugins/emploi/__init__.py:184
+msgid "stage, alternance"
+msgstr "internship, apprenticeship"
+
+#: plugins/emploi/__init__.py:185
+msgid "Une annonce qui contient l'un de ces mots est écartée."
+msgstr "An ad containing one of these words is dismissed."
+
+#: plugins/emploi/__init__.py:188
+msgid " jours"
+msgstr " days"
+
+#: plugins/emploi/__init__.py:189
+msgid "Mots indispensables :"
+msgstr "Essential words:"
+
+#: plugins/emploi/__init__.py:190
+msgid "Mots souhaités :"
+msgstr "Desired words:"
+
+#: plugins/emploi/__init__.py:191
+msgid "Mots à exclure :"
+msgstr "Words to exclude:"
+
+#: plugins/emploi/__init__.py:192
+msgid "Annonces de moins de :"
+msgstr "Ads newer than:"
+
+#: plugins/emploi/__init__.py:196
+msgid "Mon parcours, mes compétences, ce que je cherche…"
+msgstr "My background, my skills, what I am looking for…"
+
+#: plugins/emploi/__init__.py:201
+#: plugins/emploi/__init__.py:291
+#: plugins/veille/__init__.py:81
+msgid "Ajouter une source…"
+msgstr "Add a source…"
+
+#: plugins/emploi/__init__.py:342
+#: plugins/veille/__init__.py:205
+#: src/scrinium/ui/images.py:435
+msgid "Ouvrir"
+msgstr "Open"
+
+#: plugins/emploi/__init__.py:354
+msgid "Ouvrir l'annonce"
+msgstr "Open the ad"
+
+#: plugins/emploi/__init__.py:355
+msgid "Changer le statut"
+msgstr "Change the status"
+
+#: plugins/emploi/__init__.py:358
+msgid "Modifier la note…"
+msgstr "Edit the note…"
+
+#: plugins/emploi/__init__.py:359
+msgid "Retirer du suivi"
+msgstr "Remove from tracking"
+
+#: plugins/emploi/__init__.py:499
+msgid "Extension Emploi"
+msgstr "Job search extension"
+
+#: plugins/emploi/__init__.py:77
+#: plugins/veille/__init__.py:50
+msgid "L'adresse doit commencer par http:// ou https://."
+msgstr "The address must start with http:// or https://."
+
+#: plugins/emploi/__init__.py:142
+#: src/scrinium/ui/markdown.py:208
+msgid "Lien"
+msgstr "Link"
+
+#: plugins/emploi/__init__.py:142
+#: plugins/emploi/__init__.py:162
+msgid "Annonce"
+msgstr "Ad"
+
+#: plugins/emploi/__init__.py:142
+#: plugins/emploi/__init__.py:206
+#: plugins/veille/__init__.py:28
+msgid "Source"
+msgstr "Source"
+
+#: plugins/emploi/__init__.py:142
+msgid "Mots trouvés"
+msgstr "Words found"
+
+#: plugins/emploi/__init__.py:142
+msgid "Indispensables manquants"
+msgstr "Missing essentials"
+
+#: plugins/emploi/__init__.py:162
+msgid "Depuis le"
+msgstr "Since"
+
+#: plugins/emploi/__init__.py:206
+#: plugins/veille/__init__.py:97
+msgid "Afficher"
+msgstr "Show"
+
+#: plugins/emploi/__init__.py:206
+#: plugins/veille/__init__.py:97
+msgid "Adresse du flux"
+msgstr "Feed address"
+
+#: plugins/emploi/__init__.py:229
+msgid "Double-clic sur une annonce : l'ouvrir dans le navigateur. « Retenir » la met dans votre suivi ; « Préparer ma candidature » compose le texte à donner à une IA. Rien n'est envoyé ni postulé automatiquement."
+msgstr "Double-click an ad to open it in the browser. \"Keep\" puts it in your tracking; \"Prepare my application\" composes the text to give to an AI. Nothing is sent or applied for automatically."
+
+#: plugins/emploi/__init__.py:231
+#: plugins/veille/__init__.py:132
+msgid "Fiche non validée : relisez les sources, puis validez-la pour lancer la relève et la modifier."
+msgstr "Note not validated: review the sources, then validate it to start checking and to edit it."
+
+#: plugins/emploi/__init__.py:293
+#: plugins/supervision/__init__.py:314
+#: plugins/veille/__init__.py:197
+msgid "Retirer"
+msgstr "Remove"
+
+#: plugins/emploi/__init__.py:392
+#: plugins/emploi/__init__.py:307
+#: plugins/veille/__init__.py:243
+msgid "Relève en cours…"
+msgstr "Checking…"
+
+#: plugins/emploi/__init__.py:474
+msgid "%(f)d à lien fort, %(w)d à lien faible, sur %(n)d annonce(s) récentes relevées."
+msgstr "%(f)d strong match(es), %(w)d weak match(es), out of %(n)d recent ad(s) found."
+
+#: plugins/emploi/__init__.py:476
+msgid "Ajoutez une source d'annonces (onglet « Ma recherche ») et vos mots-clés."
+msgstr "Add an ad source (\"My search\" tab) and your keywords."
+
+#: plugins/emploi/__init__.py:565
+msgid "Emploi"
+msgstr "Job search"
+
+#: plugins/emploi/__init__.py:194
+msgid "Mon profil (sert à préparer la demande pour l'IA ; données personnelles : verrouillez la fiche)"
+msgstr "My profile (used to prepare the request for the AI; personal data: lock the note)"
+
+#: plugins/emploi/__init__.py:200
+msgid "Sources d'annonces (flux RSS ou Atom)"
+msgstr "Ad sources (RSS or Atom feeds)"
+
+#: plugins/emploi/__init__.py:455
+msgid "Clic droit sur une ligne : changer le statut, noter, ouvrir l'annonce."
+msgstr "Right-click a line: change the status, add a note, open the ad."
+
+#: plugins/emploi/__init__.py:456
+msgid "Rien ici pour l'instant : « Retenir » une annonce pour la suivre."
+msgstr "Nothing here yet: \"Keep\" an ad to track it."
+
+#: plugins/emploi/__init__.py:478
+msgid "Indiquez des mots-clés dans l'onglet « Ma recherche » : sans eux, aucune annonce n'est proposée."
+msgstr "Enter keywords in the \"My search\" tab: without them, no ad is offered."
+
+#: plugins/emploi/__init__.py:482
+#: plugins/veille/__init__.py:312
+msgid "injoignable : %s"
+msgstr "unreachable: %s"
+
+#: plugins/emploi/__init__.py:565
+#: plugins/emploi/logique.py:286
+msgid "%d nouvelle(s) annonce(s) à lien fort"
+msgstr "%d new strong-match ad(s)"
+
+#: plugins/emploi/__init__.py:324
+msgid "Retenue : « %s » est dans l'onglet Suivi."
+msgstr "Kept: \"%s\" is in the Tracking tab."
+
+#: plugins/emploi/__init__.py:454
+msgid "%d candidature(s) à relancer (sans nouvelle depuis %d jours)."
+msgstr "%d application(s) to follow up (no news for %d days)."
+
+#: plugins/emploi/__init__.py:463
+msgid "fort"
+msgstr "strong"
+
+#: plugins/emploi/__init__.py:463
+msgid "faible"
+msgstr "weak"
+
+#: plugins/emploi/logique.py:34
+msgid "retenue"
+msgstr "kept"
+
+#: plugins/emploi/logique.py:34
+msgid "postulée"
+msgstr "applied"
+
+#: plugins/emploi/logique.py:34
+msgid "relancée"
+msgstr "followed up"
+
+#: plugins/emploi/logique.py:34
+msgid "entretien"
+msgstr "interview"
+
+#: plugins/emploi/logique.py:35
+msgid "refus"
+msgstr "rejected"
+
+#: plugins/emploi/logique.py:35
+msgid "abandon"
+msgstr "dropped"
+
+#: plugins/emploi/logique.py:327
+msgid "Recherche d'emploi"
+msgstr "Job search"
+
+#: plugins/emploi/logique.py:296
+msgid "(à compléter : mon parcours, mes compétences, ce que je cherche)"
+msgstr "(to complete: my background, my skills, what I am looking for)"
+
+#: plugins/emploi/logique.py:297
+msgid "Tu m'aides à préparer une candidature. Réponds en français."
+msgstr "You are helping me prepare a job application. Answer in English."
+
+#: plugins/emploi/logique.py:298
+msgid "## Mon profil"
+msgstr "## My profile"
+
+#: plugins/emploi/logique.py:299
+msgid "## L'annonce"
+msgstr "## The ad"
+
+#: plugins/emploi/logique.py:302
+msgid "Texte de l'annonce (extrait) :"
+msgstr "Text of the ad (excerpt):"
+
+#: plugins/emploi/logique.py:303
+msgid "## Correspondance avec mes mots-clés"
+msgstr "## Match with my keywords"
+
+#: plugins/emploi/logique.py:305
+msgid "## Ce que je te demande"
+msgstr "## What I am asking you"
+
+#: plugins/emploi/logique.py:306
+msgid "1. Une lettre de motivation courte (200 mots environ), sobre et précise."
+msgstr "1. A short cover letter (about 200 words), sober and precise."
+
+#: plugins/emploi/logique.py:307
+msgid "2. Les cinq points de mon profil à mettre en avant pour cette annonce, et comment les formuler dans mon CV."
+msgstr "2. The five points of my profile to emphasise for this ad, and how to word them in my CV."
+
+#: plugins/emploi/logique.py:308
+msgid "3. Les points faibles de ma candidature et les questions à préparer pour un entretien."
+msgstr "3. The weak points of my application and the questions to prepare for an interview."
+
+#: plugins/emploi/logique.py:309
+msgid "## Règles"
+msgstr "## Rules"
+
+#: plugins/emploi/logique.py:310
+msgid "- N'invente aucune expérience, aucun diplôme ni aucune compétence : appuie-toi uniquement sur mon profil."
+msgstr "- Do not invent any experience, degree or skill: rely only on my profile."
+
+#: plugins/emploi/logique.py:311
+msgid "- S'il te manque une information, pose-moi la question avant d'écrire."
+msgstr "- If you are missing information, ask me before writing."
+
+#: plugins/emploi/logique.py:312
+msgid "- Signale ce qui, dans l'annonce, ne correspond pas à mon profil."
+msgstr "- Point out what in the ad does not match my profile."
+
+#: plugins/emploi/logique.py:322
+msgid "Développeur Python, dix ans d'expérience, administration Linux, intérêt pour les messageries (XMPP)."
+msgstr "Python developer, ten years of experience, Linux administration, interest in messaging (XMPP)."
+
+#: plugins/emploi/logique.py:299
+msgid "Titre : %s"
+msgstr "Title: %s"
+
+#: plugins/emploi/logique.py:299
+msgid "Source : %s"
+msgstr "Source: %s"
+
+#: plugins/emploi/logique.py:299
+msgid "Lien : %s"
+msgstr "Link: %s"
+
+#: plugins/emploi/logique.py:302
+msgid "(ouvre le lien pour le texte complet, je le collerai ici)"
+msgstr "(open the link for the full text, I will paste it here)"
+
+#: plugins/emploi/logique.py:303
+msgid "Trouvés : %s"
+msgstr "Found: %s"
+
+#: plugins/emploi/logique.py:304
+msgid "Indispensables manquants : %s"
+msgstr "Missing essentials: %s"
+
+#: plugins/emploi/logique.py:324
+msgid "Emploi (exemples)"
+msgstr "Job search (examples)"
+
+#: plugins/emploi/logique.py:324
+msgid "Exemple · Ma recherche d'emploi"
+msgstr "Example · My job search"
+
+#: plugins/emploi/logique.py:289
+msgid "%d candidature(s) à relancer"
+msgstr "%d application(s) to follow up"
+
+#: plugins/emploi/logique.py:301
+msgid "Publiée : %s"
+msgstr "Published: %s"
 
 #: plugins/inventaire/__init__.py:13
 msgid ""
@@ -4302,12 +4717,6 @@ msgstr "Scan now"
 msgid "Tout accepter comme normal"
 msgstr "Accept everything as normal"
 
-#: plugins/securite/__init__.py:59
-#: plugins/supervision/__init__.py:126
-#: plugins/veille/__init__.py:86
-msgid "Surveiller en arrière-plan"
-msgstr "Monitor in the background"
-
 #: plugins/securite/__init__.py:60
 msgid "Toutes les 10 minutes, une notification pour ce qui est nouveau. Scrinium doit rester ouvert."
 msgstr "Every 10 minutes, a notification for what is new. Scrinium must stay open."
@@ -4738,11 +5147,6 @@ msgstr "Last check: %s"
 #: plugins/supervision/__init__.py:284
 msgid "Pour estimer la puissance, indiquez les watts de la machine au repos et à pleine charge (clic droit > Modifier > « Watts repos-max », ou une ligne « watts: 40-200 » dans la fiche)."
 msgstr "To estimate the power, give the machine's watts at idle and at full load (right-click > Edit > \"Watts idle-max\", or a \"watts: 40-200\" line in the note)."
-
-#: plugins/supervision/__init__.py:314
-#: plugins/veille/__init__.py:197
-msgid "Retirer"
-msgstr "Remove"
 
 #: plugins/supervision/__init__.py:439
 msgid "« %s » est en panne : elle ne répond plus."
@@ -5588,19 +5992,9 @@ msgstr ""
 "• Safety: the note is inert until you validate it (it makes network requests). Only http and https addresses are followed, 10 seconds and 2 MB at most per feed, nothing is downloaded or executed outside the feed; a link opens only on a click.\n"
 "• What has been read is remembered in the note (short fingerprints)."
 
-#: plugins/veille/__init__.py:28
-#: plugins/veille/__init__.py:97
-#: plugins/veille/__init__.py:109
-msgid "Source"
-msgstr "Source"
-
 #: plugins/veille/__init__.py:36
 msgid "facultatif : ne garder que les articles qui contiennent ce mot"
 msgstr "optional: only keep articles containing this word"
-
-#: plugins/veille/__init__.py:38
-msgid "Adresse du flux :"
-msgstr "Feed address:"
 
 #: plugins/veille/__init__.py:39
 msgid "Mot-clé :"
@@ -5609,11 +6003,6 @@ msgstr "Keyword:"
 #: plugins/veille/__init__.py:79
 msgid "Tout marquer comme lu"
 msgstr "Mark all as read"
-
-#: plugins/veille/__init__.py:81
-#: plugins/veille/__init__.py:194
-msgid "Ajouter une source…"
-msgstr "Add a source…"
 
 #: plugins/veille/__init__.py:83
 msgid "Afficher les lus"
@@ -5627,27 +6016,9 @@ msgstr "By default, a read article disappears from the list."
 msgid "Relève les fiches Veille validées toutes les 30 minutes, même quand elles ne sont pas affichées, et notifie les nouveautés. Scrinium doit rester ouvert."
 msgstr "Checks validated Watch notes every 30 minutes, even when they are not displayed, and notifies about news. Scrinium must stay open."
 
-#: plugins/veille/__init__.py:205
-#: src/scrinium/ui/images.py:435
-#: src/scrinium/ui/repertoire.py:340
-msgid "Ouvrir"
-msgstr "Open"
-
 #: plugins/veille/__init__.py:329
 msgid "Extension Veille"
 msgstr "Watch extension"
-
-#: plugins/veille/__init__.py:50
-msgid "L'adresse doit commencer par http:// ou https://."
-msgstr "The address must start with http:// or https://."
-
-#: plugins/veille/__init__.py:97
-msgid "Afficher"
-msgstr "Show"
-
-#: plugins/veille/__init__.py:97
-msgid "Adresse du flux"
-msgstr "Feed address"
 
 #: plugins/veille/__init__.py:97
 msgid "Mot-clé"
@@ -5657,10 +6028,6 @@ msgstr "Keyword"
 msgid "Double-clic sur un article : l'ouvrir dans le navigateur (il est alors marqué lu). Clic droit sur un article : le marquer lu ou non lu ; sur une source : la modifier ou la retirer."
 msgstr "Double-click an article to open it in the browser (it is then marked as read). Right-click an article to mark it read or unread; right-click a source to edit or remove it."
 
-#: plugins/veille/__init__.py:132
-msgid "Fiche non validée : relisez les sources, puis validez-la pour lancer la relève et la modifier."
-msgstr "Note not validated: review the sources, then validate it to start checking and to edit it."
-
 #: plugins/veille/__init__.py:207
 msgid "Marquer comme non lu"
 msgstr "Mark as unread"
@@ -5669,17 +6036,12 @@ msgstr "Mark as unread"
 msgid "Marquer comme lu"
 msgstr "Mark as read"
 
-#: plugins/veille/__init__.py:243
-#: plugins/veille/__init__.py:174
-msgid "Relève en cours…"
-msgstr "Checking…"
-
 #: plugins/veille/__init__.py:310
 msgid "Ajoutez une source (flux RSS ou Atom)."
 msgstr "Add a source (RSS or Atom feed)."
 
 #: plugins/veille/__init__.py:395
-#: plugins/veille/logique.py:243
+#: plugins/veille/logique.py:187
 msgid "Veille"
 msgstr "Watch"
 
@@ -5691,30 +6053,22 @@ msgstr "%d unread of %d"
 msgid "Tout est lu (%d article(s) masqué(s))."
 msgstr "All read (%d article(s) hidden)."
 
-#: plugins/veille/__init__.py:312
-msgid "injoignable : %s"
-msgstr "unreachable: %s"
-
 #: plugins/veille/__init__.py:395
-#: plugins/veille/logique.py:204
+#: plugins/veille/logique.py:148
 msgid "%d nouveauté(s) à lire"
 msgstr "%d new item(s) to read"
 
-#: plugins/veille/logique.py:150
-msgid "adresse refusée (http ou https seulement)"
-msgstr "address refused (http or https only)"
-
-#: plugins/veille/logique.py:240
+#: plugins/veille/logique.py:184
 msgid "Veille (exemples)"
 msgstr "Watch (examples)"
 
-#: plugins/veille/logique.py:240
+#: plugins/veille/logique.py:184
 msgid "Exemple · Veille informatique"
 msgstr "Example · IT watch"
 
-#: plugins/veille/logique.py:154
-msgid "redirection refusée"
-msgstr "redirect refused"
+#: plugins/veille/logique.py:99
+msgid "adresse refusée (http ou https seulement)"
+msgstr "address refused (http or https only)"
 
 #: src/scrinium/cli.py:86
 msgid "Aucun texte reçu : utilisez un tube, par exemple :  ip a | scrinium ajouter -t Informatique -f Réseau"
@@ -6534,7 +6888,7 @@ msgstr ""
 "You can read them with any text editor. To back them up, copy this folder. Locked notes are .lock files, unreadable without their password."
 
 #: src/scrinium/core/guide.py:11
-#: src/scrinium/core/guide.py:115
+#: src/scrinium/core/guide.py:116
 msgid "Guide"
 msgstr "Guide"
 
@@ -6606,6 +6960,7 @@ msgid ""
 "• Veille : des flux RSS ou Atom et les nouveautés non lues (extension Veille).\n"
 "• Santé : la tension avec une courbe, et le traitement avec une case par prise (extension Santé).\n"
 "• Mots de passe : un carnet de sites et de mots de passe, masqués, à verrouiller (extension Mots de passe).\n"
+"• Emploi : des listes de mots-clés, des annonces récentes à lien fort ou faible, le suivi des candidatures et un texte à donner à une IA pour préparer la candidature (extension Emploi).\n"
 "• Liens entre fiches : écrivez [[Titre d'une fiche]] dans le texte ; dans l'aperçu (Ctrl+E) le lien est cliquable, et Fichier > Fiches liées… montre qui pointe vers la fiche.\n"
 "• Pastille rouge : sur l'icône d'une fiche, elle signale qu'il y a quelque chose à faire (échéance proche, résolution à cocher, garantie, prêt, prise oubliée, nouveautés…) ; survolez-la pour le détail.\n"
 "• Supervision : l'état de vos machines (ping, ports, page web, disque, mémoire et charge par SSH) dans une fiche, avec une notification quand l'une tombe (extension Supervision).\n"
@@ -6634,6 +6989,7 @@ msgstr ""
 "• Watch: RSS or Atom feeds and unread news (Watch extension).\n"
 "• Health: blood pressure with a curve, and treatment with a box per dose (Health extension).\n"
 "• Passwords: a notebook of sites and passwords, hidden, to be locked (Passwords extension).\n"
+"• Job search: keyword lists, recent ads with a strong or weak match, application tracking and a text to give to an AI to prepare the application (Job search extension).\n"
 "• Links between notes: write [[Title of a note]] in the text; in the preview (Ctrl+E) the link is clickable, and File > Linked notes… shows what points to the note.\n"
 "• Red dot: on a note's icon, it signals that there is something to do (deadline close, resolution to tick, warranty, loan, missed dose, news…); hover it for details.\n"
 "• Monitoring: the state of your machines (ping, ports, web page, disk, memory and load over SSH) in a note, with a notification when one goes down (Monitoring extension).\n"
@@ -6642,11 +6998,11 @@ msgstr ""
 "\n"
 "Security: a type that RUNS commands (Applications, CLI actions) stays inert until you have validated the note yourself. A note received from someone else therefore never runs anything on its own."
 
-#: src/scrinium/core/guide.py:68
+#: src/scrinium/core/guide.py:69
 msgid "Guide 4 · Les extensions"
 msgstr "Guide 4 · Extensions"
 
-#: src/scrinium/core/guide.py:68
+#: src/scrinium/core/guide.py:69
 msgid ""
 "Menu Extensions > Gérer les extensions… : cochez celles qui vous servent. Livrées avec Scrinium :\n"
 "\n"
@@ -6672,11 +7028,11 @@ msgstr ""
 "\n"
 "Write your own: Help menu > \"Extensions documentation\"."
 
-#: src/scrinium/core/guide.py:81
+#: src/scrinium/core/guide.py:82
 msgid "Guide 5 · Console et commandes"
 msgstr "Guide 5 · Console and commands"
 
-#: src/scrinium/core/guide.py:81
+#: src/scrinium/core/guide.py:82
 msgid ""
 "L'extension Capture relie vos fiches au terminal, sans jamais rien valider à votre place.\n"
 "\n"
@@ -6692,11 +7048,11 @@ msgstr ""
 "• Extensions > \"Run a command and insert the output…\": the opposite, the command is run after confirmation and its output is inserted in the note, at the cursor.\n"
 "• From a terminal: \"ls -al | scrinium ajouter -t Topic -f Note\" adds the output to a note."
 
-#: src/scrinium/core/guide.py:93
+#: src/scrinium/core/guide.py:94
 msgid "Guide 6 · Verrouillage, secours et partage"
 msgstr "Guide 6 · Locking, recovery and sharing"
 
-#: src/scrinium/core/guide.py:93
+#: src/scrinium/core/guide.py:94
 msgid ""
 "• Verrouiller : bouton « Verrouiller… ». Le titre reste visible, le contenu est chiffré. Mot de passe oublié = fiche perdue, sauf avec le FICHIER DE SECOURS (menu Sécurité > Fichier de secours…) : faites-le dès le premier verrouillage, gardez-le hors de cet ordinateur.\n"
 "• Une fiche verrouillée n'est jamais envoyée, lue, traduite ni partagée tant qu'elle est fermée.\n"
@@ -6708,11 +7064,11 @@ msgstr ""
 "• Sharing: the Sharing extension synchronises notes with a Scrinium server. An invitation by email (valid 48 h) gives read or write access; in a conflict, both versions are kept.\n"
 "• Invite someone to INSTALL Scrinium: File menu > \"Invite to install Scrinium…\"."
 
-#: src/scrinium/core/guide.py:101
+#: src/scrinium/core/guide.py:102
 msgid "Guide 7 · Où sont mes données, sauvegarde"
 msgstr "Guide 7 · Where is my data, backup"
 
-#: src/scrinium/core/guide.py:101
+#: src/scrinium/core/guide.py:102
 msgid ""
 "• Vos fiches : un dossier par thème, un fichier .md par fiche (.lock si verrouillée), avec un sous-dossier .pj pour les images jointes :\n"
 "\n"
@@ -7976,10 +8332,6 @@ msgstr "Inline code"
 #: src/scrinium/ui/markdown.py:207
 msgid "Bloc de code"
 msgstr "Code block"
-
-#: src/scrinium/ui/markdown.py:208
-msgid "Lien"
-msgstr "Link"
 
 #: src/scrinium/ui/markdown.py:209
 msgid "Effacer la mise en forme (sélection ou ligne)"

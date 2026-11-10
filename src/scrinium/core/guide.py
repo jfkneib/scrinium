@@ -57,6 +57,7 @@ def fiches(dossier_fiches) -> list:
             "• Veille : des flux RSS ou Atom et les nouveautés non lues (extension Veille).\n"
             "• Santé : la tension avec une courbe, et le traitement avec une case par prise (extension Santé).\n"
             "• Mots de passe : un carnet de sites et de mots de passe, masqués, à verrouiller (extension Mots de passe).\n"
+            "• Emploi : des listes de mots-clés, des annonces récentes à lien fort ou faible, le suivi des candidatures et un texte à donner à une IA pour préparer la candidature (extension Emploi).\n"
             "• Liens entre fiches : écrivez [[Titre d'une fiche]] dans le texte ; dans l'aperçu (Ctrl+E) le lien est cliquable, et Fichier > Fiches liées… montre qui pointe vers la fiche.\n"
             "• Pastille rouge : sur l'icône d'une fiche, elle signale qu'il y a quelque chose à faire (échéance proche, résolution à cocher, garantie, prêt, prise oubliée, nouveautés…) ; survolez-la pour le détail.\n"
             "• Supervision : l'état de vos machines (ping, ports, page web, disque, mémoire et charge par SSH) dans une fiche, avec une notification quand l'une tombe (extension Supervision).\n"

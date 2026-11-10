@@ -1,0 +1,8 @@
+{
+  "titre": "Emploi",
+  "version": "0.1",
+  "auteur": "Scrinium",
+  "description": "Un type de fiche « Recherche d'emploi » : vous définissez des listes de mots-clés (indispensables, souhaités, à exclure) et des sources (flux RSS ou Atom d'offres) ; Scrinium retient les annonces récentes et indique un lien FORT (tous les mots indispensables trouvés) ou FAIBLE (seulement une partie), avec les mots trouvés et manquants. Un bouton retient l'annonce dans votre suivi de candidatures, un autre prépare la demande à donner à une IA. Rien n'est envoyé automatiquement.",
+  "classe": "EmploiPlugin",
+  "api": 1
+}

@@ -20,7 +20,7 @@ from scrinium.core.store import Store  # noqa: E402
 from scrinium.ui.fenetre import Fenetre  # noqa: E402
 
 PLUGINS = Path(__file__).resolve().parent.parent / "plugins"
-NOMS = ("inventaire", "collection", "motsdepasse", "recettes", "journal", "veille", "sante")
+NOMS = ("inventaire", "collection", "motsdepasse", "recettes", "journal", "veille", "sante", "emploi")
 
 
 def _charger(nom):
@@ -52,7 +52,7 @@ def fen(app, tmp_path, monkeypatch):
 
 
 def test_tous_les_types_sont_enregistres_et_ont_un_modele(fen):
-    for t in ("inventaire", "collection", "motsdepasse", "recettes", "journal", "veille", "sante"):
+    for t in ("inventaire", "collection", "motsdepasse", "recettes", "journal", "veille", "sante", "emploi"):
         ty = next(x for x in types_fiche.types() if x.nom == t)
         texte = ty.texte_neuf()
         assert types_fiche.type_de(texte) == ty and t in fen.vues_types
@@ -336,3 +336,118 @@ def test_veille_remettre_non_lu(fen):
     assert vue.t_articles.rowCount() == 1 and len(lg.non_lus(vue.articles, vue.doc)) == 0
     vue._non_lire_article(0)
     assert len(lg.non_lus(vue.articles, vue.doc)) == 1 and "aaaaaaaaaa" not in lg.ecrire(vue.doc)
+
+
+def test_flux_commun():
+    from scrinium.core import flux
+    rss = (b'<rss><channel><item><title>Dev Python</title><link>https://x.org/1</link><guid>g1</guid><pubDate>Tue, 10 Nov 2026 10:00:00 +0000</pubDate>'
+           b'<description>&lt;p&gt;Poste &lt;b&gt;Linux&lt;/b&gt; &amp;amp; XMPP&lt;/p&gt;</description></item>'
+           b'<item><title>Piege</title><link>javascript:alert(1)</link></item><item><link>https://x.org/3</link></item></channel></rss>')
+    e = flux.entrees(rss)
+    assert len(e) == 1 and e[0].titre == "Dev Python" and e[0].date == "2026-11-10 10:00" and e[0].cle == "g1" and e[0].resume == "Poste Linux & XMPP"
+    assert flux.entrees(b"<!DOCTYPE a [<!ENTITY x 'y'>]><a/>") == [] and flux.entrees(b"pas du xml") == []
+    assert flux.adresse_valide("https://a.org/x") and not flux.adresse_valide("file:///etc/passwd") and not flux.adresse_valide("javascript:alert(1)")
+    with pytest.raises(ValueError):
+        flux.telecharger("ftp://x.org/f")
+
+
+def _annonce(lg, titre, resume="", date_=None, source="S"):
+    return lg.Annonce(titre, "https://x.org/" + titre.replace(" ", "-"), (date_ or date.today()).isoformat() + " 10:00", resume, source, lg.empreinte(source, titre))
+
+
+def test_emploi_lien_fort_faible_exclu():
+    lg = _charger("emploi")
+    p = lg.Profil(14, ["python", "linux", "admin système | sysadmin"], ["xmpp", "télétravail"], ["stage", "alternance"])
+    niveau = lambda t, r="": lg.evaluer(_annonce(lg, t, r), p)                            # noqa: E731
+    assert niveau("Développeur Python", "Linux, SYSADMIN, XMPP").niveau == "fort"
+    assert niveau("Développeur Python", "Linux, SYSADMIN, XMPP").manquants == []
+    faible = niveau("Développeur Python", "télétravail")
+    assert faible.niveau == "faible" and faible.manquants == ["linux", "admin système | sysadmin"] and faible.trouves == ["python", "télétravail"]
+    assert niveau("Comptable").niveau == "aucun" and niveau("Stage Python Linux Admin Système").niveau == "exclue"
+    assert niveau("Admin Systeme", "python linux").niveau == "fort"                       # accents et majuscules ne comptent pas
+    assert niveau("Pythonista", "linuxien").niveau == "aucun"                              # mot entier seulement
+    assert lg.evaluer(_annonce(lg, "Dev C++", ""), lg.Profil(14, ["c++"])).niveau == "fort"
+    assert lg.evaluer(_annonce(lg, "Dev C", ""), lg.Profil(14, ["c++"])).niveau == "aucun"
+    q = lg.Profil(14, [], ["xmpp", "linux"])                                              # sans indispensable : deux souhaités = fort
+    assert lg.evaluer(_annonce(lg, "XMPP Linux"), q).niveau == "fort" and lg.evaluer(_annonce(lg, "XMPP"), q).niveau == "faible"
+    assert lg.evaluer(_annonce(lg, "XMPP"), lg.Profil(14, [], ["xmpp"])).niveau == "fort"
+    assert lg.evaluer(_annonce(lg, "Python Linux"), p).score > lg.evaluer(_annonce(lg, "Python"), p).score
+    assert lg.lire_mots("python, Django ; admin système | sysadmin, PYTHON") == ["python", "Django", "admin système | sysadmin"]
+
+
+def test_emploi_recentes_proposees_et_tri():
+    lg = _charger("emploi")
+    auj = date(2026, 11, 11)
+    p = lg.Profil(7, ["python", "linux"], [])
+    a_fort_vieux = _annonce(lg, "Python Linux vieux", "", date(2026, 11, 1))
+    a_fort = _annonce(lg, "Python Linux", "", date(2026, 11, 10))
+    a_faible = _annonce(lg, "Python seul", "", date(2026, 11, 11))
+    a_sans_date = lg.Annonce("Python sans date", "https://x.org/sd", "", "", "S", "0123456789")
+    toutes = [a_faible, a_fort_vieux, a_fort, a_sans_date]
+    res = lg.proposees(toutes, p, True, auj)
+    assert [a.titre for a, _l in res][:2] == ["Python Linux", "Python seul"] and "Python Linux vieux" not in [a.titre for a, _l in res]
+    assert [a.titre for a, _l in res][-1] == "Python sans date"
+    assert [l.niveau for _a, l in lg.proposees(toutes, p, False, auj)] == ["fort"]
+    lg.vue(p, a_fort)
+    assert "Python Linux" not in [a.titre for a, _l in lg.proposees(toutes, p, True, auj)]
+
+
+def test_emploi_suivi_relance_texte_et_demande():
+    lg = _charger("emploi")
+    auj = date(2026, 11, 20)
+    p = lg.Profil(14, ["python"], ["xmpp"], ["stage"], "Dix ans de Python.", [lg.Source("S", "https://x.org/f", False)])
+    a = _annonce(lg, "Dev Python", "Poste XMPP à Lyon")
+    assert lg.retenir(p, a, date(2026, 11, 1)) and not lg.retenir(p, a) and a.empreinte in p.vus
+    lg.changer_statut(p.suivi[0], "postulée", date(2026, 11, 10))
+    assert [s.titre for s in lg.relances(p, auj)] == ["Dev Python"] and lg.relances(p, date(2026, 11, 15)) == []
+    lg.changer_statut(p.suivi[0], "n'importe quoi", auj)
+    assert p.suivi[0].statut == "postulée"
+    t = lg.ecrire(p)
+    q = lg.lire(t)
+    assert q.indispensables == ["python"] and q.exclus == ["stage"] and q.profil == "Dix ans de Python." and q.sources[0].afficher is False
+    assert q.suivi[0].statut == "postulée" and q.suivi[0].date == "2026-11-10" and q.vus == p.vus and lg.ecrire(q) == t
+    assert "javascript" not in lg.ecrire(lg.lire("#scrinium-emploi\n## Sources\n| X | javascript:alert(1) | |\n")) and lg.lire(None) == lg.Profil()
+    d = lg.demande_ia(p, a, lg.evaluer(a, p))
+    assert "Dix ans de Python." in d and "Dev Python" in d and "Poste XMPP à Lyon" in d and "N'invente" in d and "python, xmpp" in d
+    lg.NOUVELLES[lg.cle_recherche(q)] = 2
+    assert "2 nouvelle" in lg.a_faire(t, auj) and "relancer" in lg.a_faire(t, auj)
+    lg.NOUVELLES.clear()
+    assert lg.a_faire(lg.texte_neuf()) is None
+
+
+def test_vue_emploi(fen, monkeypatch):
+    from PyQt6.QtWidgets import QDialog
+    lg = _charger("emploi")
+    vue = fen.vues_types["emploi"]
+    sortie = []
+    vue.modifie.connect(sortie.append)
+    vue.charger(lg.ecrire(lg.Profil(14, ["python", "linux"], ["xmpp"], ["stage"], "Mon profil", [lg.Source("S", "https://x.org/f")])))
+    assert not sortie
+    vue.annonces = [_annonce(lg, "Python Linux XMPP"), _annonce(lg, "Python"), _annonce(lg, "Stage Python Linux"), _annonce(lg, "Comptable")]
+    vue._afficher()
+    assert vue.t_annonces.rowCount() == 2 and vue.t_annonces.item(0, 1).text() == "Python Linux XMPP" and "fort" in vue.t_annonces.item(0, 0).text()
+    assert "faible" in vue.t_annonces.item(1, 0).text()
+    vue.c_faibles.setChecked(False)
+    assert vue.t_annonces.rowCount() == 1
+    vue.c_faibles.setChecked(True)
+    vue.t_annonces.selectRow(0)
+    vue._retenir(0)
+    assert vue.t_annonces.rowCount() == 1 and vue.t_suivi.rowCount() == 1 and "| retenue | Python Linux XMPP |" in sortie[-1]
+    vue._statut(0, "postulée")
+    assert vue.t_suivi.item(0, 0).text() == "postulée"
+    vus = []
+    monkeypatch.setattr(QDialog, "exec", lambda self: vus.append(self.texte.toPlainText()) or 0)
+    vue._preparer(0)
+    assert vus and "Mon profil" in vus[0] and "Python" in vus[0]
+    vue._ecarter(0)
+    assert vue.t_annonces.rowCount() == 0
+    vue.e_ind.setText("python, linux, django")                                                    # les listes se modifient dans l'onglet « Ma recherche »
+    assert "indispensables: python, linux, django" in sortie[-1]
+    appels = []
+    monkeypatch.setattr(vue._pool, "submit", lambda *a, **k: appels.append(a))
+    vue.actif = False
+    vue.actualiser()
+    assert appels == []
+    vue.actif = True
+    vue.actualiser()
+    assert len(appels) == 1
