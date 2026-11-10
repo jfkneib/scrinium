@@ -279,3 +279,22 @@ def test_cumul_seulement_en_suivi_continu_et_affiche(fen):
     item = vue.table.item(0, 7)
     assert item.text().endswith("Wh") and "ESTIMÉE" in item.toolTip() and "01/01/2026" in item.toolTip()
     assert vue.table.item(0, 6).text() == "≈ 100 W"
+
+
+def test_cumul_par_semaine_et_par_mois():
+    from datetime import date, datetime
+    t = datetime(2026, 11, 2, 12, 0).timestamp()                                   # un lundi
+    e = lg.cumuler(None, "2026-10-01", 100, t)
+    for k in range(1, 3):
+        e = lg.cumuler(e, "2026-10-01", 100, t + 60 * k)
+    assert round(e["jours"]["2026-11-02"], 3) == round(100 * 120 / 3600, 3)
+    e["jours"].update({"2026-10-30": 10.0, "2026-11-01": 5.0, "2026-10-12": 7.0, "2026-11-05": 2.0, "2026-09-30": 99.0})
+    p = lg.periodes(e, date(2026, 11, 5))                                           # jeudi 5 novembre 2026
+    assert p["lundi"] == date(2026, 11, 2) and p["premier"] == date(2026, 11, 1) and p["premier_prec"] == date(2026, 10, 1)
+    assert round(p["semaine"], 2) == round(100 * 120 / 3600 + 2.0, 2)                # lundi 2 -> jeudi 5
+    assert p["semaine_prec"] == 15.0                                                # 26/10 -> 1/11 : 10 + 5
+    assert round(p["mois"], 2) == round(100 * 120 / 3600 + 5.0 + 2.0, 2) and p["mois_prec"] == 17.0   # octobre : 10 + 7 (le 30/09 exclu)
+    assert lg.periodes(None, date(2026, 11, 5))["mois"] == 0.0
+    gros = lg.cumuler(None, "2020-01-01", 100, t)
+    gros["jours"] = {f"2025-{m:02d}-{d:02d}": 1.0 for m in range(1, 13) for d in range(1, 29)}
+    assert len(lg.cumuler(gros, "2020-01-01", 100, t + 60)["jours"]) <= lg.MAX_JOURS

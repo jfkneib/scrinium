@@ -10,7 +10,7 @@
   l'utilisateur ne l'a pas validée. SSH sans mot de passe (clés) ; la commande envoyée est fixe, en lecture seule."""
 import time
 from concurrent.futures import ThreadPoolExecutor
-from datetime import datetime
+from datetime import date, datetime
 
 from PyQt6.QtCore import QObject, Qt, QTimer, pyqtSignal
 from PyQt6.QtGui import QBrush, QColor
@@ -132,11 +132,11 @@ class VueSupervision(QWidget):
         self.l_maj = QLabel()
         haut.addWidget(self.l_maj, 1)
         lay.addLayout(haut)
-        self.table = QTableWidget(0, 10)
+        self.table = QTableWidget(0, 12)
         self.table.setHorizontalHeaderLabels([_("État"), _("Machine"), _("Réseau"), _("Disque"), _("Mémoire"), _("Charge"),
-                                              _("Puissance"), _("Cumul"), _("En marche depuis"), _("Détail")])
+                                              _("Puissance"), _("Cumul"), _("Semaine"), _("Mois"), _("En marche depuis"), _("Détail")])
         self.table.verticalHeader().setVisible(False)
-        self.table.horizontalHeader().setSectionResizeMode(9, QHeaderView.ResizeMode.Stretch)
+        self.table.horizontalHeader().setSectionResizeMode(11, QHeaderView.ResizeMode.Stretch)
         self.table.setEditTriggers(QAbstractItemView.EditTrigger.NoEditTriggers)
         self.table.setSelectionBehavior(QAbstractItemView.SelectionBehavior.SelectRows)
         self.table.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
@@ -252,9 +252,11 @@ class VueSupervision(QWidget):
         watts = logique.puissance_estimee(m, mes)
         cumul = self.p.cumul_de(m) if self.p is not None else None
         texte_cumul = logique.formater_energie(cumul["wh"]) if cumul else ""
+        per = logique.periodes(cumul, date.today()) if cumul else None
         cases = ["● " + _libelle_etat(e), m["nom"] + "  (" + m["adresse"] + ")", "  ".join(reseau),
                  f"{mes['disque_pct']} %" if "disque_pct" in mes else "", f"{mes['memoire_pct']} %" if "memoire_pct" in mes else "",
-                 f"{mes['charge']:.2f}" if "charge" in mes else "", f"≈ {watts} W" if watts is not None else ("—" if mes else ""), texte_cumul, logique.duree(mes["uptime_s"]) if "uptime_s" in mes else "",
+                 f"{mes['charge']:.2f}" if "charge" in mes else "", f"≈ {watts} W" if watts is not None else ("—" if mes else ""), texte_cumul,
+                 logique.formater_energie(per["semaine"]) if per else "", logique.formater_energie(per["mois"]) if per else "", logique.duree(mes["uptime_s"]) if "uptime_s" in mes else "",
                  ", ".join(raisons)]
         for c, t in enumerate(cases):
             it = QTableWidgetItem(t)
@@ -270,6 +272,14 @@ class VueSupervision(QWidget):
                               % {"date": datetime.strptime(cumul["depuis"], "%Y-%m-%d").strftime("%d/%m/%Y"),
                                  "duree": logique.duree(int(cumul["secondes"]))}
                               + ("" if self.p.fond else "\n" + _("Suivi continu désactivé : le cumul est à l'arrêt.")))
+            if c == 8 and per:
+                it.setToolTip(_("ESTIMATION. Semaine en cours (depuis le lundi %(lundi)s) : %(cette)s. Semaine précédente : %(prec)s.") % {
+                    "lundi": per["lundi"].strftime("%d/%m"), "cette": logique.formater_energie(per["semaine"]),
+                    "prec": logique.formater_energie(per["semaine_prec"])})
+            if c == 9 and per:
+                it.setToolTip(_("ESTIMATION. Mois en cours (%(mois)s) : %(ce)s. Mois précédent (%(mois_prec)s) : %(prec)s.") % {
+                    "mois": per["premier"].strftime("%m/%Y"), "ce": logique.formater_energie(per["mois"]),
+                    "mois_prec": per["premier_prec"].strftime("%m/%Y"), "prec": logique.formater_energie(per["mois_prec"])})
             if c == 6 and watts is None and mes:
                 it.setToolTip(_("Pour estimer la puissance, indiquez les watts de la machine au repos et à pleine charge (clic droit > Modifier > « Watts repos-max », "
                                 "ou une ligne « watts: 40-200 » dans la fiche)."))
@@ -439,6 +449,7 @@ DOC = _(
     "• « Surveiller en arrière-plan » (décoché par défaut) : les fiches Supervision validées sont aussi contrôlées quand elles ne sont pas affichées, tant que Scrinium reste ouvert.\n"
     "• Puissance (facultatif) : indiquez les watts de la machine au repos et à pleine charge (ex. 40-200) : Scrinium ESTIME la puissance d'après la charge, et le dit au survol. Ce n'est pas une mesure.\n"
     "• Cumul (facultatif) : avec « depuis: 2026-11-10 » (date de mise en service) et les watts, Scrinium cumule l'énergie ESTIMÉE en Wh depuis cette date, seulement en suivi continu (« Surveiller en arrière-plan » coché, Scrinium ouvert). Les périodes sans suivi ne sont pas comptées ; changer la date remet le cumul à zéro.\n"
+    "• Le tableau montre aussi l'énergie estimée de la semaine en cours (depuis le lundi) et du mois en cours ; l'infobulle donne la semaine et le mois précédents.\n"
     "• SSH : connexion par clé, sans mot de passe. Scrinium n'envoie qu'une commande fixe, en lecture seule (charge, mémoire, disque).\n"
     "• Type exécutable : une fiche reçue d'un autre ne lance aucun contrôle tant que vous ne l'avez pas validée (bandeau « Valider cette fiche »). "
     "Les adresses sont écrites en clair dans la fiche.")

@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: scrinium 0.2.0\n"
 "Report-Msgid-Bugs-To: \n"
-"PO-Revision-Date: 2026-11-10 14:46+0100\n"
+"PO-Revision-Date: 2026-11-10 14:47+0100\n"
 "Last-Translator: Jean-François Kneib\n"
 "Language-Team: English\n"
 "Language: en\n"
@@ -588,6 +588,7 @@ msgstr "Month by month"
 
 #: plugins/budget/__init__.py:164
 #: plugins/planning/__init__.py:308
+#: plugins/supervision/__init__.py:137
 msgid "Mois"
 msgstr "Month"
 
@@ -3111,7 +3112,7 @@ msgstr "Loop in the dependencies around \"%s\""
 msgid "Cette fiche fait le point sur les plannings (fiches « Planning ») du même thème que celle-ci, ou sur tous si vous le choisissez en haut : avancement, retards, dates. Elle se met à jour quand on l'ouvre ou qu'on clique sur « Actualiser »."
 msgstr "This note gives an overview of the plannings (\"Planning\" notes) of the same topic as itself, or of all of them if you choose so at the top: progress, delays, dates. It updates when you open it or click \"Refresh\"."
 
-#: plugins/supervision/__init__.py:433
+#: plugins/supervision/__init__.py:443
 msgid ""
 "L'état de vos machines (ordinateurs, serveurs, NAS, box) dans une fiche.\n"
 "\n"
@@ -3121,6 +3122,7 @@ msgid ""
 "• « Surveiller en arrière-plan » (décoché par défaut) : les fiches Supervision validées sont aussi contrôlées quand elles ne sont pas affichées, tant que Scrinium reste ouvert.\n"
 "• Puissance (facultatif) : indiquez les watts de la machine au repos et à pleine charge (ex. 40-200) : Scrinium ESTIME la puissance d'après la charge, et le dit au survol. Ce n'est pas une mesure.\n"
 "• Cumul (facultatif) : avec « depuis: 2026-11-10 » (date de mise en service) et les watts, Scrinium cumule l'énergie ESTIMÉE en Wh depuis cette date, seulement en suivi continu (« Surveiller en arrière-plan » coché, Scrinium ouvert). Les périodes sans suivi ne sont pas comptées ; changer la date remet le cumul à zéro.\n"
+"• Le tableau montre aussi l'énergie estimée de la semaine en cours (depuis le lundi) et du mois en cours ; l'infobulle donne la semaine et le mois précédents.\n"
 "• SSH : connexion par clé, sans mot de passe. Scrinium n'envoie qu'une commande fixe, en lecture seule (charge, mémoire, disque).\n"
 "• Type exécutable : une fiche reçue d'un autre ne lance aucun contrôle tant que vous ne l'avez pas validée (bandeau « Valider cette fiche »). Les adresses sont écrites en clair dans la fiche."
 msgstr ""
@@ -3132,6 +3134,7 @@ msgstr ""
 "• \"Monitor in the background\" (unchecked by default): validated Monitoring notes are also checked when they are not shown, as long as Scrinium stays open.\n"
 "• Power (optional): give the machine's watts at idle and at full load (e.g. 40-200): Scrinium ESTIMATES the power from the load, and says so on hover. It is not a measurement.\n"
 "• Total (optional): with \"depuis: 2026-11-10\" (commissioning date) and the watts, Scrinium accumulates the ESTIMATED energy in Wh since that date, only in continuous monitoring (\"Monitor in the background\" checked, Scrinium open). Periods without monitoring are not counted; changing the date resets the total.\n"
+"• The table also shows the estimated energy of the current week (since Monday) and of the current month; the tooltip gives the previous week and month.\n"
 "• SSH: key-based login, no password. Scrinium sends only one fixed, read-only command (load, memory, disk).\n"
 "• Executable type: a note received from someone else runs no check until you validate it (\"Validate this note\" banner). Addresses are written in clear text in the note."
 
@@ -3193,12 +3196,12 @@ msgstr "Monitor in the background"
 msgid "Contrôle les fiches Supervision validées toutes les minutes, même quand elles ne sont pas affichées, et notifie quand une machine tombe. Scrinium doit rester ouvert."
 msgstr "Checks validated Monitoring notes every minute, even when they are not shown, and notifies you when a machine goes down. Scrinium must stay open."
 
-#: plugins/supervision/__init__.py:347
+#: plugins/supervision/__init__.py:357
 msgid "Extension Supervision"
 msgstr "Monitoring extension"
 
-#: plugins/supervision/__init__.py:429
-#: plugins/supervision/logique.py:190
+#: plugins/supervision/__init__.py:439
+#: plugins/supervision/logique.py:217
 msgid "Supervision"
 msgstr "Monitoring"
 
@@ -3255,6 +3258,10 @@ msgid "Cumul"
 msgstr "Total"
 
 #: plugins/supervision/__init__.py:137
+msgid "Semaine"
+msgstr "Week"
+
+#: plugins/supervision/__init__.py:137
 msgid "En marche depuis"
 msgstr "Up for"
 
@@ -3270,7 +3277,7 @@ msgstr "Right-click: add, edit or remove a machine."
 msgid "Fiche non validée : relisez les machines, puis validez-la pour lancer les contrôles et la modifier."
 msgstr "Note not validated: review the machines, then validate it to run the checks and edit it."
 
-#: plugins/supervision/__init__.py:301
+#: plugins/supervision/__init__.py:311
 msgid "Ajouter une machine…"
 msgstr "Add a machine…"
 
@@ -3278,19 +3285,27 @@ msgstr "Add a machine…"
 msgid "Dernier contrôle : %s"
 msgstr "Last check: %s"
 
-#: plugins/supervision/__init__.py:274
+#: plugins/supervision/__init__.py:284
 msgid "Pour estimer la puissance, indiquez les watts de la machine au repos et à pleine charge (clic droit > Modifier > « Watts repos-max », ou une ligne « watts: 40-200 » dans la fiche)."
 msgstr "To estimate the power, give the machine's watts at idle and at full load (right-click > Edit > \"Watts idle-max\", or a \"watts: 40-200\" line in the note)."
 
-#: plugins/supervision/__init__.py:304
+#: plugins/supervision/__init__.py:314
 msgid "Retirer"
 msgstr "Remove"
 
-#: plugins/supervision/__init__.py:429
+#: plugins/supervision/__init__.py:439
 msgid "« %s » est en panne : elle ne répond plus."
 msgstr "\"%s\" is down: it no longer answers."
 
-#: plugins/supervision/__init__.py:278
+#: plugins/supervision/__init__.py:276
+msgid "ESTIMATION. Semaine en cours (depuis le lundi %(lundi)s) : %(cette)s. Semaine précédente : %(prec)s."
+msgstr "ESTIMATE. Current week (since Monday %(lundi)s): %(cette)s. Previous week: %(prec)s."
+
+#: plugins/supervision/__init__.py:280
+msgid "ESTIMATION. Mois en cours (%(mois)s) : %(ce)s. Mois précédent (%(mois_prec)s) : %(prec)s."
+msgstr "ESTIMATE. Current month (%(mois)s): %(ce)s. Previous month (%(mois_prec)s): %(prec)s."
+
+#: plugins/supervision/__init__.py:288
 msgid ""
 "ESTIMATION, pas une mesure : %(repos)d W au repos + (%(maxi)d − %(repos)d) W × charge %(charge)d %% = %(w)d W.\n"
 "Soit environ %(wh)d Wh par jour si cela dure (%(kwh).1f kWh par mois)."
@@ -3298,64 +3313,64 @@ msgstr ""
 "ESTIMATE, not a measurement: %(repos)d W idle + (%(maxi)d − %(repos)d) W × load %(charge)d %% = %(w)d W.\n"
 "About %(wh)d Wh per day if it lasts (%(kwh).1f kWh per month)."
 
-#: plugins/supervision/__init__.py:430
+#: plugins/supervision/__init__.py:440
 msgid "« %s » est en alerte : "
 msgstr "\"%s\" is on alert: "
 
-#: plugins/supervision/__init__.py:268
+#: plugins/supervision/__init__.py:270
 msgid "Énergie ESTIMÉE cumulée depuis le %(date)s : %(duree)s de suivi continu comptées. Ce n'est pas une mesure : seules les périodes où « Surveiller en arrière-plan » était coché et où Scrinium était ouvert sont comptées."
 msgstr "ESTIMATED energy accumulated since %(date)s: %(duree)s of continuous monitoring counted. This is not a measurement: only the periods when \"Monitor in the background\" was checked and Scrinium was open are counted."
 
-#: plugins/supervision/__init__.py:272
+#: plugins/supervision/__init__.py:274
 msgid "Suivi continu désactivé : le cumul est à l'arrêt."
 msgstr "Continuous monitoring is off: the total is paused."
 
-#: plugins/supervision/logique.py:195
+#: plugins/supervision/logique.py:222
 msgid "Supervision (exemples)"
 msgstr "Monitoring (examples)"
 
-#: plugins/supervision/logique.py:195
+#: plugins/supervision/logique.py:222
 msgid "Exemple · Mes machines"
 msgstr "Example · My machines"
 
-#: plugins/supervision/logique.py:241
+#: plugins/supervision/logique.py:268
 msgid "cible SSH refusée"
 msgstr "SSH target refused"
 
-#: plugins/supervision/logique.py:187
-#: plugins/supervision/logique.py:196
+#: plugins/supervision/logique.py:214
+#: plugins/supervision/logique.py:223
 msgid "Cette machine"
 msgstr "This machine"
 
-#: plugins/supervision/logique.py:284
+#: plugins/supervision/logique.py:311
 msgid "SSH a échoué"
 msgstr "SSH failed"
 
-#: plugins/supervision/logique.py:327
+#: plugins/supervision/logique.py:354
 msgid "ne répond pas"
 msgstr "not answering"
 
-#: plugins/supervision/logique.py:332
+#: plugins/supervision/logique.py:359
 msgid "page web en erreur"
 msgstr "web page in error"
 
-#: plugins/supervision/logique.py:332
+#: plugins/supervision/logique.py:359
 msgid "page web muette"
 msgstr "web page not answering"
 
-#: plugins/supervision/logique.py:334
+#: plugins/supervision/logique.py:361
 msgid "SSH : %s"
 msgstr "SSH: %s"
 
-#: plugins/supervision/logique.py:337
+#: plugins/supervision/logique.py:364
 msgid "disque à %d %%"
 msgstr "disk at %d %%"
 
-#: plugins/supervision/logique.py:330
+#: plugins/supervision/logique.py:357
 msgid "port %d fermé"
 msgstr "port %d closed"
 
-#: plugins/supervision/logique.py:197
+#: plugins/supervision/logique.py:224
 msgid "Exemple de serveur (à adapter)"
 msgstr "Example server (adapt it)"
 

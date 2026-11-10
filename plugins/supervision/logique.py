@@ -11,7 +11,7 @@ import subprocess
 import sys
 import time
 import urllib.request
-from datetime import date, datetime
+from datetime import date, datetime, timedelta
 from urllib.parse import urlparse
 
 from scrinium.core.types_fiche import TypeFiche
@@ -89,15 +89,42 @@ def cumuler(etat: dict | None, depuis: str, watts: int | None, maintenant: float
     except ValueError:
         return None
     if not etat or etat.get("depuis") != depuis:
-        etat = {"depuis": depuis, "wh": 0.0, "secondes": 0.0, "dernier": None}
+        etat = {"depuis": depuis, "wh": 0.0, "secondes": 0.0, "dernier": None, "jours": {}}
     nouveau = dict(etat, dernier=maintenant)
     dernier = etat.get("dernier")
     if watts is not None and dernier is not None and maintenant >= debut:
         dt = maintenant - max(dernier, debut)
         if 0 < dt <= plafond:
-            nouveau["wh"] = etat["wh"] + watts * dt / 3600
+            ajout = watts * dt / 3600
+            nouveau["wh"] = etat["wh"] + ajout
             nouveau["secondes"] = etat["secondes"] + dt
+            jour = datetime.fromtimestamp(maintenant).date().isoformat()
+            jours = dict(etat.get("jours") or {})
+            jours[jour] = jours.get(jour, 0.0) + ajout
+            nouveau["jours"] = dict(sorted(jours.items())[-MAX_JOURS:])
     return nouveau
+
+
+MAX_JOURS = 400                                          # jours d'historique gardés (de quoi comparer deux mois et deux semaines)
+
+
+def energie_periode(etat: dict | None, debut: date, fin: date) -> float:
+    """Wh estimés entre deux jours (inclus), d'après l'énergie rangée par jour."""
+    if not etat:
+        return 0.0
+    return sum(v for j, v in (etat.get("jours") or {}).items() if debut.isoformat() <= j <= fin.isoformat())
+
+
+def periodes(etat: dict | None, aujourdhui: date) -> dict:
+    """Énergie estimée de la semaine en cours (depuis lundi), de la semaine précédente, du mois en cours et du mois précédent."""
+    lundi = aujourdhui - timedelta(days=aujourdhui.weekday())
+    premier = aujourdhui.replace(day=1)
+    fin_mois_prec = premier - timedelta(days=1)
+    return {"lundi": lundi, "semaine": energie_periode(etat, lundi, aujourdhui),
+            "semaine_prec": energie_periode(etat, lundi - timedelta(days=7), lundi - timedelta(days=1)),
+            "mois": energie_periode(etat, premier, aujourdhui),
+            "mois_prec": energie_periode(etat, fin_mois_prec.replace(day=1), fin_mois_prec), "premier": premier,
+            "premier_prec": fin_mois_prec.replace(day=1)}
 
 
 def formater_energie(wh: float) -> str:

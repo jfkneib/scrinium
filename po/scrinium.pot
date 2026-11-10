@@ -564,6 +564,7 @@ msgstr ""
 
 #: plugins/budget/__init__.py:164
 #: plugins/planning/__init__.py:308
+#: plugins/supervision/__init__.py:137
 msgid "Mois"
 msgstr ""
 
@@ -2950,7 +2951,7 @@ msgstr ""
 msgid "Cette fiche fait le point sur les plannings (fiches « Planning ») du même thème que celle-ci, ou sur tous si vous le choisissez en haut : avancement, retards, dates. Elle se met à jour quand on l'ouvre ou qu'on clique sur « Actualiser »."
 msgstr ""
 
-#: plugins/supervision/__init__.py:433
+#: plugins/supervision/__init__.py:443
 msgid ""
 "L'état de vos machines (ordinateurs, serveurs, NAS, box) dans une fiche.\n"
 "\n"
@@ -2960,6 +2961,7 @@ msgid ""
 "• « Surveiller en arrière-plan » (décoché par défaut) : les fiches Supervision validées sont aussi contrôlées quand elles ne sont pas affichées, tant que Scrinium reste ouvert.\n"
 "• Puissance (facultatif) : indiquez les watts de la machine au repos et à pleine charge (ex. 40-200) : Scrinium ESTIME la puissance d'après la charge, et le dit au survol. Ce n'est pas une mesure.\n"
 "• Cumul (facultatif) : avec « depuis: 2026-11-10 » (date de mise en service) et les watts, Scrinium cumule l'énergie ESTIMÉE en Wh depuis cette date, seulement en suivi continu (« Surveiller en arrière-plan » coché, Scrinium ouvert). Les périodes sans suivi ne sont pas comptées ; changer la date remet le cumul à zéro.\n"
+"• Le tableau montre aussi l'énergie estimée de la semaine en cours (depuis le lundi) et du mois en cours ; l'infobulle donne la semaine et le mois précédents.\n"
 "• SSH : connexion par clé, sans mot de passe. Scrinium n'envoie qu'une commande fixe, en lecture seule (charge, mémoire, disque).\n"
 "• Type exécutable : une fiche reçue d'un autre ne lance aucun contrôle tant que vous ne l'avez pas validée (bandeau « Valider cette fiche »). Les adresses sont écrites en clair dans la fiche."
 msgstr ""
@@ -3022,12 +3024,12 @@ msgstr ""
 msgid "Contrôle les fiches Supervision validées toutes les minutes, même quand elles ne sont pas affichées, et notifie quand une machine tombe. Scrinium doit rester ouvert."
 msgstr ""
 
-#: plugins/supervision/__init__.py:347
+#: plugins/supervision/__init__.py:357
 msgid "Extension Supervision"
 msgstr ""
 
-#: plugins/supervision/__init__.py:429
-#: plugins/supervision/logique.py:190
+#: plugins/supervision/__init__.py:439
+#: plugins/supervision/logique.py:217
 msgid "Supervision"
 msgstr ""
 
@@ -3084,6 +3086,10 @@ msgid "Cumul"
 msgstr ""
 
 #: plugins/supervision/__init__.py:137
+msgid "Semaine"
+msgstr ""
+
+#: plugins/supervision/__init__.py:137
 msgid "En marche depuis"
 msgstr ""
 
@@ -3099,7 +3105,7 @@ msgstr ""
 msgid "Fiche non validée : relisez les machines, puis validez-la pour lancer les contrôles et la modifier."
 msgstr ""
 
-#: plugins/supervision/__init__.py:301
+#: plugins/supervision/__init__.py:311
 msgid "Ajouter une machine…"
 msgstr ""
 
@@ -3107,82 +3113,90 @@ msgstr ""
 msgid "Dernier contrôle : %s"
 msgstr ""
 
-#: plugins/supervision/__init__.py:274
+#: plugins/supervision/__init__.py:284
 msgid "Pour estimer la puissance, indiquez les watts de la machine au repos et à pleine charge (clic droit > Modifier > « Watts repos-max », ou une ligne « watts: 40-200 » dans la fiche)."
 msgstr ""
 
-#: plugins/supervision/__init__.py:304
+#: plugins/supervision/__init__.py:314
 msgid "Retirer"
 msgstr ""
 
-#: plugins/supervision/__init__.py:429
+#: plugins/supervision/__init__.py:439
 msgid "« %s » est en panne : elle ne répond plus."
 msgstr ""
 
-#: plugins/supervision/__init__.py:278
+#: plugins/supervision/__init__.py:276
+msgid "ESTIMATION. Semaine en cours (depuis le lundi %(lundi)s) : %(cette)s. Semaine précédente : %(prec)s."
+msgstr ""
+
+#: plugins/supervision/__init__.py:280
+msgid "ESTIMATION. Mois en cours (%(mois)s) : %(ce)s. Mois précédent (%(mois_prec)s) : %(prec)s."
+msgstr ""
+
+#: plugins/supervision/__init__.py:288
 msgid ""
 "ESTIMATION, pas une mesure : %(repos)d W au repos + (%(maxi)d − %(repos)d) W × charge %(charge)d %% = %(w)d W.\n"
 "Soit environ %(wh)d Wh par jour si cela dure (%(kwh).1f kWh par mois)."
 msgstr ""
 
-#: plugins/supervision/__init__.py:430
+#: plugins/supervision/__init__.py:440
 msgid "« %s » est en alerte : "
 msgstr ""
 
-#: plugins/supervision/__init__.py:268
+#: plugins/supervision/__init__.py:270
 msgid "Énergie ESTIMÉE cumulée depuis le %(date)s : %(duree)s de suivi continu comptées. Ce n'est pas une mesure : seules les périodes où « Surveiller en arrière-plan » était coché et où Scrinium était ouvert sont comptées."
 msgstr ""
 
-#: plugins/supervision/__init__.py:272
+#: plugins/supervision/__init__.py:274
 msgid "Suivi continu désactivé : le cumul est à l'arrêt."
 msgstr ""
 
-#: plugins/supervision/logique.py:195
+#: plugins/supervision/logique.py:222
 msgid "Supervision (exemples)"
 msgstr ""
 
-#: plugins/supervision/logique.py:195
+#: plugins/supervision/logique.py:222
 msgid "Exemple · Mes machines"
 msgstr ""
 
-#: plugins/supervision/logique.py:241
+#: plugins/supervision/logique.py:268
 msgid "cible SSH refusée"
 msgstr ""
 
-#: plugins/supervision/logique.py:187
-#: plugins/supervision/logique.py:196
+#: plugins/supervision/logique.py:214
+#: plugins/supervision/logique.py:223
 msgid "Cette machine"
 msgstr ""
 
-#: plugins/supervision/logique.py:284
+#: plugins/supervision/logique.py:311
 msgid "SSH a échoué"
 msgstr ""
 
-#: plugins/supervision/logique.py:327
+#: plugins/supervision/logique.py:354
 msgid "ne répond pas"
 msgstr ""
 
-#: plugins/supervision/logique.py:332
+#: plugins/supervision/logique.py:359
 msgid "page web en erreur"
 msgstr ""
 
-#: plugins/supervision/logique.py:332
+#: plugins/supervision/logique.py:359
 msgid "page web muette"
 msgstr ""
 
-#: plugins/supervision/logique.py:334
+#: plugins/supervision/logique.py:361
 msgid "SSH : %s"
 msgstr ""
 
-#: plugins/supervision/logique.py:337
+#: plugins/supervision/logique.py:364
 msgid "disque à %d %%"
 msgstr ""
 
-#: plugins/supervision/logique.py:330
+#: plugins/supervision/logique.py:357
 msgid "port %d fermé"
 msgstr ""
 
-#: plugins/supervision/logique.py:197
+#: plugins/supervision/logique.py:224
 msgid "Exemple de serveur (à adapter)"
 msgstr ""
 
