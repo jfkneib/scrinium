@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: scrinium 0.2.0\n"
 "Report-Msgid-Bugs-To: \n"
-"PO-Revision-Date: 2026-11-10 08:35+0100\n"
+"PO-Revision-Date: 2026-11-10 09:17+0100\n"
 "Last-Translator: Jean-François Kneib\n"
 "Language-Team: English\n"
 "Language: en\n"
@@ -243,7 +243,7 @@ msgid "Applications installées"
 msgstr "Installed applications"
 
 #: plugins/applications/__init__.py:64
-#: src/scrinium/ui/repertoire.py:150
+#: src/scrinium/ui/repertoire.py:158
 msgid "Filtrer…"
 msgstr "Filter…"
 
@@ -369,6 +369,7 @@ msgstr "Export…"
 
 #: plugins/applications/__init__.py:238
 #: plugins/capture/__init__.py:261
+#: src/scrinium/ui/repertoire.py:140
 msgid "Importer…"
 msgstr "Import…"
 
@@ -837,7 +838,7 @@ msgstr "Add a column"
 
 #: plugins/calc/__init__.py:46
 #: plugins/tableur/__init__.py:85
-#: src/scrinium/ui/repertoire.py:139
+#: src/scrinium/ui/repertoire.py:145
 msgid "Importer un CSV…"
 msgstr "Import a CSV…"
 
@@ -5033,24 +5034,24 @@ msgstr "unrecognised Scrinium link: « %s »"
 msgid "non disponible sous %(ici)s (réservée à : %(ou)s)"
 msgstr "not available on %(ici)s (only for: %(ou)s)"
 
-#: src/scrinium/core/repertoire.py:148
+#: src/scrinium/core/repertoire.py:149
 #: src/scrinium/ui/fenetre.py:793
 msgid "Répertoire"
 msgstr "Directory"
 
-#: src/scrinium/core/repertoire.py:30
+#: src/scrinium/core/repertoire.py:31
 msgid "Contacts (nom, téléphones, adresse, courriel)"
 msgstr "Contacts (name, phones, address, email)"
 
-#: src/scrinium/core/repertoire.py:31
+#: src/scrinium/core/repertoire.py:32
 msgid "Livres (titre, auteur, année)"
 msgstr "Books (title, author, year)"
 
-#: src/scrinium/core/repertoire.py:32
+#: src/scrinium/core/repertoire.py:33
 msgid "Vocabulaire (mot, traduction, exemple)"
 msgstr "Vocabulary (word, translation, example)"
 
-#: src/scrinium/core/repertoire.py:33
+#: src/scrinium/core/repertoire.py:34
 msgid "Tableau libre (nom, détails)"
 msgstr "Free table (name, details)"
 
@@ -5868,12 +5869,13 @@ msgid "Cette fiche est verrouillée : %s contiendra son texte et ses images EN C
 msgstr "This note is locked: %s will contain its text and images IN CLEAR. Continue?"
 
 #: src/scrinium/ui/fenetre.py:1253
-#: src/scrinium/ui/repertoire.py:473
+#: src/scrinium/ui/repertoire.py:513
 msgid "Écriture impossible : %s"
 msgstr "Cannot write: %s"
 
 #: src/scrinium/ui/fenetre.py:1304
-#: src/scrinium/ui/repertoire.py:450
+#: src/scrinium/ui/repertoire.py:458
+#: src/scrinium/ui/repertoire.py:489
 msgid "Lecture impossible : %s"
 msgstr "Cannot read: %s"
 
@@ -5948,7 +5950,7 @@ msgid "Ajouter une image"
 msgstr "Add an image"
 
 #: src/scrinium/ui/images.py:435
-#: src/scrinium/ui/repertoire.py:332
+#: src/scrinium/ui/repertoire.py:340
 msgid "Ouvrir"
 msgstr "Open"
 
@@ -6105,31 +6107,54 @@ msgstr "Adds an entry in the displayed letter: type its name, it sorts itself"
 msgid "Colonnes…"
 msgstr "Columns…"
 
-#: src/scrinium/ui/repertoire.py:143
+#: src/scrinium/ui/repertoire.py:146
+msgid "Importer des contacts (vCard, .vcf)…"
+msgstr "Import contacts (vCard, .vcf)…"
+
+#: src/scrinium/ui/repertoire.py:147
+msgid "Importer un dossier de contacts (KDE Connect…)"
+msgstr "Import a folder of contacts (KDE Connect…)"
+
+#: src/scrinium/ui/repertoire.py:151
 msgid "Applications…"
 msgstr "Applications…"
 
-#: src/scrinium/ui/repertoire.py:145
+#: src/scrinium/ui/repertoire.py:153
 msgid "Les applications que les fiches peuvent lancer, avec « app:nom paramètre » (déclarées sur cet ordinateur seulement)"
 msgstr "The applications that notes can launch, with \"app:name parameter\" (declared on this computer only)"
 
-#: src/scrinium/ui/repertoire.py:370
+#: src/scrinium/ui/repertoire.py:378
 msgid "Une ligne par application : nom = commande. Dans une fiche, « app:nom paramètre » donne un bouton qui la lance. « {valeur} » est remplacé par le paramètre (un seul argument, sans shell ; il ne peut pas commencer par « - »). Ces réglages restent sur cet ordinateur : une fiche reçue ne lance que ce que vous avez déclaré ici."
 msgstr "One line per application: name = command. In a note, \"app:name parameter\" gives a button that launches it. \"{valeur}\" is replaced by the parameter (a single argument, no shell; it cannot start with \"-\"). These settings stay on this computer: a received note only launches what you declared here."
 
-#: src/scrinium/ui/repertoire.py:444
+#: src/scrinium/ui/repertoire.py:452
 msgid "Fichiers CSV (*.csv *.txt);;Tous (*)"
 msgstr "CSV files (*.csv *.txt);;All (*)"
 
-#: src/scrinium/ui/repertoire.py:457
+#: src/scrinium/ui/repertoire.py:465
+#: src/scrinium/ui/repertoire.py:480
 msgid "%d entrée(s) ajoutée(s)."
 msgstr "%d entry(ies) added."
 
-#: src/scrinium/ui/repertoire.py:463
+#: src/scrinium/ui/repertoire.py:480
+#: src/scrinium/ui/repertoire.py:484
+#: src/scrinium/ui/repertoire.py:473
+msgid "Importer des contacts"
+msgstr "Import contacts"
+
+#: src/scrinium/ui/repertoire.py:485
+msgid "Contacts vCard (*.vcf);;Tous (*)"
+msgstr "vCard contacts (*.vcf);;All (*)"
+
+#: src/scrinium/ui/repertoire.py:493
+msgid "Dossier de contacts"
+msgstr "Contacts folder"
+
+#: src/scrinium/ui/repertoire.py:503
 msgid "CSV, séparateur virgule (*.csv)"
 msgstr "CSV, comma separator (*.csv)"
 
-#: src/scrinium/ui/repertoire.py:463
+#: src/scrinium/ui/repertoire.py:503
 msgid "CSV, séparateur point-virgule — Excel en français (*.csv)"
 msgstr "CSV, semicolon separator — French Excel (*.csv)"
 
@@ -6137,31 +6162,35 @@ msgstr "CSV, semicolon separator — French Excel (*.csv)"
 msgid "Les colonnes de votre tableau. Ce qui est saisi suit sa colonne quand vous la déplacez."
 msgstr "The columns of your table. What you typed follows its column when you move it."
 
-#: src/scrinium/ui/repertoire.py:397
+#: src/scrinium/ui/repertoire.py:405
 msgid "Aucune application pour ouvrir ceci : copié"
 msgstr "No application to open this: copied"
 
-#: src/scrinium/ui/repertoire.py:255
+#: src/scrinium/ui/repertoire.py:473
+msgid "Aucun fichier de contacts trouvé."
+msgstr "No contacts file found."
+
+#: src/scrinium/ui/repertoire.py:263
 msgid "(nouvelle entrée)"
 msgstr "(new entry)"
 
-#: src/scrinium/ui/repertoire.py:313
+#: src/scrinium/ui/repertoire.py:321
 msgid "Actions rapides"
 msgstr "Quick actions"
 
-#: src/scrinium/ui/repertoire.py:324
+#: src/scrinium/ui/repertoire.py:332
 msgid "Cette application n'est pas déclarée sur cet ordinateur : cliquez pour la déclarer."
 msgstr "This application is not declared on this computer: click to declare it."
 
-#: src/scrinium/ui/repertoire.py:355
+#: src/scrinium/ui/repertoire.py:363
 msgid "Programme introuvable : %s"
 msgstr "Program not found: %s"
 
-#: src/scrinium/ui/repertoire.py:422
+#: src/scrinium/ui/repertoire.py:430
 msgid "Supprimer l'entrée"
 msgstr "Delete the entry"
 
-#: src/scrinium/ui/repertoire.py:459
+#: src/scrinium/ui/repertoire.py:467
 msgid "Colonnes ajoutées : %s"
 msgstr "Columns added: %s"
 
@@ -6169,19 +6198,19 @@ msgstr "Columns added: %s"
 msgid "La colonne « %s » contient des données : elles seront perdues à la validation. Continuer ?"
 msgstr "The column « %s » contains data: it will be lost when you confirm. Continue?"
 
-#: src/scrinium/ui/repertoire.py:352
+#: src/scrinium/ui/repertoire.py:360
 msgid "Paramètre refusé pour %s : il ne doit pas commencer par « - »."
 msgstr "Parameter refused for %s: it must not start with \"-\"."
 
-#: src/scrinium/ui/repertoire.py:360
+#: src/scrinium/ui/repertoire.py:368
 msgid "Lancement impossible : %s"
 msgstr "Could not launch: %s"
 
-#: src/scrinium/ui/repertoire.py:401
+#: src/scrinium/ui/repertoire.py:409
 msgid "Copié"
 msgstr "Copied"
 
-#: src/scrinium/ui/repertoire.py:422
+#: src/scrinium/ui/repertoire.py:430
 msgid "Supprimer « %s » du répertoire ?"
 msgstr "Delete « %s » from the directory?"
 
@@ -6189,18 +6218,18 @@ msgstr "Delete « %s » from the directory?"
 msgid "classement A-Z"
 msgstr "A-Z sorting"
 
-#: src/scrinium/ui/repertoire.py:322
+#: src/scrinium/ui/repertoire.py:330
 msgid "Lancer %s"
 msgstr "Launch %s"
 
-#: src/scrinium/ui/repertoire.py:322
+#: src/scrinium/ui/repertoire.py:330
 msgid "%s (à déclarer)"
 msgstr "%s (to declare)"
 
-#: src/scrinium/ui/repertoire.py:332
+#: src/scrinium/ui/repertoire.py:340
 msgid "Appeler"
 msgstr "Call"
 
-#: src/scrinium/ui/repertoire.py:332
+#: src/scrinium/ui/repertoire.py:340
 msgid "Écrire à"
 msgstr "Write to"

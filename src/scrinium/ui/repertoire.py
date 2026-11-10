@@ -12,7 +12,7 @@ from PyQt6.QtCore import Qt, QUrl, pyqtSignal
 from PyQt6.QtGui import QCursor, QDesktopServices, QFont, QGuiApplication
 from PyQt6.QtWidgets import (QDialog, QDialogButtonBox, QFileDialog, QFormLayout, QHBoxLayout, QInputDialog, QLabel,
                              QLineEdit, QListWidget, QListWidgetItem, QMessageBox, QPlainTextEdit, QPushButton, QRadioButton,
-                             QScrollArea, QToolTip, QVBoxLayout, QWidget)
+                             QMenu, QScrollArea, QToolButton, QToolTip, QVBoxLayout, QWidget)
 
 from ..core.repertoire import (LETTRES, MAX_COLONNES, Tableau, actions, applications_citees, commande_application, lire_declarations,
                                sans_applications, texte_declarations)
@@ -136,8 +136,16 @@ class VueRepertoire(QWidget):
         self.b_supprimer.clicked.connect(self.supprimer)
         self.b_colonnes = QPushButton(icone("view-pim-notes"), _("Colonnes…"))
         self.b_colonnes.clicked.connect(self.colonnes)
-        self.b_importer = QPushButton(_("Importer un CSV…"))
-        self.b_importer.clicked.connect(self.importer)
+        self.b_importer = QToolButton()
+        self.b_importer.setText(_("Importer…"))
+        self.b_importer.setIcon(icone("document-import"))
+        self.b_importer.setToolButtonStyle(Qt.ToolButtonStyle.ToolButtonTextBesideIcon)
+        self.b_importer.setPopupMode(QToolButton.ToolButtonPopupMode.InstantPopup)
+        mi = QMenu(self.b_importer)
+        mi.addAction(_("Importer un CSV…"), self.importer)
+        mi.addAction(_("Importer des contacts (vCard, .vcf)…"), self.importer_vcf)
+        mi.addAction(_("Importer un dossier de contacts (KDE Connect…)"), self.importer_dossier_vcf)
+        self.b_importer.setMenu(mi)
         self.b_exporter = QPushButton(icone("document-save"), _("Exporter en CSV…"))
         self.b_exporter.clicked.connect(self.exporter)
         self.b_applications = QPushButton(icone("system-run"), _("Applications…"))
@@ -458,6 +466,38 @@ class VueRepertoire(QWidget):
         if creees:
             msg += "\n" + _("Colonnes ajoutées : %s") % ", ".join(creees)
         QMessageBox.information(self, _("Importer un CSV"), msg)
+
+    def _importer_octets(self, fichiers: list):
+        """Ajoute les contacts de ces fichiers vCard (octets) et rend compte."""
+        if not fichiers:
+            QMessageBox.information(self, _("Importer des contacts"), _("Aucun fichier de contacts trouvé."))
+            return
+        ajoutees, creees = self.tableau.importer_vcf(fichiers)
+        if creees:
+            self._construire_formulaire()
+        self._signaler()
+        self._rafraichir()
+        QMessageBox.information(self, _("Importer des contacts"), _("%d entrée(s) ajoutée(s).") % ajoutees)
+
+    def importer_vcf(self):
+        defaut = Path.home() / ".local/share/kpeoplevcard"
+        chemins, _f = QFileDialog.getOpenFileNames(self, _("Importer des contacts"), str(defaut if defaut.is_dir() else Path.home()),
+                                                   _("Contacts vCard (*.vcf);;Tous (*)"))
+        try:
+            self._importer_octets([Path(c).read_bytes() for c in chemins])
+        except OSError as ex:
+            QMessageBox.critical(self, _("Importer des contacts"), _("Lecture impossible : %s") % ex)
+
+    def importer_dossier_vcf(self):
+        defaut = Path.home() / ".local/share/kpeoplevcard"
+        dossier = QFileDialog.getExistingDirectory(self, _("Dossier de contacts"), str(defaut if defaut.is_dir() else Path.home()))
+        if not dossier:
+            return
+        try:
+            fichiers = sorted(Path(dossier).rglob("*.vcf"))[:5000]
+            self._importer_octets([f.read_bytes() for f in fichiers])
+        except OSError as ex:
+            QMessageBox.critical(self, _("Importer des contacts"), _("Lecture impossible : %s") % ex)
 
     def exporter(self):
         virgule, pointvirgule = _("CSV, séparateur virgule (*.csv)"), _("CSV, séparateur point-virgule — Excel en français (*.csv)")

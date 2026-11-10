@@ -13,6 +13,7 @@ Partie sans interface ; l'affichage est dans `ui/repertoire.py`."""
 import csv
 import io
 import os
+import quopri
 import re
 import shlex
 import unicodedata
@@ -245,6 +246,14 @@ class Tableau:
         casse, noms courants des carnets d'adresses compris) ; une colonne inconnue est AJOUTÉE (rien n'est perdu), plusieurs colonnes
         vers une même cible sont réunies. Les lignes déjà présentes ne sont pas doublées. Retourne (lignes ajoutées, colonnes créées)."""
         entete, lignes = lire_csv(octets)
+        return self.importer_lignes(entete, lignes)
+
+    def importer_vcf(self, fichiers) -> tuple[int, list]:
+        """Ajoute les contacts de fichiers vCard (.vcf : un ou plusieurs contacts par fichier). Mêmes règles que le CSV."""
+        entete, lignes = lire_vcards(fichiers)
+        return self.importer_lignes(entete, lignes)
+
+    def importer_lignes(self, entete: list, lignes: list) -> tuple[int, list]:
         if not entete:
             return 0, []
         cibles, creees = [], []
@@ -307,6 +316,87 @@ def lire_csv(octets: bytes) -> tuple[list, list]:
     if not lignes:
         return [], []
     return lignes[0], [l for l in lignes[1:] if any(x.strip() for x in l)]
+
+
+# ---------- vCard (.vcf) ----------
+ENTETE_VCARD = ["Nom", "Prénom", "Téléphones", "Adresse", "Courriel", "Lien", "Notes"]
+MAX_CONTACTS = 20000
+
+
+def _vc_valeur(v: str) -> str:
+    return v.replace("\\n", "\n").replace("\\N", "\n").replace("\\,", ",").replace("\\;", ";").replace("\\\\", "\\")
+
+
+def _vc_decouper(valeur: str) -> list:
+    """Composants séparés par des « ; » non échappés."""
+    return [_vc_valeur(x) for x in re.split(r"(?<!\\);", valeur)]
+
+
+def lire_vcards(fichiers) -> tuple[list, list]:
+    """(en-tête, lignes) des contacts de fichiers vCard (2.1, 3.0 ou 4.0) donnés en octets (un objet ou une liste). Nom, prénom, téléphones,
+    adresse postale, courriels, sites et notes ont leur colonne ; société, fonction et anniversaire passent dans les notes (rien n'est perdu)."""
+    if isinstance(fichiers, (bytes, bytearray)):
+        fichiers = [bytes(fichiers)]
+    lignes = []
+    for octets in fichiers:
+        texte = decoder(octets).replace("\r\n", "\n").replace("\r", "\n")
+        texte = re.sub(r"=\n(?=[ \t]*[=\w])", "", texte) if "QUOTED-PRINTABLE" in texte.upper() else texte
+        texte = re.sub(r"\n[ \t]", "", texte)                                  # lignes repliées
+        carte = None
+        for brut in texte.split("\n"):
+            ligne = brut.strip()
+            if ligne.upper() == "BEGIN:VCARD":
+                carte = {"tel": [], "mail": [], "web": [], "adr": [], "notes": [], "autres": []}
+            elif ligne.upper() == "END:VCARD" and carte is not None:
+                ligne_csv = _vc_en_ligne(carte)
+                if any(ligne_csv):
+                    lignes.append(ligne_csv)
+                carte = None
+                if len(lignes) >= MAX_CONTACTS:
+                    return ENTETE_VCARD, lignes
+            elif carte is not None and ":" in ligne:
+                cle, _sep, valeur = ligne.partition(":")
+                parties = cle.split(";")
+                nom = parties[0].split(".")[-1].upper()
+                if any(p.upper().startswith("ENCODING=QUOTED-PRINTABLE") or p.upper() == "QUOTED-PRINTABLE" for p in parties[1:]):
+                    try:
+                        valeur = quopri.decodestring(valeur.encode("latin-1")).decode("utf-8", "replace")
+                    except (ValueError, UnicodeError):
+                        pass
+                _vc_noter(carte, nom, valeur.strip())
+    return ENTETE_VCARD, lignes
+
+
+def _vc_noter(carte: dict, nom: str, valeur: str) -> None:
+    if not valeur:
+        return
+    if nom == "N":
+        c = _vc_decouper(valeur) + [""] * 5
+        carte["nom"], carte["prenom"] = c[0].strip(), " ".join(x for x in (c[1], c[2]) if x.strip()).strip()
+    elif nom == "FN":
+        carte["fn"] = _vc_valeur(valeur).strip()
+    elif nom == "TEL":
+        carte["tel"].append(_vc_valeur(valeur).replace("tel:", "").strip())
+    elif nom == "EMAIL":
+        carte["mail"].append(_vc_valeur(valeur).strip())
+    elif nom == "URL":
+        carte["web"].append(_vc_valeur(valeur).strip())
+    elif nom == "ADR":
+        carte["adr"].append(", ".join(x.strip() for x in _vc_decouper(valeur) if x.strip()))
+    elif nom == "NOTE":
+        carte["notes"].append(_vc_valeur(valeur).strip())
+    elif nom in ("ORG", "TITLE", "BDAY"):
+        etiquette = {"ORG": "Société", "TITLE": "Fonction", "BDAY": "Anniversaire"}[nom]
+        carte["autres"].append(f"{etiquette} : " + " ".join(x for x in _vc_decouper(valeur) if x.strip()))
+
+
+def _vc_en_ligne(c: dict) -> list:
+    nom, prenom = c.get("nom", ""), c.get("prenom", "")
+    if not nom and not prenom:
+        nom = c.get("fn", "")                    # pas de nom structuré : le nom affiché va dans « Nom »
+    notes = c["autres"] + c["notes"]
+    return [nom, prenom, "\n".join(dict.fromkeys(c["tel"])), "\n".join(c["adr"]), "\n".join(dict.fromkeys(c["mail"])),
+            "\n".join(dict.fromkeys(c["web"])), "\n".join(notes)]
 
 
 def texte_modele(numero: int) -> str:

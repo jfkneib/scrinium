@@ -361,3 +361,49 @@ def test_vue_bouton_lancer_seulement_les_applications_declarees(monkeypatch):
     assert not v.lancer("inconnue", "x") and ouverts == ["inconnue"] and len(lances) == 1
     stock["absent"] = "programme-qui-nexiste-pas {valeur}"
     assert not v.lancer("absent", "x") and len(lances) == 1
+
+
+VCF_30 = (
+    "BEGIN:VCARD\r\nVERSION:3.0\r\nFN:Alice Dupont\r\nN:Dupont;Alice;;;\r\nTEL;TYPE=CELL:06 01 02 03 04\r\nTEL;TYPE=HOME:01 23 45 67 89\r\n"
+    "EMAIL;TYPE=INTERNET:alice@exemple.fr\r\nADR;TYPE=HOME:;;12 rue des Lilas;Lyon;;69000;France\r\nURL:https://alice.exemple.fr\r\n"
+    "ORG:Société\\, Truc;Service A\r\nBDAY:1980-05-17\r\nNOTE:Ligne un\\nLigne deux\r\nEND:VCARD\r\n"
+    "BEGIN:VCARD\r\nVERSION:3.0\r\nFN:Bob Sans-Nom-Structuré\r\nitem1.TEL:+33 6 50 12 45 36\r\nEND:VCARD\r\n"
+    "BEGIN:VCARD\r\nVERSION:3.0\r\nFN:\r\nEND:VCARD\r\n")
+VCF_21 = ("BEGIN:VCARD\nVERSION:2.1\nN;CHARSET=UTF-8;ENCODING=QUOTED-PRINTABLE:=C3=89lodie;Cl=C3=A9mence;;;\n"
+          "TEL;CELL:0700000000\nNOTE;ENCODING=QUOTED-PRINTABLE:Une note tr=C3=A8s=\n longue\nEND:VCARD\n")
+
+
+def test_import_vcard_contacts_remplissent_les_colonnes_du_modele():
+    t = Tableau.depuis_texte(texte_modele(0))
+    ajoutees, creees = t.importer_vcf([VCF_30.encode("utf-8"), VCF_21.encode("utf-8")])
+    assert ajoutees == 3 and creees == []                       # la vCard vide est ignorée ; aucune colonne ajoutée
+    nom, prenom, tel, adr, mail, lien, notes = (t.lignes[0][t.colonnes.index(c)] for c in
+                                                ("Nom", "Prénom", "Téléphones", "Adresse", "Courriel", "Lien", "Notes"))
+    assert (nom, prenom, mail, lien) == ("Dupont", "Alice", "alice@exemple.fr", "https://alice.exemple.fr")
+    assert tel == "06 01 02 03 04\n01 23 45 67 89" and adr == "12 rue des Lilas, Lyon, 69000, France"
+    assert notes == "Société : Société, Truc Service A\nAnniversaire : 1980-05-17\nLigne un\nLigne deux"
+    bob = t.lignes[1]
+    assert bob[t.colonnes.index("Nom")] == "Bob Sans-Nom-Structuré" and bob[t.colonnes.index("Téléphones")] == "+33 6 50 12 45 36"
+    elodie = t.lignes[2]
+    assert elodie[0] == "Élodie" and elodie[1] == "Clémence" and "très longue" in elodie[t.colonnes.index("Notes")].replace("  ", " ")
+    assert t.importer_vcf([VCF_30.encode()])[0] == 0            # déjà présents : pas de doublon
+    assert actions(tel)[0][0] == "tel"                          # et les boutons « Appeler » en profitent
+
+
+def test_import_vcard_dans_la_fenetre(tmp_path, monkeypatch):
+    from scrinium.ui import repertoire as ui_rep
+    v = VueRepertoire()
+    v.charger(texte_modele(0))
+    d = tmp_path / "kdeconnect-abc"
+    d.mkdir()
+    (d / "1.vcf").write_bytes(VCF_30.encode())
+    (d / "2.vcf").write_bytes(VCF_21.encode())
+    messages = []
+    monkeypatch.setattr(ui_rep.QMessageBox, "information", staticmethod(lambda *a, **k: messages.append(a[2])))
+    monkeypatch.setattr(ui_rep.QFileDialog, "getExistingDirectory", staticmethod(lambda *a, **k: str(tmp_path)))
+    v.importer_dossier_vcf()
+    assert len(v.tableau.lignes) == 3 and messages == ["3 entrée(s) ajoutée(s)."]
+    monkeypatch.setattr(ui_rep.QFileDialog, "getOpenFileNames", staticmethod(lambda *a, **k: ([str(d / "1.vcf")], "")))
+    v.importer_vcf()
+    assert len(v.tableau.lignes) == 3 and messages[-1] == "0 entrée(s) ajoutée(s)."
+    assert [a.text() for a in v.b_importer.menu().actions()][1].startswith("Importer des contacts")
