@@ -19,7 +19,9 @@ import io
 import math
 import operator
 import re
+import zipfile
 from datetime import date
+from xml.sax.saxutils import escape as _esc, quoteattr as _attr
 
 from scrinium.core.types_fiche import TypeFiche
 from scrinium.i18n import N_, _
@@ -377,6 +379,136 @@ def depuis_csv(texte: str) -> list:
     lignes = [r for r in csv.reader(io.StringIO(texte), delimiter=sep) if any(c.strip() for c in r)][:MAX_LIGNES]
     largeur = min(max((len(r) for r in lignes), default=0), MAX_COLONNES)
     return [([c.strip() for c in r] + [""] * largeur)[:largeur] for r in lignes]
+
+
+# ---------- Excel (.xlsx) et LibreOffice (.ods) ----------
+_ANGLAIS = {"SOMME": "SUM", "MOYENNE": "AVERAGE", "NB": "COUNT", "ARRONDI": "ROUND", "RACINE": "SQRT", "ENT": "INT"}
+_PLAGE_OU_CELLULE = re.compile(_PLAGE.pattern.replace("(", "(", 1) + "|" + _CELLULE.pattern)
+_FONCTION = re.compile(r"\b([A-Za-zÉé]+)\s*\(")
+
+
+def formule_standard(formule: str, ods: bool = False) -> str:
+    """Formule Scrinium (noms français, « ; ») -> formule d'Excel (SUM, virgules) ou d'OpenDocument (`of:=SUM([.A1:.A3];2)`), sans le « = »."""
+    f = formule.strip().lstrip("=").strip().replace("×", "*").replace("÷", "/")
+    f = _FONCTION.sub(lambda m: _ANGLAIS.get(m.group(1).upper(), m.group(1).upper()) + "(", f)
+    if ods:
+        return _PLAGE_OU_CELLULE.sub(lambda m: f"[.{m.group(1).upper()}:.{m.group(2).upper()}]" if m.group(1) else f"[.{m.group(3).upper()}]", f)
+    f = f.replace(";", ",")
+    f = _PLAGE.sub(lambda m: f"{m.group(1).upper()}:{m.group(2).upper()}", f)
+    return _CELLULE.sub(lambda m: m.group(1).upper(), f)
+
+
+def _cellules_export(lignes: list) -> list:
+    """[[(brut, valeur ou ErreurCellule ou None)]] rognées à la dernière ligne et colonne utilisées (la grille vide du bas n'est pas exportée)."""
+    f = Feuille(lignes)
+    nl = max((i + 1 for i, r in enumerate(lignes) if any(c.strip() for c in r)), default=0)
+    nc = max((j + 1 for r in lignes for j, c in enumerate(r) if c.strip()), default=0)
+    res = []
+    for l in range(nl):
+        ligne = []
+        for c in range(nc):
+            brut = f.brut(l, c).strip()
+            try:
+                v = f.valeur(l, c)
+            except ErreurCellule as ex:
+                v = ex
+            ligne.append((brut, v))
+        res.append(ligne)
+    return res
+
+
+def _num(v) -> str:
+    return repr(float(v)) if isinstance(v, float) else str(int(v))
+
+
+def vers_xlsx(lignes: list) -> bytes:
+    """Classeur Excel (.xlsx) : les formules sont gardées (avec leur résultat), lisible par Excel, LibreOffice, Google Sheets…"""
+    rangees = []
+    for l, ligne in enumerate(_cellules_export(lignes), 1):
+        cases = []
+        for c, (brut, v) in enumerate(ligne):
+            if not brut:
+                continue
+            nom = nom_cellule(l - 1, c)
+            if brut.startswith("="):
+                f = _esc(formule_standard(brut))
+                if isinstance(v, ErreurCellule):
+                    cases.append(f'<c r="{nom}" t="e"><f>{f}</f><v>{_esc(str(v))}</v></c>')
+                elif isinstance(v, (int, float)) and not isinstance(v, bool):
+                    cases.append(f'<c r="{nom}"><f>{f}</f><v>{_num(v)}</v></c>')
+                else:
+                    cases.append(f'<c r="{nom}" t="str"><f>{f}</f><v>{_esc(str(v if v is not None else ""))}</v></c>')
+            elif isinstance(v, (int, float)) and not isinstance(v, bool):
+                cases.append(f'<c r="{nom}"><v>{_num(v)}</v></c>')
+            else:
+                cases.append(f'<c r="{nom}" t="inlineStr"><is><t xml:space="preserve">{_esc(brut)}</t></is></c>')
+        rangees.append(f'<row r="{l}">{"".join(cases)}</row>')
+    entete = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n'
+    ns = 'xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"'
+    rel = "http://schemas.openxmlformats.org/officeDocument/2006/relationships"
+    fichiers = {
+        "[Content_Types].xml": entete + '<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">'
+        '<Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>'
+        '<Default Extension="xml" ContentType="application/xml"/>'
+        '<Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/>'
+        '<Override PartName="/xl/worksheets/sheet1.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>'
+        '<Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/></Types>',
+        "_rels/.rels": entete + '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">'
+        f'<Relationship Id="rId1" Type="{rel}/officeDocument" Target="xl/workbook.xml"/></Relationships>',
+        "xl/workbook.xml": entete + f'<workbook {ns} xmlns:r="{rel}"><sheets><sheet name="Tableur" sheetId="1" r:id="rId1"/></sheets></workbook>',
+        "xl/_rels/workbook.xml.rels": entete + '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">'
+        f'<Relationship Id="rId1" Type="{rel}/worksheet" Target="worksheets/sheet1.xml"/>'
+        f'<Relationship Id="rId2" Type="{rel}/styles" Target="styles.xml"/></Relationships>',
+        "xl/styles.xml": entete + f'<styleSheet {ns}><fonts count="1"><font><sz val="11"/><name val="Calibri"/></font></fonts>'
+        '<fills count="2"><fill><patternFill patternType="none"/></fill><fill><patternFill patternType="gray125"/></fill></fills>'
+        '<borders count="1"><border><left/><right/><top/><bottom/><diagonal/></border></borders>'
+        '<cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs>'
+        '<cellXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0"/></cellXfs></styleSheet>',
+        "xl/worksheets/sheet1.xml": entete + f'<worksheet {ns}><sheetData>{"".join(rangees)}</sheetData></worksheet>',
+    }
+    sortie = io.BytesIO()
+    with zipfile.ZipFile(sortie, "w", zipfile.ZIP_DEFLATED) as z:
+        for nom, contenu in fichiers.items():
+            z.writestr(nom, contenu)
+    return sortie.getvalue()
+
+
+def vers_ods(lignes: list) -> bytes:
+    """Classeur LibreOffice (.ods) : les formules sont gardées (avec leur résultat)."""
+    rangees = []
+    for ligne in _cellules_export(lignes):
+        cases = []
+        for brut, v in ligne:
+            if not brut:
+                cases.append("<table:table-cell/>")
+            elif brut.startswith("="):
+                f = _attr("of:=" + formule_standard(brut, ods=True))
+                if isinstance(v, ErreurCellule):
+                    cases.append(f"<table:table-cell table:formula={f}/>")
+                elif isinstance(v, (int, float)) and not isinstance(v, bool):
+                    cases.append(f'<table:table-cell table:formula={f} office:value-type="float" office:value="{_num(v)}"/>')
+                else:
+                    cases.append(f'<table:table-cell table:formula={f} office:value-type="string"><text:p>{_esc(str(v or ""))}</text:p></table:table-cell>')
+            elif isinstance(v, (int, float)) and not isinstance(v, bool):
+                cases.append(f'<table:table-cell office:value-type="float" office:value="{_num(v)}"/>')
+            else:
+                cases.append(f'<table:table-cell office:value-type="string"><text:p>{_esc(brut)}</text:p></table:table-cell>')
+        rangees.append(f'<table:table-row>{"".join(cases)}</table:table-row>')
+    contenu = (
+        '<?xml version="1.0" encoding="UTF-8"?>\n<office:document-content xmlns:office="urn:oasis:names:tc:opendocument:xmlns:office:1.0" '
+        'xmlns:table="urn:oasis:names:tc:opendocument:xmlns:table:1.0" xmlns:text="urn:oasis:names:tc:opendocument:xmlns:text:1.0" xmlns:of="urn:oasis:names:tc:opendocument:xmlns:of:1.2" '
+        'office:version="1.2"><office:body><office:spreadsheet><table:table table:name="Tableur">'
+        f'{"".join(rangees)}</table:table></office:spreadsheet></office:body></office:document-content>')
+    manifeste = (
+        '<?xml version="1.0" encoding="UTF-8"?>\n<manifest:manifest xmlns:manifest="urn:oasis:names:tc:opendocument:xmlns:manifest:1.0" '
+        'manifest:version="1.2"><manifest:file-entry manifest:full-path="/" manifest:media-type="application/vnd.oasis.opendocument.spreadsheet"/>'
+        '<manifest:file-entry manifest:full-path="content.xml" manifest:media-type="text/xml"/></manifest:manifest>')
+    sortie = io.BytesIO()
+    with zipfile.ZipFile(sortie, "w") as z:
+        z.writestr(zipfile.ZipInfo("mimetype"), "application/vnd.oasis.opendocument.spreadsheet")      # d'abord, non compressé
+        z.writestr("META-INF/manifest.xml", manifeste, zipfile.ZIP_DEFLATED)
+        z.writestr("content.xml", contenu, zipfile.ZIP_DEFLATED)
+    return sortie.getvalue()
 
 
 # ---------- aides à l'édition ----------

@@ -280,3 +280,66 @@ def test_exemples_a_la_premiere_activation_seulement(fen, monkeypatch):
     fen.plugins.desactiver("tableur")
     fen.plugins.activer("tableur")
     assert fen.plugins.creer_exemples("tableur") == []
+
+
+def _grille():
+    g = lg.vide()
+    g[0][:4] = ["Produit", "Prix", "Qté", "Total"]
+    g[1][:4] = ["Pomme", "1,5", "4", "=B2*C2"]
+    g[2][:4] = ["Poire", "2", "3", "=B3*C3"]
+    g[3][3] = "=SOMME(D2:D3)"
+    g[4][3] = "=ARRONDI(D4/3;2)"
+    g[5][3] = "=1/0"
+    g[6][0] = "a & <b>"
+    return g
+
+
+def test_formules_pour_excel_et_libreoffice():
+    assert lg.formule_standard("=ARRONDI(D4/3;2)+MOYENNE(a1:B2)") == "ROUND(D4/3,2)+AVERAGE(A1:B2)"
+    assert lg.formule_standard("=SOMME(D2:D3)", ods=True) == "SUM([.D2:.D3])"
+    assert lg.formule_standard("=B2*C2", ods=True) == "[.B2]*[.C2]"
+    assert lg.formule_standard("=RACINE(ENT(A1))") == "SQRT(INT(A1))"
+
+
+def test_export_xlsx_et_ods_gardent_les_formules_et_leurs_resultats():
+    import zipfile
+    from io import BytesIO
+    from xml.etree import ElementTree as ET
+    g = _grille()
+    with zipfile.ZipFile(BytesIO(lg.vers_xlsx(g))) as z:
+        assert {"[Content_Types].xml", "xl/workbook.xml", "xl/worksheets/sheet1.xml"} <= set(z.namelist())
+        for nom in z.namelist():
+            ET.fromstring(z.read(nom))                                          # XML bien formé (a & <b> échappé)
+        feuille = z.read("xl/worksheets/sheet1.xml").decode()
+    assert '<c r="D2"><f>B2*C2</f><v>6.0</v></c>' in feuille or '<c r="D2"><f>B2*C2</f><v>6</v></c>' in feuille
+    assert "<f>SUM(D2:D3)</f>" in feuille and 't="e"' in feuille and "a &amp; &lt;b&gt;" in feuille and "<row r=\"8\"" not in feuille
+    with zipfile.ZipFile(BytesIO(lg.vers_ods(g))) as z:
+        assert z.namelist()[0] == "mimetype" and z.getinfo("mimetype").compress_type == zipfile.ZIP_STORED
+        ET.fromstring(z.read("content.xml"))
+        contenu = z.read("content.xml").decode()
+    assert 'table:formula="of:=SUM([.D2:.D3])"' in contenu and 'table:formula="of:=[.B2]*[.C2]"' in contenu
+
+
+@pytest.mark.skipif(not shutil.which("soffice"), reason="LibreOffice absent")
+@pytest.mark.parametrize("format_", ["xlsx", "ods"])
+def test_libreoffice_recalcule_les_fichiers_exportes(tmp_path, format_):
+    import subprocess
+    f = tmp_path / f"t.{format_}"
+    f.write_bytes(lg.vers_xlsx(_grille()) if format_ == "xlsx" else lg.vers_ods(_grille()))
+    subprocess.run(["soffice", "--headless", "--convert-to", "csv", "--outdir", str(tmp_path), str(f)], check=True, capture_output=True, timeout=120)
+    lignes = (tmp_path / "t.csv").read_text(encoding="utf-8").splitlines()
+    assert lignes[1].endswith(",6") and lignes[3].endswith(",12") and lignes[4].endswith(",4") and "DIV/0" in lignes[5]
+
+
+def test_export_classeur_dans_la_fenetre(fen, tmp_path, monkeypatch):
+    import sys
+    vue = _nouvelle(fen)
+    vue.modifier_cellule(0, 0, "3")
+    vue.modifier_cellule(1, 0, "=A1*2")
+    mod = sys.modules["scrinium_plugin_tableur"]
+    for format_ in ("xlsx", "ods"):
+        cible = tmp_path / "t"
+        monkeypatch.setattr(mod.QFileDialog, "getSaveFileName", staticmethod(lambda *a, **k: (str(cible), "")))
+        vue.exporter_classeur(format_)
+        assert (tmp_path / f"t.{format_}").stat().st_size > 200 and format_ in vue.etat.text()
+    assert vue.b_classeur.menu().actions()[0].text().endswith("(.xlsx)…")

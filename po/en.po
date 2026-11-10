@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: scrinium 0.2.0\n"
 "Report-Msgid-Bugs-To: \n"
-"PO-Revision-Date: 2026-11-10 08:05+0100\n"
+"PO-Revision-Date: 2026-11-10 08:17+0100\n"
 "Last-Translator: Jean-François Kneib\n"
 "Language-Team: English\n"
 "Language: en\n"
@@ -802,7 +802,7 @@ msgstr "No total"
 
 #: plugins/calc/__init__.py:23
 #: plugins/tableur/__init__.py:71
-#: plugins/tableur/logique.py:413
+#: plugins/tableur/logique.py:545
 msgid "Somme"
 msgstr "Sum"
 
@@ -836,7 +836,7 @@ msgid "Ajouter une colonne"
 msgstr "Add a column"
 
 #: plugins/calc/__init__.py:46
-#: plugins/tableur/__init__.py:76
+#: plugins/tableur/__init__.py:85
 #: src/scrinium/ui/repertoire.py:134
 msgid "Importer un CSV…"
 msgstr "Import a CSV…"
@@ -848,7 +848,7 @@ msgid "Importer un CSV"
 msgstr "Import a CSV"
 
 #: plugins/calc/__init__.py:235
-#: plugins/tableur/__init__.py:244
+#: plugins/tableur/__init__.py:266
 msgid "Fichiers CSV (*.csv *.txt);;Tous les fichiers (*)"
 msgstr "CSV files (*.csv *.txt);;All files (*)"
 
@@ -871,43 +871,43 @@ msgid "Copier"
 msgstr "Copy"
 
 #: plugins/calc/__init__.py:215
-#: plugins/tableur/__init__.py:333
+#: plugins/tableur/__init__.py:355
 msgid "Coller"
 msgstr "Paste"
 
 #: plugins/calc/__init__.py:217
-#: plugins/tableur/__init__.py:335
+#: plugins/tableur/__init__.py:357
 msgid "Insérer une ligne au-dessus"
 msgstr "Insert a row above"
 
 #: plugins/calc/__init__.py:218
-#: plugins/tableur/__init__.py:336
+#: plugins/tableur/__init__.py:358
 msgid "Insérer une ligne en dessous"
 msgstr "Insert a row below"
 
 #: plugins/calc/__init__.py:221
-#: plugins/tableur/__init__.py:339
+#: plugins/tableur/__init__.py:361
 msgid "Insérer une colonne à gauche"
 msgstr "Insert a column on the left"
 
 #: plugins/calc/__init__.py:222
-#: plugins/tableur/__init__.py:340
+#: plugins/tableur/__init__.py:362
 msgid "Insérer une colonne à droite"
 msgstr "Insert a column on the right"
 
 #: plugins/calc/__init__.py:223
-#: plugins/tableur/__init__.py:341
+#: plugins/tableur/__init__.py:363
 #: src/scrinium/ui/repertoire.py:90
 msgid "Supprimer la colonne"
 msgstr "Delete the column"
 
 #: plugins/calc/__init__.py:245
-#: plugins/tableur/__init__.py:254
+#: plugins/tableur/__init__.py:276
 msgid "Ce fichier ne contient aucun tableau."
 msgstr "This file contains no table."
 
 #: plugins/calc/__init__.py:248
-#: plugins/tableur/__init__.py:257
+#: plugins/tableur/__init__.py:279
 msgid "Remplacer le contenu actuel de la fiche par ce fichier ?"
 msgstr "Replace the current content of the note with this file?"
 
@@ -3109,7 +3109,7 @@ msgstr "Loop in the dependencies around \"%s\""
 msgid "Cette fiche fait le point sur les plannings (fiches « Planning ») du même thème que celle-ci, ou sur tous si vous le choisissez en haut : avancement, retards, dates. Elle se met à jour quand on l'ouvre ou qu'on clique sur « Actualiser »."
 msgstr "This note gives an overview of the plannings (\"Planning\" notes) of the same topic as itself, or of all of them if you choose so at the top: progress, delays, dates. It updates when you open it or click \"Refresh\"."
 
-#: plugins/tableur/__init__.py:358
+#: plugins/tableur/__init__.py:383
 msgid ""
 "Un tableur pour des cellules et des formules, par exemple pour suivre des relevés (compteur, poids, dépenses…).\n"
 "\n"
@@ -3119,6 +3119,7 @@ msgid ""
 "• Exemples de formules : =A1*B1, =B3-B2, =SOMME(B1:B10), =MOYENNE(B1:B10), =MAX(B1:B10)-MIN(B1:B10), =ARRONDI(A1/3;2). Fonctions : SOMME, MOYENNE, MIN, MAX, NB, ABS, ARRONDI, RACINE, ENT. Opérations : + - * / ^ %. Les erreurs s'affichent dans la cellule (#DIV/0!, #REF!, #CYCLE!…).\n"
 "• Si la première colonne s'appelle « Date » (cellule A1), « Ajouter une ligne » y met la date du jour. « Totaux » ajoute une ligne de somme, moyenne, minimum ou maximum sous les données.\n"
 "• Clic droit : insérer ou supprimer des lignes et des colonnes. Suppr vide les cellules. Ctrl+C et Ctrl+V : copier, coller (on peut coller depuis un autre tableur).\n"
+"• Clic droit > « Exporter pour Excel (.xlsx) » ou « pour LibreOffice (.ods) » (aussi le bouton « Excel / LibreOffice ») : un classeur qui GARDE les formules (avec leurs résultats) ; Excel, LibreOffice et Google Sheets l'ouvrent directement.\n"
 "• « Exporter en CSV… » écrit les résultats dans un fichier (séparateur « ; », que LibreOffice et Excel ouvrent directement) ; « Importer un CSV… » remplace le tableau par un fichier.\n"
 "• Le texte de la fiche est un tableau Markdown : lisible partout, cherchable, partageable, verrouillable. Rien n'est exécuté : seules ces opérations sont comprises. L'impression et l'export PDF montrent les résultats.\n"
 "• Pour une simple liste avec des totaux par colonne, voyez l'extension Calc."
@@ -3131,6 +3132,7 @@ msgstr ""
 "• Example formulas: =A1*B1, =B3-B2, =SOMME(B1:B10), =MOYENNE(B1:B10), =MAX(B1:B10)-MIN(B1:B10), =ARRONDI(A1/3;2). Functions: SOMME (SUM), MOYENNE (AVERAGE), MIN, MAX, NB (COUNT), ABS, ARRONDI (ROUND), RACINE (SQRT), ENT (INT). Operations: + - * / ^ %. Errors are shown in the cell (#DIV/0!, #REF!, #CYCLE!…).\n"
 "• If the first column is called \"Date\" (cell A1), \"Add a row\" puts today's date in it. \"Totals\" adds a row with the sum, average, minimum or maximum under the data.\n"
 "• Right-click: insert or delete rows and columns. Delete clears the cells. Ctrl+C and Ctrl+V: copy, paste (you can paste from another spreadsheet).\n"
+"• Right-click > \"Export for Excel (.xlsx)\" or \"for LibreOffice (.ods)\" (also the \"Excel / LibreOffice\" button): a workbook that KEEPS the formulas (with their results); Excel, LibreOffice and Google Sheets open it directly.\n"
 "• \"Export to CSV…\" writes the results to a file (\";\" separator, which LibreOffice and Excel open directly); \"Import a CSV…\" replaces the table with a file.\n"
 "• The note's text is a Markdown table: readable anywhere, searchable, shareable, lockable. Nothing is executed: only these operations are understood. Printing and PDF export show the results.\n"
 "• For a simple list with totals per column, see the Calc extension."
@@ -3139,55 +3141,85 @@ msgstr ""
 msgid "Totaux"
 msgstr "Totals"
 
-#: plugins/tableur/__init__.py:87
+#: plugins/tableur/__init__.py:77
+msgid "Excel / LibreOffice"
+msgstr "Excel / LibreOffice"
+
+#: plugins/tableur/__init__.py:82
+#: plugins/tableur/__init__.py:365
+msgid "Exporter pour Excel (.xlsx)…"
+msgstr "Export for Excel (.xlsx)…"
+
+#: plugins/tableur/__init__.py:83
+#: plugins/tableur/__init__.py:366
+msgid "Exporter pour LibreOffice (.ods)…"
+msgstr "Export for LibreOffice (.ods)…"
+
+#: plugins/tableur/__init__.py:96
 msgid "Contenu de la cellule : un nombre, du texte, ou une formule comme =SOMME(A1:A5)"
 msgstr "Content of the cell: a number, some text, or a formula such as =SOMME(A1:A5)"
 
-#: plugins/tableur/__init__.py:350
+#: plugins/tableur/__init__.py:375
 msgid "Extension Tableur"
 msgstr "Spreadsheet extension"
 
-#: plugins/tableur/__init__.py:204
+#: plugins/tableur/__init__.py:213
 msgid "%(l)d lignes, %(c)d colonnes. Pour une formule : cliquez une cellule, tapez = puis la formule, par exemple =SOMME(A1:A5) ou =A1*B1, et Entrée."
 msgstr "%(l)d rows, %(c)d columns. For a formula: click a cell, type = then the formula, for example =SOMME(A1:A5) or =A1*B1, and Enter."
 
-#: plugins/tableur/logique.py:414
+#: plugins/tableur/__init__.py:255
+msgid "Exporter pour Excel"
+msgstr "Export for Excel"
+
+#: plugins/tableur/__init__.py:255
+msgid "Exporter pour LibreOffice"
+msgstr "Export for LibreOffice"
+
+#: plugins/tableur/__init__.py:256
+msgid "Classeurs Excel (*.xlsx)"
+msgstr "Excel workbooks (*.xlsx)"
+
+#: plugins/tableur/__init__.py:256
+msgid "Classeurs LibreOffice (*.ods)"
+msgstr "LibreOffice workbooks (*.ods)"
+
+#: plugins/tableur/logique.py:546
 msgid "Exemple. Cliquez une cellule : la barre au-dessus de la grille montre sa formule (ici « =B2*C2 » : quantité fois prix). Tapez = dans une cellule pour écrire la vôtre, par exemple =SOMME(D2:D4) ou =D5*1.2. Entrée valide."
 msgstr "Example. Click a cell: the bar above the grid shows its formula (here \"=B2*C2\": quantity times price). Type = in a cell to write your own, for example =SOMME(D2:D4) or =D5*1.2. Enter validates."
 
-#: plugins/tableur/logique.py:419
+#: plugins/tableur/logique.py:551
 msgid "Tableur"
 msgstr "Spreadsheet"
 
-#: plugins/tableur/logique.py:411
+#: plugins/tableur/logique.py:543
 msgid "Article"
 msgstr "Item"
 
-#: plugins/tableur/logique.py:411
+#: plugins/tableur/logique.py:543
 msgid "Quantité"
 msgstr "Quantity"
 
-#: plugins/tableur/logique.py:411
+#: plugins/tableur/logique.py:543
 msgid "Prix"
 msgstr "Price"
 
-#: plugins/tableur/logique.py:412
+#: plugins/tableur/logique.py:544
 msgid "Pommes"
 msgstr "Apples"
 
-#: plugins/tableur/logique.py:412
+#: plugins/tableur/logique.py:544
 msgid "Pain"
 msgstr "Bread"
 
-#: plugins/tableur/logique.py:412
+#: plugins/tableur/logique.py:544
 msgid "Lait"
 msgstr "Milk"
 
-#: plugins/tableur/logique.py:416
+#: plugins/tableur/logique.py:548
 msgid "Tableur (exemples)"
 msgstr "Spreadsheet (examples)"
 
-#: plugins/tableur/logique.py:416
+#: plugins/tableur/logique.py:548
 msgid "Exemple · Liste de courses"
 msgstr "Example · Shopping list"
 

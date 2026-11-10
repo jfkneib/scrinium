@@ -73,9 +73,18 @@ class VueTableur(QWidget):
         self.b_totaux.setMenu(m)
         self.b_export = QPushButton(icone("document-export"), _("Exporter en CSV…"))
         self.b_export.clicked.connect(lambda *_a: self.exporter_csv())
+        self.b_classeur = QToolButton()
+        self.b_classeur.setText(_("Excel / LibreOffice"))
+        self.b_classeur.setIcon(icone("x-office-spreadsheet"))
+        self.b_classeur.setToolButtonStyle(Qt.ToolButtonStyle.ToolButtonTextBesideIcon)
+        self.b_classeur.setPopupMode(QToolButton.ToolButtonPopupMode.InstantPopup)
+        mc = QMenu(self.b_classeur)
+        mc.addAction(_("Exporter pour Excel (.xlsx)…"), lambda: self.exporter_classeur("xlsx"))
+        mc.addAction(_("Exporter pour LibreOffice (.ods)…"), lambda: self.exporter_classeur("ods"))
+        self.b_classeur.setMenu(mc)
         self.b_import = QPushButton(icone("document-import"), _("Importer un CSV…"))
         self.b_import.clicked.connect(lambda *_a: self.importer_csv())
-        for b in (self.b_ligne, self.b_colonne, self.b_totaux, self.b_export, self.b_import):
+        for b in (self.b_ligne, self.b_colonne, self.b_totaux, self.b_classeur, self.b_export, self.b_import):
             haut.addWidget(b)
         haut.addStretch(1)
         lay.addLayout(haut)
@@ -239,6 +248,19 @@ class VueTableur(QWidget):
                 f.write(logique.vers_csv(self.lignes))
             self.etat.setText(_("Exporté : %s") % chemin)
 
+    def exporter_classeur(self, format_: str):
+        """Écrit un classeur Excel (xlsx) ou LibreOffice (ods) avec les formules et leurs résultats."""
+        xlsx = format_ == "xlsx"
+        chemin, _filtre = QFileDialog.getSaveFileName(
+            self, _("Exporter pour Excel") if xlsx else _("Exporter pour LibreOffice"), "tableau." + format_,
+            _("Classeurs Excel (*.xlsx)") if xlsx else _("Classeurs LibreOffice (*.ods)"))
+        if chemin:
+            if not chemin.lower().endswith("." + format_):
+                chemin += "." + format_
+            with open(chemin, "wb") as f:
+                f.write(logique.vers_xlsx(self.lignes) if xlsx else logique.vers_ods(self.lignes))
+            self.etat.setText(_("Exporté : %s") % chemin)
+
     def importer_csv(self):
         """Remplace le tableau par le contenu d'un fichier CSV (après accord si le tableau n'est pas vide)."""
         chemin, _filtre = QFileDialog.getOpenFileName(self, _("Importer un CSV"), "", _("Fichiers CSV (*.csv *.txt);;Tous les fichiers (*)"))
@@ -339,6 +361,9 @@ class VueTableur(QWidget):
         m.addAction(_("Insérer une colonne à gauche"), lambda: self.inserer_colonne(c))
         m.addAction(_("Insérer une colonne à droite"), lambda: self.inserer_colonne(c + 1))
         m.addAction(icone("edit-delete"), _("Supprimer la colonne"), lambda: self.supprimer_colonnes([y for _l, y in sel]))
+        m.addSeparator()
+        m.addAction(_("Exporter pour Excel (.xlsx)…"), lambda: self.exporter_classeur("xlsx"))
+        m.addAction(_("Exporter pour LibreOffice (.ods)…"), lambda: self.exporter_classeur("ods"))
         m.exec(self.table.viewport().mapToGlobal(pos))
 
 
@@ -370,6 +395,8 @@ DOC = _(
     "moyenne, minimum ou maximum sous les données.\n"
     "• Clic droit : insérer ou supprimer des lignes et des colonnes. Suppr vide les cellules. Ctrl+C et Ctrl+V : copier, coller (on peut "
     "coller depuis un autre tableur).\n"
+    "• Clic droit > « Exporter pour Excel (.xlsx) » ou « pour LibreOffice (.ods) » (aussi le bouton « Excel / LibreOffice ») : un classeur qui GARDE les formules "
+    "(avec leurs résultats) ; Excel, LibreOffice et Google Sheets l'ouvrent directement.\n"
     "• « Exporter en CSV… » écrit les résultats dans un fichier (séparateur « ; », que LibreOffice et Excel ouvrent directement) ; « Importer "
     "un CSV… » remplace le tableau par un fichier.\n"
     "• Le texte de la fiche est un tableau Markdown : lisible partout, cherchable, partageable, verrouillable. Rien n'est exécuté : seules "
