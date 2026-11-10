@@ -29,6 +29,7 @@ class Source:
     nom: str
     adresse: str
     mot: str = ""                                          # ne garder que les articles qui contiennent ce mot (titre ou résumé)
+    afficher: bool = True                                  # case cochée : les articles de cette source sont montrés (sinon masqués, et non comptés)
 
 
 @dataclass
@@ -67,14 +68,15 @@ def lire(texte: str | None) -> Document:
             continue
         c = [x.strip() for x in m[1].split("|")]
         if len(c) >= 2 and adresse_valide(c[1]) and len(doc.sources) < MAX_SOURCES:
-            doc.sources.append(Source(" ".join(c[0].split())[:60] or c[1][:60], c[1], " ".join((c[2] if len(c) > 2 else "").split())[:40]))
+            doc.sources.append(Source(" ".join(c[0].split())[:60] or c[1][:60], c[1], " ".join((c[2] if len(c) > 2 else "").split())[:40],
+                                      (c[3].strip().lower() if len(c) > 3 else "oui") not in ("non", "no", "0", "faux")))
     return doc
 
 
 def ecrire(doc: Document) -> str:
-    sortie = [MARQUE, "", "| Source | Adresse du flux | Mot-clé |", "|---|---|---|"]
+    sortie = [MARQUE, "", "| Source | Adresse du flux | Mot-clé | Affiché |", "|---|---|---|---|"]
     for s in doc.sources[:MAX_SOURCES]:
-        sortie.append("| %s | %s | %s |" % (s.nom.replace("|", "/"), s.adresse.replace("|", "%7C"), s.mot.replace("|", "/")))
+        sortie.append("| %s | %s | %s | %s |" % (s.nom.replace("|", "/"), s.adresse.replace("|", "%7C"), s.mot.replace("|", "/"), "oui" if s.afficher else "non"))
     if doc.lus:
         sortie += ["", "## Lus"] + doc.lus[-MAX_LUS:]
     return "\n".join(sortie) + "\n"
@@ -133,7 +135,7 @@ def analyser(source: Source, contenu: bytes) -> list:
         if not titre or not adresse_valide(lien):
             continue
         resume = _texte(e, "description", "summary", "content")
-        if source.mot and source.mot.casefold() not in (titre + " " + resume).casefold():
+        if source.mot and source.mot.casefold() not in (titre + " " + resume + " " + lien).casefold():
             continue
         cle = _texte(e, "guid", "id") or lien
         res.append(Article(source.nom, titre[:300], lien, _jour(_texte(e, "pubDate", "updated", "published", "date")), empreinte(source.nom, cle)))
@@ -161,9 +163,16 @@ def recuperer(source: Source, ouvrir=telecharger) -> tuple:
         return [], str(ex)[:120]
 
 
+def visibles(articles: list, doc: Document) -> list:
+    """Articles des sources dont la case est cochée."""
+    cochees = {s.nom for s in doc.sources if s.afficher}
+    return [a for a in articles if a.source in cochees]
+
+
 def non_lus(articles: list, doc: Document) -> list:
+    """Articles non lus des sources cochées."""
     lus = set(doc.lus)
-    return [a for a in articles if a.empreinte not in lus]
+    return [a for a in visibles(articles, doc) if a.empreinte not in lus]
 
 
 def marquer_lus(doc: Document, articles: list) -> None:

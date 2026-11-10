@@ -4082,7 +4082,7 @@ msgstr ""
 
 #: plugins/securite/__init__.py:59
 #: plugins/supervision/__init__.py:126
-#: plugins/veille/__init__.py:84
+#: plugins/veille/__init__.py:86
 msgid "Surveiller en arrière-plan"
 msgstr ""
 
@@ -4500,7 +4500,7 @@ msgid "Pour estimer la puissance, indiquez les watts de la machine au repos et �
 msgstr ""
 
 #: plugins/supervision/__init__.py:314
-#: plugins/veille/__init__.py:179
+#: plugins/veille/__init__.py:191
 msgid "Retirer"
 msgstr ""
 
@@ -5297,133 +5297,137 @@ msgstr ""
 msgid "llama-server n'est pas prêt après %d s"
 msgstr ""
 
-#: plugins/veille/__init__.py:356
+#: plugins/veille/__init__.py:377
 msgid ""
 "Suivre des sites sans les ouvrir un par un : flux RSS ou Atom, avec un mot-clé facultatif.\n"
 "\n"
 "• Nouvelle fiche > « Veille » : « Ajouter une source… » (nom, adresse du flux commençant par http:// ou https://, mot-clé). Les articles s'affichent du plus récent au plus ancien, les non lus en gras. Double-clic : ouvrir l'article dans le navigateur (il est alors marqué lu) ; « Tout marquer comme lu » vide la liste des nouveautés.\n"
-"• Le mot-clé garde seulement les articles dont le titre ou le résumé le contient.\n"
+"• Le mot-clé garde seulement les articles dont le titre, le résumé ou l'adresse le contient. La case « Afficher » de chaque source ne montre que les sources cochées (le reste est masqué et non compté) : utile pour ne voir que ejabberd, puis que slixmpp. Les articles lus disparaissent ; « Afficher les lus » les remet.\n"
 "• Une pastille rouge sur l'icône de la fiche signale les nouveautés non lues ; « Surveiller en arrière-plan » relève toutes les 30 minutes, même fiche fermée, et notifie. Scrinium doit rester ouvert.\n"
 "• Sûreté : la fiche est inerte tant que vous ne l'avez pas validée (elle fait des requêtes réseau). Seules les adresses http et https sont suivies, 10 secondes et 2 Mo au plus par flux, rien n'est téléchargé ni exécuté en dehors du flux ; un lien ne s'ouvre que sur un clic.\n"
 "• Ce qui est lu est mémorisé dans la fiche (empreintes courtes)."
 msgstr ""
 
 #: plugins/veille/__init__.py:28
-#: plugins/veille/__init__.py:95
-#: plugins/veille/__init__.py:106
+#: plugins/veille/__init__.py:97
+#: plugins/veille/__init__.py:109
 msgid "Source"
 msgstr ""
 
-#: plugins/veille/__init__.py:35
+#: plugins/veille/__init__.py:36
 msgid "facultatif : ne garder que les articles qui contiennent ce mot"
 msgstr ""
 
-#: plugins/veille/__init__.py:37
+#: plugins/veille/__init__.py:38
 msgid "Adresse du flux :"
 msgstr ""
 
-#: plugins/veille/__init__.py:38
+#: plugins/veille/__init__.py:39
 msgid "Mot-clé :"
 msgstr ""
 
-#: plugins/veille/__init__.py:77
+#: plugins/veille/__init__.py:79
 msgid "Tout marquer comme lu"
 msgstr ""
 
-#: plugins/veille/__init__.py:79
-#: plugins/veille/__init__.py:176
+#: plugins/veille/__init__.py:81
+#: plugins/veille/__init__.py:188
 msgid "Ajouter une source…"
 msgstr ""
 
-#: plugins/veille/__init__.py:81
+#: plugins/veille/__init__.py:83
 msgid "Afficher les lus"
 msgstr ""
 
-#: plugins/veille/__init__.py:82
+#: plugins/veille/__init__.py:84
 msgid "Par défaut, un article lu disparaît de la liste."
 msgstr ""
 
-#: plugins/veille/__init__.py:85
+#: plugins/veille/__init__.py:87
 msgid "Relève les fiches Veille validées toutes les 30 minutes, même quand elles ne sont pas affichées, et notifie les nouveautés. Scrinium doit rester ouvert."
 msgstr ""
 
-#: plugins/veille/__init__.py:187
+#: plugins/veille/__init__.py:199
 #: src/scrinium/ui/images.py:435
 #: src/scrinium/ui/repertoire.py:340
 msgid "Ouvrir"
 msgstr ""
 
-#: plugins/veille/__init__.py:188
+#: plugins/veille/__init__.py:200
 msgid "Marquer comme lu"
 msgstr ""
 
-#: plugins/veille/__init__.py:217
+#: plugins/veille/__init__.py:229
 msgid "Relève en cours…"
 msgstr ""
 
-#: plugins/veille/__init__.py:288
+#: plugins/veille/__init__.py:309
 msgid "Extension Veille"
 msgstr ""
 
-#: plugins/veille/__init__.py:49
+#: plugins/veille/__init__.py:50
 msgid "L'adresse doit commencer par http:// ou https://."
 msgstr ""
 
-#: plugins/veille/__init__.py:95
+#: plugins/veille/__init__.py:97
+msgid "Afficher"
+msgstr ""
+
+#: plugins/veille/__init__.py:97
 msgid "Adresse du flux"
 msgstr ""
 
-#: plugins/veille/__init__.py:95
+#: plugins/veille/__init__.py:97
 msgid "Mot-clé"
 msgstr ""
 
-#: plugins/veille/__init__.py:128
+#: plugins/veille/__init__.py:131
 msgid "Double-clic sur un article : l'ouvrir dans le navigateur (il est alors marqué lu). Clic droit sur une source : modifier ou retirer."
 msgstr ""
 
-#: plugins/veille/__init__.py:129
+#: plugins/veille/__init__.py:132
 msgid "Fiche non validée : relisez les sources, puis validez-la pour lancer la relève et la modifier."
 msgstr ""
 
-#: plugins/veille/__init__.py:269
+#: plugins/veille/__init__.py:290
 msgid "Ajoutez une source (flux RSS ou Atom)."
 msgstr ""
 
-#: plugins/veille/__init__.py:353
-#: plugins/veille/logique.py:201
+#: plugins/veille/__init__.py:374
+#: plugins/veille/logique.py:210
 msgid "Veille"
 msgstr ""
 
-#: plugins/veille/__init__.py:269
+#: plugins/veille/__init__.py:290
 msgid "%d non lu(s) sur %d"
 msgstr ""
 
-#: plugins/veille/__init__.py:269
+#: plugins/veille/__init__.py:290
 msgid "Tout est lu (%d article(s) masqué(s))."
 msgstr ""
 
-#: plugins/veille/__init__.py:271
+#: plugins/veille/__init__.py:292
 msgid "injoignable : %s"
 msgstr ""
 
-#: plugins/veille/__init__.py:353
-#: plugins/veille/logique.py:189
+#: plugins/veille/__init__.py:374
+#: plugins/veille/logique.py:198
 msgid "%d nouveauté(s) à lire"
 msgstr ""
 
-#: plugins/veille/logique.py:148
+#: plugins/veille/logique.py:150
 msgid "adresse refusée (http ou https seulement)"
 msgstr ""
 
-#: plugins/veille/logique.py:198
+#: plugins/veille/logique.py:207
 msgid "Veille (exemples)"
 msgstr ""
 
-#: plugins/veille/logique.py:198
+#: plugins/veille/logique.py:207
 msgid "Exemple · Ma veille"
 msgstr ""
 
-#: plugins/veille/logique.py:152
+#: plugins/veille/logique.py:154
 msgid "redirection refusée"
 msgstr ""
 

@@ -279,3 +279,28 @@ def test_veille_les_lus_sont_masques(fen):
     vue.c_lus.setChecked(False)
     vue._tout_lire()
     assert vue.t_articles.rowCount() == 0 and "Tout est lu" in vue.l_etat.text()
+
+
+def test_veille_cases_par_source(fen):
+    from PyQt6.QtCore import Qt
+    lg = _charger("veille")
+    doc = lg.Document([lg.Source("ejabberd", "https://x.org/e"), lg.Source("slixmpp", "https://x.org/s")])
+    t = lg.ecrire(doc)
+    assert "| ejabberd | https://x.org/e |  | oui |" in t
+    vue = fen.vues_types["veille"]
+    sortie = []
+    vue.modifie.connect(sortie.append)
+    vue.charger(t)
+    vue.articles = [lg.Article("ejabberd", "v1", "https://x.org/e1", "2026-11-10 10:00", "aaaaaaaaaa"), lg.Article("slixmpp", "v2", "https://x.org/s1", "2026-11-09 10:00", "bbbbbbbbbb")]
+    vue._afficher()
+    assert vue.t_articles.rowCount() == 2
+    vue.t_sources.item(1, 0).setCheckState(Qt.CheckState.Unchecked)                  # on ne veut que ejabberd
+    assert vue.t_articles.rowCount() == 1 and vue.t_articles.item(0, 0).text() == "ejabberd" and "| slixmpp | https://x.org/s |  | non |" in sortie[-1]
+    assert len(lg.non_lus(vue.articles, vue.doc)) == 1
+    assert lg.lire(sortie[-1]).sources[1].afficher is False and lg.lire("| S | https://x.org/f | |\n").sources[0].afficher is True
+    vue.t_sources.item(0, 0).setCheckState(Qt.CheckState.Unchecked)
+    vue.t_sources.item(1, 0).setCheckState(Qt.CheckState.Checked)
+    assert vue.t_articles.rowCount() == 1 and vue.t_articles.item(0, 0).text() == "slixmpp"
+    # le mot-clé regarde aussi l'adresse de l'article (un flux de versions a des titres comme « v2.7.0 »)
+    flux = (b'<feed xmlns="http://www.w3.org/2005/Atom"><entry><title>v2.7.0</title><link rel="alternate" href="https://github.com/processone/ejabberd/releases/tag/v2.7.0"/><id>1</id></entry></feed>')
+    assert lg.analyser(lg.Source("G", "https://x.org/f", "ejabberd"), flux) and not lg.analyser(lg.Source("G", "https://x.org/f", "slixmpp"), flux)

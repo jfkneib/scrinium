@@ -26,6 +26,7 @@ class DialogueSource(QDialog):
     def __init__(self, s=None, parent=None):
         super().__init__(parent)
         self.setWindowTitle(_("Source"))
+        self.afficher = s.afficher if s else True
         self.resize(480, 160)
         f = QFormLayout(self)
         self.nom = QLineEdit(s.nom if s else "")
@@ -50,7 +51,7 @@ class DialogueSource(QDialog):
 
     def resultat(self):
         a = self.adresse.text().strip()
-        return logique.Source(" ".join(self.nom.text().split())[:60] or a[:60], a, " ".join(self.mot.text().split())[:40])
+        return logique.Source(" ".join(self.nom.text().split())[:60] or a[:60], a, " ".join(self.mot.text().split())[:40], self.afficher)
 
 
 class VueVeille(QWidget):
@@ -67,6 +68,7 @@ class VueVeille(QWidget):
         self._actif = True
         self._gen = 0
         self._attendus = 0
+        self._remplit = False
         self._pool = ThreadPoolExecutor(max_workers=4, thread_name_prefix="veille")
         self._recu.connect(self._arrive)
         lay = QVBoxLayout(self)
@@ -91,10 +93,11 @@ class VueVeille(QWidget):
         self.l_etat = QLabel()
         haut.addWidget(self.l_etat, 1)
         lay.addLayout(haut)
-        self.t_sources = QTableWidget(0, 3)
-        self.t_sources.setHorizontalHeaderLabels([_("Source"), _("Adresse du flux"), _("Mot-clé")])
+        self.t_sources = QTableWidget(0, 4)
+        self.t_sources.setHorizontalHeaderLabels([_("Afficher"), _("Source"), _("Adresse du flux"), _("Mot-clé")])
+        self.t_sources.itemChanged.connect(self._case_source)
         self.t_sources.verticalHeader().setVisible(False)
-        self.t_sources.horizontalHeader().setSectionResizeMode(1, QHeaderView.ResizeMode.Stretch)
+        self.t_sources.horizontalHeader().setSectionResizeMode(2, QHeaderView.ResizeMode.Stretch)
         self.t_sources.setEditTriggers(QAbstractItemView.EditTrigger.NoEditTriggers)
         self.t_sources.setSelectionBehavior(QAbstractItemView.SelectionBehavior.SelectRows)
         self.t_sources.setMaximumHeight(130)
@@ -156,6 +159,15 @@ class VueVeille(QWidget):
             self._enregistrer()
             self.actualiser()
 
+    def _case_source(self, it):
+        """Case « Afficher » d'une source : ne montrer que les sources cochées (enregistré dans la fiche, la liste se met à jour tout de suite)."""
+        if self._remplit or it.column() != 0 or not self._actif or not (0 <= it.row() < len(self.doc.sources)):
+            return
+        oui = it.checkState() == Qt.CheckState.Checked
+        if oui != self.doc.sources[it.row()].afficher:
+            self.doc.sources[it.row()].afficher = oui
+            self._enregistrer()
+
     def _modifier(self, i: int):
         if 0 <= i < len(self.doc.sources):
             d = DialogueSource(self.doc.sources[i], self)
@@ -216,7 +228,7 @@ class VueVeille(QWidget):
         self._attendus = len(self.doc.sources)
         self.l_etat.setText(_("Relève en cours…"))
         for i, s in enumerate(self.doc.sources):
-            self._pool.submit(self._travail, gen, i, logique.Source(s.nom, s.adresse, s.mot))
+            self._pool.submit(self._travail, gen, i, logique.Source(s.nom, s.adresse, s.mot, s.afficher))
 
     def _travail(self, gen: int, i: int, s):
         try:
@@ -243,14 +255,22 @@ class VueVeille(QWidget):
     # ---------- affichage ----------
     def _afficher(self):
         d = self.doc
-        self.t_sources.setRowCount(len(d.sources))
-        for i, s in enumerate(d.sources):
-            for c, v in enumerate((s.nom, s.adresse, s.mot)):
-                self.t_sources.setItem(i, c, QTableWidgetItem(v))
+        self._remplit = True
+        try:
+            self.t_sources.setRowCount(len(d.sources))
+            for i, s in enumerate(d.sources):
+                case = QTableWidgetItem()
+                case.setFlags(Qt.ItemFlag.ItemIsUserCheckable | Qt.ItemFlag.ItemIsEnabled)
+                case.setCheckState(Qt.CheckState.Checked if s.afficher else Qt.CheckState.Unchecked)
+                self.t_sources.setItem(i, 0, case)
+                for c, v in enumerate((s.nom, s.adresse, s.mot), 1):
+                    self.t_sources.setItem(i, c, QTableWidgetItem(v))
+        finally:
+            self._remplit = False
         self.t_sources.resizeColumnsToContents()
-        self.t_sources.horizontalHeader().setSectionResizeMode(1, QHeaderView.ResizeMode.Stretch)
+        self.t_sources.horizontalHeader().setSectionResizeMode(2, QHeaderView.ResizeMode.Stretch)
         lus = set(d.lus)
-        self.affiches = [a for a in self.articles if self.c_lus.isChecked() or a.empreinte not in lus]
+        self.affiches = [a for a in logique.visibles(self.articles, d) if self.c_lus.isChecked() or a.empreinte not in lus]
         self.t_articles.setRowCount(len(self.affiches))
         for i, a in enumerate(self.affiches):
             gras = a.empreinte not in lus
@@ -266,7 +286,8 @@ class VueVeille(QWidget):
         n = len(logique.non_lus(self.articles, d))
         if self.articles and not self._attendus:
             logique.NON_LUS[logique.cle_sources(d)] = n
-        etat = (_("%d non lu(s) sur %d") % (n, len(self.articles)) if n else _("Tout est lu (%d article(s) masqué(s)).") % len(self.articles)) if self.articles else (_("Ajoutez une source (flux RSS ou Atom).") if not d.sources else "")
+        visibles = len(logique.visibles(self.articles, d))
+        etat = (_("%d non lu(s) sur %d") % (n, visibles) if n else _("Tout est lu (%d article(s) masqué(s)).") % visibles) if self.articles else (_("Ajoutez une source (flux RSS ou Atom).") if not d.sources else "")
         if self.erreurs:
             etat += "  ·  " + _("injoignable : %s") % ", ".join(sorted(self.erreurs))
         if not self._attendus:
@@ -359,7 +380,8 @@ DOC = _(
     "• Nouvelle fiche > « Veille » : « Ajouter une source… » (nom, adresse du flux commençant par http:// ou https://, mot-clé). Les articles s'affichent "
     "du plus récent au plus ancien, les non lus en gras. Double-clic : ouvrir l'article dans le navigateur (il est alors marqué lu) ; "
     "« Tout marquer comme lu » vide la liste des nouveautés.\n"
-    "• Le mot-clé garde seulement les articles dont le titre ou le résumé le contient.\n"
+    "• Le mot-clé garde seulement les articles dont le titre, le résumé ou l'adresse le contient. La case « Afficher » de chaque source ne montre que les sources "
+    "cochées (le reste est masqué et non compté) : utile pour ne voir que ejabberd, puis que slixmpp. Les articles lus disparaissent ; « Afficher les lus » les remet.\n"
     "• Une pastille rouge sur l'icône de la fiche signale les nouveautés non lues ; « Surveiller en arrière-plan » relève toutes les 30 minutes, même "
     "fiche fermée, et notifie. Scrinium doit rester ouvert.\n"
     "• Sûreté : la fiche est inerte tant que vous ne l'avez pas validée (elle fait des requêtes réseau). Seules les adresses http et https sont "
