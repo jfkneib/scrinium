@@ -249,3 +249,16 @@ def test_entree_retiree_a_la_desactivation(fen, app):
     assert fen.actions_image
     fen.plugins.desactiver("ocr")
     assert fen.actions_image == []
+
+
+def test_preparer_agrandit_sans_toucher_a_l_original():
+    from PyQt6.QtGui import QGuiApplication, QImage
+    app = QGuiApplication.instance() or QGuiApplication([])
+    from PyQt6.QtCore import QBuffer, QByteArray, QIODevice
+    img = QImage(40, 20, QImage.Format.Format_RGB32)
+    img.fill(0xFFFFFF)
+    b = QByteArray(); w = QBuffer(b); w.open(QIODevice.OpenModeFlag.WriteOnly); img.save(w, "PNG")
+    out = lg.preparer(bytes(b))
+    r = QImage.fromData(out)
+    assert (r.width(), r.height()) == (80, 40)
+    assert lg.preparer(b"pas une image") == b"pas une image"

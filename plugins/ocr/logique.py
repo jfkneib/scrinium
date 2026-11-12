@@ -56,8 +56,33 @@ def nettoyer(texte: str) -> str:
     return re.sub(r"\n{3,}", "\n\n", texte).strip()[:TEXTE_MAX]
 
 
+def preparer(donnees: bytes) -> bytes:
+    """Image préparée pour Tesseract, EN MÉMOIRE (la pièce jointe n'est jamais modifiée) : agrandie si elle est petite
+    (les petits caractères, comme les noms dans une capture d'écran, sont sinon mal lus) et en niveaux de gris.
+    En cas de problème (Qt absent, image illisible), l'image d'origine est renvoyée."""
+    try:
+        from PyQt6.QtCore import QBuffer, QByteArray, QIODevice, Qt
+        from PyQt6.QtGui import QImage
+        img = QImage.fromData(donnees)
+        if img.isNull():
+            return donnees
+        facteur = 2 if max(img.width(), img.height()) <= 2500 else 1
+        if facteur > 1:
+            img = img.scaled(img.width() * facteur, img.height() * facteur, Qt.AspectRatioMode.IgnoreAspectRatio,
+                             Qt.TransformationMode.SmoothTransformation)
+        img = img.convertToFormat(QImage.Format.Format_Grayscale8)
+        tampon = QByteArray()
+        sortie = QBuffer(tampon)
+        sortie.open(QIODevice.OpenModeFlag.WriteOnly)
+        img.save(sortie, "PNG")
+        return bytes(tampon) or donnees
+    except Exception:
+        return donnees
+
+
 def reconnaitre(exe: str, donnees: bytes, langue: str = "fra") -> str:
     """Texte lu dans une image (PNG/JPEG). RuntimeError avec le message de Tesseract en cas d'échec."""
+    donnees = preparer(donnees)
     r = subprocess.run([exe, "stdin", "stdout", "-l", langue or "fra"], input=donnees, capture_output=True,
                        timeout=DELAI, **_options())
     if r.returncode != 0:
