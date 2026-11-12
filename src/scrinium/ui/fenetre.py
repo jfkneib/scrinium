@@ -21,6 +21,7 @@ from .assistant import AssistantCle
 from .capture_rapide import THEME_DEFAUT, CaptureRapide
 from .extensions import DialogueExtensions, UiPlugin
 from . import export_pdf
+from .chercher_remplacer import BarreChercherRemplacer
 from .choix_icone import DialogueIcone
 from .entrees_menu import remplir as remplir_menu
 from .icons import avec_epingle, avec_pastille, icone, icone_appli
@@ -330,6 +331,8 @@ class Fenetre(QMainWindow):
         ld.addLayout(ligne)
         ld.addWidget(self.format)
         ld.addWidget(self.bandeau_validation)
+        self.barre_remplacer = BarreChercherRemplacer(self.texte)
+        ld.addWidget(self.barre_remplacer)
         ld.addWidget(self.pile, 1)
         ld.addWidget(self.bande)
         ld.addWidget(self.statut)
@@ -356,6 +359,7 @@ class Fenetre(QMainWindow):
             self.texte.addAction(a)
         self.texte.textChanged.connect(self._maj_apercu)
         for seq, slot in (("Ctrl+S", self._forcer), ("Ctrl+Shift+L", self.refermer_fiche), ("Ctrl+F", lambda: self.recherche.setFocus()),
+                          ("Ctrl+H", self.chercher_remplacer),
                           ("Ctrl+E", lambda: self.format.b_apercu.isEnabled() and self.format.b_apercu.toggle())):
             a = QAction(self)
             a.setShortcut(QKeySequence(seq))
@@ -695,7 +699,14 @@ class Fenetre(QMainWindow):
                 self.quitter_fiche()
                 self._afficher(t, f)
 
+    def chercher_remplacer(self):
+        """Ctrl+H : chercher / remplacer dans le texte de la fiche affichée (si elle est modifiable)."""
+        if self.texte.isEnabled() and self.pile.currentWidget() is self.texte:
+            self.barre_remplacer.ouvrir()
+
     def _etat_editeur(self, actif):
+        if not actif and hasattr(self, "barre_remplacer"):
+            self.barre_remplacer.setVisible(False)
         self.titre.setEnabled(actif)
         self.texte.setEnabled(actif)
         self.format.setEnabled(actif)

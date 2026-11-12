@@ -31,6 +31,7 @@ def fiches(dossier_fiches) -> list:
         (_("Guide 2 · Gestes utiles"), _(
             "• Nouvelle fiche : Ctrl+N ou le bouton « Fiche ». Nouveau thème : bouton « Thème ».\n"
             "• Chercher : Ctrl+F (titres, notes et thèmes, tous thèmes confondus). Le thème « ★ Toutes les fiches » montre tout.\n"
+            "• Chercher / remplacer dans le texte de la fiche : Ctrl+H (tout est annulable avec Ctrl+Z).\n"
             "• Déplacer une fiche vers un autre thème : glissez-la sur le thème (ou clic droit sur la fiche > « Déplacer vers le thème »).\n"
             "• Ranger : glissez les fiches pour changer leur ordre, mettez-les en favoris.\n"
             "• Images : on peut joindre des images à une fiche ; le clic droit sur une image propose l'OCR si l'extension est activée.\n"
