@@ -25,19 +25,22 @@ TOTAL_MAX = 300 * 1024 * 1024
 FICHIER_MAX = 25 * 1024 * 1024
 
 
-def exporter(store: Store, th: Theme, chemin: Path) -> dict:
+def exporter(store: Store, th: Theme, chemin: Path, simple: bool = False, en_clair: bool = False) -> dict:
     """Écrit l'archive `chemin` (.zip). Retourne {"fiches", "verrouillees", "images"}. Les fiches verrouillées (ouvertes ou non) sont
-    copiées chiffrées ; il faut avoir enregistré les modifications en cours avant l'appel."""
+    copiées chiffrées ; il faut avoir enregistré les modifications en cours avant l'appel.
+    `simple` : Markdown pour un autre outil (sans marques de type, voir echange_md.texte_simple) ; `en_clair` : les fiches verrouillées
+    OUVERTES (dont le mot de passe a été saisi) sortent en clair, comme les autres (les fermées restent chiffrées)."""
     chemin = Path(chemin)
     racine = propre(th.nom, "theme")
-    rapport = {"fiches": 0, "verrouillees": 0, "images": 0}
+    rapport = {"fiches": 0, "verrouillees": 0, "images": 0, "en_clair": 0}
     ordre = []
     tmp = chemin.with_name(chemin.name + ".tmp")
     try:
         with zipfile.ZipFile(tmp, "w", zipfile.ZIP_DEFLATED) as z:
             for f in store.fiches_triees(th):
                 stem = f.path.stem
-                if f.verrou:
+                chiffree = f.verrou and not (en_clair and not f.fermee)      # copiée telle quelle, sans être lue
+                if chiffree:
                     z.writestr(f"{racine}/{f.path.name}", f.path.read_bytes())
                     pj = store.dossier_pj(f)
                     if pj.is_dir():
@@ -52,9 +55,10 @@ def exporter(store: Store, th: Theme, chemin: Path) -> dict:
                         z.writestr(f"{racine}/{stem}_images/{nom}", store.lire_piece(f, piece))
                         liste.append((f"{stem}_images/{nom}", piece.nom))
                         rapport["images"] += 1
-                    z.writestr(f"{racine}/{stem}.md", echange_md.texte_exporte(f.titre, f.texte or "", liste))
+                    rapport["en_clair"] += 1 if f.verrou else 0
+                    z.writestr(f"{racine}/{stem}.md", echange_md.texte_exporte(f.titre, echange_md.texte_simple(f.texte or "") if simple else (f.texte or ""), liste))
                     rapport["fiches"] += 1
-                ordre.append(f.path.name)
+                ordre.append(f.path.name if chiffree else f"{stem}.md")
             z.writestr(MANIFESTE, json.dumps({"format": FORMAT, "version": 1, "theme": th.nom, "icone": th.icone, "ordre": ordre},
                                              ensure_ascii=False, indent=1))
         tmp.replace(chemin)

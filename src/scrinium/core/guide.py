@@ -35,6 +35,7 @@ def fiches(dossier_fiches) -> list:
             "• Lecture seule : clic droit sur une fiche ou un thème > « Lecture seule » : plus de modification par erreur (texte, titre, mise en forme), la fiche s'ouvre en aperçu. Même geste pour lever.\n"
             "• Export / import : Fichier > « Exporter la fiche en Markdown… » (le texte en .md, les images dans un dossier à côté) et « Importer des fichiers Markdown… » (une fiche par fichier, ses images jointes). Une fiche d'un type exécutable importée reste inerte jusqu'à sa validation.\n"
             "• Un thème entier : « Exporter le thème en archive (.zip)… » (fiches en Markdown, images ; les fiches verrouillées restent chiffrées) et « Importer un thème (.zip)… » (crée toujours un NOUVEAU thème, sans toucher aux vôtres).\n"
+            "• Autres outils : « Exporter en Markdown simple… » (tableaux en Markdown, sans les marques de type) ; on peut aussi déposer un fichier .md (une fiche) ou une archive .zip (un thème) sur la fenêtre pour l'importer.\n"
             "• Déplacer une fiche vers un autre thème : glissez-la sur le thème (ou clic droit sur la fiche > « Déplacer vers le thème »).\n"
             "• Ranger : glissez les fiches pour changer leur ordre, mettez-les en favoris.\n"
             "• Images : on peut joindre des images à une fiche ; le clic droit sur une image propose l'OCR si l'extension est activée.\n"

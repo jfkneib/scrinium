@@ -11,6 +11,7 @@ import re
 from pathlib import Path
 from urllib.parse import quote, unquote
 
+from . import types_fiche
 from .store import TYPE_PIECE, Fiche, Store, Theme, propre
 
 TAILLE_MAX = 5 * 1024 * 1024                         # un fichier .md plus gros n'est pas une fiche
@@ -19,6 +20,18 @@ IMAGES_MAX = 50
 SUFFIXES_IMAGE = {".png", ".jpg", ".jpeg", ".webp", ".gif", ".bmp"}
 _IMAGE = re.compile(r"!\[([^\]]*)\]\(\s*([^)\s]+)(?:\s+\"[^\"]*\")?\s*\)")
 _TITRE = re.compile(r"\A\s*#[ \t]+(.+?)[ \t]*\n")
+
+
+def texte_simple(texte: str) -> str:
+    """Texte d'une fiche pour un AUTRE outil que Scrinium : le rendu Markdown du type s'il en a un (un tableur ou un répertoire
+    devient des tableaux Markdown), sinon le texte sans sa marque de type (`#scrinium-…`). Un texte libre reste tel quel."""
+    if types_fiche.type_de(texte) is None:
+        return texte
+    rendu = types_fiche.en_markdown(texte)
+    if rendu != texte:
+        return rendu
+    premiere, _sep, reste = texte.partition("\n")
+    return reste.lstrip("\n") if types_fiche.marque(premiere) else texte
 
 
 def texte_exporte(titre: str, texte: str, images: list) -> str:
@@ -30,9 +43,9 @@ def texte_exporte(titre: str, texte: str, images: list) -> str:
     return out
 
 
-def exporter(store: Store, f: Fiche, chemin: Path, titre: str, texte: str) -> int:
+def exporter(store: Store, f: Fiche, chemin: Path, titre: str, texte: str, simple: bool = False) -> int:
     """Écrit la fiche (`titre`, `texte` : ce qui est à l'écran) dans `chemin` (.md) ; ses images dans « <nom>_images/ » à côté.
-    Retourne le nombre d'images. ValueError si la fiche est fermée (verrouillée, mot de passe non saisi)."""
+    `simple` : Markdown pour un autre outil (voir `texte_simple`). Retourne le nombre d'images. ValueError si la fiche est fermée (verrouillée, mot de passe non saisi)."""
     if f.fermee:
         raise ValueError("fiche verrouillée : déverrouillez-la d'abord")
     chemin = Path(chemin)
@@ -51,7 +64,7 @@ def exporter(store: Store, f: Fiche, chemin: Path, titre: str, texte: str) -> in
             nom = f"{i:02d}-{base}{ext}"
             (dossier / nom).write_bytes(store.lire_piece(f, p))
             liste.append((f"{dossier.name}/{nom}", p.nom))
-    chemin.write_text(texte_exporte(titre, texte, liste), encoding="utf-8")
+    chemin.write_text(texte_exporte(titre, texte_simple(texte) if simple else texte, liste), encoding="utf-8")
     return len(liste)
 
 

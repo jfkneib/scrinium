@@ -52,7 +52,7 @@ def test_export_puis_import(store, tmp_path):
     t = _theme_riche(store)
     z = tmp_path / "doc.zip"
     r = echange_theme.exporter(store, t, z)
-    assert r == {"fiches": 2, "verrouillees": 1, "images": 1}
+    assert r == {"fiches": 2, "verrouillees": 1, "images": 1, "en_clair": 0}
     noms = zipfile.ZipFile(z).namelist()
     assert "Doc/Alpha.md" in noms and "Doc/Secrète.lock" in noms and any(n.startswith("Doc/Secrète.pj/") for n in noms)
     brut = b"".join(zipfile.ZipFile(z).read(n) for n in noms)
@@ -128,3 +128,19 @@ def test_depuis_la_fenetre(tmp_path, monkeypatch):
         assert w.theme == "Doc (2)" and s.theme("Doc (2)") is not None
     finally:
         w.close()
+
+
+def test_theme_markdown_simple_et_fiche_verrouillee_en_clair(store, tmp_path):
+    t = _theme_riche(store)
+    sec = next(f for f in t.fiches if f.verrou)
+    store.deverrouiller(sec, "mdp")                                  # fiche ouverte : exportable en clair sur demande
+    r = echange_theme.exporter(store, t, tmp_path / "c.zip", en_clair=True)
+    assert (r["fiches"], r["verrouillees"], r["en_clair"]) == (3, 0, 1)
+    z = zipfile.ZipFile(tmp_path / "c.zip")
+    assert b"contenu confidentiel" in z.read("Doc/Secrète.md")
+    assert json.loads(z.read(echange_theme.MANIFESTE))["ordre"] == ["Beta.md", "Alpha.md", "Secrète.md"]
+    th2, rap = echange_theme.importer(store, tmp_path / "c.zip", preparer)
+    assert [f.titre for f in store.fiches_triees(th2)] == ["Beta", "Alpha", "Secrète"] and not any(f.verrou for f in th2.fiches)
+    # sans « en_clair » : copiée chiffrée même si elle est ouverte
+    r2 = echange_theme.exporter(store, t, tmp_path / "d.zip")
+    assert r2["verrouillees"] == 1 and b"contenu confidentiel" not in b"".join(zipfile.ZipFile(tmp_path / "d.zip").read(n) for n in zipfile.ZipFile(tmp_path / "d.zip").namelist())

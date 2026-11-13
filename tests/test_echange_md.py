@@ -104,3 +104,36 @@ def test_export_fiche_fermee_refuse(fen):
     with pytest.raises(ValueError):
         echange_md.exporter(w.store, f, tmp / "s.md", "Secrète", "")
     assert not (tmp / "s.md").exists()
+
+
+def test_markdown_simple_sans_marque_de_type(fen):
+    w, t, tmp = fen
+    tf = types_fiche.TypeFiche("essai-simple", "Essai", "document-new", executable=True, modele=lambda: "")
+    types_fiche.enregistrer(tf)
+    try:
+        assert echange_md.texte_simple("#scrinium-essai-simple\nligne 1\nligne 2") == "ligne 1\nligne 2"
+        assert echange_md.texte_simple("texte libre\n") == "texte libre\n"
+        f = w.store.nouvelle_fiche(t)
+        w.store.enregistrer(t, f, "Typée", "#scrinium-essai-simple\ncorps")
+        w._afficher(t, f)
+        w.exporter_markdown(str(tmp / "t.md"), simple=True)
+        w.exporter_markdown(str(tmp / "u.md"))
+        assert "scrinium-essai" not in (tmp / "t.md").read_text(encoding="utf-8") and "scrinium-essai-simple" in (tmp / "u.md").read_text(encoding="utf-8")
+    finally:
+        types_fiche.desenregistrer("essai-simple")
+
+
+def test_glisser_deposer_importe(fen):
+    from PyQt6.QtCore import QMimeData, QPointF, Qt, QUrl
+    from PyQt6.QtGui import QDropEvent
+    w, t, tmp = fen
+    (tmp / "depose.md").write_text("# Déposée\n\ncorps", encoding="utf-8")
+    m = QMimeData()
+    m.setUrls([QUrl.fromLocalFile(str(tmp / "depose.md")), QUrl.fromLocalFile(str(tmp / "autre.png"))])
+    assert w._deposes(m) == ([tmp / "depose.md"], [])
+    ev = QDropEvent(QPointF(5, 5), Qt.DropAction.CopyAction, m, Qt.MouseButton.LeftButton, Qt.KeyboardModifier.NoModifier)
+    w.dropEvent(ev)
+    assert ev.isAccepted()
+    w._importer_deposes([tmp / "depose.md"], [])                 # (le dépôt réel est différé par un QTimer)
+    assert any(f.titre == "Déposée" for th in w.store.themes for f in th.fiches)
+    assert w.texte._importables(m) is True

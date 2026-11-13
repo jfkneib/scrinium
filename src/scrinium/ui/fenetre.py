@@ -7,7 +7,7 @@ from pathlib import Path
 from PyQt6.QtCore import QEvent, QSize, Qt, QTimer, pyqtSignal
 from PyQt6.QtGui import QAction, QActionGroup, QKeySequence
 from PyQt6.QtPrintSupport import QPrintDialog, QPrinter
-from PyQt6.QtWidgets import (QAbstractItemView, QApplication, QDialog, QFileDialog, QHBoxLayout, QInputDialog, QLabel, QLineEdit, QListWidget,
+from PyQt6.QtWidgets import (QAbstractItemView, QApplication, QCheckBox, QDialog, QDialogButtonBox, QFileDialog, QHBoxLayout, QInputDialog, QLabel, QLineEdit, QListWidget,
                              QListWidgetItem, QMainWindow, QMenu, QMessageBox, QPushButton, QSplitter, QToolButton,
                              QStackedWidget, QSystemTrayIcon, QToolBar, QVBoxLayout, QWidget)
 
@@ -166,6 +166,7 @@ class Fenetre(QMainWindow):
         self.recherche.textChanged.connect(lambda *_: self.maj_fiches())
         tb.addWidget(self.recherche)
 
+        self.setAcceptDrops(True)                  # un .md ou un .zip de thème déposé sur la fenêtre est importé
         m = self.menuBar()
         mf = m.addMenu(_("&Fichier"))
         mf.addAction(self.a_theme)
@@ -175,6 +176,8 @@ class Fenetre(QMainWindow):
         mf.addAction(self._action(_("Fiches liées…"), "insert-link", self.fiches_liees, "Ctrl+Alt+L"))
         mf.addAction(self._action(_("Imprimer la fiche…"), "document-print", self.imprimer_fiche, "Ctrl+P"))
         mf.addAction(self._action(_("Exporter la fiche en Markdown…"), "document-export", self.exporter_markdown))
+        mf.addAction(self._action(_("Exporter en Markdown simple (pour un autre outil)…"), "document-export",
+                                  lambda *_a: self.exporter_markdown(simple=True)))
         mf.addAction(self._action(_("Importer des fichiers Markdown…"), "document-import", self.importer_markdown))
         mf.addAction(self._action(_("Exporter le thème en archive (.zip)…"), "document-export", self.exporter_theme))
         mf.addAction(self._action(_("Importer un thème (.zip)…"), "document-import", self.importer_theme))
@@ -1371,8 +1374,9 @@ class Fenetre(QMainWindow):
         texte = types_fiche.en_markdown(self.texte.toPlainText())      # un répertoire s'imprime en tableaux, une section par lettre
         return f, self.titre.text(), texte, images
 
-    def exporter_markdown(self, chemin: str | None = None):
-        """Exporte la fiche affichée en fichier Markdown (+ dossier « <nom>_images » pour ses images). `chemin` : sans boîte de dialogue (tests)."""
+    def exporter_markdown(self, chemin: str | None = None, simple: bool = False):
+        """Exporte la fiche affichée en fichier Markdown (+ dossier « <nom>_images » pour ses images). `chemin` : sans boîte de dialogue (tests).
+        `simple` : pour un autre outil (tableaux en Markdown, sans la marque de type de Scrinium)."""
         f = self.fiche
         if not f or f.fermee:
             QMessageBox.information(self, _("Exporter en Markdown"), _("Ouvrez d'abord une fiche (déverrouillée) à exporter."))
@@ -1393,7 +1397,7 @@ class Fenetre(QMainWindow):
         if chemin.suffix.lower() != ".md":
             chemin = chemin.with_name(chemin.name + ".md")
         try:
-            n = echange_md.exporter(self.store, f, chemin, self.titre.text(), self.texte.toPlainText())
+            n = echange_md.exporter(self.store, f, chemin, self.titre.text(), self.texte.toPlainText(), simple)
         except (OSError, ValueError) as ex:
             QMessageBox.critical(self, _("Exporter en Markdown"), _("Écriture impossible : %s") % ex)
             return
@@ -1438,7 +1442,54 @@ class Fenetre(QMainWindow):
             QMessageBox.warning(self, _("Importer des fichiers Markdown"),
                                 _("Certains éléments n'ont pas été importés :") + "\n\n" + "\n".join(problemes[:15]))
 
-    def exporter_theme(self, chemin: str | None = None):
+    def _options_export_theme(self, t):
+        """Boîte « options d'export » d'un thème : (simple, en_clair) ou None si annulé."""
+        ouvertes = [f for f in t.fiches if f.verrou and not f.fermee]
+        d = QDialog(self)
+        d.setWindowTitle(_("Exporter le thème"))
+        lay = QVBoxLayout(d)
+        c_simple = QCheckBox(_("Markdown simple, pour un autre outil que Scrinium (sans les marques de type des fiches)"))
+        lay.addWidget(c_simple)
+        c_clair = None
+        if ouvertes:
+            c_clair = QCheckBox(_("Inclure EN CLAIR les fiches verrouillées actuellement ouvertes (%d) ; les autres restent chiffrées") % len(ouvertes))
+            lay.addWidget(c_clair)
+        lay.addWidget(QLabel(_("Sinon, les fiches verrouillées sont copiées chiffrées, telles quelles.")))
+        bb = QDialogButtonBox(QDialogButtonBox.StandardButton.Ok | QDialogButtonBox.StandardButton.Cancel)
+        bb.accepted.connect(d.accept)
+        bb.rejected.connect(d.reject)
+        lay.addWidget(bb)
+        if d.exec() != QDialog.DialogCode.Accepted:
+            return None
+        return c_simple.isChecked(), bool(c_clair and c_clair.isChecked())
+
+    @staticmethod
+    def _deposes(src) -> tuple[list, list]:
+        """(fichiers Markdown, archives de thème) déposés depuis un gestionnaire de fichiers."""
+        chemins = [Path(u.toLocalFile()) for u in src.urls() if u.isLocalFile()]
+        return ([c for c in chemins if c.suffix.lower() in (".md", ".markdown")], [c for c in chemins if c.suffix.lower() == ".zip"])
+
+    def dragEnterEvent(self, ev):
+        if any(self._deposes(ev.mimeData())):
+            ev.acceptProposedAction()
+
+    def dragMoveEvent(self, ev):
+        if any(self._deposes(ev.mimeData())):
+            ev.acceptProposedAction()
+
+    def dropEvent(self, ev):
+        mds, zips = self._deposes(ev.mimeData())
+        if mds or zips:
+            ev.acceptProposedAction()
+            QTimer.singleShot(0, lambda: self._importer_deposes(mds, zips))     # après la fin du glisser (des boîtes de dialogue peuvent s'ouvrir)
+
+    def _importer_deposes(self, mds: list, zips: list):
+        if mds:
+            self.importer_markdown(mds)
+        for z in zips:
+            self.importer_theme(str(z))
+
+    def exporter_theme(self, chemin: str | None = None, simple: bool = False, en_clair: bool = False):
         """Exporte le thème courant en archive zip (fiches en Markdown, images ; fiches verrouillées copiées chiffrées)."""
         t = self._theme_courant()
         if t is None:
@@ -1446,6 +1497,10 @@ class Fenetre(QMainWindow):
             return
         self.sauver()
         if chemin is None:
+            options = self._options_export_theme(t)
+            if options is None:
+                return
+            simple, en_clair = options
             chemin, _f = QFileDialog.getSaveFileName(self, _("Exporter le thème"), str(Path.home() / f"{propre(t.nom, 'theme')}.zip"),
                                                      _("Archive (*.zip)"))
             if not chemin:
@@ -1454,7 +1509,7 @@ class Fenetre(QMainWindow):
         if chemin.suffix.lower() != ".zip":
             chemin = chemin.with_name(chemin.name + ".zip")
         try:
-            r = echange_theme.exporter(self.store, t, chemin)
+            r = echange_theme.exporter(self.store, t, chemin, simple, en_clair)
         except (OSError, ValueError) as ex:
             QMessageBox.critical(self, _("Exporter le thème"), _("Écriture impossible : %s") % ex)
             return
