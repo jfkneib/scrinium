@@ -142,7 +142,7 @@ If you distribute a modified version, please make it clear that it is not the or
 
 ## Project principles
 
-Scrinium is free software for anyone: a core with no dependency on third-party services, optional integrations, safe by default, nothing personal in the repository. See [`docs/principes.md`](docs/principes.md).
+Scrinium is free software for anyone: a core with no dependency on third-party services, optional integrations, safe by default, nothing personal in the repository. See [`docs/principes.md`](docs/principes.md). To develop or contribute: [`docs/developpement.md`](docs/developpement.md) (developer guide, French and English) and [`CONTRIBUTING.md`](CONTRIBUTING.md).
 
 ## License
 

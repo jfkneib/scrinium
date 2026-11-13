@@ -126,7 +126,7 @@ Si vous distribuez une version modifiée, merci d'indiquer clairement qu'il ne s
 
 ## Principes du projet
 
-Scrinium est un logiciel libre pour n'importe qui : cœur sans dépendance à un service tiers, intégrations facultatives, sécurité par défaut, rien de personnel dans le dépôt. Voir [`docs/principes.md`](docs/principes.md).
+Scrinium est un logiciel libre pour n'importe qui : cœur sans dépendance à un service tiers, intégrations facultatives, sécurité par défaut, rien de personnel dans le dépôt. Voir [`docs/principes.md`](docs/principes.md). Pour développer ou contribuer : [`docs/developpement.md`](docs/developpement.md) (manuel du développeur, français et anglais) et [`CONTRIBUTING.md`](CONTRIBUTING.md).
 
 ## Licence
 

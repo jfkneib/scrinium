@@ -13,9 +13,9 @@ Texte d'une fiche :
 
     #scrinium-securite
 
-    ## jfk-XPS-8940
+    ## machine-exemple
     ok: ecoute|tcp|22
-    ok: compte|jfk
+    ok: compte|utilisateur
 """
 import base64
 import hashlib
