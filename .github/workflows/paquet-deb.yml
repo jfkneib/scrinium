@@ -33,6 +33,8 @@ jobs:
           # Module Firefox (.xpi) SIGNÉ par Mozilla, déposé à la main dans navigateur/signe/ (voir navigateur/README.md) : joint à la release.
           # Un .xpi non signé n'est jamais joint (Firefox le refuserait).
           cp navigateur/signe/*.xpi dist/ 2>/dev/null || echo "Pas de module Firefox signé à joindre."
+          # Copie au nom FIXE : https://github.com/<dépôt>/releases/latest/download/scrinium_all.deb pointe toujours sur la dernière version.
+          cp dist/scrinium_*_all.deb dist/scrinium_all.deb
           cd dist && sha256sum * | tee SHA256SUMS
       - uses: actions/upload-artifact@v4
         with:

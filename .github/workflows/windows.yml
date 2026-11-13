@@ -129,3 +129,6 @@ jobs:
           gh release view $tag 2>$null
           if ($LASTEXITCODE -ne 0) { gh release create $tag --draft --title "Scrinium $($tag.TrimStart('v'))" --notes "Installateur Windows." 2>$null }
           gh release upload $tag $fichier --clobber
+          # Copie au nom FIXE (…/releases/latest/download/Scrinium-setup.exe : toujours la dernière version).
+          Copy-Item $fichier "Scrinium-setup.exe"
+          gh release upload $tag "Scrinium-setup.exe" --clobber
