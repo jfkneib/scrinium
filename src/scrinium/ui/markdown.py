@@ -192,6 +192,7 @@ class BarreFormat(QWidget):
     def __init__(self, editeur: QPlainTextEdit, parent=None):
         super().__init__(parent)
         self.ed = editeur
+        self.lecture_seule = False                 # vrai : les boutons d'écriture restent grisés, même hors aperçu
         lay = QHBoxLayout(self)
         lay.setContentsMargins(0, 0, 0, 0)
         lay.setSpacing(2)
@@ -227,7 +228,7 @@ class BarreFormat(QWidget):
     def definir_apercu(self, actif: bool) -> None:
         """Pendant l'aperçu, les boutons d'écriture sont grisés."""
         for b in self.boutons:
-            b.setEnabled(not actif)
+            b.setEnabled(not actif and not self.lecture_seule)
         if self.b_apercu.isChecked() != actif:
             self.b_apercu.setChecked(actif)
 

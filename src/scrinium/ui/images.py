@@ -144,6 +144,8 @@ class Editeur(QPlainTextEdit):
         return bool(self._sources(src)) or super().canInsertFromMimeData(src)
 
     def insertFromMimeData(self, src):
+        if self.isReadOnly():
+            return
         sources = self._sources(src)
         if sources:
             self.images_recues.emit(sources)

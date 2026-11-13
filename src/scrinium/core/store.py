@@ -642,11 +642,38 @@ class Store:
     def _cle_fiche(th: Theme, f: Fiche) -> str:
         return f"{th.path.name}/{f.path.name}"
 
-    def favoris(self) -> dict:
-        brut = self.reglages().get("favoris", {})
+    def _listes(self, cle: str) -> dict:
+        """Réglage de forme {"themes": [noms], "fiches": ["thème/fichier"]} (favoris, lecture seule), nettoyé."""
+        brut = self.reglages().get(cle, {})
         brut = brut if isinstance(brut, dict) else {}
         return {k: [x for x in (brut.get(k) if isinstance(brut.get(k), list) else []) if isinstance(x, str)]
                 for k in ("themes", "fiches")}
+
+    def favoris(self) -> dict:
+        return self._listes("favoris")
+
+    # ---------- lecture seule (réglage de l'utilisateur, comme les favoris : jamais dans les fiches) ----------
+    def theme_lecture_seule(self, th: Theme) -> bool:
+        return th.path.name in self._listes("lecture_seule")["themes"]
+
+    def fiche_lecture_seule(self, th: Theme, f: Fiche) -> bool:
+        """Vrai si la fiche, ou son thème, est en lecture seule : le texte ne peut plus être modifié par erreur."""
+        l = self._listes("lecture_seule")
+        return th.path.name in l["themes"] or self._cle_fiche(th, f) in l["fiches"]
+
+    def fiche_lecture_seule_propre(self, th: Theme, f: Fiche) -> bool:
+        return self._cle_fiche(th, f) in self._listes("lecture_seule")["fiches"]
+
+    def lecture_seule_theme(self, th: Theme, on: bool = True) -> None:
+        l = self._listes("lecture_seule")
+        l["themes"] = [x for x in l["themes"] if x != th.path.name] + ([th.path.name] if on else [])
+        self.sauver_reglages(lecture_seule=l)
+
+    def lecture_seule_fiche(self, th: Theme, f: Fiche, on: bool = True) -> None:
+        l = self._listes("lecture_seule")
+        cle = self._cle_fiche(th, f)
+        l["fiches"] = [x for x in l["fiches"] if x != cle] + ([cle] if on else [])
+        self.sauver_reglages(lecture_seule=l)
 
     def theme_epingle(self, th: Theme) -> bool:
         return th.path.name in self.favoris()["themes"]
@@ -669,18 +696,20 @@ class Store:
         self._sauver_favoris(fav)
 
     def _favoris_suivre(self, ancien: str, nouveau: str | None, theme: bool = False) -> None:
-        """Un thème (theme=True, par son nom) ou une fiche (« thème/fichier ») change de nom (`nouveau`) ou disparaît (None)."""
-        fav = self.favoris()
-        avant = json.dumps(fav, sort_keys=True)
-        if theme:
-            fav["themes"] = [nouveau if x == ancien else x for x in fav["themes"] if nouveau or x != ancien]
-            fav["fiches"] = [(nouveau + x[len(ancien):] if nouveau else None) if x.startswith(ancien + "/") else x
-                             for x in fav["fiches"]]
-            fav["fiches"] = [x for x in fav["fiches"] if x]
-        else:
-            fav["fiches"] = [nouveau if x == ancien else x for x in fav["fiches"] if nouveau or x != ancien]
-        if json.dumps(fav, sort_keys=True) != avant:
-            self._sauver_favoris(fav)
+        """Un thème (theme=True, par son nom) ou une fiche (« thème/fichier ») change de nom (`nouveau`) ou disparaît (None) :
+        les favoris et la lecture seule le suivent."""
+        for cle in ("favoris", "lecture_seule"):
+            fav = self._listes(cle)
+            avant = json.dumps(fav, sort_keys=True)
+            if theme:
+                fav["themes"] = [nouveau if x == ancien else x for x in fav["themes"] if nouveau or x != ancien]
+                fav["fiches"] = [(nouveau + x[len(ancien):] if nouveau else None) if x.startswith(ancien + "/") else x
+                                 for x in fav["fiches"]]
+                fav["fiches"] = [x for x in fav["fiches"] if x]
+            else:
+                fav["fiches"] = [nouveau if x == ancien else x for x in fav["fiches"] if nouveau or x != ancien]
+            if json.dumps(fav, sort_keys=True) != avant:
+                self.sauver_reglages(**{cle: fav})
 
     def _noms_changes(self, ancien: str, nouveau: str | None, theme: bool = False) -> None:
         """Un thème (theme=True) ou une fiche (« thème/fichier ») change de nom ou disparaît (`nouveau` = None) :

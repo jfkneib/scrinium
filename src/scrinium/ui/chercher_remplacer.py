@@ -99,8 +99,10 @@ class BarreChercherRemplacer(QWidget):
         motif = self.chercher.text()
         n = occurrences(self.editeur.toPlainText(), motif, self.casse.isChecked())
         self.compte.setText(_("%d trouvé(s)") % n if motif else "")
-        for b in (self.b_prec, self.b_suiv, self.b_un, self.b_tout):
+        for b in (self.b_prec, self.b_suiv):
             b.setEnabled(bool(motif) and n > 0)
+        for b in (self.b_un, self.b_tout, self.remplacer):
+            b.setEnabled(bool(motif) and n > 0 and not self.editeur.isReadOnly())
         sels = []
         if motif and n <= 2000:
             fmt = QTextCharFormat()
@@ -144,7 +146,7 @@ class BarreChercherRemplacer(QWidget):
         return bool(motif) and (sel == motif if self.casse.isChecked() else sel.lower() == motif.lower())
 
     def remplacer_un(self):
-        if not self.chercher.text():
+        if not self.chercher.text() or self.editeur.isReadOnly():
             return
         if not self._selection_correspond() and not self._aller(False):
             return
@@ -154,7 +156,7 @@ class BarreChercherRemplacer(QWidget):
 
     def remplacer_tout(self) -> int:
         motif = self.chercher.text()
-        if not motif:
+        if not motif or self.editeur.isReadOnly():
             return 0
         doc = self.editeur.document()
         curseur = QTextCursor(doc)

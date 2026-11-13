@@ -98,7 +98,7 @@ class UiPlugin:
         """Insère du texte à la position du curseur dans la note affichée (remplace la sélection). False si la note
         n'est pas modifiable (aucune fiche, ou fiche verrouillée fermée)."""
         e = self._f.texte
-        if not e.isEnabled() or self._f.fiche is None:
+        if not e.isEnabled() or e.isReadOnly() or self._f.fiche is None:
             return False
         e.textCursor().insertText(texte)
         e.setFocus()
@@ -112,7 +112,7 @@ class UiPlugin:
     def remplacer_tout(self, texte: str) -> bool:
         """Remplace tout le texte de la note affichée (annulable avec Ctrl+Z). False si elle n'est pas modifiable."""
         e = self._f.texte
-        if not e.isEnabled() or self._f.fiche is None:
+        if not e.isEnabled() or e.isReadOnly() or self._f.fiche is None:
             return False
         c = e.textCursor()
         c.select(QTextCursor.SelectionType.Document)
@@ -124,7 +124,7 @@ class UiPlugin:
     def ajouter_a_la_fin(self, texte: str) -> bool:
         """Ajoute du texte à la fin de la note affichée. False si elle n'est pas modifiable."""
         e = self._f.texte
-        if not e.isEnabled() or self._f.fiche is None:
+        if not e.isEnabled() or e.isReadOnly() or self._f.fiche is None:
             return False
         c = e.textCursor()
         c.movePosition(QTextCursor.MoveOperation.End)

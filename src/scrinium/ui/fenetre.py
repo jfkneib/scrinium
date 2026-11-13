@@ -482,6 +482,10 @@ class Fenetre(QMainWindow):
         if n == 1:                                       # plusieurs sélectionnées : seuls déplacer et supprimer sont groupés
             m.addAction(avec_epingle(""), _("Désépingler") if self.store.fiche_epinglee(t, f) else _("Épingler"),
                         lambda: self.epingler_fiche(t, f))
+            a = m.addAction(icone("object-locked"), _("Lecture seule"), lambda: self.basculer_lecture_seule(t, f))
+            a.setCheckable(True)
+            a.setChecked(self.store.fiche_lecture_seule_propre(t, f))
+            a.setEnabled(not self.store.theme_lecture_seule(t))                  # le thème est déjà en lecture seule : on le lève d'abord
         if self._ordre_fiches_possible() and self.store.ordre()["fiches"].get(t.path.name):
             m.addAction(_("Remettre les fiches dans l'ordre alphabétique"), self._ordre_alphabetique_fiches)
         autres = [th for th in self._themes_ordonnes() if not all(x is th for x, _f in self._fiches_selectionnees())]
@@ -535,6 +539,11 @@ class Fenetre(QMainWindow):
         if n == 1:                                       # plusieurs sélectionnés : seule la suppression est groupée
             m.addAction(avec_epingle(""), _("Désépingler") if self.store.theme_epingle(self._theme_courant()) else _("Épingler"),
                         self.epingler_theme)
+            th = self._theme_courant()
+            a = m.addAction(icone("object-locked"), _("Lecture seule (toutes les fiches du thème)"),
+                            lambda: self.basculer_lecture_seule(th))
+            a.setCheckable(True)
+            a.setChecked(self.store.theme_lecture_seule(th))
             m.addAction(icone("edit-rename"), _("Renommer…"), self.renommer_theme)
             m.addAction(icone("view-pim-notes"), _("Icône…"), self.icone_theme)
         if self.store.ordre()["themes"]:
@@ -762,11 +771,39 @@ class Fenetre(QMainWindow):
         self.bande.charger(t, f)
         ty = types_fiche.type_de(f.texte) if f and not ferme else None
         self._mode_vue(self.vues_types.get(ty.nom) if ty else None)
+        self._maj_lecture_seule(a_l_ouverture=True)
         self.texte.document().clearUndoRedoStacks()
         self.chargement = False
         self._maj_boutons()
         if f is not None:
             self.plugins.emettre("fiche_ouverte", fiche=FicheVue(t, f))
+
+    def _maj_lecture_seule(self, a_l_ouverture: bool = False):
+        """Fiche (ou thème) en lecture seule : le texte et le titre ne se modifient plus (même par les boutons de mise en forme,
+        le collage ou les extensions) ; à l'ouverture, la fiche s'affiche en aperçu. Les fiches typées (tableaux…) gardent leur vue."""
+        f, t = self.fiche, self.fiche_theme
+        ro = bool(f and not f.fermee and self.store.fiche_lecture_seule(t, f))
+        self.texte.setReadOnly(ro)
+        self.titre.setReadOnly(ro)
+        self.format.lecture_seule = ro
+        apercu = self.format.b_apercu.isChecked()
+        for b in self.format.boutons:
+            b.setEnabled(not ro and not apercu)
+        if ro:
+            self._statut("🔒 " + _("Lecture seule") + f"  ·  {t.nom}/{f.path.name}", ORANGE)
+            if a_l_ouverture and self.pile.currentWidget() is self.texte and self.format.b_apercu.isEnabled():
+                self.format.b_apercu.setChecked(True)
+
+    def basculer_lecture_seule(self, t, f=None):
+        """Active ou désactive la lecture seule d'une fiche (`f`) ou de tout un thème (f=None)."""
+        if f is None:
+            self.store.lecture_seule_theme(t, not self.store.theme_lecture_seule(t))
+        else:
+            self.store.lecture_seule_fiche(t, f, not self.store.fiche_lecture_seule_propre(t, f))
+        if self.fiche is not None and (f is self.fiche or (f is None and t is self.fiche_theme)):
+            self._maj_lecture_seule(a_l_ouverture=True)
+            if not self.store.fiche_lecture_seule(self.fiche_theme, self.fiche):
+                self._statut(_("Lecture seule retirée") + f"  ·  {self.fiche_theme.nom}/{self.fiche.path.name}", VERT)
 
     def ajouter_vue_type(self, nom: str, vue) -> None:
         """Enregistre la vue d'un type de fiche (voir core/types_fiche.py). Une vue est un widget qui a :
