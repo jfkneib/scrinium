@@ -162,6 +162,17 @@ Si vous modifiez un texte déjà traduit, son ancienne traduction n'est plus rel
 5. Vérifier les fichiers, puis publier. Une **pré-version** (case « pre-release ») laisse la version précédente en « dernière » :
    pratique pour que les personnes concernées testent avant la version normale.
 
+### 9. Références
+
+- **Qt 6** (l'interface) : [documentation Qt](https://doc.qt.io/qt-6/) : widgets, signaux et slots, `QTextDocument`, `QImage`.
+- **PyQt6** (le lien Python) : [documentation de PyQt6](https://www.riverbankcomputing.com/static/Docs/PyQt6/) (Riverbank Computing). Les noms
+  suivent Qt, avec quelques écarts (énumérations qualifiées : `Qt.AlignmentFlag.AlignCenter`, signal = `pyqtSignal`). PyQt6 est distribué
+  sous GPL v3 (ou licence commerciale) ; Scrinium, sous GPL-3.0-or-later, est compatible.
+- **cryptography** (le chiffrement) : [cryptography.io](https://cryptography.io/) : AES-GCM, scrypt, RSA.
+- **Icônes** : thème Breeze de KDE (LGPL-3.0-or-later), voir `src/scrinium/icons/NOTICE`.
+- Le reste de la documentation du projet : [`plugins.md`](plugins.md), [`principes.md`](principes.md), [`api-partage.md`](api-partage.md),
+  [`format-pieces-jointes.md`](format-pieces-jointes.md), [`partage-coeur.md`](partage-coeur.md).
+
 ---
 
 ## English
@@ -316,3 +327,14 @@ If you edit an already translated text, its old translation is no longer linked:
    (`navigateur/signe/*.xpi`), if present, is attached too. Nothing is public at this stage.
 5. Check the files, then publish. A **pre-release** ("pre-release" box) keeps the previous version as "latest": handy to let the people
    concerned test before the normal release.
+
+### 9. References
+
+- **Qt 6** (the interface): [Qt documentation](https://doc.qt.io/qt-6/): widgets, signals and slots, `QTextDocument`, `QImage`.
+- **PyQt6** (the Python binding): [PyQt6 documentation](https://www.riverbankcomputing.com/static/Docs/PyQt6/) (Riverbank Computing). Names
+  follow Qt, with a few differences (scoped enums: `Qt.AlignmentFlag.AlignCenter`, signal = `pyqtSignal`). PyQt6 is distributed under
+  GPL v3 (or a commercial licence); Scrinium, GPL-3.0-or-later, is compatible.
+- **cryptography** (encryption): [cryptography.io](https://cryptography.io/): AES-GCM, scrypt, RSA.
+- **Icons**: KDE Breeze theme (LGPL-3.0-or-later), see `src/scrinium/icons/NOTICE`.
+- The rest of the project documentation: [`plugins.md`](plugins.md), [`principes.md`](principes.md), [`api-partage.md`](api-partage.md),
+  [`format-pieces-jointes.md`](format-pieces-jointes.md), [`partage-coeur.md`](partage-coeur.md).

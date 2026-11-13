@@ -130,7 +130,7 @@ Scrinium est un logiciel libre pour n'importe qui : cœur sans dépendance à un
 
 ## Licence
 
-GPL-3.0-or-later (voir [`LICENSE`](LICENSE)). Icônes : thème Breeze (KDE), LGPL-3.0-or-later (voir `src/scrinium/icons/NOTICE`).
+GPL-3.0-or-later (voir [`LICENSE`](LICENSE)). Construit avec [Qt](https://www.qt.io/) via [PyQt6](https://www.riverbankcomputing.com/software/pyqt/) (GPL v3) et [cryptography](https://cryptography.io/). Icônes : thème Breeze (KDE), LGPL-3.0-or-later (voir `src/scrinium/icons/NOTICE`).
 
 Les extensions s'exécutent dans le processus de Scrinium : celles distribuées avec lui devraient avoir une licence compatible GPL.
 

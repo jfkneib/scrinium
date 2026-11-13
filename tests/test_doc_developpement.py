@@ -33,4 +33,4 @@ def test_les_liens_relatifs_existent():
 def test_les_deux_langues_ont_les_memes_titres_de_section():
     texte = DOC.read_text(encoding="utf-8")
     fr, en = texte.split("## English")
-    assert len(re.findall(r"^### \d+\.", fr, re.M)) == len(re.findall(r"^### \d+\.", en, re.M)) == 8
+    assert len(re.findall(r"^### \d+\.", fr, re.M)) == len(re.findall(r"^### \d+\.", en, re.M)) == 9
