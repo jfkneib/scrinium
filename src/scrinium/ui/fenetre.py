@@ -20,7 +20,7 @@ from ..i18n import _
 from .assistant import AssistantCle
 from .capture_rapide import THEME_DEFAUT, CaptureRapide
 from .extensions import DialogueExtensions, UiPlugin
-from . import export_pdf
+from . import export_pdf, export_theme_doc
 from .chercher_remplacer import BarreChercherRemplacer
 from .choix_icone import DialogueIcone
 from .entrees_menu import remplir as remplir_menu
@@ -181,6 +181,8 @@ class Fenetre(QMainWindow):
                                   lambda *_a: self.exporter_markdown(simple=True)))
         mf.addAction(self._action(_("Importer des fichiers Markdown…"), "document-import", self.importer_markdown))
         mf.addAction(self._action(_("Exporter le thème en archive (.zip)…"), "document-export", self.exporter_theme))
+        mf.addAction(self._action(_("Exporter le thème en site HTML…"), "text-html", self.exporter_theme_html))
+        mf.addAction(self._action(_("Exporter le thème en un seul PDF…"), "application-pdf", self.exporter_theme_pdf))
         mf.addAction(self._action(_("Importer un thème (.zip)…"), "document-import", self.importer_theme))
         mf.addAction(self._action(_("Capture rapide…"), "document-edit", self.capture_rapide, "Ctrl+Alt+N"))
         mf.addAction(self._action(_("Inviter à installer Scrinium…"), "mail-send", self.inviter))
@@ -558,6 +560,8 @@ class Fenetre(QMainWindow):
             a.setChecked(self.store.theme_lecture_seule(th))
             m.addAction(icone("edit-rename"), _("Renommer…"), self.renommer_theme)
             m.addAction(icone("document-export"), _("Exporter le thème (.zip)…"), self.exporter_theme)
+            m.addAction(icone("text-html"), _("Exporter le thème en site HTML…"), self.exporter_theme_html)
+            m.addAction(icone("application-pdf"), _("Exporter le thème en un seul PDF…"), self.exporter_theme_pdf)
             m.addAction(icone("view-pim-notes"), _("Icône…"), self.icone_theme)
         if self.store.ordre()["themes"]:
             m.addAction(_("Remettre les thèmes dans l'ordre alphabétique"), self._ordre_alphabetique_themes)
@@ -1564,6 +1568,52 @@ class Fenetre(QMainWindow):
             return
         self._statut(_("✔ Thème exporté : %d fiche(s), dont %d verrouillée(s) (chiffrées)") % (r["fiches"] + r["verrouillees"], r["verrouillees"])
                      + f"  ·  {chemin}", VERT)
+
+    def _rapport_doc(self, r: dict, cible) -> None:
+        msg = _("✔ Thème exporté : %d fiche(s)") % r["fiches"]
+        if r["ignorees"]:
+            msg += "  ·  " + _("%d fiche(s) verrouillée(s) ignorée(s)") % r["ignorees"]
+        self._statut(msg + f"  ·  {cible}", VERT)
+
+    def exporter_theme_html(self, dossier: str | None = None):
+        """Exporte le thème courant en site HTML (un dossier : index.html, une page par fiche, images/)."""
+        t = self._theme_courant()
+        if t is None:
+            QMessageBox.information(self, _("Exporter le thème"), _("Choisissez d'abord un thème (pas « Toutes les fiches »)."))
+            return
+        self.sauver()
+        if dossier is None:
+            dossier = QFileDialog.getExistingDirectory(self, _("Dossier du site (un sous-dossier y sera créé)"), str(Path.home()))
+            if not dossier:
+                return
+            dossier = str(Path(dossier) / propre(t.nom, "theme"))
+        try:
+            r = export_theme_doc.exporter_html(self.store, t, Path(dossier))
+        except (OSError, ValueError) as ex:
+            QMessageBox.critical(self, _("Exporter le thème"), _("Écriture impossible : %s") % ex)
+            return
+        self._rapport_doc(r, dossier)
+
+    def exporter_theme_pdf(self, chemin: str | None = None):
+        """Exporte le thème courant en un seul PDF (sommaire, puis chaque fiche)."""
+        t = self._theme_courant()
+        if t is None:
+            QMessageBox.information(self, _("Exporter le thème"), _("Choisissez d'abord un thème (pas « Toutes les fiches »)."))
+            return
+        self.sauver()
+        if chemin is None:
+            chemin, _f = QFileDialog.getSaveFileName(self, _("Exporter le thème en PDF"), str(Path.home() / f"{propre(t.nom, 'theme')}.pdf"),
+                                                     _("Documents PDF (*.pdf)"))
+            if not chemin:
+                return
+        if not str(chemin).lower().endswith(".pdf"):
+            chemin = f"{chemin}.pdf"
+        try:
+            r = export_theme_doc.exporter_pdf(self.store, t, Path(chemin))
+        except OSError as ex:
+            QMessageBox.critical(self, _("Exporter le thème"), _("Écriture impossible : %s") % ex)
+            return
+        self._rapport_doc(r, chemin)
 
     def importer_theme(self, chemin: str | None = None):
         """Crée un NOUVEAU thème à partir d'une archive exportée par Scrinium (jamais de fusion avec un thème existant)."""

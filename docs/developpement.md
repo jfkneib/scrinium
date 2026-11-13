@@ -83,6 +83,7 @@ docs/               documentation du projet
 | `images.py` | Pièces jointes : import avec réencodage, éditeur qui capte le collage, bande de vignettes, visionneuse. |
 | `table_fiche.py`, `repertoire.py` | Vues des fiches « liste » et « répertoire ». |
 | `export_pdf.py` | Export PDF d'une fiche. |
+| `export_theme_doc.py` | Export d'un thème en site HTML ou en un seul PDF. |
 | `assistant.py`, `lien_ajout.py`, `capture_rapide.py`, `choix_icone.py`, `icons.py`, `instance.py` | Fenêtres et utilitaires : fichier de secours, validation d'un lien `scrinium://ajouter`, note rapide, choix d'icône, icônes, instance unique. |
 
 **Règle de séparation.** La *logique* d'une fonction va dans le cœur (ou dans `logique.py` d'une extension), **sans PyQt**, avec ses
@@ -255,6 +256,7 @@ docs/               project documentation
 | `images.py` | Attachments: import with re-encoding, an editor that catches pasting, thumbnail strip, viewer. |
 | `table_fiche.py`, `repertoire.py` | Views of "list" and "directory" notes. |
 | `export_pdf.py` | PDF export of a note. |
+| `export_theme_doc.py` | Export of a topic as an HTML site or a single PDF. |
 | `assistant.py`, `lien_ajout.py`, `capture_rapide.py`, `choix_icone.py`, `icons.py`, `instance.py` | Windows and utilities: recovery file, validation of a `scrinium://ajouter` link, quick note, icon picker, icons, single instance. |
 
 **Separation rule.** A feature's *logic* goes in the core (or in an extension's `logique.py`), **without PyQt**, with its tests; the
