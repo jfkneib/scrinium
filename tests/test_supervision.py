@@ -78,7 +78,7 @@ def test_machine_locale_sans_ssh_donne_des_mesures(monkeypatch):
     mes = lg.sonder(m).get("mesures", {})
     if Path("/proc/meminfo").exists():
         assert {"charge", "uptime_s", "memoire_pct", "disque_pct"} <= set(mes)
-    assert lg.est_locale("localhost") and not lg.est_locale("192.168.1.2")
+    assert lg.est_locale("localhost") and not lg.est_locale("192.0.2.2")
 
 
 def test_sonder_avec_ssh_simule(monkeypatch):

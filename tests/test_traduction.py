@@ -122,7 +122,7 @@ def test_cible_par_defaut():
 
 def test_serveur_local_ou_distant():
     assert lg.est_local("http://127.0.0.1:9931") and lg.est_local("http://localhost:8080") and lg.est_local("http://[::1]:1")
-    assert not lg.est_local("http://192.168.1.50:9931") and not lg.est_local("https://exemple.fr")
+    assert not lg.est_local("http://192.0.2.50:9931") and not lg.est_local("https://exemple.fr")
 
 
 def test_trouver_les_fichiers(tmp_path, monkeypatch):
@@ -506,7 +506,7 @@ def test_fiche_verrouillee_ouverte_traduction_locale_possible(fen, app, monkeypa
 # ---------- préparation du moteur llama.cpp ----------
 def test_serveur_distant_refuse_sans_accord(fen, monkeypatch):
     r = fen.plugins.actifs["traduction"][1].reglages
-    r.set("url", "http://192.168.1.50:9931")
+    r.set("url", "http://192.0.2.50:9931")
     avertis = []
     monkeypatch.setattr(mod().QMessageBox, "warning", lambda *a, **k: avertis.append(a[2]))
     vue = fen.plugins.actifs["traduction"][1].fiche_courante()

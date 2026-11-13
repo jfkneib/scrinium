@@ -26,7 +26,7 @@ lg = importlib.util.module_from_spec(_spec)
 _spec.loader.exec_module(lg)
 
 WHO = """jfk      :0           2026-11-10 08:00 (:0)
-jfk      pts/1        2026-11-10 10:00 (192.168.1.50)
+jfk      pts/1        2026-11-10 10:00 (192.0.2.50)
 bob      pts/2        2026-11-10 10:05 (tmux(1234).%0)
 """
 SS = """tcp   LISTEN 0 128 0.0.0.0:22     0.0.0.0:*   users:(("sshd",pid=900,fd=3))
@@ -41,7 +41,7 @@ jfk:x:1000:1000:jfk:/home/jfk:/bin/bash
 www:x:1001:1001::/var/www:/usr/sbin/nologin
 nobody:x:65534:65534:nobody:/nonexistent:/usr/sbin/nologin
 """
-LAST = """jfk      pts/1        192.168.1.50     Tue Nov 10 10:00   still logged in
+LAST = """jfk      pts/1        192.0.2.50     Tue Nov 10 10:00   still logged in
 jfk      :0           :0               Tue Nov 10 08:00   still logged in
 reboot   system boot  0.0.0.0          Tue Nov 10 07:59   still running
 """
@@ -57,10 +57,10 @@ def test_empreinte_comme_ssh_keygen():
 
 
 def test_analyseurs_linux():
-    assert lg.lire_who(WHO) == [("jfk", ":0", ":0"), ("jfk", "pts/1", "192.168.1.50"), ("bob", "pts/2", "tmux(1234).%0")]
+    assert lg.lire_who(WHO) == [("jfk", ":0", ":0"), ("jfk", "pts/1", "192.0.2.50"), ("bob", "pts/2", "tmux(1234).%0")]
     assert lg.lire_ss(SS)[0] == ("tcp", "0.0.0.0", 22, ["sshd"]) and ("tcp", "127.0.0.1", 631, []) in lg.lire_ss(SS) and len(lg.lire_ss(SS)) == 5
     assert lg.lire_passwd(PASSWD) == ["root", "jfk"]
-    assert lg.lire_last(LAST) == [("jfk", "192.168.1.50")]
+    assert lg.lire_last(LAST) == [("jfk", "192.0.2.50")]
     assert lg.lire_processus("systemd\nsshd\nsshd\nTeamViewer_Service\nbash\n") == ["sshd", "teamviewer_service"]
 
 
@@ -69,7 +69,7 @@ def test_analyseurs_windows_et_macos():
          " admin                 rdp-tcp#0           2  Active          .  11/10/2026 9:00 AM\n jfk2                                      3  Disc            .  11/10/2026 7:00 AM\n")
     assert lg.lire_query_user(q) == [("jfk", "console", ""), ("admin", "rdp-tcp#0", "rdp"), ("jfk2", "", "")]
     net = ("  Proto  Adresse locale         Adresse distante       État           PID\n  TCP    0.0.0.0:135            0.0.0.0:0              ÉCOUTE          1052\n"
-           "  TCP    127.0.0.1:5000         0.0.0.0:0              ÉCOUTE          2200\n  TCP    192.168.1.5:50000      52.1.1.1:443           ÉTABLI          3300\n"
+           "  TCP    127.0.0.1:5000         0.0.0.0:0              ÉCOUTE          2200\n  TCP    192.0.2.5:50000      52.1.1.1:443           ÉTABLI          3300\n"
            "  TCP    [::]:3389              [::]:0                 ÉCOUTE          1500\n")
     assert lg.lire_netstat_windows(net) == [("tcp", "0.0.0.0", 135, ["1052"]), ("tcp", "127.0.0.1", 5000, ["2200"]), ("tcp", "[::]", 3389, ["1500"])]
     assert lg.lire_tasklist_csv('"svchost.exe","1052","Services","0","10 K"\n"TeamViewer.exe","2200","Console","1","20 K"\n') == {"1052": "svchost.exe", "2200": "TeamViewer.exe"}
@@ -91,7 +91,7 @@ def test_scanner_linux_constats_et_statuts():
                      {"/etc/passwd": PASSWD, "/home/jfk/.ssh/authorized_keys": AUTORISEES})
     cs = lg.scanner("linux", exe, lire, "jfk", "/home/jfk")
     cles = {c.cle for c in cs}
-    assert {"session|jfk|local", "session|jfk|192.168.1.50", "ecoute|tcp|22", "ecoute|tcp|631", "ecoute|udp|5353", "connexion|jfk|192.168.1.50",
+    assert {"session|jfk|local", "session|jfk|192.0.2.50", "ecoute|tcp|22", "ecoute|tcp|631", "ecoute|udp|5353", "connexion|jfk|192.0.2.50",
             "compte|root", "compte|jfk", "acces|sshd", "acces|teamviewerd"} <= cles
     assert "ecoute|udp|40429" not in cles                                               # port UDP éphémère : ignoré
     assert sum(1 for c in cs if c.categorie == "cle") == 1 and sum(1 for c in cs if c.categorie == "planifie") == 1     # deux clés identiques : une seule

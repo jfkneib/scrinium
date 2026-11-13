@@ -50,7 +50,7 @@ class DialogueMachine(QDialog):
         f = QFormLayout(self)
         self.nom = QLineEdit(m["nom"])
         self.adresse = QLineEdit(m["adresse"])
-        self.adresse.setPlaceholderText("192.168.1.10 / serveur.local")
+        self.adresse.setPlaceholderText("192.0.2.10 / serveur.local")
         self.ports = QLineEdit(", ".join(str(p) for p in m["ports"]))
         self.ports.setPlaceholderText("22, 80, 443")
         self.web = QLineEdit(m["web"])
