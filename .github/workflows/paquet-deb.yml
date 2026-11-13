@@ -1,7 +1,8 @@
 name: Paquet .deb
 
 # À chaque tag « vX.Y.Z » : construit le .deb dans un Debian 13 propre, calcule SHA256SUMS et les dépose dans une
-# release BROUILLON (rien n'est publié tant que vous ne cliquez pas sur « Publish release »).
+# release BROUILLON (rien n'est publié tant que vous ne cliquez pas sur « Publish release »). Le module Firefox signé
+# (navigateur/signe/*.xpi), s'il existe, est joint aussi.
 on:
   push:
     tags: ["v*"]
@@ -29,7 +30,10 @@ jobs:
           git config --global --add safe.directory "$GITHUB_WORKSPACE"
           dpkg-buildpackage -us -uc -b
           mkdir -p dist && mv ../scrinium_*_all.deb dist/
-          cd dist && sha256sum scrinium_*_all.deb | tee SHA256SUMS
+          # Module Firefox (.xpi) SIGNÉ par Mozilla, déposé à la main dans navigateur/signe/ (voir navigateur/README.md) : joint à la release.
+          # Un .xpi non signé n'est jamais joint (Firefox le refuserait).
+          cp navigateur/signe/*.xpi dist/ 2>/dev/null || echo "Pas de module Firefox signé à joindre."
+          cd dist && sha256sum * | tee SHA256SUMS
       - uses: actions/upload-artifact@v4
         with:
           name: paquet-deb
