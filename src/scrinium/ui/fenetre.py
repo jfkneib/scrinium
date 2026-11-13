@@ -312,6 +312,8 @@ class Fenetre(QMainWindow):
         self.apercu.fiche_demandee.connect(self.ouvrir_fiche_liee)
         self.format = BarreFormat(self.texte)
         self.format.apercu_demande.connect(self.basculer_apercu)
+        self.format.fiches_cibles = lambda: [(t.nom, f.titre) for t in self.store.themes for f in self.store.fiches_triees(t)
+                                             if f.titre and f is not self.fiche]
         self.pile = QStackedWidget()
         self.pile.addWidget(self.texte)
         self.pile.addWidget(self.apercu)

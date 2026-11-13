@@ -12,7 +12,8 @@ from urllib.parse import unquote
 
 from PyQt6.QtCore import QUrl, pyqtSignal
 from PyQt6.QtGui import QDesktopServices, QTextCursor
-from PyQt6.QtWidgets import QHBoxLayout, QPlainTextEdit, QTextBrowser, QToolButton, QWidget
+from PyQt6.QtWidgets import (QDialog, QDialogButtonBox, QHBoxLayout, QLabel, QLineEdit, QListWidget, QMessageBox, QPlainTextEdit, QTextBrowser,
+                             QToolButton, QVBoxLayout, QWidget)
 
 from ..core import liens_fiches
 from ..i18n import _
@@ -185,6 +186,58 @@ def effacer_format(ed: QPlainTextEdit) -> None:
 
 
 # ---------- interface ----------
+def lien_fiche(ed: QPlainTextEdit, theme: str, titre: str, doublon: bool = False) -> str:
+    """Écrit un lien `[[Titre]]` vers une autre fiche (ou `[[Thème/Titre]]` si deux fiches portent ce titre) ; la sélection, s'il y en a
+    une, devient le texte affiché : `[[Titre|sélection]]`. Retourne le texte inséré."""
+    c = ed.textCursor()
+    cible = f"{theme}/{titre}" if doublon else titre
+    sel = " ".join(c.selectedText().replace("\u2029", " ").split()) if c.hasSelection() else ""
+    texte = f"[[{cible}|{sel}]]" if sel and sel != titre else f"[[{cible}]]"
+    c.insertText(texte)
+    ed.setTextCursor(c)
+    return texte
+
+
+def choisir_fiche(parent, cibles: list):
+    """Boîte « lien vers une fiche » : liste filtrable des fiches ; retourne (thème, titre) ou None."""
+    d = QDialog(parent)
+    d.setWindowTitle(_("Lien vers une fiche"))
+    d.resize(420, 380)
+    lay = QVBoxLayout(d)
+    lay.addWidget(QLabel(_("Choisissez la fiche vers laquelle pointer :")))
+    filtre = QLineEdit()
+    filtre.setPlaceholderText(_("Chercher une fiche"))
+    filtre.setClearButtonEnabled(True)
+    lay.addWidget(filtre)
+    liste = QListWidget()
+    lay.addWidget(liste, 1)
+    for th, ti in cibles:
+        liste.addItem(f"{th} / {ti}")
+
+    def maj(*_a):
+        q = filtre.text().strip().casefold()
+        premier = None
+        for i, (th, ti) in enumerate(cibles):
+            visible = q in f"{th} {ti}".casefold()
+            liste.item(i).setHidden(not visible)
+            if visible and premier is None:
+                premier = i
+        if premier is not None:
+            liste.setCurrentRow(premier)
+    filtre.textChanged.connect(maj)
+    filtre.returnPressed.connect(d.accept)
+    liste.itemDoubleClicked.connect(lambda *_a: d.accept())
+    bb = QDialogButtonBox(QDialogButtonBox.StandardButton.Ok | QDialogButtonBox.StandardButton.Cancel)
+    bb.accepted.connect(d.accept)
+    bb.rejected.connect(d.reject)
+    lay.addWidget(bb)
+    maj()
+    filtre.setFocus()
+    if d.exec() != QDialog.DialogCode.Accepted or liste.currentRow() < 0 or liste.currentItem().isHidden():
+        return None
+    return cibles[liste.currentRow()]
+
+
 class BarreFormat(QWidget):
     """Rangée de petits boutons de mise en forme + bouton « Aperçu » (bascule édition / lecture)."""
     apercu_demande = pyqtSignal(bool)
@@ -192,6 +245,7 @@ class BarreFormat(QWidget):
     def __init__(self, editeur: QPlainTextEdit, parent=None):
         super().__init__(parent)
         self.ed = editeur
+        self.fiches_cibles = lambda: []            # [(thème, titre)] des fiches qu'un lien peut viser (donné par la fenêtre)
         self.lecture_seule = False                 # vrai : les boutons d'écriture restent grisés, même hors aperçu
         lay = QHBoxLayout(self)
         lay.setContentsMargins(0, 0, 0, 0)
@@ -206,7 +260,8 @@ class BarreFormat(QWidget):
                 ("❝", _("Citation"), lambda: prefixer(self.ed, "> "), ""),
                 ("</>", _("Code (dans la ligne)"), lambda: entourer(self.ed, "`", _("code")), "font-family: monospace;"),
                 ("{ }", _("Bloc de code"), lambda: bloc_code(self.ed), "font-family: monospace;"),
-                ("🔗", _("Lien"), lambda: lien(self.ed), ""),
+                ("🔗", _("Lien web (http, https, mailto)"), lambda: lien(self.ed), ""),
+                ("[[ ]]", _("Lien vers une autre fiche"), lambda: self._lien_fiche(), "font-family: monospace;"),
                 ("Tx", _("Effacer la mise en forme (sélection ou ligne)"), lambda: effacer_format(self.ed), "")):
             b = QToolButton()
             b.setText(texte)
@@ -224,6 +279,17 @@ class BarreFormat(QWidget):
         self.b_apercu.setCheckable(True)
         self.b_apercu.toggled.connect(self.apercu_demande.emit)
         lay.addWidget(self.b_apercu)
+
+    def _lien_fiche(self) -> None:
+        cibles = list(self.fiches_cibles())
+        if not cibles:
+            QMessageBox.information(self, _("Lien vers une fiche"), _("Il n'y a pas d'autre fiche vers laquelle pointer."))
+            return
+        choix = choisir_fiche(self, cibles)
+        if choix is not None:
+            theme, titre = choix
+            lien_fiche(self.ed, theme, titre, sum(1 for _t, x in cibles if x.casefold() == titre.casefold()) > 1)
+            self.ed.setFocus()
 
     def definir_apercu(self, actif: bool) -> None:
         """Pendant l'aperçu, les boutons d'écriture sont grisés."""

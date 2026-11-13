@@ -68,3 +68,49 @@ def test_clic_ouvre_la_fiche_et_cree_si_absente(fen, monkeypatch):
     monkeypatch.setattr(QMessageBox, "question", lambda *a, **k: QMessageBox.StandardButton.Yes)
     fen.apercu._lien(QUrl("scrinium-fiche:Nouvelle%20id%C3%A9e"))
     assert fen.fiche.titre == "Nouvelle idée" and lf.resoudre(fen.store, "Nouvelle idée")
+
+
+def test_bouton_lien_vers_une_fiche():
+    from PyQt6.QtWidgets import QApplication, QPlainTextEdit
+    from scrinium.ui import markdown
+    QApplication.instance() or QApplication([])
+    ed = QPlainTextEdit("voir ici et aussi")
+    markdown.lien_fiche(ed, "Cuisine", "Crêpes")                       # sans sélection : [[Titre]]
+    assert ed.toPlainText() == "[[Crêpes]]voir ici et aussi"
+    c = ed.textCursor()
+    c.select(c.SelectionType.Document)
+    ed.setTextCursor(c)
+    assert markdown.lien_fiche(ed, "Cuisine", "Crêpes", doublon=True) == "[[Cuisine/Crêpes|[[Crêpes]]voir ici et aussi]]"   # la sélection devient le texte affiché
+    ed.setPlainText("la recette")
+    c = ed.textCursor()
+    c.setPosition(3)
+    c.setPosition(10, c.MoveMode.KeepAnchor)
+    ed.setTextCursor(c)
+    assert markdown.lien_fiche(ed, "Cuisine", "Recette") == "[[Recette|recette]]" and ed.toPlainText() == "la [[Recette|recette]]"
+    ed.setPlainText("Recette")
+    c = ed.textCursor()
+    c.select(c.SelectionType.Document)
+    ed.setTextCursor(c)
+    assert markdown.lien_fiche(ed, "Cuisine", "Recette") == "[[Recette]]"       # sélection identique au titre : pas de texte affiché inutile
+
+
+def test_bouton_lien_fiche_dans_la_fenetre(tmp_path, monkeypatch):
+    from PyQt6.QtWidgets import QApplication
+    from scrinium.core.paths import Paths
+    from scrinium.core.store import Store
+    from scrinium.ui.fenetre import Fenetre
+    QApplication.instance() or QApplication([])
+    monkeypatch.setenv("XDG_CONFIG_HOME", str(tmp_path / "xdg"))
+    s = Store(Paths(tmp_path / "am"))
+    s.sauver_reglages(recovery_asked=True)
+    t = s.nouveau_theme("Doc")
+    a = s.nouvelle_fiche(t); s.enregistrer(t, a, "Alpha", "x")
+    b = s.nouvelle_fiche(t); s.enregistrer(t, b, "Beta", "y")
+    w = Fenetre(s)
+    try:
+        th = w.store.theme("Doc")
+        w._afficher(th, next(x for x in th.fiches if x.titre == "Alpha"))
+        assert ("Doc", "Beta") in w.format.fiches_cibles() and ("Doc", "Alpha") not in w.format.fiches_cibles()   # pas de lien vers soi-même
+        assert any("autre fiche" in b.toolTip() for b in w.format.boutons)
+    finally:
+        w.close()
