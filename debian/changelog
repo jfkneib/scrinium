@@ -1,3 +1,19 @@
+scrinium (0.10.1) unstable; urgency=medium
+
+  * Barre de mise en forme : nouveau bouton « [[ ]] » pour faire un lien vers une autre fiche
+    (liste filtrable ; la sélection devient le texte affiché). Le bouton 🔗 reste pour les
+    liens web (http, https, mailto).
+  * Thèmes « Guide » et « Doc » : une fiche « Sommaire » avec des liens vers chaque page, et à la
+    fin de chaque page « ← Sommaire · Suivant → » (les fiches d'extensions du Guide reviennent
+    aussi au sommaire). Les pages déjà présentes ne sont jamais réécrites.
+  * Manuel du développeur (docs/developpement.md, français et anglais) et CONTRIBUTING.md :
+    carte du code, règles à ne pas casser, ajout d'une extension, traductions, publication,
+    références Qt, PyQt6 et licences ; un test vérifie que la carte du code reste à jour.
+  * Adresses d'exemple 192.0.2.x (plage réservée à la documentation) à la place de 192.168.1.x ;
+    nom de machine d'exemple neutre dans l'extension Sécurité.
+
+ -- Jean-François Kneib <kneib.jean-francois@cegetel.net>  Fri, 13 Nov 2026 18:00:00 +0100
+
 scrinium (0.10.0) unstable; urgency=medium
 
   * Pastille rouge « à faire » sur l'icône des fiches qui demandent une action (échéance
