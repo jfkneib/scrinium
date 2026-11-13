@@ -113,6 +113,12 @@ class Theme:
         self.fiches: list[Fiche] = []
 
     @property
+    def image(self) -> Path | None:
+        """Miniature (photo) choisie pour ce thème, à la place de l'icône ; None s'il n'y en a pas."""
+        p = self.path / ".icone.png"
+        return p if p.is_file() else None
+
+    @property
     def nom(self) -> str:
         return self.path.name
 
@@ -222,6 +228,15 @@ class Store:
     def icone_theme(self, th: Theme, icone: str) -> None:
         th.icone = icone.strip() or ICONE_DEFAUT
         _ecrire(th.path / ".icone", (th.icone + "\n").encode("utf-8"))
+        self._hook()
+
+    def image_theme(self, th: Theme, png: bytes | None) -> None:
+        """Pose (PNG déjà réduit) ou retire (None) la miniature du thème."""
+        p = th.path / ".icone.png"
+        if png:
+            _ecrire(p, png)
+        else:
+            p.unlink(missing_ok=True)
         self._hook()
 
     def supprimer_theme(self, th: Theme) -> None:

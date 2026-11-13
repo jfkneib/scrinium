@@ -20,6 +20,7 @@ from .store import Fiche, Store, Theme, propre
 
 FORMAT = "scrinium-theme"
 MANIFESTE = "scrinium-theme.json"
+IMAGE_THEME = "icone.png"                      # la miniature du thème (photo), à la racine du dossier du thème
 ENTREES_MAX = 5000
 TOTAL_MAX = 300 * 1024 * 1024
 FICHIER_MAX = 25 * 1024 * 1024
@@ -60,6 +61,8 @@ def exporter(store: Store, th: Theme, chemin: Path, simple: bool = False, en_cla
                     z.writestr(f"{racine}/{stem}.md", echange_md.texte_exporte(f.titre, echange_md.texte_simple(f.texte or "") if simple else (f.texte or ""), liste, numeros))
                     rapport["fiches"] += 1
                 ordre.append(f.path.name if chiffree else f"{stem}.md")
+            if th.image is not None:
+                z.writestr(f"{racine}/{IMAGE_THEME}", th.image.read_bytes())
             z.writestr(MANIFESTE, json.dumps({"format": FORMAT, "version": 1, "theme": th.nom, "icone": th.icone, "ordre": ordre},
                                              ensure_ascii=False, indent=1))
         tmp.replace(chemin)
@@ -76,9 +79,10 @@ def _nom_sur(nom: str) -> str | None:
     return n
 
 
-def importer(store: Store, chemin: Path, preparer) -> tuple[Theme, dict]:
+def importer(store: Store, chemin: Path, preparer, vignette=None) -> tuple[Theme, dict]:
     """Crée un NOUVEAU thème à partir de l'archive. `preparer` : voir echange_md.importer. Retourne (thème, rapport) avec
-    {"fiches", "verrouillees", "images", "ignores": [raison]}. ValueError si l'archive est illisible ou démesurée."""
+    {"fiches", "verrouillees", "images", "ignores": [raison]}. `vignette(octets) -> PNG réduit` (ui/images.vignette_theme) : si
+    elle est donnée, la miniature du thème de l'archive est reprise. ValueError si l'archive est illisible ou démesurée."""
     try:
         z = zipfile.ZipFile(chemin)
     except (zipfile.BadZipFile, OSError) as ex:
@@ -95,6 +99,7 @@ def importer(store: Store, chemin: Path, preparer) -> tuple[Theme, dict]:
             except (ValueError, UnicodeDecodeError):
                 manifeste = {}
         ignores, mds, images, locks, pj, racines = [], {}, {}, {}, {}, set()
+        miniature = None
         for i in infos:
             n = _nom_sur(i.filename)
             if n is None:
@@ -108,7 +113,9 @@ def importer(store: Store, chemin: Path, preparer) -> tuple[Theme, dict]:
             if len(parts) >= 2:
                 racines.add(parts[0])
             rel = parts[1:] if len(parts) >= 2 else parts           # on retire le dossier racine (nom du thème)
-            if len(rel) == 1 and rel[0].lower().endswith(".md"):
+            if rel == [IMAGE_THEME]:
+                miniature = i
+            elif len(rel) == 1 and rel[0].lower().endswith(".md"):
                 mds[rel[0]] = i
             elif len(rel) == 1 and rel[0].endswith(".lock"):
                 locks[rel[0]] = i
@@ -128,6 +135,13 @@ def importer(store: Store, chemin: Path, preparer) -> tuple[Theme, dict]:
         icone = manifeste.get("icone")
         if isinstance(icone, str) and re.fullmatch(r"[\w.-]{1,60}", icone):
             store.icone_theme(th, icone)
+        if miniature is not None and vignette is not None:
+            try:
+                png = vignette(z.read(miniature))
+                if png:
+                    store.image_theme(th, png)
+            except Exception as ex:
+                ignores.append(f"{IMAGE_THEME} : {ex}")
         rapport = {"fiches": 0, "verrouillees": 0, "images": 0, "ignores": ignores}
         cree = {}                                                     # nom de fichier d'origine -> fiche créée
         with tempfile.TemporaryDirectory(prefix="scrinium-import-") as tmp:

@@ -104,6 +104,22 @@ def preparer(source, jpeg: bool = False) -> tuple[str, bytes]:
     raise ImageInvalide(_("Image trop lourde, même compressée."))
 
 
+def vignette_theme(source) -> bytes | None:
+    """PNG carré de 96 px (centre de l'image) pour l'icône d'un thème ; `source` : chemin, QImage ou octets. None si illisible."""
+    if isinstance(source, (bytes, bytearray)):
+        img = QImage.fromData(bytes(source))
+    elif isinstance(source, QImage):
+        img = source
+    else:
+        img = QImage(str(source))
+    if img.isNull():
+        return None
+    cote = min(img.width(), img.height())
+    img = img.copy((img.width() - cote) // 2, (img.height() - cote) // 2, cote, cote)
+    img = img.scaled(96, 96, Qt.AspectRatioMode.IgnoreAspectRatio, Qt.TransformationMode.SmoothTransformation)
+    return _encoder(img.convertToFormat(QImage.Format.Format_ARGB32), "PNG")
+
+
 def miniature(donnees: bytes) -> QPixmap:
     img = QImage.fromData(donnees)
     if img.isNull():

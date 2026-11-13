@@ -44,13 +44,26 @@ def icone_appli() -> QIcon:
     return QIcon(str(DOSSIER / "scrinium.svg"))
 
 
-def avec_epingle(nom: str = "") -> QIcon:
-    """Icône `nom` (ou aucune, si vide) marquée d'une punaise en bas à droite : thème ou fiche épinglé."""
-    cle = ("epingle", nom)
+def _photo(image) -> QIcon:
+    """Icône tirée d'une miniature (chemin) ; le cache suit la date du fichier, donc un changement de photo se voit tout de suite."""
+    cle = ("photo", str(image), image.stat().st_mtime_ns)
+    if cle not in _cache:
+        _cache[cle] = QIcon(str(image))
+    return _cache[cle]
+
+
+def icone_theme_image(theme, nom: str) -> QIcon:
+    """Icône d'un thème : sa photo s'il en a une, sinon l'icône `nom`."""
+    return _photo(theme.image) if theme.image is not None else icone(nom)
+
+
+def avec_epingle(nom: str = "", image=None) -> QIcon:
+    """Icône `nom` (ou aucune, si vide ; ou la photo `image`) marquée d'une punaise en bas à droite : thème ou fiche épinglé."""
+    cle = ("epingle", nom, str(image), image.stat().st_mtime_ns if image is not None else 0)
     if cle in _cache:
         return _cache[cle]
     punaise = icone("epingle")
-    base = icone(nom) if nom else QIcon()
+    base = _photo(image) if image is not None else (icone(nom) if nom else QIcon())
     res = QIcon()
     for taille in (16, 22, 32, 48):
         pm = QPixmap(taille * 2, taille * 2)

@@ -24,7 +24,7 @@ from . import export_pdf, export_theme_doc
 from .chercher_remplacer import BarreChercherRemplacer
 from .choix_icone import DialogueIcone
 from .entrees_menu import remplir as remplir_menu
-from .icons import avec_epingle, avec_pastille, icone, icone_appli
+from .icons import avec_epingle, avec_pastille, icone, icone_appli, icone_theme_image
 from . import images
 from .images import BandePieces, Editeur
 from .markdown import Apercu, BarreFormat, entourer, navigateurs_installes
@@ -420,7 +420,7 @@ class Fenetre(QMainWindow):
         self.liste_themes.addItem(it)
         for t in self._themes_ordonnes():
             nom_icone = t.icone if not icone(t.icone).isNull() else ICONE_DEFAUT
-            ic = avec_epingle(nom_icone) if self.store.theme_epingle(t) else icone(nom_icone)
+            ic = avec_epingle(nom_icone, t.image) if self.store.theme_epingle(t) else icone_theme_image(t, nom_icone)
             it = QListWidgetItem(ic, f"{t.nom}  ({len(t.fiches)})")
             it.setData(Qt.ItemDataRole.UserRole, t.path.name)
             self.liste_themes.addItem(it)
@@ -512,7 +512,7 @@ class Fenetre(QMainWindow):
         if autres:
             sous = m.addMenu(icone("folder"), _("Déplacer vers le thème"))
             for th in autres:
-                sous.addAction(icone(th.icone) if not icone(th.icone).isNull() else icone(ICONE_DEFAUT), th.nom,
+                sous.addAction(icone_theme_image(th, th.icone if not icone(th.icone).isNull() else ICONE_DEFAUT), th.nom,
                                lambda *_a, cle=th.path.name: self.deplacer_fiches_vers(cle))
         m.addAction(icone("edit-delete"), _("Supprimer les %d fiches…") % n if n > 1 else _("Supprimer…"), self.supprimer_fiche)
         m.exec(self.liste.mapToGlobal(pos))
@@ -618,9 +618,14 @@ class Fenetre(QMainWindow):
         t = self._theme_courant()
         if not t:
             return
-        d = DialogueIcone(self, t.nom, t.icone)
-        if d.exec() and d.nom():
-            self.store.icone_theme(t, d.nom())
+        d = DialogueIcone(self, t.nom, t.icone, t.image)
+        if d.exec():
+            if d.image_choisie:
+                self.store.image_theme(t, d.image_choisie)
+            elif d.image_retiree:
+                self.store.image_theme(t, None)
+            if d.nom():
+                self.store.icone_theme(t, d.nom())
             self.plugins.emettre("themes_modifies")
             self.maj_themes()
 
@@ -1630,7 +1635,7 @@ class Fenetre(QMainWindow):
                 return
         self.quitter_fiche()
         try:
-            t, r = echange_theme.importer(self.store, Path(chemin), preparer)
+            t, r = echange_theme.importer(self.store, Path(chemin), preparer, images.vignette_theme)
         except (OSError, ValueError) as ex:
             QMessageBox.critical(self, _("Importer un thème"), _("Import impossible : %s") % ex)
             return

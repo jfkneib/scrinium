@@ -93,3 +93,24 @@ def test_bouton_raccourcis(fen, monkeypatch):  # noqa: F811
     assert fen.menuBar().cornerWidget() is not None
     fen.raccourcis()
     assert "Ctrl+H" in vus[0] and "Ctrl+N" in vus[0]
+
+
+def test_photo_de_theme_stockee_exportee_importee(tmp_path):
+    from scrinium.core import echange_theme
+    from scrinium.ui import images
+    s = Store(Paths(tmp_path / "am"))
+    s.charger()
+    th = s.nouveau_theme("Voyage")
+    assert th.image is None
+    png = images.vignette_theme(_png(w=300, h=100))
+    img = QImage.fromData(png)
+    assert (img.width(), img.height()) == (96, 96)
+    s.image_theme(th, png)
+    assert th.image is not None and th.image.read_bytes() == png
+    echange_theme.exporter(s, th, tmp_path / "t.zip")
+    th2, r = echange_theme.importer(s, tmp_path / "t.zip", _preparer, images.vignette_theme)
+    assert th2.image is not None and not r["ignores"]
+    s.image_theme(th, None)
+    assert th.image is None
+    th3, r3 = echange_theme.importer(s, tmp_path / "t.zip", _preparer)       # sans vignette : ignorée sans erreur
+    assert th3.image is None and not r3["ignores"]

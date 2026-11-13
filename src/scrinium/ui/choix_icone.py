@@ -2,7 +2,8 @@
 # Copyright (C) 2026 Jean-François Kneib
 """Choix de l'icône d'un thème : liste déroulante (avec un aperçu de chaque icône) et aperçu agrandi de l'icône choisie."""
 from PyQt6.QtCore import QSize, Qt
-from PyQt6.QtWidgets import QComboBox, QDialog, QDialogButtonBox, QHBoxLayout, QLabel, QVBoxLayout
+from PyQt6.QtGui import QPixmap
+from PyQt6.QtWidgets import QComboBox, QDialog, QDialogButtonBox, QFileDialog, QHBoxLayout, QLabel, QPushButton, QVBoxLayout
 
 from ..i18n import _
 from .icons import DOSSIER, icone
@@ -28,8 +29,11 @@ def icones_proposees(actuelle: str = "") -> list:
 
 
 class DialogueIcone(QDialog):
-    def __init__(self, parent, theme_nom: str, actuelle: str):
+    def __init__(self, parent, theme_nom: str, actuelle: str, image=None):
         super().__init__(parent)
+        self.image_choisie = None            # octets PNG d'une nouvelle photo
+        self.image_retiree = False
+        self._image_actuelle = image         # chemin de la miniature existante, ou None
         self.setWindowTitle(_("Icône du thème"))
         lay = QVBoxLayout(self)
         lay.addWidget(QLabel(_("Icône de « %s » :") % theme_nom))
@@ -48,6 +52,16 @@ class DialogueIcone(QDialog):
         ligne.addWidget(self.apercu)
         lay.addLayout(ligne)
         lay.addWidget(QLabel(_("Vous pouvez aussi taper le nom d'une icône du thème d'icônes de votre système.")))
+        lp = QHBoxLayout()
+        self.b_photo = QPushButton(_("Photo…"))
+        self.b_photo.setToolTip(_("Utiliser une photo (recadrée au carré) à la place de l'icône"))
+        self.b_photo.clicked.connect(self._photo)
+        self.b_retirer = QPushButton(_("Retirer la photo"))
+        self.b_retirer.clicked.connect(self._retirer)
+        lp.addWidget(self.b_photo)
+        lp.addWidget(self.b_retirer)
+        lp.addStretch()
+        lay.addLayout(lp)
         b = QDialogButtonBox(QDialogButtonBox.StandardButton.Ok | QDialogButtonBox.StandardButton.Cancel)
         self.ok = b.button(QDialogButtonBox.StandardButton.Ok)
         b.accepted.connect(self.accept)
@@ -56,7 +70,37 @@ class DialogueIcone(QDialog):
         self.choix.currentTextChanged.connect(self._maj)
         self._maj(actuelle)
 
+    def _photo(self):
+        from .images import FILTRE, vignette_theme
+        chemin, _f = QFileDialog.getOpenFileName(self, _("Photo du thème"), "", FILTRE)
+        if not chemin:
+            return
+        png = vignette_theme(chemin)
+        if png is None:
+            return
+        self.image_choisie, self.image_retiree = png, False
+        self._maj(self.choix.currentText())
+
+    def _retirer(self):
+        self.image_choisie, self.image_retiree = None, True
+        self._maj(self.choix.currentText())
+
+    def _photo_affichee(self):
+        if self.image_choisie:
+            pm = QPixmap()
+            pm.loadFromData(self.image_choisie)
+            return pm
+        if self._image_actuelle and not self.image_retiree:
+            return QPixmap(str(self._image_actuelle))
+        return None
+
     def _maj(self, nom: str):
+        photo = self._photo_affichee()
+        self.b_retirer.setEnabled(photo is not None)
+        if photo is not None:
+            self.apercu.setPixmap(photo.scaled(40, 40))
+            self.ok.setEnabled(True)
+            return
         ic = icone(nom.strip()) if nom.strip() else None
         valide = ic is not None and not ic.isNull()
         if valide:
