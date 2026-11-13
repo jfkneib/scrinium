@@ -6369,15 +6369,54 @@ msgid ""
 msgstr ""
 
 #: src/scrinium/core/guide.py:11
-#: src/scrinium/core/guide.py:121
+#: src/scrinium/core/guide.py:19
+#: src/scrinium/core/guide.py:152
 msgid "Guide"
 msgstr ""
 
-#: src/scrinium/core/guide.py:21
+#: src/scrinium/core/guide.py:27
+msgid "les idées de base : fiches, thèmes, types"
+msgstr ""
+
+#: src/scrinium/core/guide.py:27
+msgid "les raccourcis et gestes de tous les jours"
+msgstr ""
+
+#: src/scrinium/core/guide.py:28
+msgid "note, tableur, répertoire, planning… : les types et leur emploi"
+msgstr ""
+
+#: src/scrinium/core/guide.py:28
+msgid "activer et choisir les extensions"
+msgstr ""
+
+#: src/scrinium/core/guide.py:29
+msgid "lier vos fiches au terminal"
+msgstr ""
+
+#: src/scrinium/core/guide.py:29
+msgid "mot de passe, clé de secours, partage"
+msgstr ""
+
+#: src/scrinium/core/guide.py:29
+msgid "où sont les fichiers, sauvegarder"
+msgstr ""
+
+#: src/scrinium/core/guide.py:34
+msgid "Chaque extension activée a aussi sa fiche « Guide · … » à la suite, dans ce même thème."
+msgstr ""
+
+#: src/scrinium/core/guide.py:19
+#: src/scrinium/core/guide.py:47
+#: src/scrinium/core/guide.py:38
+msgid "Sommaire"
+msgstr ""
+
+#: src/scrinium/core/guide.py:52
 msgid "Guide 1 · Le principe"
 msgstr ""
 
-#: src/scrinium/core/guide.py:21
+#: src/scrinium/core/guide.py:52
 msgid ""
 "Scrinium range vos petites notes (codes, procédures, listes, numéros…) en FICHES, classées par THÈMES.\n"
 "\n"
@@ -6387,11 +6426,11 @@ msgid ""
 "• Une fiche sensible se VERROUILLE par mot de passe (chiffrement AES-256)."
 msgstr ""
 
-#: src/scrinium/core/guide.py:31
+#: src/scrinium/core/guide.py:62
 msgid "Guide 2 · Gestes utiles"
 msgstr ""
 
-#: src/scrinium/core/guide.py:31
+#: src/scrinium/core/guide.py:62
 msgid ""
 "• Nouvelle fiche : Ctrl+N ou le bouton « Fiche ». Nouveau thème : bouton « Thème ».\n"
 "• Chercher : Ctrl+F (titres, notes et thèmes, tous thèmes confondus). Le thème « ★ Toutes les fiches » montre tout.\n"
@@ -6407,11 +6446,11 @@ msgid ""
 "• Langue : menu Aide > Langue (automatique, français, anglais)."
 msgstr ""
 
-#: src/scrinium/core/guide.py:44
+#: src/scrinium/core/guide.py:75
 msgid "Guide 3 · Les types de fiches"
 msgstr ""
 
-#: src/scrinium/core/guide.py:44
+#: src/scrinium/core/guide.py:75
 msgid ""
 "Un type change l'AFFICHAGE d'une fiche. Il se choisit à la création : flèche du bouton « Fiche » > « Nouvelle fiche » > type.\n"
 "\n"
@@ -6434,7 +6473,7 @@ msgid ""
 "• Santé : la tension avec une courbe, et le traitement avec une case par prise (extension Santé).\n"
 "• Mots de passe : un carnet de sites et de mots de passe, masqués, à verrouiller (extension Mots de passe).\n"
 "• Emploi : des listes de mots-clés, des annonces récentes à lien fort ou faible, le suivi des candidatures et un texte à donner à une IA pour préparer la candidature (extension Emploi).\n"
-"• Liens entre fiches : bouton « [[ ]] » de la barre de mise en forme (choisir la fiche dans la liste), ou écrivez [[Titre d'une fiche]] dans le texte ; dans l'aperçu (Ctrl+E) le lien est cliquable, et Fichier > Fiches liées… montre qui pointe vers la fiche.\n"
+"• Liens entre fiches : bouton « `[[ ]]` » de la barre de mise en forme (choisir la fiche dans la liste), ou écrivez `[[Titre d'une fiche]]` dans le texte ; dans l'aperçu (Ctrl+E) le lien est cliquable, et Fichier > Fiches liées… montre qui pointe vers la fiche.\n"
 "• Pastille rouge : sur l'icône d'une fiche, elle signale qu'il y a quelque chose à faire (échéance proche, résolution à cocher, garantie, prêt, prise oubliée, nouveautés…) ; survolez-la pour le détail.\n"
 "• Supervision : l'état de vos machines (ping, ports, page web, disque, mémoire et charge par SSH) dans une fiche, avec une notification quand l'une tombe (extension Supervision).\n"
 "• Planning : des tâches en couleurs sur un diagramme de Gantt, avec l'avancement, les retards et un rétroplanning à partir d'une date de fin (extension Planning).\n"
@@ -6443,11 +6482,11 @@ msgid ""
 "Sécurité : un type qui LANCE des commandes (Applications, Actions CLI) reste inerte tant que vous n'avez pas validé la fiche vous-même. Une fiche reçue d'un autre n'exécute donc jamais rien toute seule."
 msgstr ""
 
-#: src/scrinium/core/guide.py:74
+#: src/scrinium/core/guide.py:105
 msgid "Guide 4 · Les extensions"
 msgstr ""
 
-#: src/scrinium/core/guide.py:74
+#: src/scrinium/core/guide.py:105
 msgid ""
 "Menu Extensions > Gérer les extensions… : cochez celles qui vous servent. Livrées avec Scrinium :\n"
 "\n"
@@ -6462,11 +6501,11 @@ msgid ""
 "Écrire la vôtre : menu Aide > « Documentation des extensions »."
 msgstr ""
 
-#: src/scrinium/core/guide.py:87
+#: src/scrinium/core/guide.py:118
 msgid "Guide 5 · Console et commandes"
 msgstr ""
 
-#: src/scrinium/core/guide.py:87
+#: src/scrinium/core/guide.py:118
 msgid ""
 "L'extension Capture relie vos fiches au terminal, sans jamais rien valider à votre place.\n"
 "\n"
@@ -6476,11 +6515,11 @@ msgid ""
 "• Depuis un terminal : « ls -al | scrinium ajouter -t Thème -f Fiche » ajoute la sortie à une fiche."
 msgstr ""
 
-#: src/scrinium/core/guide.py:99
+#: src/scrinium/core/guide.py:130
 msgid "Guide 6 · Verrouillage, secours et partage"
 msgstr ""
 
-#: src/scrinium/core/guide.py:99
+#: src/scrinium/core/guide.py:130
 msgid ""
 "• Verrouiller : bouton « Verrouiller… ». Le titre reste visible, le contenu est chiffré. Mot de passe oublié = fiche perdue, sauf avec le FICHIER DE SECOURS (menu Sécurité > Fichier de secours…) : faites-le dès le premier verrouillage, gardez-le hors de cet ordinateur.\n"
 "• Une fiche verrouillée n'est jamais envoyée, lue, traduite ni partagée tant qu'elle est fermée.\n"
@@ -6488,11 +6527,11 @@ msgid ""
 "• Inviter quelqu'un à INSTALLER Scrinium : menu Fichier > « Inviter à installer Scrinium… »."
 msgstr ""
 
-#: src/scrinium/core/guide.py:107
+#: src/scrinium/core/guide.py:138
 msgid "Guide 7 · Où sont mes données, sauvegarde"
 msgstr ""
 
-#: src/scrinium/core/guide.py:107
+#: src/scrinium/core/guide.py:138
 msgid ""
 "• Vos fiches : un dossier par thème, un fichier .md par fiche (.lock si verrouillée), avec un sous-dossier .pj pour les images jointes :\n"
 "\n"
@@ -6501,6 +6540,14 @@ msgid ""
 "• Sauvegarder : copiez ce dossier, et votre fichier de secours à part. Restaurer : remettez-le en place, Scrinium fermé.\n"
 "• Scrinium ne recharge pas les fiches modifiées pendant qu'il tourne : fermez-le avant de changer des fichiers à la main.\n"
 "• Aucune télémétrie. Logiciel libre (GPL-3.0-or-later) : le code est sur github.com/jfkneib/scrinium."
+msgstr ""
+
+#: src/scrinium/core/guide.py:31
+msgid "Bienvenue dans le guide de Scrinium. Chaque ligne ci-dessous est un LIEN vers une fiche : passez en aperçu (Ctrl+E) et cliquez. Écrire `[[Titre d'une fiche]]` dans n'importe quelle fiche crée un lien pareil (bouton « `[[ ]]` » de la barre de mise en forme) ; Fichier > Fiches liées… (Ctrl+Alt+L) montre les fiches vers lesquelles une fiche pointe, et celles qui pointent vers elle."
+msgstr ""
+
+#: src/scrinium/core/guide.py:40
+msgid "Suivant"
 msgstr ""
 
 #: src/scrinium/core/invitation.py:13

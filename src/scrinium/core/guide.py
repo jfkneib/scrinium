@@ -15,8 +15,39 @@ def icone() -> str:
     return "help-contents"
 
 
+def titre_sommaire() -> str:
+    return f"{_('Guide')} · {_('Sommaire')}"
+
+
 def fiches(dossier_fiches) -> list:
-    """[(titre, texte)] des fiches du guide ; `dossier_fiches` : dossier où Scrinium range les fiches de l'utilisateur."""
+    """[(titre, texte)] des fiches du guide : d'abord le SOMMAIRE (une fiche de liens `[[…]]` vers les autres), puis les sept pages,
+    chacune terminée par « ← Sommaire · Page suivante → » (liens entre fiches). `dossier_fiches` : dossier où Scrinium range les fiches."""
+    pages = _pages(dossier_fiches)
+    sommaire = titre_sommaire()
+    resume = [_("les idées de base : fiches, thèmes, types"), _("les raccourcis et gestes de tous les jours"),
+              _("note, tableur, répertoire, planning… : les types et leur emploi"), _("activer et choisir les extensions"),
+              _("lier vos fiches au terminal"), _("mot de passe, clé de secours, partage"), _("où sont les fichiers, sauvegarder")]
+    liste = "\n".join(f"- [[{t}]] : {r}" for (t, _x), r in zip(pages, resume))
+    texte = _("Bienvenue dans le guide de Scrinium. Chaque ligne ci-dessous est un LIEN vers une fiche : passez en aperçu (Ctrl+E) et "
+              "cliquez. Écrire `[[Titre d'une fiche]]` dans n'importe quelle fiche crée un lien pareil (bouton « `[[ ]]` » de la barre de "
+              "mise en forme) ; Fichier > Fiches liées… (Ctrl+Alt+L) montre les fiches vers lesquelles une fiche pointe, et celles qui pointent "
+              "vers elle.") + "\n\n" + liste + "\n\n" + _("Chaque extension activée a aussi sa fiche « Guide · … » à la suite, "
+              "dans ce même thème.")
+    res = [(sommaire, texte)]
+    for i, (titre, corps) in enumerate(pages):
+        pied = f"← [[{sommaire}|{_('Sommaire')}]]"
+        if i + 1 < len(pages):
+            pied += f" · {_('Suivant')} : [[{pages[i + 1][0]}]] →"
+        res.append((titre, corps + "\n\n" + pied))
+    return res
+
+
+def pied_extension() -> str:
+    """Pied des fiches « Guide · extension » : retour au sommaire."""
+    return f"\n\n← [[{titre_sommaire()}|{_('Sommaire')}]]"
+
+
+def _pages(dossier_fiches) -> list:
     return [
         (_("Guide 1 · Le principe"), _(
             "Scrinium range vos petites notes (codes, procédures, listes, numéros…) en FICHES, classées par THÈMES.\n"
@@ -63,7 +94,7 @@ def fiches(dossier_fiches) -> list:
             "• Santé : la tension avec une courbe, et le traitement avec une case par prise (extension Santé).\n"
             "• Mots de passe : un carnet de sites et de mots de passe, masqués, à verrouiller (extension Mots de passe).\n"
             "• Emploi : des listes de mots-clés, des annonces récentes à lien fort ou faible, le suivi des candidatures et un texte à donner à une IA pour préparer la candidature (extension Emploi).\n"
-            "• Liens entre fiches : bouton « [[ ]] » de la barre de mise en forme (choisir la fiche dans la liste), ou écrivez [[Titre d'une fiche]] dans le texte ; dans l'aperçu (Ctrl+E) le lien est cliquable, et Fichier > Fiches liées… montre qui pointe vers la fiche.\n"
+            "• Liens entre fiches : bouton « `[[ ]]` » de la barre de mise en forme (choisir la fiche dans la liste), ou écrivez `[[Titre d'une fiche]]` dans le texte ; dans l'aperçu (Ctrl+E) le lien est cliquable, et Fichier > Fiches liées… montre qui pointe vers la fiche.\n"
             "• Pastille rouge : sur l'icône d'une fiche, elle signale qu'il y a quelque chose à faire (échéance proche, résolution à cocher, garantie, prêt, prise oubliée, nouveautés…) ; survolez-la pour le détail.\n"
             "• Supervision : l'état de vos machines (ping, ports, page web, disque, mémoire et charge par SSH) dans une fiche, avec une notification quand l'une tombe (extension Supervision).\n"
             "• Planning : des tâches en couleurs sur un diagramme de Gantt, avec l'avancement, les retards et un rétroplanning à partir d'une date de fin (extension Planning).\n"
@@ -118,4 +149,4 @@ def fiches(dossier_fiches) -> list:
 
 def fiches_extensions(docs) -> list:
     """[(titre, texte)] à la suite du guide : la documentation que chaque extension ACTIVE a déclarée (`ctx.ajouter_doc`)."""
-    return [(f"{_('Guide')} · {titre}", texte) for titre, texte in docs]
+    return [(f"{_('Guide')} · {titre}", texte + pied_extension()) for titre, texte in docs]
