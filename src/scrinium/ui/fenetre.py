@@ -14,7 +14,7 @@ from PyQt6.QtWidgets import (QAbstractItemView, QApplication, QDialog, QFileDial
 from .. import __version__
 from ..core import autostart, capture, crypto, invitation
 from ..core.plugins import FicheVue, Gestionnaire
-from ..core import doc_extensions, guide, lien as lien_mod, liens_fiches, repertoire, types_fiche
+from ..core import doc_extensions, echange_md, guide, lien as lien_mod, liens_fiches, repertoire, types_fiche
 from ..core.store import ICONE_DEFAUT, Store, propre
 from ..i18n import _
 from .assistant import AssistantCle
@@ -174,6 +174,8 @@ class Fenetre(QMainWindow):
         mf.addAction(self._action(_("Nouveau répertoire…"), "x-office-address-book", self.nouveau_repertoire, "Ctrl+Alt+R"))
         mf.addAction(self._action(_("Fiches liées…"), "insert-link", self.fiches_liees, "Ctrl+Alt+L"))
         mf.addAction(self._action(_("Imprimer la fiche…"), "document-print", self.imprimer_fiche, "Ctrl+P"))
+        mf.addAction(self._action(_("Exporter la fiche en Markdown…"), "document-export", self.exporter_markdown))
+        mf.addAction(self._action(_("Importer des fichiers Markdown…"), "document-import", self.importer_markdown))
         mf.addAction(self._action(_("Capture rapide…"), "document-edit", self.capture_rapide, "Ctrl+Alt+N"))
         mf.addAction(self._action(_("Inviter à installer Scrinium…"), "mail-send", self.inviter))
         mf.addSeparator()
@@ -1341,6 +1343,7 @@ class Fenetre(QMainWindow):
             m.addSeparator()
         m.addAction(icone("document-print"), _("Imprimer…"), self.imprimer_fiche)
         m.addAction(icone("document-save"), _("Exporter la fiche en PDF…"), self.exporter_pdf)
+        m.addAction(icone("document-export"), _("Exporter la fiche en Markdown…"), self.exporter_markdown)
         m.exec(vue.mapToGlobal(pos))
         m.deleteLater()
 
@@ -1364,6 +1367,73 @@ class Fenetre(QMainWindow):
                 continue
         texte = types_fiche.en_markdown(self.texte.toPlainText())      # un répertoire s'imprime en tableaux, une section par lettre
         return f, self.titre.text(), texte, images
+
+    def exporter_markdown(self, chemin: str | None = None):
+        """Exporte la fiche affichée en fichier Markdown (+ dossier « <nom>_images » pour ses images). `chemin` : sans boîte de dialogue (tests)."""
+        f = self.fiche
+        if not f or f.fermee:
+            QMessageBox.information(self, _("Exporter en Markdown"), _("Ouvrez d'abord une fiche (déverrouillée) à exporter."))
+            return
+        if chemin is None and f.verrou and QMessageBox.question(
+                self, _("Exporter en Markdown"),
+                _("Cette fiche est verrouillée : le fichier contiendra son texte et ses images EN CLAIR. Continuer ?")
+        ) != QMessageBox.StandardButton.Yes:
+            return
+        self.sauver()
+        if chemin is None:
+            base = propre(self.titre.text() or f.titre or "fiche")
+            chemin, _f = QFileDialog.getSaveFileName(self, _("Exporter en Markdown"), str(Path.home() / f"{base}.md"),
+                                                     _("Markdown (*.md)"))
+            if not chemin:
+                return
+        chemin = Path(chemin)
+        if chemin.suffix.lower() != ".md":
+            chemin = chemin.with_name(chemin.name + ".md")
+        try:
+            n = echange_md.exporter(self.store, f, chemin, self.titre.text(), self.texte.toPlainText())
+        except (OSError, ValueError) as ex:
+            QMessageBox.critical(self, _("Exporter en Markdown"), _("Écriture impossible : %s") % ex)
+            return
+        self._statut(_("✔ Fiche exportée") + f"  ·  {chemin}" + (f"  (+ {n} " + _("image(s)") + ")" if n else ""), VERT)
+
+    def importer_markdown(self, chemins: list | None = None):
+        """Crée une fiche par fichier Markdown choisi, dans le thème courant ; les images locales qu'il cite sont jointes."""
+        from .images import preparer
+        if chemins is None:
+            choisis, _f = QFileDialog.getOpenFileNames(self, _("Importer des fichiers Markdown"), str(Path.home()),
+                                                       _("Markdown et texte (*.md *.markdown *.txt);;Tous (*)"))
+            chemins = [Path(c) for c in choisis]
+        if not chemins:
+            return
+        self.quitter_fiche()
+        t = self._theme_courant() or (self.store.themes[0] if self.store.themes else None)
+        if t is None:
+            self.nouveau_theme()
+            t = self._theme_courant()
+            if t is None:
+                return
+        derniere, nb, images, problemes = None, 0, 0, []
+        for c in chemins:
+            try:
+                f, n, ignorees = echange_md.importer(self.store, t, Path(c), preparer)
+            except (OSError, ValueError) as ex:
+                problemes.append(f"{Path(c).name} : {ex}")
+                continue
+            derniere, nb, images = f, nb + 1, images + n
+            problemes += [f"{Path(c).name} → {x}" for x in ignorees]
+        if derniere is not None:
+            if self.theme not in (self.TOUS, t.nom):
+                self.theme = t.nom
+            self.recherche.blockSignals(True)
+            self.recherche.clear()
+            self.recherche.blockSignals(False)
+            self.maj_themes()
+            self.maj_fiches()
+            self._afficher(t, derniere)
+            self._statut(_("✔ Fiches importées : %d") % nb + (f"  ·  {images} " + _("image(s)") if images else ""), VERT)
+        if problemes:
+            QMessageBox.warning(self, _("Importer des fichiers Markdown"),
+                                _("Certains éléments n'ont pas été importés :") + "\n\n" + "\n".join(problemes[:15]))
 
     def imprimer_fiche(self, imprimante=None):
         """Imprime la fiche affichée (boîte d'impression du système). `imprimante` : un QPrinter déjà réglé (tests, PDF)."""
