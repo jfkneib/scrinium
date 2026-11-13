@@ -1,3 +1,18 @@
+scrinium (0.11.0) unstable; urgency=medium
+
+  Version « Enluminure » : les fiches deviennent de vrais documents illustrés.
+
+  * Images dans le texte : `![légende](pj:N)` montre une pièce jointe à l'endroit voulu (aperçu,
+    PDF, impression). Bouton 🖼 de la barre, ou clic droit sur la vignette > « Insérer dans le
+    texte ». L'image reste dans la fiche (chiffrée avec elle si elle est verrouillée).
+  * Export / import Markdown et thème : l'image garde sa place dans le texte.
+  * Un thème entier s'exporte en site HTML (sommaire, une page par fiche, liens entre pages,
+    images) ou en un seul PDF ; les fiches verrouillées fermées sont ignorées.
+  * PDF : le texte sortait minuscule, corrigé (fiche et thème).
+  * Une icône « Raccourcis clavier » au bout de la barre de menus.
+
+ -- Jean-François Kneib <kneib.jean-francois@cegetel.net>  Fri, 13 Nov 2026 20:00:00 +0100
+
 scrinium (0.10.1) unstable; urgency=medium
 
   * Barre de mise en forme : nouveau bouton « [[ ]] » pour faire un lien vers une autre fiche
