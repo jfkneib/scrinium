@@ -11,7 +11,7 @@ import re
 from pathlib import Path
 from urllib.parse import quote, unquote
 
-from . import types_fiche
+from . import images_texte, types_fiche
 from .store import TYPE_PIECE, Fiche, Store, Theme, propre
 
 TAILLE_MAX = 5 * 1024 * 1024                         # un fichier .md plus gros n'est pas une fiche
@@ -34,8 +34,16 @@ def texte_simple(texte: str) -> str:
     return reste.lstrip("\n") if types_fiche.marque(premiere) else texte
 
 
-def texte_exporte(titre: str, texte: str, images: list) -> str:
-    """Contenu du .md. `images` : [(nom du fichier image, texte alternatif)] dans le dossier d'images (déjà écrit)."""
+def texte_exporte(titre: str, texte: str, images: list, numeros: list | None = None) -> str:
+    """Contenu du .md. `images` : [(nom du fichier image, texte alternatif)] dans le dossier d'images (déjà écrit).
+    `numeros` : le n° de pièce de chaque image ; celles que le texte cite par `![](pj:N)` y prennent leur place (chemin relatif),
+    les autres sont rappelées à la fin sous « ## Images »."""
+    if numeros:
+        par_numero = dict(zip(numeros, images))
+        citees = images_texte.numeros(texte) & set(par_numero)
+        texte = images_texte.remplacer(texte, lambda alt, n: (
+            f"![{alt}]({quote(par_numero[n][0], safe='/')})" if n in par_numero else f"![{alt}](pj:{n})"))
+        images = [im for n, im in zip(numeros, images) if n not in citees]
     out = f"# {titre}\n\n{texte.rstrip()}\n"
     if images:
         out += "\n## Images\n\n" + "\n\n".join(f"![{alt.replace('[', '(').replace(']', ')')}]({quote(nom, safe='/')})"
@@ -50,7 +58,7 @@ def exporter(store: Store, f: Fiche, chemin: Path, titre: str, texte: str, simpl
         raise ValueError("fiche verrouillée : déverrouillez-la d'abord")
     chemin = Path(chemin)
     pieces = store.lister_pieces(f)
-    liste = []
+    liste, numeros = [], []
     if pieces:
         dossier = chemin.with_name(chemin.stem + "_images")
         k = 2
@@ -64,7 +72,8 @@ def exporter(store: Store, f: Fiche, chemin: Path, titre: str, texte: str, simpl
             nom = f"{i:02d}-{base}{ext}"
             (dossier / nom).write_bytes(store.lire_piece(f, p))
             liste.append((f"{dossier.name}/{nom}", p.nom))
-    chemin.write_text(texte_exporte(titre, texte_simple(texte) if simple else texte, liste), encoding="utf-8")
+            numeros.append(p.id)
+    chemin.write_text(texte_exporte(titre, texte_simple(texte) if simple else texte, liste, numeros), encoding="utf-8")
     return len(liste)
 
 
@@ -77,19 +86,30 @@ def _separer_titre(contenu: str, defaut: str) -> tuple[str, str]:
 
 
 def analyser(contenu: str, defaut: str) -> tuple[str, str, list]:
-    """(titre, texte, références d'images locales) d'un fichier Markdown. Les lignes réduites à une image sont retirées du texte
-    (l'image sera jointe à la fiche) ; une section « ## Images » devenue vide disparaît. Les liens http(s) sont laissés."""
+    """(titre, texte, références d'images locales) d'un fichier Markdown. Une ligne réduite à une image locale est remplacée par
+    `![légende](pj:@k)` (k = rang dans les références : l'image sera jointe et prendra sa place dans le texte) ; la section finale
+    « ## Images » (images seules) disparaît, ses images étant simplement jointes. Les liens http(s) sont laissés."""
     titre, corps = _separer_titre(contenu, defaut)
     refs, lignes = [], []
+    fin = re.search(r"\n+## Images[ \t]*\n+((?:[ \t]*!\[[^\n]*\n*)+)\Z", corps + "\n")
+    suite = ""
+    if fin:
+        corps, suite = corps[:fin.start()], fin.group(1)
     for ligne in corps.split("\n"):
         ms = list(_IMAGE.finditer(ligne))
         locales = [m for m in ms if "://" not in m.group(2) and not m.group(2).startswith(("data:", "/", "#"))]
         if locales and not _IMAGE.sub("", ligne).strip():
-            refs += [(m.group(1), unquote(m.group(2))) for m in locales]
+            marques = []
+            for m in locales:
+                marques.append(f"![{m.group(1)}](pj:@{len(refs)})")
+                refs.append((m.group(1), unquote(m.group(2))))
+            lignes.append(" ".join(marques))
             continue
         lignes.append(ligne)
+    for m in _IMAGE.finditer(suite):
+        if "://" not in m.group(2) and not m.group(2).startswith(("data:", "/", "#")):
+            refs.append((m.group(1), unquote(m.group(2))))
     texte = "\n".join(lignes)
-    texte = re.sub(r"\n+## Images[ \t]*\n*\Z", "\n", texte)
     return titre, texte.strip("\n") + "\n" if texte.strip() else "", refs
 
 
@@ -112,7 +132,8 @@ def importer(store: Store, th: Theme, chemin: Path, preparer) -> tuple[Fiche, in
     store.enregistrer(th, f, titre, texte)                   # jamais validée : une fiche exécutable reste inerte
     base = chemin.resolve().parent
     jointes, ignorees = 0, []
-    for alt, rel in refs[:IMAGES_MAX]:
+    nouveaux = {}                                              # rang dans `refs` -> n° de la pièce créée
+    for k, (alt, rel) in enumerate(refs[:IMAGES_MAX]):
         try:
             src = (base / rel).resolve()
             src.relative_to(base)                             # reste dans le dossier du fichier (pas de « ../ »)
@@ -121,10 +142,14 @@ def importer(store: Store, th: Theme, chemin: Path, preparer) -> tuple[Fiche, in
             type_, donnees = preparer(src)
             if type_ not in TYPE_PIECE.values():
                 raise ValueError("format non pris en charge")
-            store.ajouter_piece(f, alt or src.name, type_, donnees)
+            nouveaux[k] = store.ajouter_piece(f, alt or src.name, type_, donnees).id
             jointes += 1
         except Exception as ex:        # une image qui ne passe pas ne bloque pas la fiche
             ignorees.append(f"{rel} : {ex}")
     for rel in refs[IMAGES_MAX:]:
         ignorees.append(f"{rel[1]} : trop d'images")
+    nouveau = re.sub(r"!\[([^\]]*)\]\(pj:@(\d+)\)",
+                     lambda m: f"![{m.group(1)}](pj:{nouveaux[int(m.group(2))]})" if int(m.group(2)) in nouveaux else "", texte)
+    if nouveau != texte:
+        store.enregistrer(th, f, titre, re.sub(r"\n{3,}", "\n\n", nouveau))
     return f, jointes, ignorees

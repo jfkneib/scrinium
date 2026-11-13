@@ -48,15 +48,16 @@ def exporter(store: Store, th: Theme, chemin: Path, simple: bool = False, en_cla
                             z.writestr(f"{racine}/{pj.name}/{p.name}", p.read_bytes())
                     rapport["verrouillees"] += 1
                 else:
-                    liste = []
+                    liste, numeros = [], []
                     for i, piece in enumerate(store.lister_pieces(f), 1):
                         ext = ".jpg" if piece.type == "image/jpeg" else ".png"
                         nom = f"{i:02d}-{propre(Path(piece.nom).stem, 'image')}{ext}"
                         z.writestr(f"{racine}/{stem}_images/{nom}", store.lire_piece(f, piece))
                         liste.append((f"{stem}_images/{nom}", piece.nom))
+                        numeros.append(piece.id)
                         rapport["images"] += 1
                     rapport["en_clair"] += 1 if f.verrou else 0
-                    z.writestr(f"{racine}/{stem}.md", echange_md.texte_exporte(f.titre, echange_md.texte_simple(f.texte or "") if simple else (f.texte or ""), liste))
+                    z.writestr(f"{racine}/{stem}.md", echange_md.texte_exporte(f.titre, echange_md.texte_simple(f.texte or "") if simple else (f.texte or ""), liste, numeros))
                     rapport["fiches"] += 1
                 ordre.append(f.path.name if chiffree else f"{stem}.md")
             z.writestr(MANIFESTE, json.dumps({"format": FORMAT, "version": 1, "theme": th.nom, "icone": th.icone, "ordre": ordre},

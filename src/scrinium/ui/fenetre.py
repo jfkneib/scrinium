@@ -5,7 +5,7 @@ import time
 from pathlib import Path
 
 from PyQt6.QtCore import QEvent, QSize, Qt, QTimer, pyqtSignal
-from PyQt6.QtGui import QAction, QActionGroup, QKeySequence
+from PyQt6.QtGui import QAction, QActionGroup, QCursor, QKeySequence
 from PyQt6.QtPrintSupport import QPrintDialog, QPrinter
 from PyQt6.QtWidgets import (QAbstractItemView, QApplication, QCheckBox, QDialog, QDialogButtonBox, QFileDialog, QHBoxLayout, QInputDialog, QLabel, QLineEdit, QListWidget,
                              QListWidgetItem, QMainWindow, QMenu, QMessageBox, QPushButton, QSplitter, QToolButton,
@@ -14,7 +14,7 @@ from PyQt6.QtWidgets import (QAbstractItemView, QApplication, QCheckBox, QDialog
 from .. import __version__
 from ..core import autostart, capture, crypto, invitation
 from ..core.plugins import FicheVue, Gestionnaire
-from ..core import doc_extensions, echange_md, echange_theme, guide, lien as lien_mod, liens_fiches, repertoire, types_fiche
+from ..core import doc_extensions, echange_md, images_texte, echange_theme, guide, lien as lien_mod, liens_fiches, repertoire, types_fiche
 from ..core.store import ICONE_DEFAUT, Store, propre
 from ..i18n import _
 from .assistant import AssistantCle
@@ -25,6 +25,7 @@ from .chercher_remplacer import BarreChercherRemplacer
 from .choix_icone import DialogueIcone
 from .entrees_menu import remplir as remplir_menu
 from .icons import avec_epingle, avec_pastille, icone, icone_appli
+from . import images
 from .images import BandePieces, Editeur
 from .markdown import Apercu, BarreFormat, entourer, navigateurs_installes
 from .lien_ajout import DialogueAjoutLien
@@ -310,8 +311,10 @@ class Fenetre(QMainWindow):
         self.apercu.complements = self._entrees_clic_droit
         self.apercu.fiche_existe = lambda cible: liens_fiches.resoudre(self.store, cible) is not None
         self.apercu.fiche_demandee.connect(self.ouvrir_fiche_liee)
+        self.apercu.image_piece = self._octets_piece
         self.format = BarreFormat(self.texte)
         self.format.apercu_demande.connect(self.basculer_apercu)
+        self.format.choisir_image = self.inserer_image
         self.format.fiches_cibles = lambda: [(t.nom, f.titre) for t in self.store.themes for f in self.store.fiches_triees(t)
                                              if f.titre and f is not self.fiche]
         self.pile = QStackedWidget()
@@ -1056,6 +1059,50 @@ class Fenetre(QMainWindow):
         d.raise_()
         d.activateWindow()
 
+    def _octets_piece(self, numero: int):
+        """Octets de la pièce n° `numero` de la fiche affichée (pour ![](pj:N) dans l'aperçu), None si absente ou fermée."""
+        f = self.fiche
+        if f is None or f.fermee:
+            return None
+        for p in self.store.lister_pieces(f):
+            if p.id == numero:
+                return self.store.lire_piece(f, p)
+        return None
+
+    def inserer_piece(self, piece) -> None:
+        """Écrit `![légende](pj:N)` dans le texte, à part, à la position du curseur."""
+        if self.fiche is None or self.fiche.fermee or self.texte.isReadOnly() or self.format.lecture_seule:
+            return
+        if self.pile.currentWidget() is not self.texte:
+            self.format.b_apercu.setChecked(False)
+        c = self.texte.textCursor()
+        legende = Path(piece.nom).stem
+        avant = "" if c.atBlockStart() and c.block().text() == "" else "\n\n"
+        c.insertText(f"{avant}{images_texte.reference(piece.id, legende)}\n\n")
+        self.texte.setTextCursor(c)
+        self.texte.setFocus()
+
+    def inserer_image(self) -> None:
+        """Bouton 🖼 : choisir une pièce déjà jointe, ou une nouvelle image (fichier) qui est jointe puis insérée."""
+        if self.fiche is None or self.fiche.fermee or self.format.lecture_seule:
+            return
+        m = QMenu(self)
+        pieces = self.store.lister_pieces(self.fiche)
+        for p in pieces:
+            m.addAction(p.nom, lambda p=p: self.inserer_piece(p))
+        if pieces:
+            m.addSeparator()
+        m.addAction(_("Nouvelle image depuis un fichier…"), self._inserer_nouvelle)
+        m.exec(QCursor.pos())
+
+    def _inserer_nouvelle(self) -> None:
+        avant = len(self.bande.pieces)
+        chemins, _f = QFileDialog.getOpenFileNames(self, _("Ajouter une image"), "", images.FILTRE)
+        if chemins:
+            self.bande.ajouter([Path(c) for c in chemins])
+            for p in self.bande.pieces[avant:]:
+                self.inserer_piece(p)
+
     def pieces_modifiees(self):
         """Appelé par la bande après un ajout ou une suppression d'image."""
         f, t = self.fiche, self.fiche_theme
@@ -1367,14 +1414,14 @@ class Fenetre(QMainWindow):
         ) != QMessageBox.StandardButton.Yes:
             return None
         self.sauver()
-        images = []
+        donnees_pieces = []
         for p in self.store.lister_pieces(f):
             try:
-                images.append((p.nom, self.store.lire_piece(f, p)))
+                donnees_pieces.append((p.nom, self.store.lire_piece(f, p), p.id))
             except (ValueError, OSError):
                 continue
         texte = types_fiche.en_markdown(self.texte.toPlainText())      # un répertoire s'imprime en tableaux, une section par lettre
-        return f, self.titre.text(), texte, images
+        return f, self.titre.text(), texte, donnees_pieces
 
     def exporter_markdown(self, chemin: str | None = None, simple: bool = False):
         """Exporte la fiche affichée en fichier Markdown (+ dossier « <nom>_images » pour ses images). `chemin` : sans boîte de dialogue (tests).

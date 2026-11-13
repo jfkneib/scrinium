@@ -3,21 +3,30 @@
 """Export d'une fiche en PDF : titre, texte (Markdown rendu comme dans l'aperçu) et images jointes, en A4."""
 import html
 
-from PyQt6.QtCore import QMarginsF, QSizeF, QUrl
+from PyQt6.QtCore import QMarginsF, QSizeF, Qt, QUrl
 from PyQt6.QtGui import QImage, QPageLayout, QPageSize, QPdfWriter, QTextDocument
+
+from ..core import images_texte
 
 LARGEUR_IMAGE = 480          # px dans le document (les images plus larges sont réduites, jamais agrandies)
 
 
 def document(titre: str, texte: str, images=()) -> QTextDocument:
-    """`images` : liste de (nom, octets). Le document contient le titre, le texte rendu, puis les images."""
+    """`images` : liste de (nom, octets[, n° de pièce]). Le document contient le titre, le texte rendu (les `![](pj:N)` y montrent
+    leur image), puis les images jointes qui ne sont pas citées dans le texte."""
     doc = QTextDocument()
     doc.setMarkdown(f"# {titre.strip()}\n\n{texte}" if titre.strip() else texte)
     reste = []
-    for i, (nom, octets) in enumerate(images):
+    citees = images_texte.numeros(texte)
+    for i, (nom, octets, *numero) in enumerate(images):
         img = QImage.fromData(octets)
         if img.isNull():
             continue
+        if numero:
+            doc.addResource(QTextDocument.ResourceType.ImageResource.value, QUrl(f"pj:{numero[0]}"),
+                            img.scaledToWidth(LARGEUR_IMAGE, Qt.TransformationMode.SmoothTransformation) if img.width() > LARGEUR_IMAGE else img)
+            if numero[0] in citees:
+                continue
         adresse = f"image-jointe:{i}"
         doc.addResource(QTextDocument.ResourceType.ImageResource.value, QUrl(adresse), img)
         largeur = min(img.width(), LARGEUR_IMAGE)

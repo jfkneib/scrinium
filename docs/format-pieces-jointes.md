@@ -1,7 +1,7 @@
 # Spécification : pièces jointes (images) dans les fiches
 
 Statut : **validé le 2026-10-20** ; couche « cœur » implémentée (`core/crypto.py`, `core/store.py`, `tests/test_pieces.py`) ; interface, import d'image, `rescue` et API des extensions restent à faire. Cible : Scrinium 0.2. Choix d'interface retenu : **option B** (le texte
-reste un texte simple ; les images sont listées sous la fiche en vignettes, pas au milieu du texte).
+reste un texte simple ; les images sont listées sous la fiche en vignettes ; depuis la 0.11, le texte peut aussi en citer une avec `![légende](pj:N)`, N étant le numéro de la pièce).
 
 ## 1. Principes
 

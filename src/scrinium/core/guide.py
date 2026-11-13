@@ -69,7 +69,8 @@ def _pages(dossier_fiches) -> list:
             "• Autres outils : « Exporter en Markdown simple… » (tableaux en Markdown, sans les marques de type) ; on peut aussi déposer un fichier .md (une fiche) ou une archive .zip (un thème) sur la fenêtre pour l'importer.\n"
             "• Déplacer une fiche vers un autre thème : glissez-la sur le thème (ou clic droit sur la fiche > « Déplacer vers le thème »).\n"
             "• Ranger : glissez les fiches pour changer leur ordre, mettez-les en favoris.\n"
-            "• Images : on peut joindre des images à une fiche ; le clic droit sur une image propose l'OCR si l'extension est activée.\n"
+            "• Images : on peut joindre des images à une fiche ; le clic droit sur une image propose l'OCR si l'extension est activée. "
+            "Pour en montrer une DANS le texte : bouton 🖼 de la barre (ou clic droit sur la vignette > « Insérer dans le texte »), qui écrit `![légende](pj:N)` ; elle s'affiche dans l'aperçu, le PDF et l'impression, et suit l'export Markdown à sa place.\n"
             "• Supprimer : la fiche ou le thème va à la corbeille, rien n'est détruit tout de suite.\n"
             "• Langue : menu Aide > Langue (automatique, français, anglais).")),
         (_("Guide 3 · Les types de fiches"), _(

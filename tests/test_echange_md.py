@@ -38,7 +38,7 @@ def test_analyser():
     titre, texte, refs = echange_md.analyser("# Ma page\n\nBonjour\n\n![schéma](img/a%20b.png)\n\nFin [lien](https://x.org) ![d](https://x.org/i.png)\n\n## Images\n\n![z](z.png)\n", "defaut")
     assert titre == "Ma page" and "Bonjour" in texte and "Fin [lien]" in texte
     assert [r[1] for r in refs] == ["img/a b.png", "z.png"]           # les adresses http ne sont pas des images locales
-    assert "## Images" not in texte and "schéma" not in texte
+    assert "## Images" not in texte and "![schéma](pj:@0)" in texte      # l image garde sa place (marque remplacée à l import)
     assert echange_md.analyser("pas de titre\n", "nom")[:2] == ("nom", "pas de titre\n")
     assert echange_md.analyser("# C#\n\nx", "n")[0] == "C#"
 

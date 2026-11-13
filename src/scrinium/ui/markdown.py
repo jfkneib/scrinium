@@ -10,12 +10,12 @@ import shutil
 import subprocess
 from urllib.parse import unquote
 
-from PyQt6.QtCore import QUrl, pyqtSignal
-from PyQt6.QtGui import QDesktopServices, QTextCursor
+from PyQt6.QtCore import Qt, QUrl, pyqtSignal
+from PyQt6.QtGui import QDesktopServices, QImage, QTextCursor
 from PyQt6.QtWidgets import (QDialog, QDialogButtonBox, QHBoxLayout, QLabel, QLineEdit, QListWidget, QMessageBox, QPlainTextEdit, QTextBrowser,
                              QToolButton, QVBoxLayout, QWidget)
 
-from ..core import liens_fiches
+from ..core import images_texte, liens_fiches
 from ..i18n import _
 from .entrees_menu import remplir
 from .icons import icone
@@ -246,6 +246,7 @@ class BarreFormat(QWidget):
         super().__init__(parent)
         self.ed = editeur
         self.fiches_cibles = lambda: []            # [(thème, titre)] des fiches qu'un lien peut viser (donné par la fenêtre)
+        self.choisir_image = lambda: None          # ouvre le choix d'une image (donné par la fenêtre)
         self.lecture_seule = False                 # vrai : les boutons d'écriture restent grisés, même hors aperçu
         lay = QHBoxLayout(self)
         lay.setContentsMargins(0, 0, 0, 0)
@@ -262,6 +263,7 @@ class BarreFormat(QWidget):
                 ("{ }", _("Bloc de code"), lambda: bloc_code(self.ed), "font-family: monospace;"),
                 ("🔗", _("Lien web (http, https, mailto)"), lambda: lien(self.ed), ""),
                 ("[[ ]]", _("Lien vers une autre fiche"), lambda: self._lien_fiche(), "font-family: monospace;"),
+                ("🖼", _("Insérer une image dans le texte"), lambda: self.choisir_image(), ""),
                 ("Tx", _("Effacer la mise en forme (sélection ou ligne)"), lambda: effacer_format(self.ed), "")):
             b = QToolButton()
             b.setText(texte)
@@ -308,6 +310,7 @@ class Apercu(QTextBrowser):
         self.setOpenLinks(False)
         self.anchorClicked.connect(self._lien)
         self.fiche_existe = None                 # cible -> bool : une fiche porte ce titre (sinon le lien est marqué ✚)
+        self.image_piece = lambda n: None        # n° de pièce -> octets de l'image (donné par la fenêtre) ; pour ![](pj:N)
 
     pdf_demande = pyqtSignal()
     impression_demandee = pyqtSignal()
@@ -330,6 +333,22 @@ class Apercu(QTextBrowser):
         if url.scheme().lower() not in LIENS_AUTORISES:
             return
         ouvrir_url(url, self.navigateur() if url.scheme().lower() != "mailto" else "")
+
+    def loadResource(self, type_, url):
+        """Seules les images `pj:N` (pièces de la fiche) sont chargées, réduites à la largeur visible ; rien d'autre (ni disque, ni réseau)."""
+        if url.scheme().lower() != images_texte.SCHEMA:
+            return None
+        try:
+            donnees = self.image_piece(int(url.path()))
+        except (ValueError, OSError):
+            donnees = None
+        img = QImage.fromData(donnees) if donnees else QImage()
+        if img.isNull():
+            return None
+        largeur = max(self.viewport().width() - 30, 100)
+        if img.width() > largeur:
+            img = img.scaledToWidth(largeur, Qt.TransformationMode.SmoothTransformation)
+        return img
 
     def afficher(self, texte: str) -> None:
         barre = self.verticalScrollBar().value()

@@ -65,6 +65,7 @@ docs/               documentation du projet
 | `lien.py` | Liens `scrinium://…` reçus du système : analyse et validation, jamais d'écriture. |
 | `capture.py` | Ajouter du texte à une fiche (sortie de commande, capture rapide). |
 | `echange_md.py` | Export et import d'une fiche en Markdown avec ses images. |
+| `images_texte.py` | Images dans le texte : références « pj:N » vers les pièces jointes. |
 | `echange_theme.py` | Export et import d'un thème entier en archive zip. |
 | `exemples.py`, `guide.py`, `doc_extensions.py`, `invitation.py` | Textes livrés : premiers thèmes, thème « Guide », thème « Doc », invitation à installer. |
 | `autostart.py` | Lancement à l'ouverture de session (Linux, Windows, macOS). |
@@ -236,6 +237,7 @@ docs/               project documentation
 | `lien.py` | `scrinium://…` links received from the system: parsing and validation, never any write. |
 | `capture.py` | Append text to a note (command output, quick capture). |
 | `echange_md.py` | Export and import of ONE note as Markdown with its images. |
+| `images_texte.py` | Images inside the text: “pj:N” references to attached pieces. |
 | `echange_theme.py` | Export and import of a whole topic as a zip archive. |
 | `exemples.py`, `guide.py`, `doc_extensions.py`, `invitation.py` | Shipped texts: first topics, the "Guide" topic, the "Doc" topic, the invitation to install. |
 | `autostart.py` | Start at session login (Linux, Windows, macOS). |

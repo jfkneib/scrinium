@@ -460,6 +460,8 @@ class BandePieces(QWidget):
         m.addAction(icone("view-pim-notes"), _("Ouvrir"), lambda: self.ouvrir(i))
         m.addAction(icone("document-save"), _("Enregistrer sous…"), lambda: self.enregistrer_sous(i))
         m.addAction(icone("edit-copy"), _("Copier l'image"), lambda: self.copier(i))
+        if not self.fen.texte.isReadOnly() and not self.fen.format.lecture_seule:
+            m.addAction(icone("insert-image"), _("Insérer dans le texte"), lambda: self.fen.inserer_piece(self.pieces[i]))
         extensions = list(self.fen.actions_image)
         if extensions:
             m.addSeparator()
