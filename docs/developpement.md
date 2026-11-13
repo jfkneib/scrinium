@@ -166,8 +166,11 @@ Si vous modifiez un texte déjà traduit, son ancienne traduction n'est plus rel
 
 - **Qt 6** (l'interface) : [documentation Qt](https://doc.qt.io/qt-6/) : widgets, signaux et slots, `QTextDocument`, `QImage`.
 - **PyQt6** (le lien Python) : [documentation de PyQt6](https://www.riverbankcomputing.com/static/Docs/PyQt6/) (Riverbank Computing). Les noms
-  suivent Qt, avec quelques écarts (énumérations qualifiées : `Qt.AlignmentFlag.AlignCenter`, signal = `pyqtSignal`). PyQt6 est distribué
-  sous GPL v3 (ou licence commerciale) ; Scrinium, sous GPL-3.0-or-later, est compatible.
+  suivent Qt, avec quelques écarts (énumérations qualifiées : `Qt.AlignmentFlag.AlignCenter`, signal = `pyqtSignal`). **Licence :** PyQt6
+  est sous **GPL-3.0-only** (version gratuite de PyPI) ou sous une licence commerciale payante de Riverbank, **sans option LGPL** (à ne pas
+  confondre avec Qt, qui propose aussi la LGPL v3). Scrinium, en GPL-3.0-or-later, est compatible ; mais tant qu'il utilise PyQt6 sous GPL,
+  il doit rester sous GPL quand il est distribué. Passer à une licence plus permissive ou fermée demanderait la licence commerciale de
+  PyQt6 ou un passage à PySide6 (LGPL v3, API très proche).
 - **cryptography** (le chiffrement) : [cryptography.io](https://cryptography.io/) : AES-GCM, scrypt, RSA.
 - **Icônes** : thème Breeze de KDE (LGPL-3.0-or-later), voir `src/scrinium/icons/NOTICE`.
 - Le reste de la documentation du projet : [`plugins.md`](plugins.md), [`principes.md`](principes.md), [`api-partage.md`](api-partage.md),
@@ -332,8 +335,11 @@ If you edit an already translated text, its old translation is no longer linked:
 
 - **Qt 6** (the interface): [Qt documentation](https://doc.qt.io/qt-6/): widgets, signals and slots, `QTextDocument`, `QImage`.
 - **PyQt6** (the Python binding): [PyQt6 documentation](https://www.riverbankcomputing.com/static/Docs/PyQt6/) (Riverbank Computing). Names
-  follow Qt, with a few differences (scoped enums: `Qt.AlignmentFlag.AlignCenter`, signal = `pyqtSignal`). PyQt6 is distributed under
-  GPL v3 (or a commercial licence); Scrinium, GPL-3.0-or-later, is compatible.
+  follow Qt, with a few differences (scoped enums: `Qt.AlignmentFlag.AlignCenter`, signal = `pyqtSignal`). **Licence:** PyQt6 is
+  under **GPL-3.0-only** (the free PyPI version) or a paid commercial licence from Riverbank, **with no LGPL option** (not to be confused
+  with Qt, which also offers LGPL v3). Scrinium, GPL-3.0-or-later, is compatible; but as long as it uses PyQt6 under the GPL, it must stay
+  under the GPL when distributed. Moving to a more permissive or closed licence would need PyQt6's commercial licence or a move to
+  PySide6 (LGPL v3, very similar API).
 - **cryptography** (encryption): [cryptography.io](https://cryptography.io/): AES-GCM, scrypt, RSA.
 - **Icons**: KDE Breeze theme (LGPL-3.0-or-later), see `src/scrinium/icons/NOTICE`.
 - The rest of the project documentation: [`plugins.md`](plugins.md), [`principes.md`](principes.md), [`api-partage.md`](api-partage.md),
