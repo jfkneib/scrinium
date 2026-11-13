@@ -34,6 +34,7 @@ def fiches(dossier_fiches) -> list:
             "• Chercher / remplacer dans le texte de la fiche : Ctrl+H (tout est annulable avec Ctrl+Z).\n"
             "• Lecture seule : clic droit sur une fiche ou un thème > « Lecture seule » : plus de modification par erreur (texte, titre, mise en forme), la fiche s'ouvre en aperçu. Même geste pour lever.\n"
             "• Export / import : Fichier > « Exporter la fiche en Markdown… » (le texte en .md, les images dans un dossier à côté) et « Importer des fichiers Markdown… » (une fiche par fichier, ses images jointes). Une fiche d'un type exécutable importée reste inerte jusqu'à sa validation.\n"
+            "• Un thème entier : « Exporter le thème en archive (.zip)… » (fiches en Markdown, images ; les fiches verrouillées restent chiffrées) et « Importer un thème (.zip)… » (crée toujours un NOUVEAU thème, sans toucher aux vôtres).\n"
             "• Déplacer une fiche vers un autre thème : glissez-la sur le thème (ou clic droit sur la fiche > « Déplacer vers le thème »).\n"
             "• Ranger : glissez les fiches pour changer leur ordre, mettez-les en favoris.\n"
             "• Images : on peut joindre des images à une fiche ; le clic droit sur une image propose l'OCR si l'extension est activée.\n"

@@ -789,6 +789,28 @@ class Store:
         o["themes"] = [n for n in dict.fromkeys(noms or []) if self.theme(n) is not None]
         self._sauver_ordre(o)
 
+    def ajouter_fiche_verrouillee(self, th: Theme, titre: str, donnees: bytes, pieces: dict | None = None) -> Fiche:
+        """Ajoute à un thème une fiche verrouillée venue d'ailleurs (archive de thème) : le fichier chiffré `donnees` et ses pièces jointes
+        chiffrées `pieces` ({« 1.lock » : octets}) sont copiés TELS QUELS, sans jamais être déchiffrés. ValueError si ce ne sont pas des
+        fichiers verrouillés Scrinium."""
+        if not (donnees.startswith(crypto.MAGIC) or donnees.startswith(crypto.MAGIC1)):
+            raise ValueError("ce n'est pas une fiche verrouillée Scrinium")
+        pieces = pieces or {}
+        for nom, d in pieces.items():
+            if not re.fullmatch(r"\d+\.lock", nom) or not d.startswith(crypto.MAGIC3):
+                raise ValueError(f"pièce jointe verrouillée invalide : {nom}")
+        p = self.libre(th.path, titre, None, ".lock")
+        _ecrire(p, donnees)
+        if pieces:
+            dossier = p.with_name(p.stem + ".pj")
+            mkdir_prive(dossier)
+            for nom, d in pieces.items():
+                _ecrire(dossier / nom, d)
+        f = self._lire(p)
+        th.fiches.append(f)
+        self._hook()
+        return f
+
     def ordonner_fiches(self, th: Theme, fichiers: list | None) -> None:
         """Fixe l'ordre des fiches d'un thème (noms de fichier) ; None = retour à l'ordre alphabétique."""
         o = self.ordre()

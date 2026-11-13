@@ -14,7 +14,7 @@ from PyQt6.QtWidgets import (QAbstractItemView, QApplication, QDialog, QFileDial
 from .. import __version__
 from ..core import autostart, capture, crypto, invitation
 from ..core.plugins import FicheVue, Gestionnaire
-from ..core import doc_extensions, echange_md, guide, lien as lien_mod, liens_fiches, repertoire, types_fiche
+from ..core import doc_extensions, echange_md, echange_theme, guide, lien as lien_mod, liens_fiches, repertoire, types_fiche
 from ..core.store import ICONE_DEFAUT, Store, propre
 from ..i18n import _
 from .assistant import AssistantCle
@@ -176,6 +176,8 @@ class Fenetre(QMainWindow):
         mf.addAction(self._action(_("Imprimer la fiche…"), "document-print", self.imprimer_fiche, "Ctrl+P"))
         mf.addAction(self._action(_("Exporter la fiche en Markdown…"), "document-export", self.exporter_markdown))
         mf.addAction(self._action(_("Importer des fichiers Markdown…"), "document-import", self.importer_markdown))
+        mf.addAction(self._action(_("Exporter le thème en archive (.zip)…"), "document-export", self.exporter_theme))
+        mf.addAction(self._action(_("Importer un thème (.zip)…"), "document-import", self.importer_theme))
         mf.addAction(self._action(_("Capture rapide…"), "document-edit", self.capture_rapide, "Ctrl+Alt+N"))
         mf.addAction(self._action(_("Inviter à installer Scrinium…"), "mail-send", self.inviter))
         mf.addSeparator()
@@ -547,6 +549,7 @@ class Fenetre(QMainWindow):
             a.setCheckable(True)
             a.setChecked(self.store.theme_lecture_seule(th))
             m.addAction(icone("edit-rename"), _("Renommer…"), self.renommer_theme)
+            m.addAction(icone("document-export"), _("Exporter le thème (.zip)…"), self.exporter_theme)
             m.addAction(icone("view-pim-notes"), _("Icône…"), self.icone_theme)
         if self.store.ordre()["themes"]:
             m.addAction(_("Remettre les thèmes dans l'ordre alphabétique"), self._ordre_alphabetique_themes)
@@ -1434,6 +1437,51 @@ class Fenetre(QMainWindow):
         if problemes:
             QMessageBox.warning(self, _("Importer des fichiers Markdown"),
                                 _("Certains éléments n'ont pas été importés :") + "\n\n" + "\n".join(problemes[:15]))
+
+    def exporter_theme(self, chemin: str | None = None):
+        """Exporte le thème courant en archive zip (fiches en Markdown, images ; fiches verrouillées copiées chiffrées)."""
+        t = self._theme_courant()
+        if t is None:
+            QMessageBox.information(self, _("Exporter le thème"), _("Choisissez d'abord un thème (pas « Toutes les fiches »)."))
+            return
+        self.sauver()
+        if chemin is None:
+            chemin, _f = QFileDialog.getSaveFileName(self, _("Exporter le thème"), str(Path.home() / f"{propre(t.nom, 'theme')}.zip"),
+                                                     _("Archive (*.zip)"))
+            if not chemin:
+                return
+        chemin = Path(chemin)
+        if chemin.suffix.lower() != ".zip":
+            chemin = chemin.with_name(chemin.name + ".zip")
+        try:
+            r = echange_theme.exporter(self.store, t, chemin)
+        except (OSError, ValueError) as ex:
+            QMessageBox.critical(self, _("Exporter le thème"), _("Écriture impossible : %s") % ex)
+            return
+        self._statut(_("✔ Thème exporté : %d fiche(s), dont %d verrouillée(s) (chiffrées)") % (r["fiches"] + r["verrouillees"], r["verrouillees"])
+                     + f"  ·  {chemin}", VERT)
+
+    def importer_theme(self, chemin: str | None = None):
+        """Crée un NOUVEAU thème à partir d'une archive exportée par Scrinium (jamais de fusion avec un thème existant)."""
+        from .images import preparer
+        if chemin is None:
+            chemin, _f = QFileDialog.getOpenFileName(self, _("Importer un thème"), str(Path.home()), _("Archive (*.zip)"))
+            if not chemin:
+                return
+        self.quitter_fiche()
+        try:
+            t, r = echange_theme.importer(self.store, Path(chemin), preparer)
+        except (OSError, ValueError) as ex:
+            QMessageBox.critical(self, _("Importer un thème"), _("Import impossible : %s") % ex)
+            return
+        self.plugins.emettre("themes_modifies")
+        self.theme = t.nom
+        self.maj_themes()
+        self.maj_fiches()
+        self._statut(_("✔ Thème importé : « %s » (%d fiche(s), dont %d verrouillée(s))") % (t.nom, r["fiches"] + r["verrouillees"], r["verrouillees"]), VERT)
+        if r["ignores"]:
+            QMessageBox.warning(self, _("Importer un thème"),
+                                _("Certains éléments n'ont pas été importés :") + "\n\n" + "\n".join(r["ignores"][:15]))
 
     def imprimer_fiche(self, imprimante=None):
         """Imprime la fiche affichée (boîte d'impression du système). `imprimante` : un QPrinter déjà réglé (tests, PDF)."""
