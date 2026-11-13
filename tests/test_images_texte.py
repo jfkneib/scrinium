@@ -84,3 +84,12 @@ def test_inserer_piece_ecrit_la_reference(fen):  # noqa: F811
     fen.texte.moveCursor(fen.texte.textCursor().MoveOperation.End)
     fen.inserer_piece(p)
     assert f"![photo](pj:{p.id})" in fen.texte.toPlainText()
+
+
+def test_bouton_raccourcis(fen, monkeypatch):  # noqa: F811
+    from PyQt6.QtWidgets import QMessageBox
+    vus = []
+    monkeypatch.setattr(QMessageBox, "information", lambda *a: vus.append(a[2]))
+    assert fen.menuBar().cornerWidget() is not None
+    fen.raccourcis()
+    assert "Ctrl+H" in vus[0] and "Ctrl+N" in vus[0]

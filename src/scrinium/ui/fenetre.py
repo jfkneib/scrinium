@@ -217,6 +217,12 @@ class Fenetre(QMainWindow):
         mh.addAction(self._action(_("Guide de Scrinium"), "help-contents", self.guide))
         mh.addAction(self._action(_("Documentation des extensions"), "preferences-plugin", self.doc_extensions))
         mh.addAction(self._action(_("À propos"), "help-about", self.a_propos))
+        bk = QToolButton()
+        bk.setIcon(icone("input-keyboard"))
+        bk.setAutoRaise(True)
+        bk.setToolTip(_("Raccourcis clavier"))
+        bk.clicked.connect(self.raccourcis)
+        m.setCornerWidget(bk, Qt.Corner.TopRightCorner)
 
         self.liste_themes = ListeThemes()
         self.liste_themes.fiches_deposees.connect(self.deplacer_fiches_vers)
@@ -1837,6 +1843,20 @@ class Fenetre(QMainWindow):
         self._afficher(t, f)
         self.maj_themes()
         self.maj_fiches()
+
+    def raccourcis(self):
+        """Fenêtre d'aide : la liste des raccourcis clavier."""
+        lignes = (
+            (_("Fiche et thème"), (("Ctrl+N", _("Nouvelle fiche")), ("Ctrl+Shift+N", _("Nouveau thème")), ("Ctrl+S", _("Enregistrer maintenant")),
+                                   ("Ctrl+Shift+L", _("Refermer la fiche verrouillée")), ("Alt+↑ / Alt+↓", _("Monter / descendre l'élément")),
+                                   ("Ctrl+P", _("Imprimer la fiche")), ("Ctrl+Q", _("Quitter")))),
+            (_("Texte"), (("Ctrl+B", _("Gras")), ("Ctrl+I", _("Italique")), ("Ctrl+E", _("Aperçu / édition")),
+                          ("Ctrl+F", _("Chercher (titres, notes, thèmes)")), ("Ctrl+H", _("Chercher / remplacer dans la fiche")),
+                          ("Ctrl+Z", _("Annuler")))),
+        )
+        corps = "".join(f"<h4>{titre}</h4><table>" + "".join(
+            f"<tr><td><b>{k}</b>&nbsp;&nbsp;</td><td>{d}</td></tr>" for k, d in items) + "</table>" for titre, items in lignes)
+        QMessageBox.information(self, _("Raccourcis clavier"), corps)
 
     def a_propos(self):
         QMessageBox.about(self, _("À propos"),
