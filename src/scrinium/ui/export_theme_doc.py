@@ -119,6 +119,7 @@ def exporter_pdf(store, th, chemin: Path) -> dict:
         parties.append(f"# {titre}\n\n" + _markdown_fiche(store, f, texte, th.nom, {}, adresse))
     doc.setMarkdown("\n\n---\n\n".join(parties))
     w = QPdfWriter(str(chemin))
+    w.setResolution(96)                  # unités du document = pixels à 96 ppp (sinon le texte sort minuscule)
     w.setPageSize(QPageSize(QPageSize.PageSizeId.A4))
     w.setPageMargins(QMarginsF(15, 15, 15, 15), QPageLayout.Unit.Millimeter)
     w.setTitle(th.nom)

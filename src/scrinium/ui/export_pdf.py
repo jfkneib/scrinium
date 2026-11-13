@@ -51,6 +51,7 @@ def imprimer(imprimante, titre: str, texte: str, images=()) -> None:
 def ecrire_pdf(chemin: str, titre: str, texte: str, images=()) -> None:
     """Écrit le PDF ; lève OSError si le fichier ne peut pas être écrit."""
     w = QPdfWriter(chemin)
+    w.setResolution(96)                  # unités du document = pixels à 96 ppp (sinon le texte sort minuscule)
     w.setPageSize(QPageSize(QPageSize.PageSizeId.A4))
     w.setPageMargins(QMarginsF(15, 15, 15, 15), QPageLayout.Unit.Millimeter)
     w.setTitle(titre or "Scrinium")
