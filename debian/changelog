@@ -1,3 +1,31 @@
+scrinium (0.10.0) UNRELEASED; urgency=medium
+
+  * Pastille rouge « à faire » sur l'icône des fiches qui demandent une action (échéance
+    proche, rappel, annonce à voir…) ; au survol, la raison.
+  * Liens entre fiches : [[nom de la fiche]] ou [[Thème/fiche]] ; un clic dans l'aperçu ouvre la
+    fiche, et chaque fiche montre celles qui pointent vers elle (Ctrl+Alt+L).
+  * Lecture seule : clic droit sur une fiche ou un thème ; texte, titre, mise en forme, collage
+    et extensions sont bloqués, la fiche s'ouvre en aperçu.
+  * Chercher / remplacer dans le texte de la fiche (Ctrl+H) : surlignage, compteur, casse,
+    « Tout remplacer » annulable d'un seul Ctrl+Z.
+  * Export et import : une fiche en Markdown (.md) avec ses images ; un thème entier en
+    archive .zip (fiches verrouillées copiées chiffrées, import toujours dans un NOUVEAU thème,
+    archive relue avec des limites strictes) ; « Markdown simple » pour un autre outil ; un
+    .md ou un .zip déposé sur la fenêtre est importé. Une fiche exécutable importée reste
+    inerte jusqu'à sa validation.
+  * Nouvelles extensions : Inventaire, Collection, Mots de passe, Recettes, Journal, Santé
+    (tension, traitement), Veille (flux RSS et Atom : lus et non lus, case « Afficher » par
+    source, mot-clé, jusqu'à 100 sources) et Emploi (listes de mots-clés indispensables,
+    souhaités, exclus ; lien fort ou faible ; annonces récentes ; suivi des candidatures ;
+    demande prête pour une IA).
+  * Exemples livrés avec les extensions : Veille informatique, Veille gouvernement et droit
+    (55 flux), Emploi avec 18 flux d'offres vérifiés, Emploi dans une région (Lorraine et
+    Luxembourg). L'exemple d'une fiche exécutable est validé à l'activation de l'extension.
+  * OCR : l'image est agrandie et passée en niveaux de gris, en mémoire, avant Tesseract ; les
+    petits caractères (noms, boutons) sont bien mieux lus. La pièce jointe n'est pas modifiée.
+
+ -- Jean-François Kneib <kneib.jean-francois@cegetel.net>  Fri, 13 Nov 2026 12:00:00 +0100
+
 scrinium (0.9.0) unstable; urgency=medium
 
   * Nouvelle extension Supervision : état des machines (ping, ports, web, SSH), couleurs vert à
