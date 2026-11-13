@@ -5918,15 +5918,58 @@ msgstr ""
 msgid "Doc"
 msgstr ""
 
-#: src/scrinium/core/doc_extensions.py:22
+#: src/scrinium/core/doc_extensions.py:26
+msgid "ce qu'est une extension, où la mettre, la sécurité"
+msgstr ""
+
+#: src/scrinium/core/doc_extensions.py:26
+msgid "un premier plugin, pas à pas"
+msgstr ""
+
+#: src/scrinium/core/doc_extensions.py:27
+msgid "lire et modifier les fiches avec « ctx »"
+msgstr ""
+
+#: src/scrinium/core/doc_extensions.py:27
+msgid "boutons, menus, panneaux"
+msgstr ""
+
+#: src/scrinium/core/doc_extensions.py:27
+msgid "réagir aux événements"
+msgstr ""
+
+#: src/scrinium/core/doc_extensions.py:28
+msgid "recettes toutes prêtes"
+msgstr ""
+
+#: src/scrinium/core/doc_extensions.py:28
+msgid "bonnes pratiques et partage"
+msgstr ""
+
+#: src/scrinium/core/doc_extensions.py:33
+msgid "Référence complète (en anglais) : docs/plugins.md dans les sources de Scrinium."
+msgstr ""
+
+#: src/scrinium/core/doc_extensions.py:19
+#: src/scrinium/ui/extensions.py:167
+msgid "Extensions"
+msgstr ""
+
+#: src/scrinium/core/doc_extensions.py:19
+#: src/scrinium/core/doc_extensions.py:36
+#: src/scrinium/core/guide.py:19
+msgid "Sommaire"
+msgstr ""
+
+#: src/scrinium/core/doc_extensions.py:46
 msgid "Extensions 1 · C'est quoi ?"
 msgstr ""
 
-#: src/scrinium/core/doc_extensions.py:36
+#: src/scrinium/core/doc_extensions.py:60
 msgid "Extensions 2 · Mon premier plugin"
 msgstr ""
 
-#: src/scrinium/core/doc_extensions.py:36
+#: src/scrinium/core/doc_extensions.py:60
 msgid ""
 "Objectif : une entrée de menu « Compter mes fiches ».\n"
 "\n"
@@ -5965,11 +6008,11 @@ msgid ""
 "Un exemple complet et commenté : le dossier plugins/hello dans les sources."
 msgstr ""
 
-#: src/scrinium/core/doc_extensions.py:72
+#: src/scrinium/core/doc_extensions.py:96
 msgid "Extensions 3 · Lire et modifier les fiches"
 msgstr ""
 
-#: src/scrinium/core/doc_extensions.py:72
+#: src/scrinium/core/doc_extensions.py:96
 msgid ""
 "Tout passe par l'objet « ctx » reçu dans activer(ctx).\n"
 "\n"
@@ -6004,11 +6047,11 @@ msgid ""
 "```"
 msgstr ""
 
-#: src/scrinium/core/doc_extensions.py:104
+#: src/scrinium/core/doc_extensions.py:128
 msgid "Extensions 4 · Boutons, menus et panneaux"
 msgstr ""
 
-#: src/scrinium/core/doc_extensions.py:104
+#: src/scrinium/core/doc_extensions.py:128
 msgid ""
 "« ctx.ui » ajoute des éléments à la fenêtre ; tout est retiré tout seul quand l'extension est désactivée. Il vaut None quand Scrinium tourne sans fenêtre : testez-le.\n"
 "\n"
@@ -6043,11 +6086,11 @@ msgid ""
 "```"
 msgstr ""
 
-#: src/scrinium/core/doc_extensions.py:136
+#: src/scrinium/core/doc_extensions.py:160
 msgid "Extensions 5 · Réagir aux événements"
 msgstr ""
 
-#: src/scrinium/core/doc_extensions.py:136
+#: src/scrinium/core/doc_extensions.py:160
 msgid ""
 "ctx.on(evenement, fonction) : Scrinium appelle votre fonction quand quelque chose se passe. Les arguments arrivent par nom : acceptez toujours **kw pour rester compatible avec les ajouts futurs.\n"
 "\n"
@@ -6071,11 +6114,11 @@ msgid ""
 "```"
 msgstr ""
 
-#: src/scrinium/core/doc_extensions.py:157
+#: src/scrinium/core/doc_extensions.py:181
 msgid "Extensions 6 · Recettes"
 msgstr ""
 
-#: src/scrinium/core/doc_extensions.py:157
+#: src/scrinium/core/doc_extensions.py:181
 msgid ""
 "Horodater : insérer la date et l'heure à l'endroit du curseur.\n"
 "\n"
@@ -6114,11 +6157,11 @@ msgid ""
 "Ranger ce que l'extension reçoit : ajoutez du texte à une fiche précise avec ctx.fiches(...) puis ctx.modifier(vue, texte=...)."
 msgstr ""
 
-#: src/scrinium/core/doc_extensions.py:193
+#: src/scrinium/core/doc_extensions.py:217
 msgid "Extensions 7 · Bonnes pratiques et partage"
 msgstr ""
 
-#: src/scrinium/core/doc_extensions.py:193
+#: src/scrinium/core/doc_extensions.py:217
 msgid ""
 "• Gardez activer() rapide : ouvrez les fichiers et le réseau plus tard, pas au démarrage.\n"
 "• Testez ctx.ui is not None avant d'ajouter quoi que ce soit à la fenêtre.\n"
@@ -6132,7 +6175,7 @@ msgid ""
 "Partager votre extension : donnez le dossier (compressé) ; la personne le dépose dans son dossier d'extensions. Pour une distribution propre, un paquet Python peut déclarer un « entry point » scrinium.plugins (voir docs/plugins.md)."
 msgstr ""
 
-#: src/scrinium/core/doc_extensions.py:22
+#: src/scrinium/core/doc_extensions.py:46
 msgid ""
 "Une extension (ou « plugin ») ajoute une fonction à Scrinium sans toucher à son code : un bouton, une entrée de menu, un panneau, une réaction quand on ouvre ou enregistre une fiche…\n"
 "\n"
@@ -6147,6 +6190,15 @@ msgid ""
 "⚠ Sécurité : une extension est du code Python ordinaire qui s'exécute dans Scrinium avec vos droits. Ce n'est PAS un bac à sable. N'activez que des extensions dont vous avez confiance en l'auteur. L'API ne donne jamais la clé d'une fiche verrouillée et ne montre rien d'une fiche verrouillée encore fermée.\n"
 "\n"
 "Référence complète (en anglais) : docs/plugins.md dans les sources de Scrinium."
+msgstr ""
+
+#: src/scrinium/core/doc_extensions.py:31
+msgid "Comment écrire une extension pour Scrinium. Chaque ligne ci-dessous est un LIEN vers une fiche : passez en aperçu (Ctrl+E) et cliquez. Le guide général de Scrinium est dans le thème « Guide » (menu Aide)."
+msgstr ""
+
+#: src/scrinium/core/doc_extensions.py:38
+#: src/scrinium/core/guide.py:40
+msgid "Suivant"
 msgstr ""
 
 #: src/scrinium/core/exemples.py:12
@@ -6406,12 +6458,6 @@ msgstr ""
 msgid "Chaque extension activée a aussi sa fiche « Guide · … » à la suite, dans ce même thème."
 msgstr ""
 
-#: src/scrinium/core/guide.py:19
-#: src/scrinium/core/guide.py:47
-#: src/scrinium/core/guide.py:38
-msgid "Sommaire"
-msgstr ""
-
 #: src/scrinium/core/guide.py:52
 msgid "Guide 1 · Le principe"
 msgstr ""
@@ -6544,10 +6590,6 @@ msgstr ""
 
 #: src/scrinium/core/guide.py:31
 msgid "Bienvenue dans le guide de Scrinium. Chaque ligne ci-dessous est un LIEN vers une fiche : passez en aperçu (Ctrl+E) et cliquez. Écrire `[[Titre d'une fiche]]` dans n'importe quelle fiche crée un lien pareil (bouton « `[[ ]]` » de la barre de mise en forme) ; Fichier > Fiches liées… (Ctrl+Alt+L) montre les fiches vers lesquelles une fiche pointe, et celles qui pointent vers elle."
-msgstr ""
-
-#: src/scrinium/core/guide.py:40
-msgid "Suivant"
 msgstr ""
 
 #: src/scrinium/core/invitation.py:13
@@ -6892,10 +6934,6 @@ msgstr ""
 
 #: src/scrinium/ui/choix_icone.py:35
 msgid "Icône de « %s » :"
-msgstr ""
-
-#: src/scrinium/ui/extensions.py:167
-msgid "Extensions"
 msgstr ""
 
 #: src/scrinium/ui/extensions.py:170

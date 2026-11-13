@@ -28,10 +28,23 @@ def _blocs(texte, langage):
     return re.findall(r"```" + langage + r"\n(.*?)```", texte, re.S)
 
 
-def test_sept_fiches_avec_le_dossier_des_extensions():
+def test_sommaire_puis_sept_fiches_avec_le_dossier_des_extensions():
     fiches = doc_extensions.fiches(DOSSIER)
-    assert [t[:12] for t, _x in fiches] == [f"Extensions {i}" for i in range(1, 8)]
-    assert str(DOSSIER) in fiches[0][1] and "%s" not in fiches[0][1]
+    assert fiches[0][0] == doc_extensions.titre_sommaire()
+    assert [t[:12] for t, _x in fiches[1:]] == [f"Extensions {i}" for i in range(1, 8)]
+    assert str(DOSSIER) in fiches[1][1] and "%s" not in fiches[1][1]
+
+
+def test_liens_du_sommaire_de_la_doc():
+    from scrinium.core import liens_fiches
+    fiches = doc_extensions.fiches(DOSSIER)
+    titres = {t.casefold() for t, _x in fiches}
+    assert {c.casefold() for c, _a in liens_fiches.trouver(fiches[0][1])} == {t.casefold() for t, _x in fiches[1:]}
+    for titre, texte in fiches[1:]:
+        assert doc_extensions.titre_sommaire().casefold() in {c.casefold() for c, _a in liens_fiches.trouver(texte)}, titre
+    for titre, texte in fiches:
+        for cible, _a in liens_fiches.trouver(texte):
+            assert cible.casefold() in titres, f"{titre} : lien cassé [[{cible}]]"
 
 
 @pytest.mark.parametrize("langue", ["fr", "en"])
@@ -50,7 +63,7 @@ def test_le_premier_plugin_fonctionne_vraiment(tmp_path):
     from scrinium.core.paths import Paths
     from scrinium.core.plugins import Gestionnaire
     from scrinium.core.store import Store
-    fiche = doc_extensions.fiches(DOSSIER)[1][1]
+    fiche = doc_extensions.fiches(DOSSIER)[2][1]                 # [0] est le sommaire
     json_p, code = _blocs(fiche, "json")[0], _blocs(fiche, "python")[0]
     s = Store(Paths(tmp_path / "am"))
     s.charger()
@@ -75,7 +88,7 @@ def test_la_doc_cite_les_vrais_evenements_et_methodes():
 
 def test_present_au_premier_lancement(fen):  # noqa: F811
     th = fen.store.theme("Doc")
-    assert th is not None and len(th.fiches) == 7 and th.icone == "preferences-plugin"
+    assert th is not None and len(th.fiches) == 8 and th.icone == "preferences-plugin"
 
 
 def test_menu_aide_cree_rouvre_sans_ecraser(fen):  # noqa: F811
@@ -85,12 +98,12 @@ def test_menu_aide_cree_rouvre_sans_ecraser(fen):  # noqa: F811
     fen.maj_themes()
     fen.doc_extensions()
     th = fen.store.theme("Doc")
-    assert len(th.fiches) == 7 and fen.theme == "Doc" and fen.fiche.titre.startswith("Extensions 1")
+    assert len(th.fiches) == 8 and fen.theme == "Doc" and fen.fiche.titre == doc_extensions.titre_sommaire()
     f = next(x for x in th.fiches if x.titre.startswith("Extensions 3"))
     fen.store.enregistrer(th, f, f.titre, "ma version personnelle")           # l'utilisateur a modifié une fiche
     f2 = next(x for x in th.fiches if x.titre.startswith("Extensions 6"))
     fen.store.supprimer_fiche(th, f2)                                          # et en a supprimé une
     fen.doc_extensions()
     th = fen.store.theme("Doc")
-    assert len(th.fiches) == 7                                                 # la supprimée est recréée, rien n'est doublé
+    assert len(th.fiches) == 8                                                 # la supprimée est recréée, rien n'est doublé
     assert next(x for x in th.fiches if x.titre.startswith("Extensions 3")).texte == "ma version personnelle"

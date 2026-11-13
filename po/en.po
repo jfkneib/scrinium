@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: scrinium 0.2.0\n"
 "Report-Msgid-Bugs-To: \n"
-"PO-Revision-Date: 2026-11-13 10:06+0100\n"
+"PO-Revision-Date: 2026-11-13 10:09+0100\n"
 "Last-Translator: Jean-François Kneib\n"
 "Language-Team: English\n"
 "Language: en\n"
@@ -6208,15 +6208,58 @@ msgstr "locked note: \"%s\" must first be unlocked in the Scrinium window"
 msgid "Doc"
 msgstr "Docs"
 
-#: src/scrinium/core/doc_extensions.py:22
+#: src/scrinium/core/doc_extensions.py:26
+msgid "ce qu'est une extension, où la mettre, la sécurité"
+msgstr "what an extension is, where to put it, security"
+
+#: src/scrinium/core/doc_extensions.py:26
+msgid "un premier plugin, pas à pas"
+msgstr "a first plugin, step by step"
+
+#: src/scrinium/core/doc_extensions.py:27
+msgid "lire et modifier les fiches avec « ctx »"
+msgstr "reading and changing notes with \"ctx\""
+
+#: src/scrinium/core/doc_extensions.py:27
+msgid "boutons, menus, panneaux"
+msgstr "buttons, menus, panels"
+
+#: src/scrinium/core/doc_extensions.py:27
+msgid "réagir aux événements"
+msgstr "reacting to events"
+
+#: src/scrinium/core/doc_extensions.py:28
+msgid "recettes toutes prêtes"
+msgstr "ready-made recipes"
+
+#: src/scrinium/core/doc_extensions.py:28
+msgid "bonnes pratiques et partage"
+msgstr "good practice and sharing"
+
+#: src/scrinium/core/doc_extensions.py:33
+msgid "Référence complète (en anglais) : docs/plugins.md dans les sources de Scrinium."
+msgstr "Complete reference (in English): docs/plugins.md in the Scrinium sources."
+
+#: src/scrinium/core/doc_extensions.py:19
+#: src/scrinium/ui/extensions.py:167
+msgid "Extensions"
+msgstr "Extensions"
+
+#: src/scrinium/core/doc_extensions.py:19
+#: src/scrinium/core/doc_extensions.py:36
+#: src/scrinium/core/guide.py:19
+msgid "Sommaire"
+msgstr "Contents"
+
+#: src/scrinium/core/doc_extensions.py:46
 msgid "Extensions 1 · C'est quoi ?"
 msgstr "Extensions 1 · What is it?"
 
-#: src/scrinium/core/doc_extensions.py:36
+#: src/scrinium/core/doc_extensions.py:60
 msgid "Extensions 2 · Mon premier plugin"
 msgstr "Extensions 2 · My first plugin"
 
-#: src/scrinium/core/doc_extensions.py:36
+#: src/scrinium/core/doc_extensions.py:60
 msgid ""
 "Objectif : une entrée de menu « Compter mes fiches ».\n"
 "\n"
@@ -6290,11 +6333,11 @@ msgstr ""
 "\n"
 "A complete, commented example: the plugins/hello folder in the sources."
 
-#: src/scrinium/core/doc_extensions.py:72
+#: src/scrinium/core/doc_extensions.py:96
 msgid "Extensions 3 · Lire et modifier les fiches"
 msgstr "Extensions 3 · Reading and changing notes"
 
-#: src/scrinium/core/doc_extensions.py:72
+#: src/scrinium/core/doc_extensions.py:96
 msgid ""
 "Tout passe par l'objet « ctx » reçu dans activer(ctx).\n"
 "\n"
@@ -6360,11 +6403,11 @@ msgstr ""
 "        self.ctx.modifier(vue, titre=vue.titre.upper())\n"
 "```"
 
-#: src/scrinium/core/doc_extensions.py:104
+#: src/scrinium/core/doc_extensions.py:128
 msgid "Extensions 4 · Boutons, menus et panneaux"
 msgstr "Extensions 4 · Buttons, menus and panels"
 
-#: src/scrinium/core/doc_extensions.py:104
+#: src/scrinium/core/doc_extensions.py:128
 msgid ""
 "« ctx.ui » ajoute des éléments à la fenêtre ; tout est retiré tout seul quand l'extension est désactivée. Il vaut None quand Scrinium tourne sans fenêtre : testez-le.\n"
 "\n"
@@ -6430,11 +6473,11 @@ msgstr ""
 "    self.etiquette.setText(f\"{len((fiche.texte or '').split())} words\")\n"
 "```"
 
-#: src/scrinium/core/doc_extensions.py:136
+#: src/scrinium/core/doc_extensions.py:160
 msgid "Extensions 5 · Réagir aux événements"
 msgstr "Extensions 5 · Reacting to events"
 
-#: src/scrinium/core/doc_extensions.py:136
+#: src/scrinium/core/doc_extensions.py:160
 msgid ""
 "ctx.on(evenement, fonction) : Scrinium appelle votre fonction quand quelque chose se passe. Les arguments arrivent par nom : acceptez toujours **kw pour rester compatible avec les ajouts futurs.\n"
 "\n"
@@ -6478,11 +6521,11 @@ msgstr ""
 "    ...\n"
 "```"
 
-#: src/scrinium/core/doc_extensions.py:157
+#: src/scrinium/core/doc_extensions.py:181
 msgid "Extensions 6 · Recettes"
 msgstr "Extensions 6 · Recipes"
 
-#: src/scrinium/core/doc_extensions.py:157
+#: src/scrinium/core/doc_extensions.py:181
 msgid ""
 "Horodater : insérer la date et l'heure à l'endroit du curseur.\n"
 "\n"
@@ -6556,11 +6599,11 @@ msgstr ""
 "\n"
 "Filing what the extension receives: append text to a given note with ctx.fiches(...) then ctx.modifier(vue, texte=...)."
 
-#: src/scrinium/core/doc_extensions.py:193
+#: src/scrinium/core/doc_extensions.py:217
 msgid "Extensions 7 · Bonnes pratiques et partage"
 msgstr "Extensions 7 · Good practice and sharing"
 
-#: src/scrinium/core/doc_extensions.py:193
+#: src/scrinium/core/doc_extensions.py:217
 msgid ""
 "• Gardez activer() rapide : ouvrez les fichiers et le réseau plus tard, pas au démarrage.\n"
 "• Testez ctx.ui is not None avant d'ajouter quoi que ce soit à la fenêtre.\n"
@@ -6584,7 +6627,7 @@ msgstr ""
 "\n"
 "Sharing your extension: hand over the (zipped) folder; the person drops it into their extensions folder. For a clean distribution, a Python package can declare a \"scrinium.plugins\" entry point (see docs/plugins.md)."
 
-#: src/scrinium/core/doc_extensions.py:22
+#: src/scrinium/core/doc_extensions.py:46
 msgid ""
 "Une extension (ou « plugin ») ajoute une fonction à Scrinium sans toucher à son code : un bouton, une entrée de menu, un panneau, une réaction quand on ouvre ou enregistre une fiche…\n"
 "\n"
@@ -6613,6 +6656,15 @@ msgstr ""
 "⚠ Security: an extension is ordinary Python code running inside Scrinium with your rights. It is NOT a sandbox. Only enable extensions whose author you trust. The API never hands out the key of a locked note and shows nothing of a locked note that is still closed.\n"
 "\n"
 "Full reference: docs/plugins.md in the Scrinium sources."
+
+#: src/scrinium/core/doc_extensions.py:31
+msgid "Comment écrire une extension pour Scrinium. Chaque ligne ci-dessous est un LIEN vers une fiche : passez en aperçu (Ctrl+E) et cliquez. Le guide général de Scrinium est dans le thème « Guide » (menu Aide)."
+msgstr "How to write an extension for Scrinium. Each line below is a LINK to a note: switch to preview (Ctrl+E) and click. The general Scrinium guide is in the \"Guide\" topic (Help menu)."
+
+#: src/scrinium/core/doc_extensions.py:38
+#: src/scrinium/core/guide.py:40
+msgid "Suivant"
+msgstr "Next"
 
 #: src/scrinium/core/exemples.py:12
 #: src/scrinium/core/store.py:155
@@ -6940,12 +6992,6 @@ msgstr "where the files are, backing up"
 msgid "Chaque extension activée a aussi sa fiche « Guide · … » à la suite, dans ce même thème."
 msgstr "Each enabled extension also has its own \"Guide · …\" note after these, in this same topic."
 
-#: src/scrinium/core/guide.py:19
-#: src/scrinium/core/guide.py:47
-#: src/scrinium/core/guide.py:38
-msgid "Sommaire"
-msgstr "Contents"
-
 #: src/scrinium/core/guide.py:52
 msgid "Guide 1 · Le principe"
 msgstr "Guide 1 · The principle"
@@ -7153,10 +7199,6 @@ msgstr ""
 #: src/scrinium/core/guide.py:31
 msgid "Bienvenue dans le guide de Scrinium. Chaque ligne ci-dessous est un LIEN vers une fiche : passez en aperçu (Ctrl+E) et cliquez. Écrire `[[Titre d'une fiche]]` dans n'importe quelle fiche crée un lien pareil (bouton « `[[ ]]` » de la barre de mise en forme) ; Fichier > Fiches liées… (Ctrl+Alt+L) montre les fiches vers lesquelles une fiche pointe, et celles qui pointent vers elle."
 msgstr "Welcome to the Scrinium guide. Each line below is a LINK to a note: switch to preview (Ctrl+E) and click. Writing `[[Title of a note]]` in any note makes a link just like these (the \"`[[ ]]`\" button of the formatting bar); File > Linked notes… (Ctrl+Alt+L) shows the notes a note points to, and those pointing to it."
-
-#: src/scrinium/core/guide.py:40
-msgid "Suivant"
-msgstr "Next"
 
 #: src/scrinium/core/invitation.py:13
 msgid "Invitation à essayer Scrinium"
@@ -7573,10 +7615,6 @@ msgstr "You can also type the name of an icon from your system icon theme."
 #: src/scrinium/ui/choix_icone.py:35
 msgid "Icône de « %s » :"
 msgstr "Icon for « %s »:"
-
-#: src/scrinium/ui/extensions.py:167
-msgid "Extensions"
-msgstr "Extensions"
 
 #: src/scrinium/ui/extensions.py:170
 msgid "Une extension est un programme qui s'exécute avec les mêmes droits que Scrinium : elle peut lire les fiches ouvertes. N'activez que des extensions dont vous connaissez l'origine."

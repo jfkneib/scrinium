@@ -15,8 +15,32 @@ def icone() -> str:
     return "preferences-plugin"
 
 
+def titre_sommaire() -> str:
+    return f"{_('Extensions')} · {_('Sommaire')}"
+
+
 def fiches(dossier_extensions) -> list:
-    """[(titre, texte)] des fiches de la documentation ; `dossier_extensions` : dossier où l'utilisateur dépose ses extensions."""
+    """[(titre, texte)] des fiches de la documentation : d'abord le SOMMAIRE (liens `[[…]]` vers les sept pages), puis les pages, chacune
+    terminée par « ← Sommaire · Page suivante → ». `dossier_extensions` : dossier où l'utilisateur dépose ses extensions."""
+    pages = _pages(dossier_extensions)
+    resume = [_("ce qu'est une extension, où la mettre, la sécurité"), _("un premier plugin, pas à pas"),
+              _("lire et modifier les fiches avec « ctx »"), _("boutons, menus, panneaux"), _("réagir aux événements"),
+              _("recettes toutes prêtes"), _("bonnes pratiques et partage")]
+    liste = "\n".join(f"- [[{t}]] : {r}" for (t, _x), r in zip(pages, resume))
+    sommaire = titre_sommaire()
+    texte = _("Comment écrire une extension pour Scrinium. Chaque ligne ci-dessous est un LIEN vers une fiche : passez en aperçu "
+              "(Ctrl+E) et cliquez. Le guide général de Scrinium est dans le thème « Guide » (menu Aide).") + "\n\n" + liste + "\n\n" + \
+        _("Référence complète (en anglais) : docs/plugins.md dans les sources de Scrinium.")
+    res = [(sommaire, texte)]
+    for i, (titre, corps) in enumerate(pages):
+        pied = f"← [[{sommaire}|{_('Sommaire')}]]"
+        if i + 1 < len(pages):
+            pied += f" · {_('Suivant')} : [[{pages[i + 1][0]}]] →"
+        res.append((titre, corps + "\n\n" + pied))
+    return res
+
+
+def _pages(dossier_extensions) -> list:
     d = str(dossier_extensions)
     return [
         (_("Extensions 1 · C'est quoi ?"), _(
