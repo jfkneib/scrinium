@@ -1,4 +1,4 @@
-scrinium (0.10.0) UNRELEASED; urgency=medium
+scrinium (0.10.0) unstable; urgency=medium
 
   * Pastille rouge « à faire » sur l'icône des fiches qui demandent une action (échéance
     proche, rappel, annonce à voir…) ; au survol, la raison.
