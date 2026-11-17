@@ -1,3 +1,11 @@
+scrinium (0.11.1) unstable; urgency=medium
+
+  * Photo comme icône d'un thème : « Icône… » > « Photo… » (recadrée au carré, 96 px), affichée
+    dans la liste des thèmes ; « Retirer la photo » revient à l'icône. L'archive .zip du thème
+    emporte la photo et l'import la reprend.
+
+ -- Jean-François Kneib <kneib.jean-francois@cegetel.net>  Tue, 17 Nov 2026 10:00:00 +0100
+
 scrinium (0.11.0) unstable; urgency=medium
 
   Version « Enluminure » : les fiches deviennent de vrais documents illustrés.
