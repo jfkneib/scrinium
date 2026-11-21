@@ -1102,7 +1102,7 @@ class Fenetre(QMainWindow):
         if self.fiche is None or self.fiche.fermee or self.format.lecture_seule:
             return
         m = QMenu(self)
-        pieces = self.store.lister_pieces(self.fiche)
+        pieces = [p for p in self.store.lister_pieces(self.fiche) if images.est_image(p)]      # un document ne s'insère pas comme image
         for p in pieces:
             m.addAction(p.nom, lambda p=p: self.inserer_piece(p))
         if pieces:

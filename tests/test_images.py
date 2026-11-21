@@ -243,3 +243,18 @@ def test_recadrage_refuse_remplacement_sans_confirmation(fen, app, monkeypatch):
     v._appliquer(True)
     (p,) = fen.store.lister_pieces(fen.fiche)
     assert QImage.fromData(fen.store.lire_piece(fen.fiche, p)).width() == 400
+
+
+def test_bande_avec_un_document_joint(fen, monkeypatch):
+    """Un document joint (pas une image) s'affiche dans la bande avec une icône, s'enregistre sous… et ne passe pas par la visionneuse."""
+    from PyQt6.QtWidgets import QFileDialog
+    f = fen.fiche
+    fen.bande.ajouter([image()])
+    doc = fen.store.ajouter_piece(f, "Rapport.odt", "application/vnd.oasis.opendocument.text", b"PK-contenu")
+    fen.bande.charger(fen.fiche_theme, f)
+    assert fen.bande.liste.count() == 2 and not images.est_image(doc) and images.est_image(fen.bande.pieces[0])
+    sortie = os.path.join(os.path.dirname(str(fen.store.paths.base)), "copie.odt")
+    monkeypatch.setattr(QFileDialog, "getSaveFileName", lambda *a, **k: (sortie, ""))
+    monkeypatch.setattr(images, "Visionneuse", lambda *a, **k: (_ for _ in ()).throw(AssertionError("pas de visionneuse")))
+    fen.bande.ouvrir(1)                                                    # double-clic : enregistre le fichier
+    assert open(sortie, "rb").read() == b"PK-contenu"

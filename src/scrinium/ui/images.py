@@ -368,10 +368,20 @@ class Visionneuse(QDialog):
         except (ImageInvalide, ValueError, OSError) as ex:
             QMessageBox.warning(self, _("Recadrage"), str(ex))
             return
-        self.pieces = self.fen.store.lister_pieces(f)
+        self.pieces = [q for q in self.fen.store.lister_pieces(f) if est_image(q)]      # la visionneuse ne feuillette que les images
         self.fen.bande.charger(t, f)
         self.fen.pieces_modifiees()
         self._aller(next((k for k, q in enumerate(self.pieces) if q.id == nouvelle.id), self.i))
+
+
+def est_image(piece) -> bool:
+    """Vrai pour une pièce que la visionneuse sait afficher (PNG ou JPEG) ; faux pour un document ou tout autre fichier."""
+    return piece.type in ("image/png", "image/jpeg")
+
+
+def icone_document() -> QIcon:
+    ic = icone("x-office-document")
+    return ic if not ic.isNull() else icone("document-new")
 
 
 # ---------- bande de vignettes sous l'éditeur ----------
@@ -416,6 +426,9 @@ class BandePieces(QWidget):
             return
         self.pieces = self.fen.store.lister_pieces(fiche)
         for p in self.pieces:
+            if not est_image(p):
+                self.liste.addItem(QListWidgetItem(icone_document(), p.nom))       # document : pas de vignette
+                continue
             try:
                 pm = miniature(self.fen.store.lire_piece(fiche, p))
             except Exception:
@@ -464,8 +477,13 @@ class BandePieces(QWidget):
 
     # ----- actions sur une pièce -----
     def ouvrir(self, i):
-        if 0 <= i < len(self.pieces):
-            Visionneuse(self.fen, self.fen.fiche, self.pieces, i, self.fen).exec()
+        if not 0 <= i < len(self.pieces):
+            return
+        if not est_image(self.pieces[i]):                    # un document ne s'affiche pas ici : on propose de l'enregistrer
+            self.enregistrer_sous(i)
+            return
+        images = [p for p in self.pieces if est_image(p)]    # la visionneuse ne feuillette que les images
+        Visionneuse(self.fen, self.fen.fiche, images, images.index(self.pieces[i]), self.fen).exec()
 
     def _menu(self, pos):
         it = self.liste.itemAt(pos)
@@ -473,12 +491,15 @@ class BandePieces(QWidget):
             return
         i = self.liste.row(it)
         m = QMenu(self)
-        m.addAction(icone("view-pim-notes"), _("Ouvrir"), lambda: self.ouvrir(i))
+        image = est_image(self.pieces[i])
+        if image:
+            m.addAction(icone("view-pim-notes"), _("Ouvrir"), lambda: self.ouvrir(i))
         m.addAction(icone("document-save"), _("Enregistrer sous…"), lambda: self.enregistrer_sous(i))
-        m.addAction(icone("edit-copy"), _("Copier l'image"), lambda: self.copier(i))
-        if not self.fen.texte.isReadOnly() and not self.fen.format.lecture_seule:
-            m.addAction(icone("insert-image"), _("Insérer dans le texte"), lambda: self.fen.inserer_piece(self.pieces[i]))
-        extensions = list(self.fen.actions_image)
+        if image:
+            m.addAction(icone("edit-copy"), _("Copier l'image"), lambda: self.copier(i))
+            if not self.fen.texte.isReadOnly() and not self.fen.format.lecture_seule:
+                m.addAction(icone("insert-image"), _("Insérer dans le texte"), lambda: self.fen.inserer_piece(self.pieces[i]))
+        extensions = list(self.fen.actions_image) if image else []
         if extensions:
             m.addSeparator()
         for nom, texte, fn, ic in extensions:                    # entrées ajoutées par les extensions (ex. OCR)
@@ -502,9 +523,12 @@ class BandePieces(QWidget):
                 self.fen, _("Enregistrer sous"),
                 _("La fiche est verrouillée : la copie sera enregistrée EN CLAIR. Continuer ?")) != QMessageBox.StandardButton.Yes:
             return
-        suffixe = ".jpg" if p.type == "image/jpeg" else ".png"
-        nom = p.nom if Path(p.nom).suffix.lower() == suffixe else Path(p.nom).stem + suffixe
-        chemin, _f = QFileDialog.getSaveFileName(self.fen, _("Enregistrer l'image"), nom)
+        if est_image(p):
+            suffixe = ".jpg" if p.type == "image/jpeg" else ".png"
+            nom = p.nom if Path(p.nom).suffix.lower() == suffixe else Path(p.nom).stem + suffixe
+        else:
+            nom = Path(p.nom).name or "document"
+        chemin, _f = QFileDialog.getSaveFileName(self.fen, _("Enregistrer l'image") if est_image(p) else _("Enregistrer le fichier"), nom)
         if chemin:
             try:
                 Path(chemin).write_bytes(self.fen.store.lire_piece(f, p))
