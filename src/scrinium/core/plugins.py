@@ -113,7 +113,7 @@ class FicheVue:
 
 
 class PieceVue:
-    """Vue en lecture d'une pièce jointe (image) : métadonnées seulement ; le contenu s'obtient par `ctx.lire_piece`."""
+    """Vue en lecture d'une pièce jointe (image ou autre fichier) : métadonnées seulement ; le contenu s'obtient par `ctx.lire_piece`."""
     __slots__ = ("_p",)
 
     def __init__(self, piece):
@@ -235,11 +235,28 @@ class Contexte:
         raise ValueError("pièce inconnue (supprimée ?)")
 
     def lire_piece(self, vue: FicheVue, piece) -> bytes:
-        """Octets de l'image (PNG ou JPEG). ValueError si la fiche est verrouillée fermée ou la pièce inconnue."""
+        """Octets de la pièce (image ou autre fichier). ValueError si la fiche est verrouillée fermée ou la pièce inconnue."""
         _t, f = self._trouver(vue)
         if f.fermee:
             raise ValueError("fiche verrouillée : déverrouillez-la d'abord")
         return self._g.store.lire_piece(f, self._piece(f, piece))
+
+    def ajouter_piece(self, vue: FicheVue, nom: str, type_: str, donnees: bytes) -> PieceVue:
+        """Joint un fichier à la fiche (chiffré avec elle si elle est verrouillée). `type_` : type MIME en minuscules ; PNG et JPEG
+        doivent être déjà réencodés, tout autre type est gardé tel quel (.bin). ValueError si la fiche est fermée, le type mal
+        formé ou les limites (réglage `pieces_jointes`) dépassées."""
+        t, f = self._trouver(vue)
+        p = self._g.store.ajouter_piece(f, nom, type_, donnees)
+        self._g.emettre("piece_jointe_ajoutee", fiche=FicheVue(t, f), piece=PieceVue(p))
+        return PieceVue(p)
+
+    def remplacer_piece(self, vue: FicheVue, piece, type_: str, donnees: bytes) -> PieceVue:
+        """Remplace le contenu d'une pièce en gardant son numéro et son nom ; l'ancienne version est copiée à la corbeille et le
+        texte extrait (`ocr`) est effacé. Mêmes erreurs que `ajouter_piece`."""
+        t, f = self._trouver(vue)
+        p = self._g.store.remplacer_piece(f, self._piece(f, piece), type_, donnees)
+        self._g.emettre("piece_jointe_modifiee", fiche=FicheVue(t, f), piece=PieceVue(p), origine=self.info.nom)
+        return PieceVue(p)
 
     def maj_piece(self, vue: FicheVue, piece, ocr: str | None = None, ocr_moteur: str | None = None) -> None:
         """Enregistre le texte extrait d'une image (chiffré avec elle si la fiche est verrouillée)."""

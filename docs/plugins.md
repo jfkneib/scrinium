@@ -44,8 +44,10 @@ class MyPlugin(Plugin):
 | `ctx.ajouter_doc(title, text)` | documentation of your extension: one note added to the « Guide » topic (Help > « Guide de Scrinium ») while you are active. Pass translated text; removed when you are disabled |
 | `ctx.fiches(theme=None)` | list of `FicheVue` |
 | `ctx.fiche_courante()` | the note shown in the window, or `None` |
-| `ctx.pieces(vue)` | attachments (images) of a note: list of `PieceVue` (`id`, `nom`, `type` `image/png` or `image/jpeg`, `taille`, `ajoute`, `ocr`, `ocr_moteur`); empty for a closed locked note |
+| `ctx.pieces(vue)` | attachments of a note (images, or any other file such as a document): list of `PieceVue` (`id`, `nom`, `type` — MIME type, `image/png`, `image/jpeg` or another —, `taille`, `ajoute`, `ocr`, `ocr_moteur`); empty for a closed locked note |
 | `ctx.lire_piece(vue, piece)` | bytes of an attachment (`piece` = `PieceVue` or its `id`); `ValueError` for a closed locked note |
+| `ctx.ajouter_piece(vue, nom, type, donnees)` | attach a file to a note (encrypted with it if locked); returns a `PieceVue`. `type` is a lower-case MIME type; PNG/JPEG must already be re-encoded, any other type is kept as is. `ValueError` for a closed locked note, a malformed type or when the limits (setting `pieces_jointes`, default 50 files, 8 MB each, 100 MB per note) are exceeded. Fires `piece_jointe_ajoutee` |
+| `ctx.remplacer_piece(vue, piece, type, donnees)` | replace the content of an attachment, keeping its number and name; the old version is copied to the trash and its extracted text is cleared. Fires `piece_jointe_modifiee` |
 | `ctx.maj_piece(vue, piece, ocr=None, ocr_moteur=None)` | store text extracted from an image (encrypted with it if the note is locked; searched by the main window) |
 | `ctx.assurer_identifiant(vue)` | stable identifier of a note (a 32-character string, created and saved with the note on the first call, kept when the note is renamed, moved or locked); `FicheVue.identifiant` reads it (`None` until created or while a locked note is closed) |
 | `ctx.maj_meta(vue, **values)` | add/change/remove (`None`) metadata of a note, saved with it |

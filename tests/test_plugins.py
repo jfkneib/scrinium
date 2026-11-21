@@ -201,6 +201,45 @@ class P(Plugin):
         ctx.maj_piece(vue, 1, ocr="x")
 
 
+def test_api_ajouter_et_remplacer_une_piece_document(store):
+    code = '''
+from scrinium.core.plugins import Plugin
+EVTS = []
+class P(Plugin):
+    def activer(self, ctx):
+        self.ctx = ctx
+        for e in ("piece_jointe_ajoutee", "piece_jointe_modifiee"):
+            ctx.on(e, lambda e=e, **kw: EVTS.append((e, kw["piece"].id, kw.get("origine"))))
+'''
+    faire_plugin(store, "docs", code)
+    th = store.nouveau_theme("T")
+    f = store.nouvelle_fiche(th)
+    store.enregistrer(th, f, "Fiche", "x")
+    g = Gestionnaire(store)
+    g.demarrer()
+    assert g.activer("docs")
+    ctx = g.actifs["docs"][1]
+    vue = next(v for v in ctx.fiches() if v.titre == "Fiche")
+    odt = "application/vnd.oasis.opendocument.text"
+    pv = ctx.ajouter_piece(vue, "Rapport.odt", odt, b"PK-un")
+    assert (pv.id, pv.nom, pv.type, pv.taille) == (1, "Rapport.odt", odt, 5)
+    assert ctx.lire_piece(vue, pv) == b"PK-un"
+    ctx.maj_piece(vue, pv, ocr="texte du rapport")
+    nv = ctx.remplacer_piece(vue, pv, odt, b"PK-deux")
+    assert nv.id == 1 and ctx.lire_piece(vue, 1) == b"PK-deux" and ctx.pieces(vue)[0].ocr == ""   # le texte extrait est effacé
+    import sys
+    evts = sys.modules["scrinium_plugin_docs"].EVTS
+    assert ("piece_jointe_ajoutee", 1, None) in evts and ("piece_jointe_modifiee", 1, "docs") in evts
+    with pytest.raises(ValueError):
+        ctx.ajouter_piece(vue, "x", "pas un type", b"0")
+    with pytest.raises(ValueError):
+        ctx.remplacer_piece(vue, 99, odt, b"0")
+    store.verrouiller(th, f, "mdp", sans_secours=True)
+    f.texte = f.cle = f.salt = None
+    with pytest.raises(ValueError):
+        ctx.ajouter_piece(vue, "y.odt", odt, b"0")
+
+
 # ---------- extensions officielles (livrées avec Scrinium) ----------
 def faire_officiel(racine, nom, titre="Officielle", code="from scrinium.core.plugins import Plugin\nclass P(Plugin): api = 1\n"):
     d = racine / nom
