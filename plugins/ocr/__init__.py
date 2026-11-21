@@ -27,6 +27,8 @@ def _parent():
     return QApplication.activeWindow()
 
 
+IMAGES = ("image/png", "image/jpeg")          # types de pièces que Tesseract sait lire (les autres pièces sont des documents)
+
 class _Pont(QObject):
     """Ramène dans le fil de l'interface le résultat d'une reconnaissance (le magasin de fiches n'est pas thread-safe)."""
     resultat = pyqtSignal(object, int, str, str)      # (vue de la fiche, id de la pièce, texte, erreur)
@@ -223,7 +225,7 @@ class OcrPlugin(Plugin):
         if vue.fermee:
             QMessageBox.warning(_parent(), _("OCR"), _("Fiche verrouillée : déverrouillez-la d'abord."))
             return
-        pieces = self.ctx.pieces(vue)
+        pieces = [p for p in self.ctx.pieces(vue) if p.type in IMAGES]      # un document joint n'est pas une image
         if not pieces:
             self.ctx.ui.notifier(_("OCR"), _("Cette fiche n'a pas d'image."))
             return
@@ -238,7 +240,7 @@ class OcrPlugin(Plugin):
 
     def extraire(self, vue, pieces, silencieux=False):
         """Lance la reconnaissance des `pieces` (en arrière-plan, une par une)."""
-        travail = [p for p in pieces if (vue.id, p.id) not in self.en_cours]
+        travail = [p for p in pieces if p.type in IMAGES and (vue.id, p.id) not in self.en_cours]
         if not travail:
             return
         moteur = self._moteur() if not silencieux else self._moteur_silencieux()

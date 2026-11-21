@@ -100,6 +100,74 @@ def test_copie_de_travail_surveillance_et_purge(tmp_path):
     assert not (d / "edition-restee").exists() and (d / "autre").exists()
 
 
+# ---------- extraction du texte ----------
+def _extraction():
+    spec = importlib.util.spec_from_file_location("doc_extraction", PLUGINS / "documents" / "extraction.py")
+    m = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(m)
+    return m
+
+
+def _zip(membres: dict) -> bytes:
+    import io
+    import zipfile
+    b = io.BytesIO()
+    with zipfile.ZipFile(b, "w", zipfile.ZIP_DEFLATED) as z:
+        for nom, contenu in membres.items():
+            z.writestr(nom, contenu)
+    return b.getvalue()
+
+
+def test_extraction_odf_ooxml_et_texte_brut():
+    X = _extraction()
+    odt = _zip({"content.xml": '<?xml version="1.0"?><office:document-content xmlns:office="o" xmlns:text="t" xmlns:table="b">'
+                '<office:automatic-styles><text:p>STYLE</text:p></office:automatic-styles>'
+                '<office:body><text:h>Titre</text:h><text:p>Un<text:s text:c="2"/>deux<text:tab/>trois<text:line-break/>quatre</text:p>'
+                '<table:table><table:table-row><table:table-cell><text:p>A1</text:p></table:table-cell>'
+                '<table:table-cell><text:p>B1</text:p></table:table-cell></table:table-row></table:table></office:body></office:document-content>'})
+    t = X.extraire("Rapport.odt", ODT, odt)
+    assert t == "Titre\nUn deux trois\nquatre\nA1\nB1"                          # sans le style, espaces réduits, un saut par paragraphe
+    docx = _zip({"word/document.xml": '<w:document xmlns:w="w"><w:body><w:p><w:r><w:t>Contrat</w:t></w:r><w:r><w:tab/><w:t>signé</w:t></w:r></w:p>'
+                 '<w:p><w:r><w:delText>supprimé</w:delText><w:instrText>CHAMP</w:instrText></w:r><w:r><w:t>fin</w:t></w:r></w:p></w:body></w:document>'})
+    assert X.extraire("a.docx", "", docx) == "Contrat signé\nfin"
+    xlsx = _zip({"xl/sharedStrings.xml": '<sst xmlns="s"><si><t>Loyer</t></si><si><r><t>Charges</t></r><r><t> 2026</t></r></si></sst>'})
+    assert X.extraire("a.xlsx", "", xlsx) == "Loyer\nCharges 2026"
+    pptx = _zip({"ppt/slides/slide10.xml": '<p:sld xmlns:p="p" xmlns:a="a"><a:p><a:r><a:t>dix</a:t></a:r></a:p></p:sld>',
+                 "ppt/slides/slide2.xml": '<p:sld xmlns:p="p" xmlns:a="a"><a:p><a:r><a:t>deux</a:t></a:r></a:p></p:sld>'})
+    assert X.extraire("a.pptx", "", pptx) == "deux\ndix"                        # dans l'ordre des numéros, pas alphabétique
+    assert X.extraire("n.txt", "text/plain", "caf\u00e9\r\nlait".encode("cp1252")) == "café\nlait"
+    assert X.extraire("inconnu.xyz", "application/octet-stream", b"abc") is None and not X.prise_en_charge("a.doc")
+
+
+def test_extraction_refuse_le_dangereux_et_borne(monkeypatch):
+    X = _extraction()
+    dtd = _zip({"content.xml": '<!DOCTYPE x [<!ENTITY a "bombe">]><office:document-content xmlns:office="o">&a;</office:document-content>'})
+    with pytest.raises(X.FormatIllisible):
+        X.extraire("a.odt", ODT, dtd)
+    with pytest.raises(X.FormatIllisible):
+        X.extraire("a.odt", ODT, b"PK pas une archive")
+    gros = _zip({"content.xml": "<a>" + "x" * 5000 + "</a>"})
+    monkeypatch.setattr(X, "MEMBRE_MAX", 1000)
+    with pytest.raises(X.FormatIllisible):
+        X.extraire("a.odt", ODT, gros)                                          # une fois décompressé : trop gros
+    monkeypatch.undo()
+    assert X.extraire("a.txt", "text/plain", b"x" * 10) == "x" * 10
+    monkeypatch.setattr(X, "TEXTE_MAX", 5)
+    assert X.extraire("a.txt", "text/plain", b"123456789") == "12345"
+    monkeypatch.setattr(X, "SOURCE_MAX", 3)
+    assert X.extraire("a.txt", "text/plain", b"1234") is None                  # fichier source trop gros : pas d'extraction
+    monkeypatch.undo()
+    with pytest.raises(X.FormatIllisible):
+        X.extraire("b.txt", "text/plain", b"ab\x00cd")                          # contenu binaire sous un nom de texte
+
+
+def test_extraction_pdf_sans_outil_le_dit(monkeypatch):
+    X = _extraction()
+    monkeypatch.setattr(X.shutil, "which", lambda nom: None)
+    with pytest.raises(X.OutilManquant):
+        X.extraire("a.pdf", "application/pdf", b"%PDF-1.7")
+
+
 # ---------- avec la fenêtre (Qt hors écran) ----------
 os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
 
@@ -217,3 +285,32 @@ class _MimeFichiers:
     def urls(self):
         from PyQt6.QtCore import QUrl
         return [QUrl.fromLocalFile(c) for c in self._c]
+
+
+def test_le_texte_des_documents_joints_est_cherchable(fen, monkeypatch, tmp_path):
+    from PyQt6.QtWidgets import QFileDialog, QMessageBox
+    monkeypatch.setattr(QMessageBox, "warning", lambda *a, **k: pytest.fail("erreur inattendue : %s" % (a,)))
+    docx = tmp_path / "bail.docx"
+    docx.write_bytes(_zip({"word/document.xml": '<w:document xmlns:w="w"><w:body><w:p><w:r><w:t>Loyer mensuel : 650 euros</w:t></w:r></w:p></w:body></w:document>'}))
+    fen._importer_deposes([], [], [docx])
+    f = next(f for t in fen.store.themes for f in t.fiches if f.titre == "bail")
+    (p,) = fen.store.lister_pieces(f)
+    assert p.ocr == "Loyer mensuel : 650 euros" and p.ocr_moteur == "documents"
+    assert "650 euros" in fen.store.texte_ocr(f)                                   # c'est ce que cherche Ctrl+F
+    # remplacement par la vue : l'ancien texte disparaît, le nouveau est rangé (une seule fois, sans boucle d'événements)
+    vue = fen.vues_types["objet"]
+    ctx = fen.plugins.actifs["documents"][1]
+    fv = next(v for v in ctx.fiches() if v.titre == "bail")
+    monkeypatch.setattr(vue, "_piece", lambda: (fv, ctx.pieces(fv)[0]))
+    autre = tmp_path / "bail2.docx"
+    autre.write_bytes(_zip({"word/document.xml": '<w:document xmlns:w="w"><w:body><w:p><w:r><w:t>Charges : 80 euros</w:t></w:r></w:p></w:body></w:document>'}))
+    monkeypatch.setattr(QFileDialog, "getOpenFileName", lambda *a, **k: (str(autre), ""))
+    vue.choisir()
+    (q,) = fen.store.lister_pieces(f)
+    assert q.ocr == "Charges : 80 euros" and "650" not in fen.store.texte_ocr(f)
+    # un texte que l'extension ne sait pas lire reste sans texte, sans erreur
+    inconnu = tmp_path / "image.xyz"
+    inconnu.write_bytes(b"\x00\x01")
+    fen._importer_deposes([], [], [inconnu])
+    g = next(f for t in fen.store.themes for f in t.fiches if f.titre == "image")
+    assert fen.store.lister_pieces(g)[0].ocr == ""

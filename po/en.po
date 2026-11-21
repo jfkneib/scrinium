@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: scrinium 0.2.0\n"
 "Report-Msgid-Bugs-To: \n"
-"PO-Revision-Date: 2026-11-21 12:27+0100\n"
+"PO-Revision-Date: 2026-11-21 12:30+0100\n"
 "Last-Translator: Jean-François Kneib\n"
 "Language-Team: English\n"
 "Language: en\n"
@@ -89,7 +89,7 @@ msgstr "No events. \"Add\" creates one; the displayed note can be linked to it."
 
 #: plugins/agenda/__init__.py:176
 #: plugins/courriel/__init__.py:185
-#: plugins/ocr/__init__.py:115
+#: plugins/ocr/__init__.py:117
 msgid "Fermer"
 msgstr "Close"
 
@@ -876,7 +876,7 @@ msgstr "%(l)d rows, %(c)d columns. The grey row at the bottom gives a total per 
 
 #: plugins/calc/__init__.py:214
 #: plugins/calculatrice/__init__.py:87
-#: plugins/ocr/__init__.py:114
+#: plugins/ocr/__init__.py:116
 msgid "Copier"
 msgstr "Copy"
 
@@ -1832,13 +1832,14 @@ msgstr "The note can no longer be edited: text not inserted."
 msgid "Modèle indisponible : %s"
 msgstr "Model unavailable: %s"
 
-#: plugins/documents/__init__.py:18
+#: plugins/documents/__init__.py:43
 msgid ""
 "Pour garder un fichier (lettre, tableur, PDF…) comme une fiche, avec une description.\n"
 "\n"
 "• Nouvelle fiche > « Fiche-document » : écrivez une description, puis « Ajouter le fichier… ». Le fichier garde son format d'origine.\n"
 "• La fiche s'utilise comme les autres : recherche dans le titre et la description, verrouillage (le fichier est alors chiffré avec la fiche), partage, synchronisation, corbeille.\n"
 "• Glissez des fichiers depuis votre gestionnaire de fichiers sur la fenêtre : chacun devient une fiche-document du thème affiché, titrée d'après le nom du fichier (une image déposée dans le texte d'une fiche reste, elle, jointe à cette fiche).\n"
+"• Le texte du fichier (ODF, DOCX, XLSX, PPTX, texte brut ; PDF si « pdftotext » est installé) est rangé avec la fiche : la recherche le trouve, comme le texte d'une image lu par l'extension OCR.\n"
 "• « Remplacer le fichier… » garde l'ancienne version dans la corbeille. « Enregistrer sous… » en fait une copie (en clair).\n"
 "• « Ouvrir avec l'application associée » ouvre une copie de travail dans LibreOffice, un tableur, une visionneuse… ; chaque enregistrement fait là-bas est repris dans la fiche (l'ancienne version va à la corbeille). « Terminer l'édition » arrête la surveillance et supprime la copie de travail, qui est en clair même si la fiche est verrouillée.\n"
 "• Rien n'est ouvert ni lancé de lui-même : le type est inerte."
@@ -1848,109 +1849,114 @@ msgstr ""
 "• New note > “Document note”: write a description, then “Add the file…”. The file keeps its original format.\n"
 "• The note works like any other: search in the title and description, locking (the file is then encrypted with the note), sharing, synchronisation, trash.\n"
 "• Drag files from your file manager onto the window: each one becomes a document note in the topic shown, titled after the file name (an image dropped into the text of a note stays attached to that note).\n"
+"• The text of the file (ODF, DOCX, XLSX, PPTX, plain text; PDF if “pdftotext” is installed) is stored with the note: search finds it, like the text of an image read by the OCR extension.\n"
 "• “Replace the file…” keeps the previous version in the trash. “Save as…” makes a copy (unencrypted).\n"
 "• “Open with the associated application” opens a working copy in LibreOffice, a spreadsheet, a viewer…; each save made there is taken back into the note (the previous version goes to the trash). “Finish editing” stops watching and deletes the working copy, which is unencrypted even if the note is locked.\n"
 "• Nothing is opened or run by itself: the type is inert."
 
-#: plugins/documents/__init__.py:49
-#: plugins/documents/__init__.py:103
+#: plugins/documents/__init__.py:75
+#: plugins/documents/__init__.py:129
 msgid "Ajouter le fichier…"
 msgstr "Add the file…"
 
-#: plugins/documents/__init__.py:51
+#: plugins/documents/__init__.py:77
 #: src/scrinium/ui/images.py:502
 msgid "Enregistrer sous…"
 msgstr "Save as…"
 
-#: plugins/documents/__init__.py:53
-#: plugins/documents/__init__.py:151
+#: plugins/documents/__init__.py:79
+#: plugins/documents/__init__.py:177
 msgid "Ouvrir avec l'application associée"
 msgstr "Open with the associated application"
 
-#: plugins/documents/__init__.py:55
+#: plugins/documents/__init__.py:81
 msgid "Terminer l'édition"
 msgstr "Finish editing"
 
-#: plugins/documents/__init__.py:69
+#: plugins/documents/__init__.py:95
 msgid "Description (facultative)"
 msgstr "Description (optional)"
 
-#: plugins/documents/__init__.py:111
+#: plugins/documents/__init__.py:137
 msgid "Choisir le fichier"
 msgstr "Choose the file"
 
-#: plugins/documents/__init__.py:136
+#: plugins/documents/__init__.py:162
 #: src/scrinium/ui/images.py:536
 msgid "Enregistrer le fichier"
 msgstr "Save the file"
 
-#: plugins/documents/__init__.py:164
+#: plugins/documents/__init__.py:190
 msgid "Édition en cours : les enregistrements faits dans l'application sont repris dans la fiche. Cliquez sur « Terminer l'édition » quand vous avez fini."
 msgstr "Editing in progress: what you save in the application is taken back into the note. Click “Finish editing” when you are done."
 
-#: plugins/documents/__init__.py:222
+#: plugins/documents/__init__.py:249
 msgid "Extension Documents"
 msgstr "Documents extension"
 
-#: plugins/documents/__init__.py:234
+#: plugins/documents/__init__.py:270
 msgid "Documents"
 msgstr "Documents"
 
-#: plugins/documents/__init__.py:98
+#: plugins/documents/__init__.py:124
 msgid "Aucun fichier joint."
 msgstr "No file attached."
 
-#: plugins/documents/__init__.py:103
+#: plugins/documents/__init__.py:129
 msgid "Remplacer le fichier…"
 msgstr "Replace the file…"
 
-#: plugins/documents/__init__.py:161
-#: plugins/documents/__init__.py:125
-#: plugins/documents/__init__.py:157
+#: plugins/documents/__init__.py:187
+#: plugins/documents/__init__.py:34
+#: plugins/documents/__init__.py:151
 msgid "Fiche-document"
 msgstr "Document note"
 
-#: plugins/documents/__init__.py:161
+#: plugins/documents/__init__.py:187
 msgid "Aucune application n'a pu ouvrir ce fichier."
 msgstr "No application could open this file."
 
-#: plugins/documents/__init__.py:196
+#: plugins/documents/__init__.py:223
 msgid "Repris dans la fiche à %s. L'édition continue."
 msgstr "Taken back into the note at %s. Editing continues."
 
-#: plugins/documents/__init__.py:101
+#: plugins/documents/__init__.py:127
 msgid "%s Ko"
 msgstr "%s KB"
 
-#: plugins/documents/__init__.py:101
+#: plugins/documents/__init__.py:127
 #: plugins/lecture/__init__.py:29
 #: plugins/traduction/logique.py:538
 msgid "%s Mo"
 msgstr "%s MB"
 
-#: plugins/documents/__init__.py:102
+#: plugins/documents/__init__.py:128
 msgid "Fichier : %(nom)s (%(taille)s, %(type)s)"
 msgstr "File: %(nom)s (%(taille)s, %(type)s)"
 
-#: plugins/documents/__init__.py:117
-#: plugins/documents/__init__.py:181
-#: plugins/documents/__init__.py:239
+#: plugins/documents/__init__.py:143
+#: plugins/documents/__init__.py:207
+#: plugins/documents/__init__.py:275
 msgid "Fichier trop volumineux."
 msgstr "File too large."
 
-#: plugins/documents/__init__.py:133
+#: plugins/documents/__init__.py:159
 #: src/scrinium/ui/images.py:528
 msgid "Enregistrer sous"
 msgstr "Save as"
 
-#: plugins/documents/__init__.py:134
+#: plugins/documents/__init__.py:160
 #: src/scrinium/ui/images.py:529
 msgid "La fiche est verrouillée : la copie sera enregistrée EN CLAIR. Continuer ?"
 msgstr "The note is locked: the copy will be saved IN CLEAR. Continue?"
 
-#: plugins/documents/__init__.py:152
+#: plugins/documents/__init__.py:178
 msgid "La fiche est verrouillée : une copie EN CLAIR sera créée le temps de l'édition. Continuer ?"
 msgstr "The note is locked: an UNENCRYPTED copy will be created while you edit. Continue?"
+
+#: plugins/documents/__init__.py:34
+msgid "Pour chercher dans le texte des PDF, installez « %s » (paquet poppler-utils)."
+msgstr "To search the text of PDFs, install “%s” (poppler-utils package)."
 
 #: plugins/echeances/__init__.py:242
 msgid ""
@@ -3145,7 +3151,7 @@ msgstr "%d short password(s) (under 10 characters)"
 msgid "%d mot(s) de passe utilisé(s) plusieurs fois"
 msgstr "%d password(s) used more than once"
 
-#: plugins/ocr/__init__.py:376
+#: plugins/ocr/__init__.py:378
 msgid ""
 "Extrait le texte des images jointes à une fiche (Tesseract, en local : rien n'est envoyé sur Internet).\n"
 "\n"
@@ -3159,181 +3165,181 @@ msgstr ""
 "• The text read is searchable (Ctrl+F). If the note is locked, it is encrypted with the image.\n"
 "• In a Photos note, right-click on an image > \"Read the text (OCR) → new note\"."
 
-#: plugins/ocr/__init__.py:41
+#: plugins/ocr/__init__.py:43
 msgid "Réglages de l'OCR"
 msgstr "OCR settings"
 
-#: plugins/ocr/__init__.py:45
+#: plugins/ocr/__init__.py:47
 #: plugins/traduction/__init__.py:217
 #: plugins/traduction/__init__.py:229
 msgid "Parcourir…"
 msgstr "Browse…"
 
-#: plugins/ocr/__init__.py:50
+#: plugins/ocr/__init__.py:52
 msgid "Programme tesseract :"
 msgstr "Tesseract program:"
 
-#: plugins/ocr/__init__.py:52
+#: plugins/ocr/__init__.py:54
 msgid "Code(s) de langue installés, séparés par « + » : fra, fra+eng…"
 msgstr "Installed language code(s), separated by “+”: fra, fra+eng…"
 
-#: plugins/ocr/__init__.py:53
+#: plugins/ocr/__init__.py:55
 msgid "Langue(s) :"
 msgstr "Language(s):"
 
-#: plugins/ocr/__init__.py:54
+#: plugins/ocr/__init__.py:56
 msgid "Extraire automatiquement le texte à l'ajout d'une image"
 msgstr "Extract the text automatically when an image is added"
 
-#: plugins/ocr/__init__.py:61
+#: plugins/ocr/__init__.py:63
 #: plugins/traduction/__init__.py:248
 msgid "Tester"
 msgstr "Test"
 
-#: plugins/ocr/__init__.py:68
+#: plugins/ocr/__init__.py:70
 msgid "Programme tesseract"
 msgstr "Tesseract program"
 
-#: plugins/ocr/__init__.py:99
+#: plugins/ocr/__init__.py:101
 msgid "Texte extrait des images"
 msgstr "Text extracted from the images"
 
-#: plugins/ocr/__init__.py:109
+#: plugins/ocr/__init__.py:111
 msgid "(aucun texte extrait : « Extraire »)"
 msgstr "(no text extracted: “Extract”)"
 
-#: plugins/ocr/__init__.py:112
+#: plugins/ocr/__init__.py:114
 msgid "Extraire"
 msgstr "Extract"
 
-#: plugins/ocr/__init__.py:113
+#: plugins/ocr/__init__.py:115
 msgid "Enregistrer la correction"
 msgstr "Save the correction"
 
-#: plugins/ocr/__init__.py:180
+#: plugins/ocr/__init__.py:182
 msgid "Extension OCR"
 msgstr "OCR extension"
 
-#: plugins/ocr/__init__.py:189
+#: plugins/ocr/__init__.py:191
 msgid "Extraire le texte des images de la fiche"
 msgstr "Extract the text of the note's images"
 
-#: plugins/ocr/__init__.py:190
+#: plugins/ocr/__init__.py:192
 msgid "Texte extrait des images…"
 msgstr "Text extracted from the images…"
 
-#: plugins/ocr/__init__.py:191
+#: plugins/ocr/__init__.py:193
 msgid "Extraire le texte de l'image (OCR)"
 msgstr "Extract the text from the image (OCR)"
 
-#: plugins/ocr/__init__.py:192
+#: plugins/ocr/__init__.py:194
 msgid "Texte de l'image → nouvelle fiche"
 msgstr "Text of the image → new fiche"
 
-#: plugins/ocr/__init__.py:193
+#: plugins/ocr/__init__.py:195
 msgid "Texte de l'image → dans la fiche, au curseur"
 msgstr "Text of the image → into the fiche, at the cursor"
 
-#: plugins/ocr/__init__.py:194
+#: plugins/ocr/__init__.py:196
 msgid "Réglages de l'OCR…"
 msgstr "OCR settings…"
 
-#: plugins/ocr/__init__.py:256
-#: plugins/ocr/__init__.py:274
-#: plugins/ocr/__init__.py:331
+#: plugins/ocr/__init__.py:258
+#: plugins/ocr/__init__.py:276
+#: plugins/ocr/__init__.py:333
 msgid "OCR"
 msgstr "OCR"
 
-#: plugins/ocr/__init__.py:274
+#: plugins/ocr/__init__.py:276
 msgid "Extraction du texte…"
 msgstr "Extracting text…"
 
-#: plugins/ocr/__init__.py:44
+#: plugins/ocr/__init__.py:46
 msgid "(tesseract introuvable)"
 msgstr "(tesseract not found)"
 
-#: plugins/ocr/__init__.py:224
-#: plugins/ocr/__init__.py:235
-#: plugins/ocr/__init__.py:287
+#: plugins/ocr/__init__.py:226
+#: plugins/ocr/__init__.py:237
+#: plugins/ocr/__init__.py:289
 msgid "Fiche verrouillée : déverrouillez-la d'abord."
 msgstr "Locked note: unlock it first."
 
-#: plugins/ocr/__init__.py:228
+#: plugins/ocr/__init__.py:230
 msgid "Cette fiche n'a pas d'image."
 msgstr "This note has no images."
 
-#: plugins/ocr/__init__.py:256
+#: plugins/ocr/__init__.py:258
 msgid "Extraction du texte de %d image(s)…"
 msgstr "Extracting the text of %d image(s)…"
 
-#: plugins/ocr/__init__.py:321
+#: plugins/ocr/__init__.py:323
 msgid "La fiche n'est plus affichée : texte non inséré."
 msgstr "The fiche is no longer displayed: text not inserted."
 
-#: plugins/ocr/__init__.py:329
 #: plugins/ocr/__init__.py:331
+#: plugins/ocr/__init__.py:333
 #: plugins/photos/__init__.py:162
 msgid "Texte de %s"
 msgstr "Text of %s"
 
-#: plugins/ocr/__init__.py:331
+#: plugins/ocr/__init__.py:333
 #: plugins/photos/__init__.py:164
 msgid "Fiche créée : %s"
 msgstr "Fiche created: %s"
 
-#: plugins/ocr/__init__.py:356
+#: plugins/ocr/__init__.py:358
 msgid "Texte extrait."
 msgstr "Text extracted."
 
-#: plugins/ocr/__init__.py:368
+#: plugins/ocr/__init__.py:370
 msgid "Ouvrez d'abord une fiche (déverrouillée)."
 msgstr "Open a note (unlocked) first."
 
-#: plugins/ocr/__init__.py:83
+#: plugins/ocr/__init__.py:85
 msgid "✔ Tesseract trouvé : %s"
 msgstr "✔ Tesseract found: %s"
 
-#: plugins/ocr/__init__.py:323
+#: plugins/ocr/__init__.py:325
 msgid "Aucun texte reconnu."
 msgstr "No text recognised."
 
-#: plugins/ocr/__init__.py:328
+#: plugins/ocr/__init__.py:330
 #: plugins/photos/__init__.py:161
 msgid "(aucun texte reconnu)"
 msgstr "(no text recognised)"
 
-#: plugins/ocr/__init__.py:348
-#: plugins/ocr/__init__.py:300
+#: plugins/ocr/__init__.py:350
+#: plugins/ocr/__init__.py:302
 #: plugins/photos/__init__.py:158
 msgid "Échec : %s"
 msgstr "Failed: %s"
 
-#: plugins/ocr/__init__.py:204
+#: plugins/ocr/__init__.py:206
 msgid "Tesseract est introuvable."
 msgstr "Tesseract not found."
 
-#: plugins/ocr/__init__.py:325
+#: plugins/ocr/__init__.py:327
 msgid "La fiche n'est pas modifiable."
 msgstr "The fiche cannot be edited."
 
-#: plugins/ocr/__init__.py:328
+#: plugins/ocr/__init__.py:330
 #: src/scrinium/ui/capture_rapide.py:41
 #: src/scrinium/ui/fenetre.py:153
 msgid "Fiche"
 msgstr "Note"
 
-#: plugins/ocr/__init__.py:328
+#: plugins/ocr/__init__.py:330
 #: plugins/photos/__init__.py:161
 #: src/scrinium/ui/images.py:467
 msgid "Image"
 msgstr "Image"
 
-#: plugins/ocr/__init__.py:75
+#: plugins/ocr/__init__.py:77
 msgid "Tesseract introuvable."
 msgstr "Tesseract not found."
 
-#: plugins/ocr/__init__.py:212
-#: plugins/ocr/__init__.py:82
+#: plugins/ocr/__init__.py:214
+#: plugins/ocr/__init__.py:84
 msgid "Langue(s) non installée(s) : %s"
 msgstr "Language(s) not installed: %s"
 

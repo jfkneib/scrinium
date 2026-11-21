@@ -13,7 +13,32 @@ from PyQt6.QtWidgets import (QFileDialog, QHBoxLayout, QLabel, QMessageBox, QPla
 from scrinium.core.plugins import Plugin
 from scrinium.i18n import _
 
-from . import logique
+from . import extraction, logique
+
+MOTEUR = "documents"                       # valeur de `ocr_moteur` : texte tiré du document lui-même (pas d'une reconnaissance d'image)
+IMAGES = ("image/png", "image/jpeg")
+_prevenu: set = set()                      # outils manquants déjà signalés pendant cette session
+
+
+def indexer(ctx, vue, piece) -> bool:
+    """Range le texte du document joint dans le champ `ocr` de la pièce, pour que Ctrl+F le trouve. Les images sont laissées à l'extension
+    OCR. Silencieux si le format n'est pas pris en charge, si le fichier est abîmé ou si le texte est vide ; un outil manquant (pdftotext)
+    n'est signalé qu'une fois. Vrai si du texte a été enregistré."""
+    if piece.type in IMAGES or piece.taille > extraction.SOURCE_MAX or not extraction.prise_en_charge(piece.nom, piece.type):
+        return False
+    try:
+        texte = extraction.extraire(piece.nom, piece.type, ctx.lire_piece(vue, piece))
+    except extraction.OutilManquant as ex:
+        if ex.args[0] not in _prevenu and ctx.ui is not None:
+            _prevenu.add(ex.args[0])
+            ctx.ui.notifier(_("Fiche-document"), _("Pour chercher dans le texte des PDF, installez « %s » (paquet poppler-utils).") % ex.args[0])
+        return False
+    except (extraction.FormatIllisible, ValueError, OSError):
+        return False
+    if not texte:
+        return False
+    ctx.maj_piece(vue, piece, ocr=texte, ocr_moteur=MOTEUR)
+    return True
 
 DOC = _(
     "Pour garder un fichier (lettre, tableur, PDF…) comme une fiche, avec une description.\n"
@@ -23,6 +48,7 @@ DOC = _(
     "partage, synchronisation, corbeille.\n"
     "• Glissez des fichiers depuis votre gestionnaire de fichiers sur la fenêtre : chacun devient une fiche-document du thème affiché, titrée d'après le nom du fichier "
     "(une image déposée dans le texte d'une fiche reste, elle, jointe à cette fiche).\n"
+    "• Le texte du fichier (ODF, DOCX, XLSX, PPTX, texte brut ; PDF si « pdftotext » est installé) est rangé avec la fiche : la recherche le trouve, comme le texte d'une image lu par l'extension OCR.\n"
     "• « Remplacer le fichier… » garde l'ancienne version dans la corbeille. « Enregistrer sous… » en fait une copie (en clair).\n"
     "• « Ouvrir avec l'application associée » ouvre une copie de travail dans LibreOffice, un tableur, une visionneuse… ; chaque enregistrement fait là-bas est repris dans la fiche "
     "(l'ancienne version va à la corbeille). « Terminer l'édition » arrête la surveillance et supprime la copie de travail, qui est en clair même si la fiche est verrouillée.\n"
@@ -118,9 +144,9 @@ class VueDocument(QWidget):
             donnees = src.read_bytes()
             type_ = logique.type_mime(src.name)
             if piece is None:
-                self.ctx.ajouter_piece(vue, src.name, type_, donnees)
+                self.ctx.ajouter_piece(vue, src.name, type_, donnees)          # (l'événement « ajoutée » range le texte, voir `activer`)
             else:
-                self.ctx.remplacer_piece(vue, piece, type_, donnees)
+                indexer(self.ctx, vue, self.ctx.remplacer_piece(vue, piece, type_, donnees))
         except (ValueError, OSError) as ex:
             QMessageBox.warning(self, _("Fiche-document"), str(ex))
         self.rafraichir()
@@ -188,6 +214,7 @@ class VueDocument(QWidget):
             return False
         try:
             e["piece"] = self.ctx.remplacer_piece(e["vue"], e["piece"], e["piece"].type, donnees)
+            indexer(self.ctx, e["vue"], e["piece"])
         except ValueError as ex:
             e["veille"].acquitter()                               # (limites dépassées, fiche fermée…) : pas de boucle d'erreurs
             QMessageBox.warning(self, _("Fiche-document"), str(ex))
@@ -227,6 +254,15 @@ class DocumentsPlugin(Plugin):
             ctx.ui.ajouter_depot(self.deposer)
             for evt in ("piece_jointe_ajoutee", "piece_jointe_modifiee", "piece_jointe_supprimee"):
                 ctx.on(evt, lambda **_kw: vue.rafraichir())
+        # Recherche : le texte des documents joints (à toute fiche, pas seulement aux fiches-documents) va dans le champ `ocr` des pièces.
+        ctx.on("piece_jointe_ajoutee", lambda fiche, piece, **_kw: indexer(ctx, fiche, piece))
+        ctx.on("piece_jointe_modifiee", self._modifiee)
+
+    def _modifiee(self, fiche, piece, origine=None, **_kw):
+        """Une pièce modifiée par l'utilisateur (remplacée) : son texte est relu. Pas pour nos propres écritures (origine = nous) : le
+        remplacement fait par l'extension réindexe lui-même, et l'enregistrement du texte ne doit pas se rappeler en boucle."""
+        if origine is None:
+            indexer(self.ctx, fiche, piece)
 
     def deposer(self, chemins, theme):
         """Fichiers glissés sur la fenêtre : une fiche-document par fichier, dans le thème affiché (ou « Documents »)."""
