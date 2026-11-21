@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: scrinium 0.2.0\n"
 "Report-Msgid-Bugs-To: \n"
-"PO-Revision-Date: 2026-11-21 12:30+0100\n"
+"PO-Revision-Date: 2026-11-21 13:09+0100\n"
 "Last-Translator: Jean-François Kneib\n"
 "Language-Team: English\n"
 "Language: en\n"
@@ -6475,9 +6475,12 @@ msgid ""
 "• ctx.maj_meta(vue, cle=\"valeur\") garde des métadonnées avec la fiche (une ligne invisible en tête du texte ; chiffrées si la fiche est verrouillée ; None efface la clé).\n"
 "• ctx.assurer_identifiant(vue) : identifiant stable de la fiche (survit aux renommages, déplacements, verrouillage).\n"
 "\n"
-"Images jointes :\n"
-"• ctx.pieces(vue) : liste de pièces (id, nom, type, taille, ocr…).\n"
-"• ctx.lire_piece(vue, piece) : les octets de l'image.\n"
+"Pièces jointes (images ou autres fichiers) :\n"
+"• ctx.pieces(vue) : liste de pièces (id, nom, type MIME, taille, ocr…).\n"
+"• ctx.lire_piece(vue, piece) : les octets de la pièce.\n"
+"• ctx.ajouter_piece(vue, nom, type, donnees) joint un fichier ; ctx.remplacer_piece(vue, piece, type, donnees) le remplace (l'ancienne version va à la corbeille).\n"
+"• ctx.maj_piece(vue, piece, ocr=texte) range le texte extrait de la pièce : la recherche le trouve.\n"
+"• ctx.ui.ajouter_depot(fn) : prendre en charge des fichiers glissés sur la fenêtre ; fn(chemins, theme) renvoie la liste des chemins pris.\n"
 "\n"
 "Réglages de votre extension :\n"
 "• ctx.reglages.get(\"cle\", defaut) / .set(\"cle\", valeur) : enregistrés dans settings.json (en clair : jamais de mot de passe).\n"
@@ -6507,9 +6510,12 @@ msgstr ""
 "• ctx.maj_meta(vue, key=\"value\") keeps metadata with the note (one invisible line at the top of its text; encrypted if the note is locked; None removes the key).\n"
 "• ctx.assurer_identifiant(vue): a stable identifier for the note (survives renaming, moving, locking).\n"
 "\n"
-"Attached images:\n"
-"• ctx.pieces(vue): list of attachments (id, nom, type, taille, ocr…).\n"
-"• ctx.lire_piece(vue, piece): the image bytes.\n"
+"Attachments (images or other files):\n"
+"• ctx.pieces(vue): list of attachments (id, nom, MIME type, taille, ocr…).\n"
+"• ctx.lire_piece(vue, piece): the bytes of the attachment.\n"
+"• ctx.ajouter_piece(vue, nom, type, donnees) attaches a file; ctx.remplacer_piece(vue, piece, type, donnees) replaces it (the previous version goes to the trash).\n"
+"• ctx.maj_piece(vue, piece, ocr=text) stores the text extracted from the attachment: search finds it.\n"
+"• ctx.ui.ajouter_depot(fn): take charge of files dragged onto the window; fn(chemins, theme) returns the list of paths it took.\n"
 "\n"
 "Settings of your extension:\n"
 "• ctx.reglages.get(\"key\", default) / .set(\"key\", value): saved in settings.json (in clear text: never a password).\n"
@@ -6524,11 +6530,11 @@ msgstr ""
 "        self.ctx.modifier(vue, titre=vue.titre.upper())\n"
 "```"
 
-#: src/scrinium/core/doc_extensions.py:128
+#: src/scrinium/core/doc_extensions.py:131
 msgid "Extensions 4 · Boutons, menus et panneaux"
 msgstr "Extensions 4 · Buttons, menus and panels"
 
-#: src/scrinium/core/doc_extensions.py:128
+#: src/scrinium/core/doc_extensions.py:131
 msgid ""
 "« ctx.ui » ajoute des éléments à la fenêtre ; tout est retiré tout seul quand l'extension est désactivée. Il vaut None quand Scrinium tourne sans fenêtre : testez-le.\n"
 "\n"
@@ -6594,11 +6600,11 @@ msgstr ""
 "    self.etiquette.setText(f\"{len((fiche.texte or '').split())} words\")\n"
 "```"
 
-#: src/scrinium/core/doc_extensions.py:160
+#: src/scrinium/core/doc_extensions.py:163
 msgid "Extensions 5 · Réagir aux événements"
 msgstr "Extensions 5 · Reacting to events"
 
-#: src/scrinium/core/doc_extensions.py:160
+#: src/scrinium/core/doc_extensions.py:163
 msgid ""
 "ctx.on(evenement, fonction) : Scrinium appelle votre fonction quand quelque chose se passe. Les arguments arrivent par nom : acceptez toujours **kw pour rester compatible avec les ajouts futurs.\n"
 "\n"
@@ -6642,11 +6648,11 @@ msgstr ""
 "    ...\n"
 "```"
 
-#: src/scrinium/core/doc_extensions.py:181
+#: src/scrinium/core/doc_extensions.py:184
 msgid "Extensions 6 · Recettes"
 msgstr "Extensions 6 · Recipes"
 
-#: src/scrinium/core/doc_extensions.py:181
+#: src/scrinium/core/doc_extensions.py:184
 msgid ""
 "Horodater : insérer la date et l'heure à l'endroit du curseur.\n"
 "\n"
@@ -6720,11 +6726,11 @@ msgstr ""
 "\n"
 "Filing what the extension receives: append text to a given note with ctx.fiches(...) then ctx.modifier(vue, texte=...)."
 
-#: src/scrinium/core/doc_extensions.py:217
+#: src/scrinium/core/doc_extensions.py:220
 msgid "Extensions 7 · Bonnes pratiques et partage"
 msgstr "Extensions 7 · Good practice and sharing"
 
-#: src/scrinium/core/doc_extensions.py:217
+#: src/scrinium/core/doc_extensions.py:220
 msgid ""
 "• Gardez activer() rapide : ouvrez les fichiers et le réseau plus tard, pas au démarrage.\n"
 "• Testez ctx.ui is not None avant d'ajouter quoi que ce soit à la fenêtre.\n"
