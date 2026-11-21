@@ -4,6 +4,7 @@
 import importlib.util
 import os
 import shutil
+import sys
 from pathlib import Path
 
 import pytest
@@ -98,6 +99,36 @@ def test_copie_de_travail_surveillance_et_purge(tmp_path):
     (d / "autre").mkdir()
     L.purger_tout(d)
     assert not (d / "edition-restee").exists() and (d / "autre").exists()
+
+
+# ---------- aperçu par conversion en PDF ----------
+def test_apercu_commande_et_conversion_avec_un_faux_soffice(tmp_path, monkeypatch):
+    if os.name != "posix":
+        return
+    L = _logique()
+    assert L.est_pdf("a.PDF") and L.est_pdf("x", "application/pdf") and not L.est_pdf("a.odt")
+    assert L.est_convertible("a.docx") and not L.est_convertible("a.exe") and not L.est_convertible("a.pdf")
+    cmd = L.commande_pdf("/usr/bin/soffice", Path("/t/doc.odt"), Path("/t/pdf"), Path("/t/profil"))
+    assert cmd[0] == "/usr/bin/soffice" and "--headless" in cmd and cmd[cmd.index("--convert-to") + 1] == "pdf"
+    assert any(a.startswith("-env:UserInstallation=file:///t/profil") for a in cmd) and cmd[-1] == "/t/doc.odt"
+    faux = tmp_path / "soffice"                                            # écrit le PDF comme le ferait LibreOffice
+    faux.write_text('#!/bin/sh\nfor a in "$@"; do last="$a"; done\nout=""; prev=""\nfor a in "$@"; do [ "$prev" = "--outdir" ] && out="$a"; prev="$a"; done\n'
+                    'base=$(basename "$last"); printf "%%PDF-faux" > "$out/${base%.*}.pdf"\n')
+    faux.chmod(0o755)
+    w = tmp_path / "travail"
+    assert L.convertir_en_pdf(str(faux), "Rapport final.odt", b"PK", w) == b"%PDF-faux"
+    assert not list(w.glob("edition-*"))                                  # la copie en clair a disparu
+    en_echec = tmp_path / "echec"
+    en_echec.write_text("#!/bin/sh\nexit 3\n")
+    en_echec.chmod(0o755)
+    with pytest.raises(ValueError):
+        L.convertir_en_pdf(str(en_echec), "a.odt", b"PK", w)
+    assert not list(w.glob("edition-*"))
+    monkeypatch.setattr(L.shutil, "which", lambda n: "/opt/lo/soffice" if n == "libreoffice" else None)
+    assert L.trouver_soffice() == "/opt/lo/soffice"
+    monkeypatch.setattr(L.shutil, "which", lambda n: None)
+    if sys.platform != "win32":
+        assert L.trouver_soffice() is None
 
 
 # ---------- extraction du texte ----------
@@ -314,3 +345,35 @@ def test_le_texte_des_documents_joints_est_cherchable(fen, monkeypatch, tmp_path
     fen._importer_deposes([], [], [inconnu])
     g = next(f for t in fen.store.themes for f in t.fiches if f.titre == "image")
     assert fen.store.lister_pieces(g)[0].ocr == ""
+
+
+def test_gros_document_texte_extrait_en_arriere_plan(fen, monkeypatch, tmp_path):
+    import sys
+    import time
+    from PyQt6.QtCore import QCoreApplication
+    mod = sys.modules["scrinium_plugin_documents"]
+    monkeypatch.setattr(mod, "SYNC_MAX", 0)                                   # tout document passe par le fil de travail
+    docx = tmp_path / "gros.docx"
+    docx.write_bytes(_zip({"word/document.xml": '<w:document xmlns:w="w"><w:body><w:p><w:r><w:t>Texte du gros fichier</w:t></w:r></w:p></w:body></w:document>'}))
+    fen._importer_deposes([], [], [docx])
+    f = next(f for t in fen.store.themes for f in t.fiches if f.titre == "gros")
+    fin = time.time() + 10
+    while time.time() < fin and not fen.store.lister_pieces(f)[0].ocr:
+        QCoreApplication.processEvents()
+        time.sleep(0.02)
+    assert fen.store.lister_pieces(f)[0].ocr == "Texte du gros fichier"
+
+
+def test_apercu_sans_qtpdf_le_dit(fen, monkeypatch, tmp_path):
+    import sys
+    from PyQt6.QtWidgets import QMessageBox
+    vue = fen.vues_types["objet"]
+    ctx = fen.plugins.actifs["documents"][1]
+    fv = ctx.fiche_courante()
+    ctx.ajouter_piece(fv, "a.txt", "text/plain", b"bonjour")
+    vue.charger(_logique().texte_de(""))
+    dits = []
+    monkeypatch.setattr(QMessageBox, "information", lambda *a, **k: dits.append(a[2]))
+    monkeypatch.setattr(vue, "pdf", None)                                         # comme si PyQt6-Pdf n'était pas installé
+    vue.apercu()
+    assert len(dits) == 1 and "PyQt6-Pdf" in dits[0] and not vue._conversion

@@ -3,12 +3,19 @@
 """Extension Scrinium « Documents » : une fiche = un fichier (texte, tableur, PDF…) gardé en pièce jointe, avec une description (voir `logique.py`).
 La fiche reste une fiche : recherche, verrouillage (le fichier est chiffré avec elle), partage, synchronisation, corbeille. Type non exécutable :
 l'extension n'ouvre aucun fichier d'elle-même."""
+import threading
 import time
 from pathlib import Path
 
-from PyQt6.QtCore import QTimer, QUrl, pyqtSignal
+from PyQt6.QtCore import QBuffer, QByteArray, QIODevice, QObject, Qt, QTimer, QUrl, pyqtSignal
 from PyQt6.QtGui import QDesktopServices
-from PyQt6.QtWidgets import (QFileDialog, QHBoxLayout, QLabel, QMessageBox, QPlainTextEdit, QPushButton, QVBoxLayout, QWidget)
+from PyQt6.QtWidgets import (QFileDialog, QHBoxLayout, QLabel, QMessageBox, QPlainTextEdit, QPushButton, QSplitter, QVBoxLayout, QWidget)
+
+try:                                        # facultatif : l'aperçu demande le module QtPdf (paquet PyQt6-Pdf), sinon le bouton le dit
+    from PyQt6.QtPdf import QPdfDocument
+    from PyQt6.QtPdfWidgets import QPdfView
+except ImportError:                         # pragma: no cover (dépend de l'installation)
+    QPdfDocument = QPdfView = None
 
 from scrinium.core.plugins import Plugin
 from scrinium.i18n import _
@@ -18,6 +25,37 @@ from . import extraction, logique
 MOTEUR = "documents"                       # valeur de `ocr_moteur` : texte tiré du document lui-même (pas d'une reconnaissance d'image)
 IMAGES = ("image/png", "image/jpeg")
 _prevenu: set = set()                      # outils manquants déjà signalés pendant cette session
+SYNC_MAX = 2 * 1024 * 1024                 # au-delà, le texte est extrait en arrière-plan (la fenêtre ne se fige pas)
+
+
+class _Pont(QObject):
+    """Ramène dans le fil de l'interface le résultat d'un travail fait en arrière-plan (le magasin de fiches n'est pas thread-safe)."""
+    appel = pyqtSignal(object)
+
+    def __init__(self):
+        super().__init__()
+        self.appel.connect(lambda fn: fn())
+
+
+_pont_unique = None
+
+
+def _pont() -> _Pont:
+    global _pont_unique
+    if _pont_unique is None:
+        _pont_unique = _Pont()              # créé dans le fil de l'interface (premier appel : activation de l'extension)
+    return _pont_unique
+
+
+def _signaler_outil(ctx, nom: str) -> None:
+    if nom not in _prevenu and ctx.ui is not None:
+        _prevenu.add(nom)
+        ctx.ui.notifier(_("Fiche-document"), _("Pour chercher dans le texte des PDF, installez « %s » (paquet poppler-utils).") % nom)
+
+
+def _enregistrer_texte(ctx, vue, piece, texte: str) -> bool:
+    ctx.maj_piece(vue, piece, ocr=texte, ocr_moteur=MOTEUR)
+    return True
 
 
 def indexer(ctx, vue, piece) -> bool:
@@ -27,18 +65,42 @@ def indexer(ctx, vue, piece) -> bool:
     if piece.type in IMAGES or piece.taille > extraction.SOURCE_MAX or not extraction.prise_en_charge(piece.nom, piece.type):
         return False
     try:
-        texte = extraction.extraire(piece.nom, piece.type, ctx.lire_piece(vue, piece))
+        donnees = ctx.lire_piece(vue, piece)
+    except (ValueError, OSError):
+        return False
+    if piece.taille > SYNC_MAX:                              # gros fichier : extraction en arrière-plan, le texte est rangé à l'arrivée
+        threading.Thread(target=_extraire_en_fond, args=(ctx, vue, piece.id, piece.taille, piece.nom, piece.type, donnees), daemon=True).start()
+        return True
+    try:
+        texte = extraction.extraire(piece.nom, piece.type, donnees)
     except extraction.OutilManquant as ex:
-        if ex.args[0] not in _prevenu and ctx.ui is not None:
-            _prevenu.add(ex.args[0])
-            ctx.ui.notifier(_("Fiche-document"), _("Pour chercher dans le texte des PDF, installez « %s » (paquet poppler-utils).") % ex.args[0])
+        _signaler_outil(ctx, ex.args[0])
         return False
     except (extraction.FormatIllisible, ValueError, OSError):
         return False
-    if not texte:
-        return False
-    ctx.maj_piece(vue, piece, ocr=texte, ocr_moteur=MOTEUR)
-    return True
+    return bool(texte) and _enregistrer_texte(ctx, vue, piece, texte)
+
+
+def _extraire_en_fond(ctx, vue, ancien_id: int, ancienne_taille: int, nom: str, type_: str, donnees: bytes) -> None:
+    """Fil de travail : lit le texte (sans toucher au magasin de fiches), puis le range dans le fil de l'interface si la pièce n'a pas changé."""
+    try:
+        texte, outil = extraction.extraire(nom, type_, donnees), ""
+    except extraction.OutilManquant as ex:
+        texte, outil = None, ex.args[0]
+    except Exception:                                        # fichier abîmé : on laisse la pièce sans texte
+        return
+
+    def ranger():
+        if outil:
+            _signaler_outil(ctx, outil)
+            return
+        try:
+            courante = next((p for p in ctx.pieces(vue) if p.id == ancien_id), None)
+            if texte and courante is not None and courante.taille == ancienne_taille:       # supprimée ou remplacée entre-temps : abandon
+                _enregistrer_texte(ctx, vue, courante, texte)
+        except (ValueError, OSError):
+            pass
+    _pont().appel.emit(ranger)
 
 DOC = _(
     "Pour garder un fichier (lettre, tableur, PDF…) comme une fiche, avec une description.\n"
@@ -49,6 +111,8 @@ DOC = _(
     "• Glissez des fichiers depuis votre gestionnaire de fichiers sur la fenêtre : chacun devient une fiche-document du thème affiché, titrée d'après le nom du fichier "
     "(une image déposée dans le texte d'une fiche reste, elle, jointe à cette fiche).\n"
     "• Le texte du fichier (ODF, DOCX, XLSX, PPTX, texte brut ; PDF si « pdftotext » est installé) est rangé avec la fiche : la recherche le trouve, comme le texte d'une image lu par l'extension OCR.\n"
+    "• « Aperçu » montre le fichier dans la fiche : un PDF directement, un document ODF, DOCX, XLSX, PPTX, RTF ou texte converti en PDF par LibreOffice s'il est installé "
+    "(rien n'est installé ni téléchargé pour vous). L'aperçu demande le module Qt PDF (PyQt6-Pdf).\n"
     "• « Remplacer le fichier… » garde l'ancienne version dans la corbeille. « Enregistrer sous… » en fait une copie (en clair).\n"
     "• « Ouvrir avec l'application associée » ouvre une copie de travail dans LibreOffice, un tableur, une visionneuse… ; chaque enregistrement fait là-bas est repris dans la fiche "
     "(l'ancienne version va à la corbeille). « Terminer l'édition » arrête la surveillance et supprime la copie de travail, qui est en clair même si la fiche est verrouillée.\n"
@@ -78,10 +142,13 @@ class VueDocument(QWidget):
         self.b_sous.clicked.connect(self.enregistrer_sous)
         self.b_ouvrir = QPushButton(_("Ouvrir avec l'application associée"))
         self.b_ouvrir.clicked.connect(self.ouvrir_externe)
+        self.b_apercu = QPushButton(_("Aperçu"))
+        self.b_apercu.clicked.connect(self.apercu)
         self.b_fin = QPushButton(_("Terminer l'édition"))
         self.b_fin.clicked.connect(lambda: self.terminer())
         self.b_fin.hide()
         boutons.addWidget(self.b_ajout)
+        boutons.addWidget(self.b_apercu)
         boutons.addWidget(self.b_ouvrir)
         boutons.addWidget(self.b_fin)
         boutons.addWidget(self.b_sous)
@@ -94,10 +161,19 @@ class VueDocument(QWidget):
         self.desc = QPlainTextEdit()
         self.desc.setPlaceholderText(_("Description (facultative)"))
         self.desc.textChanged.connect(self._edite)
-        lay.addWidget(self.desc, 1)
+        self.pdf = QPdfView() if QPdfView is not None else None
+        self._doc = self._tampon = None
+        self._conversion = False
+        cadre = QSplitter(Qt.Orientation.Vertical)
+        if self.pdf is not None:
+            self.pdf.hide()
+            cadre.addWidget(self.pdf)
+        cadre.addWidget(self.desc)
+        lay.addWidget(cadre, 1)
 
     # ----- contrat des vues -----
     def charger(self, texte: str) -> None:
+        self._fermer_apercu()
         self._charge = True
         self.desc.setPlainText(logique.description(texte))
         self._charge = False
@@ -129,6 +205,7 @@ class VueDocument(QWidget):
         self.b_ajout.setText(_("Ajouter le fichier…") if piece is None else _("Remplacer le fichier…"))
         self.b_sous.setEnabled(piece is not None)
         self.b_ouvrir.setEnabled(piece is not None and self._edition is None)
+        self.b_apercu.setEnabled(piece is not None and not self._conversion)
 
     def choisir(self) -> None:
         vue, piece = self._piece()
@@ -166,6 +243,84 @@ class VueDocument(QWidget):
             except (ValueError, OSError) as ex:
                 QMessageBox.warning(self, _("Fiche-document"), str(ex))
 
+
+    # ----- aperçu (PDF directement ; autres documents convertis en PDF par LibreOffice s'il est installé) -----
+    def _apercu_ouvert(self) -> bool:
+        return self.pdf is not None and not self.pdf.isHidden()
+
+    def apercu(self) -> None:
+        if self._apercu_ouvert():
+            self._fermer_apercu()
+            return
+        vue, piece = self._piece()
+        if piece is None or self._conversion:
+            return
+        if self.pdf is None:
+            QMessageBox.information(self, _("Aperçu"), _("L'aperçu demande le module PyQt6-Pdf (QtPdf), qui n'est pas installé."))
+            return
+        try:
+            donnees = self.ctx.lire_piece(vue, piece)
+        except (ValueError, OSError) as ex:
+            QMessageBox.warning(self, _("Fiche-document"), str(ex))
+            return
+        if logique.est_pdf(piece.nom, piece.type):
+            self._montrer_pdf(donnees)
+            return
+        soffice = logique.trouver_soffice() if logique.est_convertible(piece.nom) else None
+        if soffice is None:
+            QMessageBox.information(self, _("Aperçu"), _("Pour l'aperçu de ce type de document, installez LibreOffice."))
+            return
+        if vue.verrou and QMessageBox.question(
+                self, _("Aperçu"),
+                _("La fiche est verrouillée : une copie EN CLAIR sera créée le temps de la conversion. Continuer ?")) != QMessageBox.StandardButton.Yes:
+            return
+        self._conversion = True
+        self.b_apercu.setEnabled(False)
+        self.b_apercu.setText(_("Conversion en cours…"))
+        dossier, nom = self.ctx.dossier_donnees, piece.nom
+
+        def travail():
+            try:
+                pdf, erreur = logique.convertir_en_pdf(soffice, nom, donnees, dossier), ""
+            except (ValueError, OSError) as ex:
+                pdf, erreur = None, str(ex)
+            _pont().appel.emit(lambda: self._fin_conversion(pdf, erreur))
+        threading.Thread(target=travail, daemon=True).start()
+
+    def _fin_conversion(self, pdf, erreur: str) -> None:
+        try:
+            self._conversion = False
+            self.b_apercu.setText(_("Aperçu"))
+            self.rafraichir()
+            if pdf is None:
+                QMessageBox.warning(self, _("Fiche-document"), _("Aperçu impossible : %s") % erreur)
+            else:
+                self._montrer_pdf(pdf)
+        except RuntimeError:                                   # la vue a été détruite (extension désactivée) pendant la conversion
+            pass
+
+    def _montrer_pdf(self, donnees: bytes) -> None:
+        self._fermer_apercu()
+        self._tampon = QBuffer(self)
+        self._tampon.setData(QByteArray(donnees))
+        self._tampon.open(QIODevice.OpenModeFlag.ReadOnly)
+        self._doc = QPdfDocument(self)
+        self._doc.load(self._tampon)
+        self.pdf.setDocument(self._doc)
+        self.pdf.show()
+        self.b_apercu.setText(_("Fermer l'aperçu"))
+
+    def _fermer_apercu(self) -> None:
+        if self.pdf is None or self._doc is None:
+            return
+        self.pdf.hide()
+        self.pdf.setDocument(None)
+        self._doc.close()
+        self._doc.deleteLater()
+        self._tampon.deleteLater()
+        self._doc = self._tampon = None
+        if not self._conversion:
+            self.b_apercu.setText(_("Aperçu"))
 
     # ----- édition dans l'application associée -----
     def ouvrir_externe(self) -> None:
@@ -246,6 +401,7 @@ class DocumentsPlugin(Plugin):
 
     def activer(self, ctx):
         self.ctx, self.vue = ctx, None
+        _pont()                                               # créé ici : dans le fil de l'interface
         ctx.ajouter_doc(_("Extension Documents"), DOC)
         logique.purger_tout(ctx.dossier_donnees)              # copies de travail restées d'une session interrompue
         if ctx.ui is not None:

@@ -6,6 +6,8 @@ import mimetypes
 import os
 import re
 import shutil
+import subprocess
+import sys
 import tempfile
 from pathlib import Path
 
@@ -121,6 +123,60 @@ class Surveillance:
         """La modification courante a été reprise (ou abandonnée) : elle ne sera pas signalée de nouveau."""
         self.base = self._signature()
         self._vu = None
+
+
+# ---------- aperçu : conversion en PDF par LibreOffice (facultatif) ----------
+CONVERTIBLES = {".odt", ".ods", ".odp", ".docx", ".xlsx", ".pptx", ".rtf", ".txt", ".csv"}
+DELAI_CONVERSION = 120                    # secondes accordées à LibreOffice
+PDF_MAX = 100 * 1024 * 1024
+
+
+def est_pdf(nom: str, type_: str = "") -> bool:
+    return Path(nom or "").suffix.lower() == ".pdf" or type_ == "application/pdf"
+
+
+def est_convertible(nom: str) -> bool:
+    return Path(nom or "").suffix.lower() in CONVERTIBLES
+
+
+def trouver_soffice() -> str | None:
+    """Chemin de LibreOffice (`soffice`), ou None s'il n'est pas installé. Rien n'est installé ni téléchargé."""
+    for nom in ("soffice", "libreoffice"):
+        chemin = shutil.which(nom)
+        if chemin:
+            return chemin
+    if sys.platform == "win32":
+        for base in (os.environ.get("ProgramFiles", r"C:\Program Files"), os.environ.get("ProgramFiles(x86)", r"C:\Program Files (x86)")):
+            exe = Path(base) / "LibreOffice" / "program" / "soffice.exe"
+            if exe.is_file():
+                return str(exe)
+    return None
+
+
+def commande_pdf(soffice: str, source: Path, sortie: Path, profil: Path) -> list:
+    """Ligne de commande de la conversion. Un profil à part évite d'entrer en conflit avec un LibreOffice déjà ouvert par l'utilisateur."""
+    return [soffice, f"-env:UserInstallation={profil.as_uri()}", "--headless", "--norestore", "--convert-to", "pdf",
+            "--outdir", str(sortie), str(source)]
+
+
+def convertir_en_pdf(soffice: str, nom: str, donnees: bytes, dossier: Path) -> bytes:
+    """Convertit le document en PDF avec LibreOffice (copie de travail en clair, supprimée ensuite). OSError / ValueError en cas d'échec."""
+    source = copie_de_travail(dossier, nom, donnees)
+    try:
+        sortie = source.parent / "pdf"
+        sortie.mkdir()
+        try:
+            r = subprocess.run(commande_pdf(soffice, source, sortie, source.parent / "profil"), capture_output=True, timeout=DELAI_CONVERSION)
+        except subprocess.TimeoutExpired as ex:
+            raise ValueError("LibreOffice n'a pas répondu à temps") from ex
+        pdf = sortie / (source.stem + ".pdf")
+        if r.returncode != 0 or not pdf.is_file():
+            raise ValueError("la conversion en PDF a échoué")
+        if pdf.stat().st_size > PDF_MAX:
+            raise ValueError("PDF trop volumineux")
+        return pdf.read_bytes()
+    finally:
+        purger(source)
 
 
 def _modele() -> str:

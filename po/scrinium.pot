@@ -1750,7 +1750,7 @@ msgstr ""
 msgid "Modèle indisponible : %s"
 msgstr ""
 
-#: plugins/documents/__init__.py:43
+#: plugins/documents/__init__.py:105
 msgid ""
 "Pour garder un fichier (lettre, tableur, PDF…) comme une fiche, avec une description.\n"
 "\n"
@@ -1758,113 +1758,144 @@ msgid ""
 "• La fiche s'utilise comme les autres : recherche dans le titre et la description, verrouillage (le fichier est alors chiffré avec la fiche), partage, synchronisation, corbeille.\n"
 "• Glissez des fichiers depuis votre gestionnaire de fichiers sur la fenêtre : chacun devient une fiche-document du thème affiché, titrée d'après le nom du fichier (une image déposée dans le texte d'une fiche reste, elle, jointe à cette fiche).\n"
 "• Le texte du fichier (ODF, DOCX, XLSX, PPTX, texte brut ; PDF si « pdftotext » est installé) est rangé avec la fiche : la recherche le trouve, comme le texte d'une image lu par l'extension OCR.\n"
+"• « Aperçu » montre le fichier dans la fiche : un PDF directement, un document ODF, DOCX, XLSX, PPTX, RTF ou texte converti en PDF par LibreOffice s'il est installé (rien n'est installé ni téléchargé pour vous). L'aperçu demande le module Qt PDF (PyQt6-Pdf).\n"
 "• « Remplacer le fichier… » garde l'ancienne version dans la corbeille. « Enregistrer sous… » en fait une copie (en clair).\n"
 "• « Ouvrir avec l'application associée » ouvre une copie de travail dans LibreOffice, un tableur, une visionneuse… ; chaque enregistrement fait là-bas est repris dans la fiche (l'ancienne version va à la corbeille). « Terminer l'édition » arrête la surveillance et supprime la copie de travail, qui est en clair même si la fiche est verrouillée.\n"
 "• Rien n'est ouvert ni lancé de lui-même : le type est inerte."
 msgstr ""
 
-#: plugins/documents/__init__.py:75
-#: plugins/documents/__init__.py:129
+#: plugins/documents/__init__.py:53
+#: plugins/documents/__init__.py:342
+#: plugins/documents/__init__.py:228
+msgid "Fiche-document"
+msgstr ""
+
+#: plugins/documents/__init__.py:139
+#: plugins/documents/__init__.py:205
 msgid "Ajouter le fichier…"
 msgstr ""
 
-#: plugins/documents/__init__.py:77
+#: plugins/documents/__init__.py:141
 #: src/scrinium/ui/images.py:502
 msgid "Enregistrer sous…"
 msgstr ""
 
-#: plugins/documents/__init__.py:79
-#: plugins/documents/__init__.py:177
+#: plugins/documents/__init__.py:143
+#: plugins/documents/__init__.py:332
 msgid "Ouvrir avec l'application associée"
 msgstr ""
 
-#: plugins/documents/__init__.py:81
+#: plugins/documents/__init__.py:145
+#: plugins/documents/__init__.py:259
+#: plugins/documents/__init__.py:271
+msgid "Aperçu"
+msgstr ""
+
+#: plugins/documents/__init__.py:147
 msgid "Terminer l'édition"
 msgstr ""
 
-#: plugins/documents/__init__.py:95
+#: plugins/documents/__init__.py:162
 msgid "Description (facultative)"
 msgstr ""
 
-#: plugins/documents/__init__.py:137
+#: plugins/documents/__init__.py:214
 msgid "Choisir le fichier"
 msgstr ""
 
-#: plugins/documents/__init__.py:162
+#: plugins/documents/__init__.py:239
 #: src/scrinium/ui/images.py:536
 msgid "Enregistrer le fichier"
 msgstr ""
 
-#: plugins/documents/__init__.py:190
+#: plugins/documents/__init__.py:279
+msgid "Conversion en cours…"
+msgstr ""
+
+#: plugins/documents/__init__.py:311
+msgid "Fermer l'aperçu"
+msgstr ""
+
+#: plugins/documents/__init__.py:345
 msgid "Édition en cours : les enregistrements faits dans l'application sont repris dans la fiche. Cliquez sur « Terminer l'édition » quand vous avez fini."
 msgstr ""
 
-#: plugins/documents/__init__.py:249
+#: plugins/documents/__init__.py:405
 msgid "Extension Documents"
 msgstr ""
 
-#: plugins/documents/__init__.py:270
+#: plugins/documents/__init__.py:426
 msgid "Documents"
 msgstr ""
 
-#: plugins/documents/__init__.py:124
+#: plugins/documents/__init__.py:53
+msgid "Pour chercher dans le texte des PDF, installez « %s » (paquet poppler-utils)."
+msgstr ""
+
+#: plugins/documents/__init__.py:200
 msgid "Aucun fichier joint."
 msgstr ""
 
-#: plugins/documents/__init__.py:129
+#: plugins/documents/__init__.py:205
 msgid "Remplacer le fichier…"
 msgstr ""
 
-#: plugins/documents/__init__.py:187
-#: plugins/documents/__init__.py:34
-#: plugins/documents/__init__.py:151
-msgid "Fiche-document"
+#: plugins/documents/__init__.py:259
+msgid "L'aperçu demande le module PyQt6-Pdf (QtPdf), qui n'est pas installé."
 msgstr ""
 
-#: plugins/documents/__init__.py:187
+#: plugins/documents/__init__.py:271
+msgid "Pour l'aperçu de ce type de document, installez LibreOffice."
+msgstr ""
+
+#: plugins/documents/__init__.py:342
 msgid "Aucune application n'a pu ouvrir ce fichier."
 msgstr ""
 
-#: plugins/documents/__init__.py:223
+#: plugins/documents/__init__.py:378
 msgid "Repris dans la fiche à %s. L'édition continue."
 msgstr ""
 
-#: plugins/documents/__init__.py:127
+#: plugins/documents/__init__.py:203
 msgid "%s Ko"
 msgstr ""
 
-#: plugins/documents/__init__.py:127
+#: plugins/documents/__init__.py:203
 #: plugins/lecture/__init__.py:29
 #: plugins/traduction/logique.py:538
 msgid "%s Mo"
 msgstr ""
 
-#: plugins/documents/__init__.py:128
+#: plugins/documents/__init__.py:204
 msgid "Fichier : %(nom)s (%(taille)s, %(type)s)"
 msgstr ""
 
-#: plugins/documents/__init__.py:143
-#: plugins/documents/__init__.py:207
-#: plugins/documents/__init__.py:275
+#: plugins/documents/__init__.py:220
+#: plugins/documents/__init__.py:362
+#: plugins/documents/__init__.py:431
 msgid "Fichier trop volumineux."
 msgstr ""
 
-#: plugins/documents/__init__.py:159
+#: plugins/documents/__init__.py:236
 #: src/scrinium/ui/images.py:528
 msgid "Enregistrer sous"
 msgstr ""
 
-#: plugins/documents/__init__.py:160
+#: plugins/documents/__init__.py:237
 #: src/scrinium/ui/images.py:529
 msgid "La fiche est verrouillée : la copie sera enregistrée EN CLAIR. Continuer ?"
 msgstr ""
 
-#: plugins/documents/__init__.py:178
+#: plugins/documents/__init__.py:275
+msgid "La fiche est verrouillée : une copie EN CLAIR sera créée le temps de la conversion. Continuer ?"
+msgstr ""
+
+#: plugins/documents/__init__.py:333
 msgid "La fiche est verrouillée : une copie EN CLAIR sera créée le temps de l'édition. Continuer ?"
 msgstr ""
 
-#: plugins/documents/__init__.py:34
-msgid "Pour chercher dans le texte des PDF, installez « %s » (paquet poppler-utils)."
+#: plugins/documents/__init__.py:296
+msgid "Aperçu impossible : %s"
 msgstr ""
 
 #: plugins/echeances/__init__.py:242
@@ -8082,10 +8113,6 @@ msgstr ""
 
 #: src/scrinium/ui/markdown.py:207
 msgid "Choisissez la fiche vers laquelle pointer :"
-msgstr ""
-
-#: src/scrinium/ui/markdown.py:279
-msgid "Aperçu"
 msgstr ""
 
 #: src/scrinium/ui/markdown.py:280
