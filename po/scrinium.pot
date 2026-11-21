@@ -1750,83 +1750,110 @@ msgstr ""
 msgid "Modèle indisponible : %s"
 msgstr ""
 
-#: plugins/documents/__init__.py:16
+#: plugins/documents/__init__.py:18
 msgid ""
 "Pour garder un fichier (lettre, tableur, PDF…) comme une fiche, avec une description.\n"
 "\n"
 "• Nouvelle fiche > « Fiche-document » : écrivez une description, puis « Ajouter le fichier… ». Le fichier garde son format d'origine.\n"
 "• La fiche s'utilise comme les autres : recherche dans le titre et la description, verrouillage (le fichier est alors chiffré avec la fiche), partage, synchronisation, corbeille.\n"
 "• « Remplacer le fichier… » garde l'ancienne version dans la corbeille. « Enregistrer sous… » en fait une copie (en clair).\n"
+"• « Ouvrir avec l'application associée » ouvre une copie de travail dans LibreOffice, un tableur, une visionneuse… ; chaque enregistrement fait là-bas est repris dans la fiche (l'ancienne version va à la corbeille). « Terminer l'édition » arrête la surveillance et supprime la copie de travail, qui est en clair même si la fiche est verrouillée.\n"
 "• Rien n'est ouvert ni lancé de lui-même : le type est inerte."
 msgstr ""
 
-#: plugins/documents/__init__.py:40
-#: plugins/documents/__init__.py:83
+#: plugins/documents/__init__.py:47
+#: plugins/documents/__init__.py:101
 msgid "Ajouter le fichier…"
 msgstr ""
 
-#: plugins/documents/__init__.py:42
+#: plugins/documents/__init__.py:49
 #: src/scrinium/ui/images.py:497
 msgid "Enregistrer sous…"
 msgstr ""
 
-#: plugins/documents/__init__.py:49
+#: plugins/documents/__init__.py:51
+#: plugins/documents/__init__.py:149
+msgid "Ouvrir avec l'application associée"
+msgstr ""
+
+#: plugins/documents/__init__.py:53
+msgid "Terminer l'édition"
+msgstr ""
+
+#: plugins/documents/__init__.py:67
 msgid "Description (facultative)"
 msgstr ""
 
-#: plugins/documents/__init__.py:90
+#: plugins/documents/__init__.py:109
 msgid "Choisir le fichier"
 msgstr ""
 
-#: plugins/documents/__init__.py:115
+#: plugins/documents/__init__.py:134
 #: src/scrinium/ui/images.py:531
 msgid "Enregistrer le fichier"
 msgstr ""
 
-#: plugins/documents/__init__.py:127
+#: plugins/documents/__init__.py:162
+msgid "Édition en cours : les enregistrements faits dans l'application sont repris dans la fiche. Cliquez sur « Terminer l'édition » quand vous avez fini."
+msgstr ""
+
+#: plugins/documents/__init__.py:220
 msgid "Extension Documents"
 msgstr ""
 
-#: plugins/documents/__init__.py:78
+#: plugins/documents/__init__.py:96
 msgid "Aucun fichier joint."
 msgstr ""
 
-#: plugins/documents/__init__.py:83
+#: plugins/documents/__init__.py:101
 msgid "Remplacer le fichier…"
 msgstr ""
 
-#: plugins/documents/__init__.py:81
+#: plugins/documents/__init__.py:159
+#: plugins/documents/__init__.py:123
+#: plugins/documents/__init__.py:155
+msgid "Fiche-document"
+msgstr ""
+
+#: plugins/documents/__init__.py:159
+msgid "Aucune application n'a pu ouvrir ce fichier."
+msgstr ""
+
+#: plugins/documents/__init__.py:194
+msgid "Repris dans la fiche à %s. L'édition continue."
+msgstr ""
+
+#: plugins/documents/__init__.py:99
 msgid "%s Ko"
 msgstr ""
 
-#: plugins/documents/__init__.py:81
+#: plugins/documents/__init__.py:99
 #: plugins/lecture/__init__.py:29
 #: plugins/traduction/logique.py:538
 msgid "%s Mo"
 msgstr ""
 
-#: plugins/documents/__init__.py:82
+#: plugins/documents/__init__.py:100
 msgid "Fichier : %(nom)s (%(taille)s, %(type)s)"
 msgstr ""
 
-#: plugins/documents/__init__.py:96
+#: plugins/documents/__init__.py:115
+#: plugins/documents/__init__.py:179
 msgid "Fichier trop volumineux."
 msgstr ""
 
-#: plugins/documents/__init__.py:104
-#: plugins/documents/__init__.py:120
-#: plugins/documents/logique.py:47
-msgid "Fiche-document"
-msgstr ""
-
-#: plugins/documents/__init__.py:112
+#: plugins/documents/__init__.py:131
 #: src/scrinium/ui/images.py:523
 msgid "Enregistrer sous"
 msgstr ""
 
-#: plugins/documents/__init__.py:113
+#: plugins/documents/__init__.py:132
 #: src/scrinium/ui/images.py:524
 msgid "La fiche est verrouillée : la copie sera enregistrée EN CLAIR. Continuer ?"
+msgstr ""
+
+#: plugins/documents/__init__.py:150
+msgid "La fiche est verrouillée : une copie EN CLAIR sera créée le temps de l'édition. Continuer ?"
 msgstr ""
 
 #: plugins/echeances/__init__.py:242

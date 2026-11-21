@@ -375,7 +375,7 @@ def test_remplacer_piece_limites(store):
     th, f = nouvelle(store)
     p = store.ajouter_piece(f, "a.png", "image/png", PNG)
     with pytest.raises(ValueError, match="type"):
-        store.remplacer_piece(f, p, "image/gif", b"GIF89a")
+        store.remplacer_piece(f, p, "pas un type", b"GIF89a")
     with pytest.raises(ValueError, match="lourde"):
         store.remplacer_piece(f, p, "image/png", b"0" * (LIMITES_PIECES["octets_piece"] + 1))
     assert store.lire_piece(f, store.lister_pieces(f)[0]) == PNG                      # rien n'a changé
@@ -391,7 +391,7 @@ def test_piece_document_en_clair(store):
     p = store.ajouter_piece(f, "Rapport.odt", TYPE_ODT, ODT)
     assert p.chemin.suffix == ".bin" and p.chemin.read_bytes() == ODT
     s2 = recharger(store)
-    g = s2.themes[0].fiches[0]
+    g = s2.theme("T").fiches[0]
     (q,) = s2.lister_pieces(g)
     assert (q.nom, q.type, q.taille) == ("Rapport.odt", TYPE_ODT, len(ODT)) and s2.lire_piece(g, q) == ODT
 

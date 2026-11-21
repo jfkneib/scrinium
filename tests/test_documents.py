@@ -70,6 +70,34 @@ def test_la_fiche_garde_son_fichier_sans_l_extension(tmp_path):
     assert (p.nom, p.type) == ("contrat.odt", ODT) and g.lire_piece(h, p) == b"PK-contenu"
 
 
+def test_copie_de_travail_surveillance_et_purge(tmp_path):
+    L = _logique()
+    assert L.nom_sur_disque("../../etc/passwd") == "passwd" and L.nom_sur_disque("a:b*c.odt") == "a_b_c.odt"
+    assert L.nom_sur_disque("") == "document" and L.nom_sur_disque("...") == "document"
+    c = L.copie_de_travail(tmp_path / "w", "Rapport.odt", b"abc")
+    assert c.read_bytes() == b"abc" and c.name == "Rapport.odt" and c.parent.parent == tmp_path / "w"
+    if os.name == "posix":
+        assert c.stat().st_mode & 0o777 == 0o600 and c.parent.stat().st_mode & 0o777 == 0o700
+    v = L.Surveillance(c)
+    assert not v.sonder() and not v.a_change()
+    c.write_bytes(b"abcd")
+    os.utime(c, ns=(1, 1))                                  # date nettement différente, même si l'écriture est dans la même seconde
+    assert v.a_change() and not v.sonder()                   # première interrogation : pas encore stable
+    assert v.sonder()                                        # deuxième, même signature : stable, à reprendre
+    c.write_bytes(b"abcde")                                  # l'application écrit encore : le compteur repart
+    os.utime(c, ns=(2, 2))
+    assert not v.sonder() and v.sonder()
+    v.acquitter()
+    assert not v.sonder() and not v.a_change()
+    L.purger(c)
+    assert not c.parent.exists()
+    d = tmp_path / "w"
+    (d / "edition-restee").mkdir()
+    (d / "autre").mkdir()
+    L.purger_tout(d)
+    assert not (d / "edition-restee").exists() and (d / "autre").exists()
+
+
 # ---------- avec la fenêtre (Qt hors écran) ----------
 os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
 
@@ -123,3 +151,34 @@ def test_vue_document_ajoute_remplace_et_enregistre(fen, monkeypatch, tmp_path):
     monkeypatch.setattr(QFileDialog, "getSaveFileName", lambda *a, **k: (str(sortie), ""))
     vue.enregistrer_sous()
     assert sortie.read_bytes() == b"PK-deux"
+
+
+def test_vue_edition_externe_reprend_les_enregistrements(fen, monkeypatch):
+    from PyQt6.QtGui import QDesktopServices
+    from PyQt6.QtWidgets import QMessageBox
+    L = _logique()
+    vue = fen.vues_types["objet"]
+    f = fen.fiche
+    ctx = fen.plugins.actifs["documents"][1]
+    fv = ctx.fiche_courante()
+    ctx.ajouter_piece(fv, "contrat.odt", ODT, b"PK-un")
+    vue.charger(L.texte_de("Location"))
+    ouverts = []
+    monkeypatch.setattr(QDesktopServices, "openUrl", lambda url: ouverts.append(url.toLocalFile()) or True)
+    monkeypatch.setattr(QMessageBox, "warning", lambda *a, **k: pytest.fail("erreur inattendue : %s" % (a,)))
+    vue.ouvrir_externe()
+    (chemin,) = ouverts
+    chemin = Path(chemin)
+    assert chemin.read_bytes() == b"PK-un" and not vue.b_ouvrir.isEnabled() and not vue.b_fin.isHidden()
+    chemin.write_bytes(b"PK-modifie")
+    os.utime(chemin, ns=(5, 5))
+    vue._sonder()                                            # pas encore stable
+    assert fen.store.lire_piece(f, fen.store.lister_pieces(f)[0]) == b"PK-un"
+    vue._sonder()                                            # stable : repris dans la fiche
+    (p,) = fen.store.lister_pieces(f)
+    assert fen.store.lire_piece(f, p) == b"PK-modifie" and p.type == ODT and os.listdir(fen.store.paths.corbeille)
+    chemin.write_bytes(b"PK-dernier")                        # enregistré juste avant « Terminer » : repris quand même
+    os.utime(chemin, ns=(9, 9))
+    vue.terminer()
+    assert fen.store.lire_piece(f, fen.store.lister_pieces(f)[0]) == b"PK-dernier"
+    assert not chemin.exists() and vue.b_fin.isHidden() and vue.b_ouvrir.isEnabled()
