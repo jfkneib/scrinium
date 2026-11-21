@@ -61,7 +61,7 @@ def _recuperer(args) -> int:
 def _extraire_images(pieces, pem, phrase, dossier: Path) -> int:
     """Écrit les images d'une fiche verrouillée, déchiffrées avec la clé de secours, dans `dossier` (droits 700)."""
     from .core import crypto
-    from .core.store import mkdir_prive, propre
+    from .core.store import ext_piece, mkdir_prive, propre
     mkdir_prive(dossier)
     code = 0
     for n, p in pieces:
@@ -71,7 +71,7 @@ def _extraire_images(pieces, pem, phrase, dossier: Path) -> int:
             print(_("Image %(n)s illisible : %(ex)s") % {"n": p.name, "ex": ex}, file=sys.stderr)
             code = 1
             continue
-        suffixe = ".jpg" if ent.get("type") == "image/jpeg" else ".png"
+        suffixe = ext_piece(str(ent.get("type", "")))
         cible = dossier / f"{n}-{Path(propre(str(ent.get('nom', 'image')))).stem}{suffixe}"
         cible.write_bytes(donnees)
         cible.chmod(0o600)

@@ -12,7 +12,7 @@ from pathlib import Path
 from urllib.parse import quote, unquote
 
 from . import images_texte, types_fiche
-from .store import TYPE_PIECE, Fiche, Store, Theme, propre
+from .store import TYPE_PIECE, Fiche, Store, Theme, ext_piece, propre
 
 TAILLE_MAX = 5 * 1024 * 1024                         # un fichier .md plus gros n'est pas une fiche
 IMAGE_MAX = 20 * 1024 * 1024
@@ -67,7 +67,7 @@ def exporter(store: Store, f: Fiche, chemin: Path, titre: str, texte: str, simpl
             k += 1
         dossier.mkdir(parents=True)
         for i, p in enumerate(pieces, 1):
-            ext = ".jpg" if p.type == "image/jpeg" else ".png"
+            ext = ext_piece(p.type)
             base = propre(Path(p.nom).stem, "image")
             nom = f"{i:02d}-{base}{ext}"
             (dossier / nom).write_bytes(store.lire_piece(f, p))

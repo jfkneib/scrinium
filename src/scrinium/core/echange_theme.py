@@ -16,7 +16,7 @@ import zipfile
 from pathlib import Path
 
 from . import echange_md
-from .store import Fiche, Store, Theme, propre
+from .store import Fiche, Store, Theme, ext_piece, propre
 
 FORMAT = "scrinium-theme"
 MANIFESTE = "scrinium-theme.json"
@@ -51,7 +51,7 @@ def exporter(store: Store, th: Theme, chemin: Path, simple: bool = False, en_cla
                 else:
                     liste, numeros = [], []
                     for i, piece in enumerate(store.lister_pieces(f), 1):
-                        ext = ".jpg" if piece.type == "image/jpeg" else ".png"
+                        ext = ext_piece(piece.type)
                         nom = f"{i:02d}-{propre(Path(piece.nom).stem, 'image')}{ext}"
                         z.writestr(f"{racine}/{stem}_images/{nom}", store.lire_piece(f, piece))
                         liste.append((f"{stem}_images/{nom}", piece.nom))

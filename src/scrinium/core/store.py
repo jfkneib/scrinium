@@ -27,8 +27,21 @@ POSIX = os.name == "posix"
 # Pièces jointes (docs/format-pieces-jointes.md)
 EXT_PIECE = {"image/png": ".png", "image/jpeg": ".jpg"}
 TYPE_PIECE = {v: k for k, v in EXT_PIECE.items()}
-LIMITES_PIECES = {"nombre": 50, "octets_piece": 8 * 1024 * 1024, "octets_total": 100 * 1024 * 1024}
-_NOM_PIECE = re.compile(r"(\d+)\.(png|jpg|lock)\Z")
+EXT_AUTRE = ".bin"                  # toute autre pièce (document…) : type MIME dans le .json (clair) ou l'en-tête chiffré
+TYPE_AUTRE = "application/octet-stream"
+_TYPE_MIME = re.compile(r"[a-z0-9][a-z0-9!#$&^_.+-]{0,126}/[a-z0-9][a-z0-9!#$&^_.+-]{0,126}\Z")
+LIMITES_PIECES = {"nombre": 50, "octets_piece": 8 * 1024 * 1024, "octets_total": 100 * 1024 * 1024}   # valeurs par défaut
+_NOM_PIECE = re.compile(r"(\d+)\.(png|jpg|bin|lock)\Z")
+
+
+def ext_piece(type_: str) -> str:
+    """Extension d'une pièce en clair : .png, .jpg, ou .bin pour tout autre type."""
+    return EXT_PIECE.get(type_, EXT_AUTRE)
+
+
+def type_piece_valide(type_: str) -> bool:
+    """Type MIME bien formé (`type/sous-type`, minuscules). Le cœur ne sait pas ce qu'est un .docx : il garde l'octet-stream."""
+    return bool(_TYPE_MIME.match(type_ or ""))
 
 
 _META = re.compile(r"\A<!-- scrinium: (\{.*?\}) -->\n?", re.S)
@@ -460,6 +473,18 @@ class Store:
             return []
         return sorted((int(m[1]), p) for p in d.iterdir() if (m := _NOM_PIECE.match(p.name)))
 
+    def limites_pieces(self) -> dict:
+        """Limites des pièces : réglage `pieces_jointes` de settings.json ({"nombre", "octets_piece", "octets_total"}), sinon
+        LIMITES_PIECES. Une valeur absente, non entière ou < 1 est ignorée."""
+        lim = dict(LIMITES_PIECES)
+        r = self.reglages().get("pieces_jointes")
+        if isinstance(r, dict):
+            for k in lim:
+                v = r.get(k)
+                if isinstance(v, int) and not isinstance(v, bool) and v >= 1:
+                    lim[k] = v
+        return lim
+
     def lister_pieces(self, f: Fiche) -> list:
         """Pièces de la fiche. Fiche verrouillée : seulement si elle est ouverte (clé connue)."""
         if f.fermee or (f.verrou and f.cle is None):
@@ -481,7 +506,8 @@ class Store:
                 except (OSError, ValueError):
                     d = {}
                 d = d if isinstance(d, dict) else {}
-                res.append(Piece(n, str(d.get("nom", p.name)), TYPE_PIECE[p.suffix], p.stat().st_size, p,
+                type_ = TYPE_PIECE.get(p.suffix) or (str(d.get("type", "")) if type_piece_valide(str(d.get("type", ""))) else TYPE_AUTRE)
+                res.append(Piece(n, str(d.get("nom", p.name)), type_, p.stat().st_size, p,
                                  str(d.get("ajoute", "")), str(d.get("ocr", "")), str(d.get("ocr_moteur", ""))))
         return res
 
@@ -491,18 +517,20 @@ class Store:
                                   ("ocr_moteur", piece.ocr_moteur)) if v != ""}
 
     def ajouter_piece(self, f: Fiche, nom: str, type_: str, donnees: bytes) -> Piece:
-        """Ajoute une image déjà réencodée (PNG ou JPEG). ValueError si fiche fermée, type ou limites non respectés."""
+        """Ajoute une pièce : image déjà réencodée (PNG, JPEG → .png/.jpg) ou tout autre fichier (→ .bin, type MIME conservé).
+        ValueError si fiche fermée, type mal formé ou limites (réglage `pieces_jointes`) non respectées."""
         if f.fermee or (f.verrou and f.cle is None):
             raise ValueError("fiche verrouillée : déverrouillez-la d'abord")
-        if type_ not in EXT_PIECE:
+        if not type_piece_valide(type_):
             raise ValueError(f"type de pièce jointe non pris en charge : {type_}")
-        if len(donnees) > LIMITES_PIECES["octets_piece"]:
-            raise ValueError("image trop lourde")
+        lim = self.limites_pieces()
+        if len(donnees) > lim["octets_piece"]:
+            raise ValueError("pièce jointe trop lourde")
         d = self.dossier_pj(f)
         existantes = self._numeros(d)
-        if len(existantes) >= LIMITES_PIECES["nombre"]:
+        if len(existantes) >= lim["nombre"]:
             raise ValueError("trop de pièces jointes pour cette fiche")
-        if sum(p.stat().st_size for _n, p in existantes) + len(donnees) > LIMITES_PIECES["octets_total"]:
+        if sum(p.stat().st_size for _n, p in existantes) + len(donnees) > lim["octets_total"]:
             raise ValueError("pièces jointes trop volumineuses pour cette fiche")
         n = max((n for n, _p in existantes), default=0) + 1
         piece = Piece(n, nom or f"image-{n}", type_, len(donnees), d, time.strftime("%Y-%m-%d %H:%M"))
@@ -511,7 +539,7 @@ class Store:
             piece.chemin = d / f"{n}.lock"
             _ecrire(piece.chemin, crypto.chiffrer_piece(self._entete(piece), donnees, f.cle, f.salt, f.wrap))
         else:
-            piece.chemin = d / f"{n}{EXT_PIECE[type_]}"
+            piece.chemin = d / f"{n}{ext_piece(type_)}"
             _ecrire(piece.chemin, donnees)
             _ecrire(d / f"{n}.json", json.dumps(self._entete(piece), ensure_ascii=False).encode("utf-8"))
         return piece
@@ -521,13 +549,14 @@ class Store:
         corbeille ; le texte OCR est effacé (il ne correspond plus à l'image). ValueError si fiche fermée ou limites dépassées."""
         if f.fermee or (f.verrou and f.cle is None):
             raise ValueError("fiche verrouillée : déverrouillez-la d'abord")
-        if type_ not in EXT_PIECE:
+        if not type_piece_valide(type_):
             raise ValueError(f"type de pièce jointe non pris en charge : {type_}")
-        if len(donnees) > LIMITES_PIECES["octets_piece"]:
-            raise ValueError("image trop lourde")
+        lim = self.limites_pieces()
+        if len(donnees) > lim["octets_piece"]:
+            raise ValueError("pièce jointe trop lourde")
         d = piece.chemin.parent
         autres = sum(p.stat().st_size for n, p in self._numeros(d) if n != piece.id)
-        if autres + len(donnees) > LIMITES_PIECES["octets_total"]:
+        if autres + len(donnees) > lim["octets_total"]:
             raise ValueError("pièces jointes trop volumineuses pour cette fiche")
         mkdir_prive(self.paths.corbeille)
         stamp = time.strftime("%Y%m%d-%H%M%S")
@@ -538,7 +567,7 @@ class Store:
         if f.verrou:
             _ecrire(piece.chemin, crypto.chiffrer_piece(self._entete(neuve), donnees, f.cle, f.salt, f.wrap))
         else:
-            neuve.chemin = d / f"{piece.id}{EXT_PIECE[type_]}"
+            neuve.chemin = d / f"{piece.id}{ext_piece(type_)}"
             _ecrire(neuve.chemin, donnees)
             _ecrire(d / f"{piece.id}.json", json.dumps(self._entete(neuve), ensure_ascii=False).encode("utf-8"))
             if piece.chemin != neuve.chemin:       # PNG <-> JPEG : l'ancien fichier est remplacé
@@ -601,7 +630,7 @@ class Store:
             if cle is not None:
                 _ecrire(dest / f"{p.id}.lock", crypto.chiffrer_piece(self._entete(p), donnees, cle, salt, wrap))
             else:
-                _ecrire(dest / f"{p.id}{EXT_PIECE[p.type]}", donnees)
+                _ecrire(dest / f"{p.id}{ext_piece(p.type)}", donnees)
                 _ecrire(dest / f"{p.id}.json", json.dumps(self._entete(p), ensure_ascii=False).encode("utf-8"))
         _ecrire(dest / ".pret", b"")
         return dest

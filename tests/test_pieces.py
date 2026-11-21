@@ -100,7 +100,9 @@ def test_ajout_liste_numerotation_suppression(store):
 def test_limites_et_types(store):
     th, f = nouvelle(store)
     with pytest.raises(ValueError, match="type"):
-        store.ajouter_piece(f, "x.gif", "image/gif", b"GIF89a")
+        store.ajouter_piece(f, "x.gif", "pas un type", b"GIF89a")
+    with pytest.raises(ValueError, match="type"):
+        store.ajouter_piece(f, "x", "Application/PDF", b"%PDF")        # minuscules exigées
     with pytest.raises(ValueError, match="lourde"):
         store.ajouter_piece(f, "x.png", "image/png", b"0" * (LIMITES_PIECES["octets_piece"] + 1))
     for _i in range(LIMITES_PIECES["nombre"]):
@@ -377,3 +379,65 @@ def test_remplacer_piece_limites(store):
     with pytest.raises(ValueError, match="lourde"):
         store.remplacer_piece(f, p, "image/png", b"0" * (LIMITES_PIECES["octets_piece"] + 1))
     assert store.lire_piece(f, store.lister_pieces(f)[0]) == PNG                      # rien n'a changé
+
+
+# ---------- autres types de pièces (documents) ----------
+ODT = b"PK\x03\x04" + b"contenu-odt-" * 40
+TYPE_ODT = "application/vnd.oasis.opendocument.text"
+
+
+def test_piece_document_en_clair(store):
+    th, f = nouvelle(store)
+    p = store.ajouter_piece(f, "Rapport.odt", TYPE_ODT, ODT)
+    assert p.chemin.suffix == ".bin" and p.chemin.read_bytes() == ODT
+    s2 = recharger(store)
+    g = s2.themes[0].fiches[0]
+    (q,) = s2.lister_pieces(g)
+    assert (q.nom, q.type, q.taille) == ("Rapport.odt", TYPE_ODT, len(ODT)) and s2.lire_piece(g, q) == ODT
+
+
+def test_piece_document_sans_json_garde_un_type_par_defaut(store):
+    th, f = nouvelle(store)
+    p = store.ajouter_piece(f, "x.dat", "application/pdf", b"%PDF-1.7")
+    p.chemin.with_suffix(".json").write_text("{}", encoding="utf-8")
+    assert store.lister_pieces(f)[0].type == "application/octet-stream"
+
+
+def test_piece_document_verrouillee_et_retrait_du_verrou(store):
+    th, f = nouvelle(store)
+    store.ajouter_piece(f, "a.png", "image/png", PNG)
+    store.ajouter_piece(f, "Rapport.odt", TYPE_ODT, ODT)
+    store.verrouiller(th, f, "mdp", sans_secours=True)
+    assert sorted(p.name for p in store.dossier_pj(f).iterdir()) == ["1.lock", "2.lock"]
+    assert b"Rapport" not in b"".join(p.read_bytes() for p in store.dossier_pj(f).iterdir())
+    s2 = recharger(store)
+    g = s2.theme("T").fiches[0]
+    s2.deverrouiller(g, "mdp")
+    assert [(p.nom, p.type) for p in s2.lister_pieces(g)] == [("a.png", "image/png"), ("Rapport.odt", TYPE_ODT)]
+    s2.retirer_verrou(s2.theme("T"), g)
+    assert [p.chemin.suffix for p in s2.lister_pieces(g)] == [".png", ".bin"]
+    assert [s2.lire_piece(g, p) for p in s2.lister_pieces(g)] == [PNG, ODT]
+
+
+def test_remplacer_piece_document_garde_l_ancienne_version(store):
+    th, f = nouvelle(store)
+    p = store.ajouter_piece(f, "Rapport.odt", TYPE_ODT, ODT)
+    store.remplacer_piece(f, p, TYPE_ODT, ODT + b"modifie")
+    (q,) = store.lister_pieces(f)
+    assert q.id == p.id and store.lire_piece(f, q) == ODT + b"modifie"
+    assert any(x.name.endswith("-1.bin") for x in store.paths.corbeille.iterdir())
+
+
+def test_limites_en_reglage(store):
+    th, f = nouvelle(store)
+    assert store.limites_pieces() == LIMITES_PIECES
+    store.sauver_reglages(pieces_jointes={"nombre": 2, "octets_piece": 100, "octets_total": "x", "inconnu": 5})
+    assert store.limites_pieces() == {**LIMITES_PIECES, "nombre": 2, "octets_piece": 100}
+    with pytest.raises(ValueError, match="lourde"):
+        store.ajouter_piece(f, "gros.bin", "application/octet-stream", b"0" * 101)
+    store.ajouter_piece(f, "a.bin", "application/octet-stream", b"0")
+    store.ajouter_piece(f, "b.bin", "application/octet-stream", b"0")
+    with pytest.raises(ValueError, match="trop de pièces"):
+        store.ajouter_piece(f, "c.bin", "application/octet-stream", b"0")
+    store.sauver_reglages(pieces_jointes="n'importe quoi")
+    assert store.limites_pieces() == LIMITES_PIECES

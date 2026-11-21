@@ -12,7 +12,7 @@ from PyQt6.QtCore import QMarginsF, QSizeF, QUrl
 from PyQt6.QtGui import QImage, QPageLayout, QPageSize, QPdfWriter, QTextDocument
 
 from ..core import images_texte, types_fiche
-from ..core.store import propre
+from ..core.store import ext_piece, propre
 from .export_pdf import LARGEUR_IMAGE
 
 _LIEN_FICHE = re.compile(r"\[([^\]]*)\]\(scrinium-fiche:([^)]*)\)")
@@ -80,7 +80,7 @@ def exporter_html(store, th, dossier: Path) -> dict:
         def adresse(p, i=i):
             nonlocal nb_images
             (dossier / "images").mkdir(exist_ok=True)
-            nom = f"{i:02d}-{p.id}{'.jpg' if p.type == 'image/jpeg' else '.png'}"
+            nom = f"{i:02d}-{p.id}{ext_piece(p.type)}"
             (dossier / "images" / nom).write_bytes(store.lire_piece(f, p))
             nb_images += 1
             return f"images/{nom}"

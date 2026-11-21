@@ -35,6 +35,9 @@ reste un texte simple ; les images sont listées sous la fiche en vignettes ; de
   quel logiciel. Fichier descriptif facultatif `n.json` :
   `{"nom": "capture.png", "ajoute": "2026-10-20 14:03", "ocr": "texte extrait", "ocr_moteur": "tesseract"}`.
   Champs inconnus conservés à la réécriture.
+- **Autres types (documents)** : toute pièce dont le type MIME est bien formé (`type/sous-type`, en minuscules) est acceptée ;
+  hors PNG et JPEG elle s'écrit `n.bin` et son type est gardé dans `n.json` (`"type"`, `application/octet-stream` s'il manque).
+  Le cœur ne l'interprète pas : c'est le rôle d'une extension (type de fiche `objet`, extension « Documents »).
 - Fiche verrouillée : `n.lock` seulement (pas d'`.json` : il serait en clair).
 
 ## 3. Format `AMLOCK3` (pièce jointe verrouillée)
@@ -66,7 +69,8 @@ approximative**. Ni le contenu, ni le nom, ni le type, ni le texte OCR. (Un remp
 - Réduction : plus grand côté ≤ **2560 px** ; poids final ≤ **8 Mo** (sinon qualité JPEG réduite, puis refus avec message).
   PNG d'origine conservé en PNG si sous la limite, sinon converti en JPEG (avertissement).
 - Limites par fiche : 50 pièces, 100 Mo ; au-delà, refus avec message.
-- Valeurs ajustables dans `settings.json` (clé `pieces_jointes`).
+- Valeurs ajustables dans `settings.json` : `"pieces_jointes": {"nombre": 50, "octets_piece": 8388608, "octets_total": 104857600}`
+  (clés facultatives ; une valeur absente ou invalide garde la valeur par défaut). Les limites s'appliquent à toute pièce, image ou non.
 
 ## 5. Opérations du cœur (toutes à rendre atomiques)
 
