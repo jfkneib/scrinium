@@ -1,0 +1,8 @@
+{
+  "titre": "Documents",
+  "version": "0.1",
+  "auteur": "Scrinium",
+  "description": "Un type de fiche « Document » : un fichier (texte, tableur, PDF…) gardé comme pièce jointe d'une fiche, avec une description. La fiche garde tout ce que Scrinium sait faire : recherche, verrouillage (le fichier est chiffré avec elle), partage, synchronisation, corbeille. Le fichier reste au format d'origine ; rien n'est ouvert ni installé sans votre demande.",
+  "classe": "DocumentsPlugin",
+  "api": 1
+}

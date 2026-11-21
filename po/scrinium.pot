@@ -1750,6 +1750,85 @@ msgstr ""
 msgid "Modèle indisponible : %s"
 msgstr ""
 
+#: plugins/documents/__init__.py:16
+msgid ""
+"Pour garder un fichier (lettre, tableur, PDF…) comme une fiche, avec une description.\n"
+"\n"
+"• Nouvelle fiche > « Fiche-document » : écrivez une description, puis « Ajouter le fichier… ». Le fichier garde son format d'origine.\n"
+"• La fiche s'utilise comme les autres : recherche dans le titre et la description, verrouillage (le fichier est alors chiffré avec la fiche), partage, synchronisation, corbeille.\n"
+"• « Remplacer le fichier… » garde l'ancienne version dans la corbeille. « Enregistrer sous… » en fait une copie (en clair).\n"
+"• Rien n'est ouvert ni lancé de lui-même : le type est inerte."
+msgstr ""
+
+#: plugins/documents/__init__.py:40
+#: plugins/documents/__init__.py:83
+msgid "Ajouter le fichier…"
+msgstr ""
+
+#: plugins/documents/__init__.py:42
+#: src/scrinium/ui/images.py:497
+msgid "Enregistrer sous…"
+msgstr ""
+
+#: plugins/documents/__init__.py:49
+msgid "Description (facultative)"
+msgstr ""
+
+#: plugins/documents/__init__.py:90
+msgid "Choisir le fichier"
+msgstr ""
+
+#: plugins/documents/__init__.py:115
+#: src/scrinium/ui/images.py:531
+msgid "Enregistrer le fichier"
+msgstr ""
+
+#: plugins/documents/__init__.py:127
+msgid "Extension Documents"
+msgstr ""
+
+#: plugins/documents/__init__.py:78
+msgid "Aucun fichier joint."
+msgstr ""
+
+#: plugins/documents/__init__.py:83
+msgid "Remplacer le fichier…"
+msgstr ""
+
+#: plugins/documents/__init__.py:81
+msgid "%s Ko"
+msgstr ""
+
+#: plugins/documents/__init__.py:81
+#: plugins/lecture/__init__.py:29
+#: plugins/traduction/logique.py:538
+msgid "%s Mo"
+msgstr ""
+
+#: plugins/documents/__init__.py:82
+msgid "Fichier : %(nom)s (%(taille)s, %(type)s)"
+msgstr ""
+
+#: plugins/documents/__init__.py:96
+msgid "Fichier trop volumineux."
+msgstr ""
+
+#: plugins/documents/__init__.py:104
+#: plugins/documents/__init__.py:120
+#: plugins/documents/logique.py:47
+msgid "Fiche-document"
+msgstr ""
+
+#: plugins/documents/__init__.py:112
+#: src/scrinium/ui/images.py:523
+msgid "Enregistrer sous"
+msgstr ""
+
+#: plugins/documents/__init__.py:113
+#: src/scrinium/ui/images.py:524
+msgid "La fiche est verrouillée : la copie sera enregistrée EN CLAIR. Continuer ?"
+msgstr ""
+
 #: plugins/echeances/__init__.py:242
 msgid ""
 "Assurances, noms de domaine, certificats, contrôle technique, garanties, abonnements : ne plus rater une date.\n"
@@ -2106,7 +2185,7 @@ msgstr ""
 
 #: plugins/emploi/__init__.py:342
 #: plugins/veille/__init__.py:205
-#: src/scrinium/ui/images.py:476
+#: src/scrinium/ui/images.py:496
 msgid "Ouvrir"
 msgstr ""
 
@@ -2566,12 +2645,6 @@ msgid ""
 "• Voix Piper (naturelle, hors ligne) installée avec votre accord ; repli sur espeak-ng s'il est présent. Français ou anglais, détectés fiche par fiche.\n"
 "• Contrôles : pause, fiche suivante, arrêt.\n"
 "• Les fiches verrouillées ne sont jamais lues, même ouvertes. Le Markdown est nettoyé et les blocs de code sautés."
-msgstr ""
-
-#: plugins/lecture/__init__.py:29
-#: plugins/traduction/logique.py:538
-#: plugins/traduction/logique.py:549
-msgid "%s Mo"
 msgstr ""
 
 #: plugins/lecture/__init__.py:37
@@ -3075,7 +3148,7 @@ msgstr ""
 
 #: plugins/ocr/__init__.py:328
 #: plugins/photos/__init__.py:161
-#: src/scrinium/ui/images.py:449
+#: src/scrinium/ui/images.py:462
 msgid "Image"
 msgstr ""
 
@@ -6203,7 +6276,7 @@ msgid "Suivant"
 msgstr ""
 
 #: src/scrinium/core/exemples.py:12
-#: src/scrinium/core/store.py:161
+#: src/scrinium/core/store.py:174
 #: src/scrinium/ui/fenetre.py:129
 msgid "Bienvenue"
 msgstr ""
@@ -6742,11 +6815,11 @@ msgstr ""
 msgid "Tableau libre (nom, détails)"
 msgstr ""
 
-#: src/scrinium/core/store.py:162
+#: src/scrinium/core/store.py:175
 msgid "Exemple verrouillé"
 msgstr ""
 
-#: src/scrinium/core/store.py:163
+#: src/scrinium/core/store.py:176
 msgid ""
 "Bravo, vous avez déverrouillé la fiche !\n"
 "\n"
@@ -7166,7 +7239,7 @@ msgid "Nouvelle image depuis un fichier…"
 msgstr ""
 
 #: src/scrinium/ui/fenetre.py:1115
-#: src/scrinium/ui/images.py:430
+#: src/scrinium/ui/images.py:443
 msgid "Ajouter une image"
 msgstr ""
 
@@ -7890,32 +7963,24 @@ msgstr ""
 msgid "Recadrer"
 msgstr ""
 
-#: src/scrinium/ui/images.py:388
+#: src/scrinium/ui/images.py:398
 msgid "Ajouter une image…"
-msgstr ""
-
-#: src/scrinium/ui/images.py:477
-msgid "Enregistrer sous…"
-msgstr ""
-
-#: src/scrinium/ui/images.py:478
-msgid "Copier l'image"
-msgstr ""
-
-#: src/scrinium/ui/images.py:507
-msgid "Enregistrer l'image"
 msgstr ""
 
 #: src/scrinium/ui/images.py:346
 msgid "Sélection trop petite ou hors de l'image."
 msgstr ""
 
-#: src/scrinium/ui/images.py:425
+#: src/scrinium/ui/images.py:438
 msgid "Images"
 msgstr ""
 
-#: src/scrinium/ui/images.py:480
-msgid "Insérer dans le texte"
+#: src/scrinium/ui/images.py:499
+msgid "Copier l'image"
+msgstr ""
+
+#: src/scrinium/ui/images.py:531
+msgid "Enregistrer l'image"
 msgstr ""
 
 #: src/scrinium/ui/images.py:345
@@ -7930,20 +7995,16 @@ msgstr ""
 msgid "Recadrage"
 msgstr ""
 
-#: src/scrinium/ui/images.py:425
+#: src/scrinium/ui/images.py:438
 msgid "Images (%d)"
 msgstr ""
 
-#: src/scrinium/ui/images.py:442
+#: src/scrinium/ui/images.py:455
 msgid "Image collée"
 msgstr ""
 
-#: src/scrinium/ui/images.py:502
-msgid "Enregistrer sous"
-msgstr ""
-
-#: src/scrinium/ui/images.py:503
-msgid "La fiche est verrouillée : la copie sera enregistrée EN CLAIR. Continuer ?"
+#: src/scrinium/ui/images.py:501
+msgid "Insérer dans le texte"
 msgstr ""
 
 #: src/scrinium/ui/images.py:366
