@@ -156,10 +156,15 @@ class Editeur(QPlainTextEdit):
                 return [img]
         return []
 
-    @staticmethod
-    def _importables(src) -> bool:
-        """Fichiers .md ou .zip déposés : ils ne s'insèrent pas dans le texte, la fenêtre les importe comme fiches ou thème."""
-        return any(u.isLocalFile() and Path(u.toLocalFile()).suffix.lower() in (".md", ".markdown", ".zip") for u in src.urls())
+    depots_actifs = staticmethod(lambda: False)     # remplacé par la fenêtre : vrai si une extension prend les fichiers déposés
+
+    def _importables(self, src) -> bool:
+        """Fichiers déposés que la fenêtre traite : .md ou .zip (importés comme fiches ou thème), et, si une extension les prend
+        (`depots_actifs`), tout fichier qui n'est pas une image. Ils ne s'insèrent pas dans le texte."""
+        fichiers = [Path(u.toLocalFile()) for u in src.urls() if u.isLocalFile()]
+        if any(f.suffix.lower() in (".md", ".markdown", ".zip") for f in fichiers):
+            return True
+        return bool(self.depots_actifs()) and any(f.suffix.lower() not in SUFFIXES for f in fichiers)
 
     def dragEnterEvent(self, ev):
         if self._importables(ev.mimeData()):

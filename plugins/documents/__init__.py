@@ -21,6 +21,8 @@ DOC = _(
     "• Nouvelle fiche > « Fiche-document » : écrivez une description, puis « Ajouter le fichier… ». Le fichier garde son format d'origine.\n"
     "• La fiche s'utilise comme les autres : recherche dans le titre et la description, verrouillage (le fichier est alors chiffré avec la fiche), "
     "partage, synchronisation, corbeille.\n"
+    "• Glissez des fichiers depuis votre gestionnaire de fichiers sur la fenêtre : chacun devient une fiche-document du thème affiché, titrée d'après le nom du fichier "
+    "(une image déposée dans le texte d'une fiche reste, elle, jointe à cette fiche).\n"
     "• « Remplacer le fichier… » garde l'ancienne version dans la corbeille. « Enregistrer sous… » en fait une copie (en clair).\n"
     "• « Ouvrir avec l'application associée » ouvre une copie de travail dans LibreOffice, un tableur, une visionneuse… ; chaque enregistrement fait là-bas est repris dans la fiche "
     "(l'ancienne version va à la corbeille). « Terminer l'édition » arrête la surveillance et supprime la copie de travail, qui est en clair même si la fiche est verrouillée.\n"
@@ -222,8 +224,32 @@ class DocumentsPlugin(Plugin):
         if ctx.ui is not None:
             vue = self.vue = VueDocument(ctx)
             ctx.ui.enregistrer_type(logique.TYPE, vue)
+            ctx.ui.ajouter_depot(self.deposer)
             for evt in ("piece_jointe_ajoutee", "piece_jointe_modifiee", "piece_jointe_supprimee"):
                 ctx.on(evt, lambda **_kw: vue.rafraichir())
+
+    def deposer(self, chemins, theme):
+        """Fichiers glissés sur la fenêtre : une fiche-document par fichier, dans le thème affiché (ou « Documents »)."""
+        ctx, pris, derniere = self.ctx, [], None
+        theme = theme or _("Documents")
+        for c in chemins:
+            pris.append(c)                                     # pris en charge, même en cas d'erreur (signalée ci-dessous)
+            try:
+                if c.stat().st_size > logique.SOURCE_MAX:
+                    raise ValueError(_("Fichier trop volumineux."))
+                donnees = c.read_bytes()
+            except (OSError, ValueError) as ex:
+                ctx.ui.notifier(_("Fiche-document"), f"{c.name} : {ex}")
+                continue
+            vue = derniere = ctx.creer_fiche(theme, logique.titre_de(c.name), logique.texte_de(""))
+            try:
+                ctx.ajouter_piece(vue, c.name, logique.type_mime(c.name), donnees)
+            except ValueError as ex:
+                ctx.ui.notifier(_("Fiche-document"), f"{c.name} : {ex}")
+        if derniere is not None:
+            ctx.ui.actualiser()
+            ctx.ui.afficher_fiche(derniere)
+        return pris
 
     def desactiver(self):
         if self.vue is not None:

@@ -55,6 +55,12 @@ class UiPlugin:
             return [(t, self._appeler(fn), ic) for t, fn, ic in self._f.plugins.appeler(self._nom, fournisseur) or []]
         self._f.actions_fiche.append((self._nom, texte, SousMenu(entrees), icone_nom, tuple(types) if types else None))
 
+    def ajouter_depot(self, fn) -> None:
+        """Prend en charge des fichiers glissés depuis le gestionnaire de fichiers sur la fenêtre (hors `.md` et `.zip`, déjà importés par
+        Scrinium). `fn(chemins, theme)` reçoit la liste des `Path` et le nom du thème affiché (`None` : « Toutes les fiches ») ; elle
+        renvoie la liste des chemins qu'elle a pris, les autres sont proposés à l'extension suivante. Retiré à la désactivation."""
+        self._f.depots.append((self._nom, fn))
+
     def ajouter_action_image(self, texte: str, fn, icone_nom: str | None = None) -> None:
         """Entrée dans le clic droit d'une image jointe. `fn(fiche, piece)` reçoit la `FicheVue` et la `PieceVue` visées."""
         self._f.actions_image.append((self._nom, texte, fn, icone_nom))
@@ -157,6 +163,7 @@ class UiPlugin:
         self._actions, self._docks, self._timers, self._types = [], [], [], []
         self._f.actions_image[:] = [e for e in self._f.actions_image if e[0] != self._nom]
         self._f.actions_fiche[:] = [e for e in self._f.actions_fiche if e[0] != self._nom]
+        self._f.depots[:] = [e for e in self._f.depots if e[0] != self._nom]
 
 
 class DialogueExtensions(QDialog):

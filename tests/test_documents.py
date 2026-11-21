@@ -37,6 +37,8 @@ def test_type_mime_et_taille():
     L = _logique()
     assert L.type_mime("a.odt") == ODT and L.type_mime("Rapport.PDF") == "application/pdf"
     assert L.type_mime("inconnu.zzzq") == "application/octet-stream" and L.type_mime("") == "application/octet-stream"
+    assert L.titre_de("kate.png") == "kate" and L.titre_de("Rapport final.v2.odt") == "Rapport final.v2" and L.titre_de(".bashrc") == ".bashrc"
+    assert L.titre_de("/tmp/x/kate.odt") == "kate" and L.titre_de("") == "document"
     assert L.taille_lisible(10) == ("ko", "1") and L.taille_lisible(5000) == ("ko", "5")
     assert L.taille_lisible(3 * 1048576) == ("mo", "3,0")
 
@@ -182,3 +184,36 @@ def test_vue_edition_externe_reprend_les_enregistrements(fen, monkeypatch):
     vue.terminer()
     assert fen.store.lire_piece(f, fen.store.lister_pieces(f)[0]) == b"PK-dernier"
     assert not chemin.exists() and vue.b_fin.isHidden() and vue.b_ouvrir.isEnabled()
+
+
+def test_fichiers_deposes_sur_la_fenetre_creent_des_fiches_documents(fen, monkeypatch, tmp_path):
+    from PyQt6.QtWidgets import QMessageBox
+    L = _logique()
+    assert [n for n, _fn in fen.depots] == ["documents"]
+    a, b = tmp_path / "kate.odt", tmp_path / "carte.png"
+    a.write_bytes(b"PK-kate")
+    b.write_bytes(b"\x89PNG-carte")
+    monkeypatch.setattr(QMessageBox, "warning", lambda *a_, **k: pytest.fail("erreur inattendue"))
+    fen._importer_deposes([], [], [a, b, tmp_path / "absent.pdf"])         # le dernier n'existe pas : signalé, sans bloquer les autres
+    nouvelles = [f for t in fen.store.themes for f in t.fiches if f.titre in ("kate", "carte")]
+    assert sorted(f.titre for f in nouvelles) == ["carte", "kate"]
+    for f in nouvelles:
+        assert types_fiche.type_de(f.texte).nom == "objet" and L.description(f.texte) == ""
+        (p,) = fen.store.lister_pieces(f)
+        assert p.nom in ("kate.odt", "carte.png") and fen.store.lire_piece(f, p) in (b"PK-kate", b"\x89PNG-carte")
+    assert {fen.store.lister_pieces(f)[0].type for f in nouvelles} == {ODT, "image/png"}
+
+
+def test_sans_l_extension_les_fichiers_deposes_ne_font_rien(fen):
+    fen.plugins.desactiver("documents")
+    assert fen.depots == [] and fen._autres_deposes(_MimeFichiers(["/etc/hostname"])) == []
+
+
+class _MimeFichiers:
+    """Faux QMimeData : seulement `urls()`."""
+    def __init__(self, chemins):
+        self._c = chemins
+
+    def urls(self):
+        from PyQt6.QtCore import QUrl
+        return [QUrl.fromLocalFile(c) for c in self._c]

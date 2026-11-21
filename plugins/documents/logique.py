@@ -32,6 +32,12 @@ def texte_de(desc: str) -> str:
     return MARQUE + "\n" + ("\n" + desc + "\n" if desc else "")
 
 
+def titre_de(nom_fichier: str) -> str:
+    """Titre d'une fiche créée à partir d'un fichier : son nom sans l'extension (le nom entier s'il n'en reste rien)."""
+    nom = Path((nom_fichier or "").replace("\\", "/")).name
+    return Path(nom).stem.strip() or nom.strip() or "document"
+
+
 def type_mime(nom: str) -> str:
     """Type MIME d'après le nom du fichier (octet-stream s'il est inconnu ou mal formé)."""
     t = mimetypes.guess_type(nom or "", strict=False)[0] or TYPE_INCONNU

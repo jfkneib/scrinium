@@ -120,6 +120,7 @@ class Fenetre(QMainWindow):
         store.charger()
         self.actions_fiche: list = []         # (extension, texte, fn, icône) : clic droit dans le texte d'une fiche (voir UiPlugin)
         self.actions_image: list = []         # (extension, texte, fn, icône) : clic droit sur une image jointe (voir UiPlugin)
+        self.depots: list = []                # (extension, fn) : fichiers glissés sur la fenêtre (voir UiPlugin.ajouter_depot)
         self._ui()
         self._zone_notification()
         self.plugins = Gestionnaire(store, ui_factory=lambda info: UiPlugin(self, info.nom),
@@ -308,6 +309,7 @@ class Fenetre(QMainWindow):
         self.texte.pdf_demande.connect(self.exporter_pdf)
         self.texte.impression_demandee.connect(self.imprimer_fiche)
         self.texte.complements = self._entrees_clic_droit
+        self.texte.depots_actifs = lambda: bool(self.depots)     # sinon l'éditeur garde ses fichiers déposés (images jointes, chemins en texte)
         self.statut = QLabel("")
         droite = QWidget()
         ld = QVBoxLayout(droite)
@@ -1533,21 +1535,47 @@ class Fenetre(QMainWindow):
         chemins = [Path(u.toLocalFile()) for u in src.urls() if u.isLocalFile()]
         return ([c for c in chemins if c.suffix.lower() in (".md", ".markdown")], [c for c in chemins if c.suffix.lower() == ".zip"])
 
+    def _autres_deposes(self, src) -> list:
+        """Les autres fichiers déposés (ni Markdown ni archive), seulement si une extension sait les prendre (`ajouter_depot`)."""
+        if not self.depots:
+            return []
+        return [Path(u.toLocalFile()) for u in src.urls() if u.isLocalFile() and Path(u.toLocalFile()).is_file()
+                and Path(u.toLocalFile()).suffix.lower() not in (".md", ".markdown", ".zip")]
+
+    def _acceptable(self, src) -> bool:
+        return any(self._deposes(src)) or bool(self._autres_deposes(src))
+
     def dragEnterEvent(self, ev):
-        if any(self._deposes(ev.mimeData())):
+        if self._acceptable(ev.mimeData()):
             ev.acceptProposedAction()
 
     def dragMoveEvent(self, ev):
-        if any(self._deposes(ev.mimeData())):
+        if self._acceptable(ev.mimeData()):
             ev.acceptProposedAction()
 
     def dropEvent(self, ev):
         mds, zips = self._deposes(ev.mimeData())
-        if mds or zips:
+        autres = self._autres_deposes(ev.mimeData())
+        if mds or zips or autres:
             ev.acceptProposedAction()
-            QTimer.singleShot(0, lambda: self._importer_deposes(mds, zips))     # après la fin du glisser (des boîtes de dialogue peuvent s'ouvrir)
+            QTimer.singleShot(0, lambda: self._importer_deposes(mds, zips, autres))     # après la fin du glisser (des boîtes de dialogue peuvent s'ouvrir)
 
-    def _importer_deposes(self, mds: list, zips: list):
+    def _deposer_fichiers(self, chemins: list) -> list:
+        """Propose les fichiers déposés aux extensions, l'une après l'autre ; renvoie ceux que personne n'a pris."""
+        restants = list(chemins)
+        t = self._theme_courant()
+        for nom, fn in list(self.depots):
+            if not restants:
+                break
+            pris = self.plugins.appeler(nom, fn, list(restants), t.nom if t else None)
+            restants = [c for c in restants if c not in set(pris or [])]
+        return restants
+
+    def _importer_deposes(self, mds: list, zips: list, autres: list | None = None):
+        if autres:
+            ignores = self._deposer_fichiers(autres)
+            if ignores:
+                self._statut(_("Fichier(s) non pris en charge : %s") % ", ".join(c.name for c in ignores), ORANGE)
         if mds:
             self.importer_markdown(mds)
         for z in zips:
