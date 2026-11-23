@@ -170,6 +170,30 @@ def test_recherche_trouve_le_texte_des_images(fen):
     assert fen.rows == []
 
 
+def test_recherche_dans_le_titre_seulement(fen):
+    fen.bande.ajouter([image()])
+    piece = fen.store.lister_pieces(fen.fiche)[0]
+    fen.store.maj_piece(fen.fiche, piece, ocr="facture électricité octobre")
+    titre = fen.fiche.titre
+    fen.recherche.setText("électricité")                       # le texte extrait compte pour une recherche normale
+    assert any(f is fen.fiche for _t, f in fen.rows)
+    fen.recherche.setText("titre:électricité")                  # …mais pas pour une recherche dans le titre
+    assert fen.rows == []
+    fen.recherche.setText("title:" + titre[:3])
+    assert any(f is fen.fiche for _t, f in fen.rows)
+    fen.recherche.setText("TITRE: " + titre.upper())
+    assert any(f is fen.fiche for _t, f in fen.rows)
+
+
+def test_double_clic_sur_un_resultat_va_dans_son_theme(fen):
+    t, f = fen.fiche_theme, fen.fiche
+    fen.recherche.setText("titre:" + f.titre[:3])
+    assert fen.recherche.text()
+    fen._double_clic()
+    assert fen.recherche.text() == ""
+    assert fen.theme == t.nom and fen.fiche is f
+
+
 # ---------- recadrage ----------
 from PyQt6.QtCore import QRect, QSize  # noqa: E402
 

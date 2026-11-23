@@ -164,6 +164,7 @@ class Fenetre(QMainWindow):
         self.recherche = QLineEdit()
         self.recherche.setPlaceholderText(_("Chercher (Ctrl+F)…"))
         self.recherche.setClearButtonEnabled(True)
+        self.recherche.setToolTip(_("Cherche dans les titres, les textes et les noms de thèmes.\nAstuce : « titre:mot » ne cherche que dans les titres des fiches."))
         self.recherche.addAction(icone("edit-find"), QLineEdit.ActionPosition.LeadingPosition)
         self.recherche.textChanged.connect(lambda *_: self.maj_fiches())
         tb.addWidget(self.recherche)
@@ -697,16 +698,24 @@ class Fenetre(QMainWindow):
 
     def maj_fiches(self):
         q = self.recherche.text().strip().lower()
+        seul_titre = False
+        for pref in ("titre:", "title:"):               # « titre:mot » : uniquement dans le titre des fiches
+            if q.startswith(pref):
+                q, seul_titre = q[len(pref):].strip(), True
+                break
         self.liste.blockSignals(True)
         self.liste.clear()
         self.rows = []
         sel = None
         trouvees = []
         for t in self._themes_ordonnes():
-            if not q and self.theme != self.TOUS and t.nom != self.theme:
+            if not q and not seul_titre and self.theme != self.TOUS and t.nom != self.theme:
                 continue   # une recherche porte sur tous les thèmes
             for f in self.store.fiches_triees(t):
-                if q and q not in f.titre.lower() and q not in (f.texte or "").lower() and q not in t.nom.lower() \
+                if seul_titre:
+                    if q and q not in f.titre.lower():
+                        continue
+                elif q and q not in f.titre.lower() and q not in (f.texte or "").lower() and q not in t.nom.lower() \
                         and q not in self.store.texte_ocr(f).lower():
                     continue   # fiche verrouillée fermée : pas de recherche dans le contenu (ni dans ses images)
                 trouvees.append((t, f))
@@ -1236,14 +1245,15 @@ class Fenetre(QMainWindow):
                             _("L'extension « %(nom)s » a été désactivée après des erreurs répétées :\n%(erreur)s")
                             % {"nom": nom, "erreur": erreur})
 
-    def _aller_a(self, t, f):
-        """Affiche la fiche (t, f) : change de thème et vide la recherche si elle n'est pas dans la liste."""
+    def _aller_a(self, t, f, theme_propre: bool = False):
+        """Affiche la fiche (t, f) : change de thème et vide la recherche si elle n'est pas dans la liste
+        (`theme_propre` : sélectionne toujours son thème, même depuis « Toutes les fiches »)."""
         self.quitter_fiche()
         if self.recherche.text():
             self.recherche.blockSignals(True)
             self.recherche.clear()
             self.recherche.blockSignals(False)
-        if self.theme not in (self.TOUS, t.nom):
+        if self.theme != t.nom and (theme_propre or self.theme != self.TOUS):
             self.theme = t.nom
             self.maj_themes()
         self.maj_fiches()
@@ -1722,6 +1732,8 @@ class Fenetre(QMainWindow):
     def _double_clic(self):
         if self.fiche and self.fiche.fermee:
             self.deverrouiller()
+        elif self.fiche and self.recherche.text().strip():       # résultat de recherche : va dans son thème et le sélectionne
+            self._aller_a(self.fiche_theme, self.fiche, theme_propre=True)
 
     def refermer_fiche(self):
         """Verrouille de nouveau, tout de suite, une fiche verrouillée restée ouverte (sans retaper le mot de passe)."""
