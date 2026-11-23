@@ -1,3 +1,28 @@
+scrinium (0.12.0) unstable; urgency=medium
+
+  Version « Archiviste » : Scrinium garde aussi vos documents.
+
+  * Pièces jointes : le cœur accepte d'autres fichiers que des images (documents, enregistrés avec
+    leur type) ; limites réglables dans settings.json (« pieces_jointes »). La bande de pièces
+    affiche un document avec une icône et permet de l'enregistrer sous… ; l'API des extensions
+    gagne ctx.ajouter_piece et ctx.remplacer_piece.
+  * Nouvelle extension « Documents » (désactivée par défaut) : un type « Fiche-document » = une
+    description + un fichier joint (ajouter, remplacer en gardant l'ancienne version, enregistrer
+    sous). Chiffré avec la fiche si elle est verrouillée.
+  * Le texte des fichiers joints (ODF, DOCX, XLSX, PPTX, texte brut, PDF avec pdftotext) est
+    rangé avec la pièce : Ctrl+F le trouve. Lecture prudente, en arrière-plan pour les gros fichiers.
+  * Aperçu : un PDF s'affiche directement (module PyQt6-Pdf), ODF/DOCX/XLSX/PPTX/RTF/texte sont
+    convertis en PDF par LibreOffice s'il est installé, dans une copie supprimée ensuite.
+  * « Ouvrir avec l'application associée » : une copie de travail est ouverte ; chaque
+    enregistrement fait là-bas est repris dans la fiche (l'ancienne version va à la corbeille).
+  * Glisser des fichiers sur la fenêtre : chacun devient une fiche-document du thème affiché
+    (extension Documents active) ; nouveau point d'accroche ctx.ui.ajouter_depot.
+  * Recherche : « titre:mot » ne cherche que dans les titres ; un double-clic sur un résultat
+    ouvre la fiche dans son thème.
+  * Fenêtre des extensions : le détail défile et la liste garde son ascenseur.
+
+ -- Jean-François Kneib <kneib.jean-francois@cegetel.net>  Mon, 23 Nov 2026 15:00:00 +0100
+
 scrinium (0.11.1) unstable; urgency=medium
 
   * Photo comme icône d'un thème : « Icône… » > « Photo… » (recadrée au carré, 96 px), affichée
