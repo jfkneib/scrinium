@@ -3,7 +3,7 @@
 """Interface des extensions : ce qu'une extension peut ajouter à la fenêtre, et la boîte de gestion."""
 from PyQt6.QtCore import QTimer, QUrl, Qt
 from PyQt6.QtGui import QAction, QDesktopServices, QTextCursor
-from PyQt6.QtWidgets import (QDialog, QDockWidget, QHBoxLayout, QLabel, QListWidget, QListWidgetItem, QMessageBox,
+from PyQt6.QtWidgets import (QDialog, QDockWidget, QHBoxLayout, QLabel, QListWidget, QListWidgetItem, QMessageBox, QScrollArea,
                              QPushButton, QSystemTrayIcon, QVBoxLayout)
 
 from ..core import types_fiche
@@ -172,18 +172,24 @@ class DialogueExtensions(QDialog):
         self._fenetre = fenetre
         self.g = fenetre.plugins
         self.setWindowTitle(_("Extensions"))
-        self.resize(560, 380)
+        self.resize(620, 480)
         lay = QVBoxLayout(self)
         avert = QLabel(_("Une extension est un programme qui s'exécute avec les mêmes droits que Scrinium : elle peut "
                          "lire les fiches ouvertes. N'activez que des extensions dont vous connaissez l'origine."))
         avert.setWordWrap(True)
         lay.addWidget(avert)
         self.liste = QListWidget()
+        self.liste.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOn)   # visible en permanence (certains styles le masquent)
         lay.addWidget(self.liste, 1)
         self.detail = QLabel("")
         self.detail.setWordWrap(True)
-        self.detail.setMinimumHeight(60)
-        lay.addWidget(self.detail)
+        self.detail.setAlignment(Qt.AlignmentFlag.AlignTop)
+        self.detail.setTextFormat(Qt.TextFormat.RichText)
+        defil = QScrollArea()                # une description longue défile au lieu d'écraser la liste
+        defil.setWidgetResizable(True)
+        defil.setWidget(self.detail)
+        defil.setFixedHeight(130)
+        lay.addWidget(defil)
         bas = QHBoxLayout()
         b = QPushButton(icone("folder-new"), _("Ouvrir le dossier des extensions"))
         b.clicked.connect(self._ouvrir_dossier)
