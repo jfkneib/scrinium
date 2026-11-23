@@ -161,7 +161,7 @@ class VueDocument(QWidget):
         self.desc = QPlainTextEdit()
         self.desc.setPlaceholderText(_("Description (facultative)"))
         self.desc.textChanged.connect(self._edite)
-        self.pdf = QPdfView() if QPdfView is not None else None
+        self.pdf = QPdfView(self) if QPdfView is not None else None
         self._doc = self._tampon = None
         self._conversion = False
         cadre = QSplitter(Qt.Orientation.Vertical)
