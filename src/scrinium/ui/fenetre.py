@@ -199,6 +199,7 @@ class Fenetre(QMainWindow):
         mf.addAction(self.a_demarrage)
         mf.addAction(self._action(_("Navigateur pour les liens…"), "internet-web-browser", self.choisir_navigateur))
         mf.addSeparator()
+        mf.addAction(self._action(_("Recharger les fiches depuis le disque"), "view-refresh", self.recharger, "F5"))
         mf.addAction(self._action(_("Quitter"), "application-exit", self.quitter, "Ctrl+Q"))
         ms = m.addMenu(_("&Sécurité"))
         ms.addAction(self._action(_("Fichier de secours…"), "object-locked", self.assistant_cle))
@@ -224,7 +225,18 @@ class Fenetre(QMainWindow):
         bk.setAutoRaise(True)
         bk.setToolTip(_("Raccourcis clavier"))
         bk.clicked.connect(self.raccourcis)
-        m.setCornerWidget(bk, Qt.Corner.TopRightCorner)
+        br = QToolButton()
+        br.setIcon(icone("view-refresh"))
+        br.setAutoRaise(True)
+        br.setToolTip(_("Recharger les fiches depuis le disque"))
+        br.clicked.connect(self.recharger)
+        coin = QWidget()                      # le coin de la barre de menus n'accepte qu'un widget : on y met les deux boutons
+        lc = QHBoxLayout(coin)
+        lc.setContentsMargins(0, 0, 0, 0)
+        lc.setSpacing(0)
+        lc.addWidget(br)
+        lc.addWidget(bk)
+        m.setCornerWidget(coin, Qt.Corner.TopRightCorner)
 
         self.liste_themes = ListeThemes()
         self.liste_themes.fiches_deposees.connect(self.deplacer_fiches_vers)
@@ -1233,6 +1245,22 @@ class Fenetre(QMainWindow):
             self.fiche = None
             self.maj_themes()
 
+    def recharger(self):
+        """Relit les thèmes et fiches sur le disque (ajoutés ou modifiés hors de Scrinium), sans fermer la fenêtre.
+        La fiche en cours est d'abord enregistrée, puis rouverte ; une fiche verrouillée est refermée."""
+        self.quitter_fiche()
+        ancien = (self.fiche_theme.path.name, self.fiche.path.name) if self.fiche and self.fiche_theme else None
+        self.fiche = self.fiche_theme = None
+        self.store.charger()
+        self.maj_themes()
+        self.maj_fiches()
+        if ancien:
+            for i, (t, f) in enumerate(self.rows):
+                if (t.path.name, f.path.name) == ancien:
+                    self.liste.setCurrentRow(i)
+                    break
+        self._statut(f"{_('✔ Fiches rechargées à')} {time.strftime('%H:%M:%S')}", VERT)
+
     # ---------- extensions ----------
     def _vue(self, theme, fiche):
         return FicheVue(theme, fiche) if fiche is not None and theme is not None else None
@@ -1893,6 +1921,7 @@ class Fenetre(QMainWindow):
         """Fenêtre d'aide : la liste des raccourcis clavier."""
         lignes = (
             (_("Fiche et thème"), (("Ctrl+N", _("Nouvelle fiche")), ("Ctrl+Shift+N", _("Nouveau thème")), ("Ctrl+S", _("Enregistrer maintenant")),
+                                   ("F5", _("Recharger les fiches depuis le disque")),
                                    ("Ctrl+Shift+L", _("Refermer la fiche verrouillée")), ("Alt+↑ / Alt+↓", _("Monter / descendre l'élément")),
                                    ("Ctrl+P", _("Imprimer la fiche")), ("Ctrl+Q", _("Quitter")))),
             (_("Texte"), (("Ctrl+B", _("Gras")), ("Ctrl+I", _("Italique")), ("Ctrl+E", _("Aperçu / édition")),
