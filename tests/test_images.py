@@ -194,6 +194,16 @@ def test_double_clic_sur_un_resultat_va_dans_son_theme(fen):
     assert fen.theme == t.nom and fen.fiche is f
 
 
+def test_recharger_relit_le_disque_et_garde_la_fiche_en_cours(fen):
+    t, f = fen.fiche_theme, fen.fiche
+    p = fen.store.libre(t.path, "")                        # une fiche ajoutée « hors de Scrinium » : un fichier posé dans le dossier du thème
+    fen.store._ecrire_md(p, "Venue du disque", "texte")
+    assert all(x.titre != "Venue du disque" for _t, x in fen.rows)
+    fen.recharger()
+    assert any(x.titre == "Venue du disque" for _t, x in fen.rows)
+    assert fen.fiche is not None and fen.fiche.titre == "Ma fiche"          # la fiche en cours est rouverte
+
+
 # ---------- recadrage ----------
 from PyQt6.QtCore import QRect, QSize  # noqa: E402
 

@@ -1,3 +1,13 @@
+scrinium (0.12.1) unstable; urgency=medium
+
+  * Nouveau : « Recharger les fiches depuis le disque » (F5, menu Fichier et bouton dans la barre
+    de menus) relit thèmes et fiches ajoutés ou modifiés hors de Scrinium, sans fermer la fenêtre.
+    La fiche en cours est enregistrée puis rouverte ; une fiche verrouillée est refermée.
+  * Le programme d'installation Windows, absent de la 0.12.0 (panne du site de paquets pendant la
+    construction), est de nouveau fourni.
+
+ -- Jean-François Kneib <kneib.jean-francois@cegetel.net>  Wed, 25 Nov 2026 10:00:00 +0100
+
 scrinium (0.12.0) unstable; urgency=medium
 
   Version « Archiviste » : Scrinium garde aussi vos documents.
